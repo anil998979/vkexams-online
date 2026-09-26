@@ -664,8 +664,12 @@ footer p{
 
 <div class="navbar">
 
-<div class="logo" onclick="showHome()" style="cursor:pointer;">
-VK <span>EXAMS</span>
+<div
+    class="logo"
+    onclick="goHomeFromLogo()"
+    style="cursor:pointer;"
+>
+    VK <span>EXAMS</span>
 </div>
 
 <div class="nav-links">
@@ -2954,6 +2958,23 @@ window.addEventListener("popstate", function(event){
     }
 
 });
+
+    function goHomeFromLogo(){
+
+    document.querySelectorAll(".page").forEach(function(page){
+        page.classList.remove("active");
+    });
+
+    document.getElementById("home").classList.add("active");
+
+    window.scrollTo(0,0);
+
+    history.pushState(
+        { vkPage:"home" },
+        "",
+        "#home"
+    );
+}
     
 </script>
 
