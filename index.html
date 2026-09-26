@@ -607,6 +607,96 @@ footer p{
     margin-top:20px;
 }
 
+
+.profile-menu{
+    margin-top:22px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+
+.profile-menu-btn{
+    width:100%;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    padding:15px 16px;
+    background:#fff;
+    border:1px solid #e5e7eb;
+    border-radius:10px;
+    color:#172033;
+    font-weight:700;
+    text-align:left;
+}
+
+.profile-menu-btn:hover{
+    background:#f8fafc;
+    border-color:#1746a2;
+}
+
+.profile-menu-btn .menu-arrow{
+    color:#9ca3af;
+}
+
+.profile-summary{
+    text-align:center;
+    padding-bottom:8px;
+}
+
+.settings-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:15px;
+    padding:15px 0;
+    border-bottom:1px solid #e5e7eb;
+    text-align:left;
+}
+
+.settings-row:last-child{
+    border-bottom:0;
+}
+
+.toggle-switch{
+    width:48px;
+    height:26px;
+    border:0;
+    border-radius:20px;
+    background:#d1d5db;
+    position:relative;
+    flex-shrink:0;
+}
+
+.toggle-switch.active{
+    background:#1746a2;
+}
+
+.toggle-switch::after{
+    content:"";
+    width:20px;
+    height:20px;
+    border-radius:50%;
+    background:#fff;
+    position:absolute;
+    top:3px;
+    left:3px;
+    transition:.2s;
+}
+
+.toggle-switch.active::after{
+    left:25px;
+}
+
+.profile-info-card{
+    background:#f8fafc;
+    border:1px solid #e5e7eb;
+    border-radius:10px;
+    padding:16px;
+    margin-top:15px;
+    text-align:left;
+}
+
 @media(max-width:800px){
 
     .category-grid{
@@ -1521,15 +1611,11 @@ Select
 
 <div class="container">
 
-<span class="back"
-onclick="showHome()">
+<span class="back" onclick="showHome()">
 ← Back to Home
 </span>
 
-<div class="profile-box"
-id="profileContent">
-
-</div>
+<div class="profile-box" id="profileContent"></div>
 
 </div>
 
@@ -1542,42 +1628,33 @@ id="profileContent">
 
 <div class="modal-box">
 
-<h2>
-✏️ Edit Profile
-</h2>
+<h2>✏️ Edit Profile</h2>
 
-<label>
+<p style="color:#6b7280;margin-bottom:20px">
+Update your basic profile details.
+</p>
+
+<label style="display:block;text-align:left;font-weight:700">
 Name
 </label>
 
-<input
-id="editNameInput"
-class="form-input"
-placeholder="Enter your name">
+<input id="editNameInput" class="form-input" placeholder="Enter your name">
 
 <br><br>
 
-<label>
-Email ID
+<label style="display:block;text-align:left;font-weight:700">
+Email ID <span style="color:#9ca3af;font-weight:400">(Optional)</span>
 </label>
 
-<input
-id="editEmailInput"
-class="form-input"
-type="email"
-placeholder="Enter email">
+<input id="editEmailInput" class="form-input" type="email" placeholder="Enter your email">
 
 <div class="modal-buttons">
 
-<button
-class="btn btn-light"
-onclick="closeEditProfile()">
+<button class="btn btn-light" style="margin-left:0" onclick="closeEditProfile()">
 Cancel
 </button>
 
-<button
-class="btn btn-primary"
-onclick="saveEditedProfile()">
+<button class="btn btn-primary" onclick="saveEditedProfile()">
 Save Changes
 </button>
 
@@ -1588,7 +1665,32 @@ Save Changes
 </div>
 
 
+<!-- PROFILE ACTION MODAL -->
+
+<div id="profileActionModal" class="modal">
+
+<div class="modal-box" style="max-height:85vh;overflow:auto">
+
+<h2 id="profileActionTitle">Profile</h2>
+
+<div id="profileActionContent"></div>
+
+<div class="modal-buttons">
+
+<button class="btn btn-blue" onclick="closeProfileAction()">
+Close
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+
 <!-- LOGIN / REGISTER -->
+
+
 
 <div id="loginPage" class="page">
 
@@ -2599,6 +2701,16 @@ function submitExam(){
         examQuestions.length
     );
 
+    localStorage.setItem(
+        "lastTestCourse",
+        currentCourse
+    );
+
+    localStorage.setItem(
+        "lastTestPaper",
+        currentPaper
+    );
+
     document.getElementById("scoreText")
     .innerText =
     score +
@@ -2925,20 +3037,21 @@ function updateLoginButton(){
 
 }
 
+
 /* =========================================
    PROFILE
 ========================================= */
 
+function getStudentName(){
+
+    return localStorage.getItem("studentName") || "Student";
+
+}
+
+
 function openProfile(){
 
-    const mobile =
-    localStorage.getItem("studentMobile");
-
-    const name =
-    localStorage.getItem("studentName");
-
-    const email =
-    localStorage.getItem("studentEmail") || "";
+    const mobile = localStorage.getItem("studentMobile");
 
     if(!mobile){
 
@@ -2948,276 +3061,370 @@ function openProfile(){
 
     }
 
+    const name = getStudentName();
+    const email = localStorage.getItem("studentEmail") || "";
+    const coins = Number(localStorage.getItem("studentCoins") || 0);
+    const score = localStorage.getItem("lastScore");
+    const total = localStorage.getItem("lastTotal");
+    const initials = name.substring(0,2).toUpperCase();
 
-    const coins =
-    Number(
-        localStorage.getItem("studentCoins") || 0
-    );
+    document.getElementById("profileContent").innerHTML = `
 
+        <div class="profile-summary">
 
-    const score =
-    localStorage.getItem("lastScore");
+            <div class="avatar">${initials}</div>
 
-    const total =
-    localStorage.getItem("lastTotal");
+            <h2>${name}</h2>
 
+            <p style="color:#6b7280;margin-top:5px">
+            VK Exams Student
+            </p>
 
-    const initials =
-    name
-    ? name.substring(0,2).toUpperCase()
-    : "ST";
-
-
-    document.getElementById("profileContent")
-    .innerHTML = `
-
-        <div class="avatar">
-        ${initials}
         </div>
-
-
-        <h2 style="text-align:center">
-        ${name || "Student"}
-        </h2>
-
-
-        <p style="
-        text-align:center;
-        color:#6b7280;
-        margin-top:5px">
-        VK Exams Student
-        </p>
-
 
         <div class="coins-box">
 
-            <div>
-            🪙 Student Coins
-            </div>
+            <div>🪙 Student Coins</div>
 
-            <div class="coin-number">
-            ${coins.toFixed(1)}
-            </div>
+            <div class="coin-number">${coins.toFixed(1)}</div>
 
-            <button
-            class="btn btn-primary"
-            onclick="earnCoins()">
+            <button class="btn btn-primary" onclick="earnCoins()">
             Watch Ad & Earn 0.5 Coin
             </button>
 
-            <p style="
-            margin-top:10px;
-            font-size:13px">
+            <p style="margin-top:10px;font-size:13px">
             10 coins = payment eligibility
             </p>
 
         </div>
 
+        <div class="profile-info-card">
 
-        <div class="profile-row">
-            <strong>👤 Name</strong>
-            <span>${name || "-"}</span>
+            <div class="profile-row">
+                <strong>👤 Name</strong>
+                <span>${name}</span>
+            </div>
+
+            <div class="profile-row">
+                <strong>📱 Mobile</strong>
+                <span>${mobile}</span>
+            </div>
+
+            <div class="profile-row">
+                <strong>📧 Email</strong>
+                <span>${email || "Not added"}</span>
+            </div>
+
         </div>
 
+        <div class="profile-menu">
 
-        <div class="profile-row">
-            <strong>📱 Mobile</strong>
-            <span>${mobile}</span>
+            <button class="profile-menu-btn" onclick="openEditProfile()">
+                <span>✏️ Edit Profile</span>
+                <span class="menu-arrow">›</span>
+            </button>
+
+            <button class="profile-menu-btn" onclick="openSettings()">
+                <span>⚙️ Settings</span>
+                <span class="menu-arrow">›</span>
+            </button>
+
+            <button class="profile-menu-btn" onclick="openPurchaseHistory()">
+                <span>🛒 Purchase History</span>
+                <span class="menu-arrow">›</span>
+            </button>
+
+            <button class="profile-menu-btn" onclick="openTestResults()">
+                <span>📝 Test Results</span>
+                <span class="menu-arrow">›</span>
+            </button>
+
+            <button class="profile-menu-btn" onclick="openActivePackage()">
+                <span>📦 Active Package</span>
+                <span class="menu-arrow">›</span>
+            </button>
+
         </div>
 
-
-        <div class="profile-row">
-            <strong>📧 Email</strong>
-            <span>${email || "Not added"}</span>
-        </div>
-
-
-        <br>
-
-
-        <button
-        class="btn btn-blue"
-        style="width:100%;margin-bottom:10px"
-        onclick="openEditProfile()">
-        ✏️ Edit Profile
-        </button>
-
-
-        <button
-        class="btn btn-light"
-        style="
-        width:100%;
-        margin:0 0 10px 0;
-        border:1px solid #e5e7eb"
-        onclick="openSettings()">
-        ⚙️ Settings
-        </button>
-
-
-        <button
-        class="btn btn-light"
-        style="
-        width:100%;
-        margin:0 0 10px 0;
-        border:1px solid #e5e7eb"
-        onclick="openPurchaseHistory()">
-        🛒 Purchase History
-        </button>
-
-
-        <button
-        class="btn btn-light"
-        style="
-        width:100%;
-        margin:0 0 10px 0;
-        border:1px solid #e5e7eb"
-        onclick="openTestResults()">
-        📝 Test Results
-        </button>
-
-
-        <button
-        class="btn btn-light"
-        style="
-        width:100%;
-        margin:0 0 10px 0;
-        border:1px solid #e5e7eb"
-        onclick="openActivePackage()">
-        📦 Active Package
-        </button>
-
-
-        <button
-        class="btn btn-blue"
-        style="width:100%;margin-top:10px"
-        onclick="logoutStudent()">
+        <button class="btn btn-blue" style="width:100%;margin-top:18px" onclick="logoutStudent()">
         🚪 Logout
         </button>
 
     `;
-
 
     showPage("profile");
 
 }
 
 
-/* =========================================
-   EDIT PROFILE
-========================================= */
-
 function openEditProfile(){
 
-    const name =
-    localStorage.getItem("studentName") || "";
+    document.getElementById("editNameInput").value =
+        localStorage.getItem("studentName") || "";
 
-    const email =
-    localStorage.getItem("studentEmail") || "";
+    document.getElementById("editEmailInput").value =
+        localStorage.getItem("studentEmail") || "";
 
-
-    document.getElementById("editNameInput")
-    .value = name;
-
-
-    document.getElementById("editEmailInput")
-    .value = email;
-
-
-    document.getElementById(
-        "editProfileModal"
-    ).classList.add("active");
+    document.getElementById("editProfileModal")
+    .classList.add("active");
 
 }
 
 
 function closeEditProfile(){
 
-    document.getElementById(
-        "editProfileModal"
-    ).classList.remove("active");
+    document.getElementById("editProfileModal")
+    .classList.remove("active");
 
 }
 
 
 function saveEditedProfile(){
 
-    const name =
-    document.getElementById(
-        "editNameInput"
-    ).value.trim();
-
-
-    const email =
-    document.getElementById(
-        "editEmailInput"
-    ).value.trim();
-
+    const name = document.getElementById("editNameInput").value.trim();
+    const email = document.getElementById("editEmailInput").value.trim();
+    const mobile = localStorage.getItem("studentMobile");
 
     if(!name){
 
         alert("Please enter your name.");
-
         return;
 
     }
 
-
-    localStorage.setItem(
-        "studentName",
-        name
-    );
-
-
-    localStorage.setItem(
-        "studentEmail",
-        email
-    );
-
-
-    const mobile =
-    localStorage.getItem(
-        "studentMobile"
-    );
-
+    localStorage.setItem("studentName",name);
+    localStorage.setItem("studentEmail",email);
 
     if(mobile){
 
-        const users =
-        JSON.parse(
-            localStorage.getItem(
-                "registeredUsers"
-            ) || "{}"
+        const users = JSON.parse(
+            localStorage.getItem("registeredUsers") || "{}"
         );
 
-
         if(users[mobile]){
-
             users[mobile].name = name;
-
             users[mobile].email = email;
-
             localStorage.setItem(
                 "registeredUsers",
                 JSON.stringify(users)
             );
-
         }
 
     }
 
-
     closeEditProfile();
-
     updateLoginButton();
-
     openProfile();
 
+    alert("Profile updated successfully.");
 
-    alert(
-        "Profile updated successfully."
+}
+
+
+function openProfileAction(title,html){
+
+    document.getElementById("profileActionTitle").innerText = title;
+    document.getElementById("profileActionContent").innerHTML = html;
+    document.getElementById("profileActionModal").classList.add("active");
+
+}
+
+
+function closeProfileAction(){
+
+    document.getElementById("profileActionModal").classList.remove("active");
+
+}
+
+
+function openSettings(){
+
+    const notifications =
+        localStorage.getItem("profileNotifications") !== "false";
+
+    openProfileAction(
+        "⚙️ Settings",
+        `
+        <div class="settings-row">
+            <div>
+                <strong>Notifications</strong>
+                <p style="font-size:13px;color:#6b7280;margin-top:4px">
+                Receive important exam updates.
+                </p>
+            </div>
+            <button class="toggle-switch ${notifications ? "active" : ""}"
+            onclick="toggleProfileNotifications(this)"></button>
+        </div>
+
+        <div class="settings-row">
+            <div>
+                <strong>Account</strong>
+                <p style="font-size:13px;color:#6b7280;margin-top:4px">
+                Your account is protected by mobile OTP login.
+                </p>
+            </div>
+        </div>
+
+        <div class="settings-row">
+            <div>
+                <strong>App Version</strong>
+                <p style="font-size:13px;color:#6b7280;margin-top:4px">
+                VK Exams Online • 1.0
+                </p>
+            </div>
+        </div>
+        `
     );
 
 }
+
+
+function toggleProfileNotifications(button){
+
+    const active = button.classList.toggle("active");
+
+    localStorage.setItem(
+        "profileNotifications",
+        active ? "true" : "false"
+    );
+
+}
+
+
+function openPurchaseHistory(){
+
+    const history = JSON.parse(
+        localStorage.getItem("purchaseHistory") || "[]"
+    );
+
+    let html = "";
+
+    if(!history.length){
+
+        html = `
+            <div class="ad-box">
+                <div style="font-size:35px">🛒</div>
+                <strong>No purchases yet</strong>
+                <p style="color:#6b7280;margin-top:8px">
+                Your future course purchases will appear here.
+                </p>
+            </div>
+        `;
+
+    }else{
+
+        history.forEach(function(item){
+
+            html += `
+                <div class="profile-info-card">
+                    <strong>${item.course || "Course"}</strong>
+                    <p style="margin-top:6px;color:#6b7280">
+                    ${item.plan || "Plan"} • ₹${item.amount || "-"}
+                    </p>
+                    <p style="margin-top:4px;font-size:13px;color:#6b7280">
+                    ${item.date || ""}
+                    </p>
+                </div>
+            `;
+
+        });
+
+    }
+
+    openProfileAction("🛒 Purchase History",html);
+
+}
+
+
+function openTestResults(){
+
+    const score = localStorage.getItem("lastScore");
+    const total = localStorage.getItem("lastTotal");
+    const course = localStorage.getItem("lastTestCourse") || "Latest Test";
+    const paper = localStorage.getItem("lastTestPaper") || "";
+
+    let html;
+
+    if(score !== null){
+
+        const percentage = total
+            ? ((Number(score) / Number(total)) * 100).toFixed(1)
+            : "0";
+
+        html = `
+            <div class="coins-box">
+                <div style="font-size:16px;font-weight:700">${course} ${paper ? "• Paper " + paper : ""}</div>
+                <div class="coin-number" style="color:#1746a2">
+                ${score} / ${total}
+                </div>
+                <p>Percentage: ${percentage}%</p>
+            </div>
+            <p style="color:#6b7280;font-size:13px">
+            This section currently shows your latest completed test result.
+            </p>
+        `;
+
+    }else{
+
+        html = `
+            <div class="ad-box">
+                <div style="font-size:35px">📝</div>
+                <strong>No test results yet</strong>
+                <p style="color:#6b7280;margin-top:8px">
+                Complete a mock test to see your result here.
+                </p>
+            </div>
+        `;
+
+    }
+
+    openProfileAction("📝 Test Results",html);
+
+}
+
+
+function openActivePackage(){
+
+    const pkg = localStorage.getItem("activePackage");
+    const course = localStorage.getItem("activePackageCourse");
+    const expiry = localStorage.getItem("activePackageExpiry");
+
+    let html;
+
+    if(pkg){
+
+        html = `
+            <div class="coins-box">
+                <div style="font-size:35px">📦</div>
+                <h3 style="margin:10px 0">${pkg}</h3>
+                <p>${course || "Course"}</p>
+                <p style="margin-top:8px;color:#6b7280">
+                Valid until: ${expiry || "Not specified"}
+                </p>
+            </div>
+        `;
+
+    }else{
+
+        html = `
+            <div class="ad-box">
+                <div style="font-size:35px">📦</div>
+                <strong>No active package</strong>
+                <p style="color:#6b7280;margin-top:8px">
+                Purchase a plan from Store to activate your test access.
+                </p>
+                <button class="btn btn-primary" style="margin-top:15px" onclick="closeProfileAction();openStore()">
+                View Store
+                </button>
+            </div>
+        `;
+
+    }
+
+    openProfileAction("📦 Active Package",html);
+
+}
+
 
 /* =========================================
    LOGOUT
