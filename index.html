@@ -666,7 +666,7 @@ footer p{
 
 <div
     class="logo"
-   onclick="showHome()"
+    onclick="goHomeFromLogo()"
     style="cursor:pointer;"
 >
     VK <span>EXAMS</span>
@@ -914,8 +914,8 @@ Prepare from mobile, tablet or computer.
 <div class="container">
 
 <span class="back"
-onclick="goBack()"
-← Back
+onclick="showHome()">
+← Back to Home
 </span>
 
 <div class="section-title">
@@ -1334,8 +1334,6 @@ Correct answers and explanations
 <span class="back"
 onclick="showHome()">
 ← Back to Home
-
-    
 </span>
 
 <div class="section-title">
@@ -1538,7 +1536,6 @@ id="profileContent">
 </div>
 
 
-
 <!-- LOGIN / REGISTER -->
 
 <div id="loginPage" class="page">
@@ -1575,7 +1572,6 @@ onclick="sendOTP()">
 Send OTP
 </button>
 
-
 <div id="otpArea"
 style="display:none;margin-top:20px">
 
@@ -1605,19 +1601,18 @@ Demo OTP: 123456
 
 </div>
 
-
 <div style="margin-top:25px;text-align:center">
 
 <button
 class="btn btn-light"
-style="width:100%"
+style="width:100%;margin-left:0"
 onclick="skipLogin()">
 Skip for now
 </button>
 
 <p style="font-size:13px;color:#6b7280;margin-top:10px">
-You can browse the website without login.
-Login is required to attempt tests.
+You can browse the website without login.<br>
+Login / Register is required to attempt tests.
 </p>
 
 </div>
@@ -1655,10 +1650,7 @@ placeholder="Enter your name">
 <br><br>
 
 <label>
-Email ID
-<span style="color:#9ca3af">
-(Optional)
-</span>
+Email ID <span style="color:#9ca3af">(Optional)</span>
 </label>
 
 <input
@@ -1673,40 +1665,6 @@ placeholder="Enter your email">
 class="btn btn-primary"
 onclick="registerStudent()">
 Register
-</button>
-
-</div>
-
-</div>
-
-</div>
-
-
-<!-- NAME MODAL -->
-
-<div id="nameModal" class="modal">
-
-<div class="modal-box">
-
-<h2>
-Welcome to VK Exams
-</h2>
-
-<p>
-Enter your name to complete your profile.
-</p>
-
-<input
-id="nameInput"
-class="form-input"
-placeholder="Enter your name">
-
-<div class="modal-buttons">
-
-<button
-class="btn btn-blue"
-onclick="saveStudentName()">
-Continue
 </button>
 
 </div>
@@ -1861,17 +1819,14 @@ function showPage(page, addHistory = true){
 
     }
 }
-    function showHome(){
-        
+
+
+function showHome(){
+
     showPage("home");
-        function goBack(){
-    if(history.state && history.state.vkPage){
-        history.back();
-    }else{
-        showHome();
-    }
+
 }
-}
+
 
 /* =========================================
    EXPLORE
@@ -2242,10 +2197,31 @@ function buyPlan(plan){
 
 
 /* =========================================
+   TEST ACCESS
+========================================= */
+
+function isStudentLoggedIn(){
+
+    return !!localStorage.getItem("studentMobile");
+
+}
+
+
+/* =========================================
    FREE MOCK TEST
 ========================================= */
 
 function startFreeMock(){
+
+    if(!isStudentLoggedIn()){
+
+        alert("Please Login / Register to attempt the test.");
+
+        openLogin();
+
+        return;
+
+    }
 
     createQuestions();
 
@@ -2649,7 +2625,7 @@ function reattempt(){
 
 
 /* =========================================
-   LOGIN
+   LOGIN / REGISTER
 ========================================= */
 
 function openLogin(){
@@ -2705,34 +2681,83 @@ function verifyOTP(){
     const mobile =
     localStorage.getItem("pendingMobile");
 
-    localStorage.setItem(
-        "studentMobile",
-        mobile
+    if(!mobile){
+
+        alert("Mobile number not found. Please try again.");
+
+        return;
+
+    }
+
+    const registeredUsers =
+    JSON.parse(
+        localStorage.getItem("registeredUsers") || "{}"
     );
 
-    const name =
-    localStorage.getItem("studentName");
+    const existingUser =
+    registeredUsers[mobile];
 
-    if(!name){
 
-        document.getElementById("nameModal")
-        .classList.add("active");
+    /* EXISTING REGISTERED USER */
 
-    }else{
+    if(existingUser){
+
+        localStorage.setItem(
+            "studentMobile",
+            mobile
+        );
+
+        localStorage.setItem(
+            "studentName",
+            existingUser.name
+        );
+
+        localStorage.setItem(
+            "studentEmail",
+            existingUser.email || ""
+        );
+
+        localStorage.setItem(
+            "guestMode",
+            "false"
+        );
 
         updateLoginButton();
 
-        openProfile();
+        alert(
+            "Welcome back, " +
+            existingUser.name + "!"
+        );
+
+        showHome();
+
+        return;
 
     }
+
+
+    /* NEW USER */
+
+    document.getElementById("registerName")
+    .value = "";
+
+    document.getElementById("registerEmail")
+    .value = "";
+
+    document.getElementById("registerModal")
+    .classList.add("active");
 
 }
 
 
-function saveStudentName(){
+function registerStudent(){
 
     const name =
-    document.getElementById("nameInput")
+    document.getElementById("registerName")
+    .value.trim();
+
+    const email =
+    document.getElementById("registerEmail")
     .value.trim();
 
     if(!name){
@@ -2743,17 +2768,79 @@ function saveStudentName(){
 
     }
 
+    const mobile =
+    localStorage.getItem("pendingMobile");
+
+    if(!mobile){
+
+        alert("Mobile number not found. Please login again.");
+
+        return;
+
+    }
+
+    const registeredUsers =
+    JSON.parse(
+        localStorage.getItem("registeredUsers") || "{}"
+    );
+
+    registeredUsers[mobile] = {
+        name:name,
+        email:email
+    };
+
+    localStorage.setItem(
+        "registeredUsers",
+        JSON.stringify(registeredUsers)
+    );
+
+    localStorage.setItem(
+        "studentMobile",
+        mobile
+    );
+
     localStorage.setItem(
         "studentName",
         name
     );
 
-    document.getElementById("nameModal")
+    localStorage.setItem(
+        "studentEmail",
+        email
+    );
+
+    localStorage.setItem(
+        "guestMode",
+        "false"
+    );
+
+    document.getElementById("registerModal")
     .classList.remove("active");
 
     updateLoginButton();
 
-    openProfile();
+    alert(
+        "Registration successful!\n\nWelcome to VK Exams, " +
+        name + "!"
+    );
+
+    showHome();
+
+}
+
+
+function skipLogin(){
+
+    localStorage.removeItem("studentMobile");
+
+    localStorage.setItem(
+        "guestMode",
+        "true"
+    );
+
+    updateLoginButton();
+
+    showHome();
 
 }
 
@@ -2765,6 +2852,10 @@ function updateLoginButton(){
 
     const button =
     document.getElementById("loginNav");
+
+    if(!button){
+        return;
+    }
 
     if(logged){
 
@@ -2913,6 +3004,17 @@ function logoutStudent(){
 
     localStorage.removeItem("studentMobile");
 
+    localStorage.removeItem("studentName");
+
+    localStorage.removeItem("studentEmail");
+
+    localStorage.removeItem("pendingMobile");
+
+    localStorage.setItem(
+        "guestMode",
+        "false"
+    );
+
     updateLoginButton();
 
     showHome();
@@ -2965,6 +3067,34 @@ function completeCoinAd(){
 updateLoginButton();
 
 
+const loggedStudent =
+localStorage.getItem("studentMobile");
+
+const guestMode =
+localStorage.getItem("guestMode");
+
+
+/*
+   First-time visitor -> Login/Register page
+   Logged-in visitor -> Home
+   Guest visitor -> Home
+*/
+
+setTimeout(function(){
+
+    if(!loggedStudent && guestMode !== "true"){
+
+        showPage("loginPage", false);
+
+    }else{
+
+        showPage("home", false);
+
+    }
+
+},100);
+
+
 /* =========================================
    BASIC SCREENSHOT / CONTEXT MENU
    deterrent only – NOT full security
@@ -2995,113 +3125,61 @@ document.addEventListener(
     }
 );
 
-/* =========================================
-   VK EXAMS NAVIGATION
+
+    /* =========================================
+   VK EXAMS BROWSER BACK NAVIGATION
 ========================================= */
 
-const validPages = [
-    "home",
-    "explore",
-    "course",
-    "syllabus",
-    "testseries",
-    "papers",
-    "examPage",
-    "resultPage",
-    "solutionsPage",
-    "store",
-    "profile",
-    "loginPage"
-];
-
-function getCurrentPage(){
-
-    const activePage =
-        document.querySelector(".page.active");
-
-    return activePage
-        ? activePage.id
-        : "home";
-}
-
-
-/* =========================================
-   INITIAL HISTORY
-========================================= */
-
-let initialPage =
+const firstPage =
     window.location.hash
     ? window.location.hash.substring(1)
     : "home";
 
-if(!validPages.includes(initialPage)){
-    initialPage = "home";
-}
-
 history.replaceState(
-    { vkPage: initialPage },
+    { vkPage: firstPage },
     "",
-    "#" + initialPage
+    "#" + firstPage
 );
-
-
-/* =========================================
-   BROWSER BACK / FORWARD
-========================================= */
+    history.pushState(
+    { vkPage: firstPage },
+    "",
+    "#" + firstPage
+);
 
 window.addEventListener("popstate", function(event){
 
-    let page = "home";
-
     if(
         event.state &&
-        event.state.vkPage &&
-        validPages.includes(event.state.vkPage)
+        event.state.vkPage
     ){
 
-        page = event.state.vkPage;
+        showPage(
+            event.state.vkPage,
+            false
+        );
+
+    }else{
+
+        history.pushState(
+            { vkPage:"home" },
+            "",
+            "#home"
+        );
+
+        showPage(
+            "home",
+            false
+        );
 
     }
-
-    showPage(page, false);
 
 });
 
+    function goHomeFromLogo(){
 
-/* =========================================
-   VK EXAMS LOGO → HOME
-========================================= */
-
-function goHomeFromLogo(){
-
-    /* Remove active page */
-    document.querySelectorAll(".page").forEach(function(page){
-        page.classList.remove("active");
-    });
-
-    /* Show Home */
-    const homePage =
-        document.getElementById("home");
-
-    if(homePage){
-        homePage.classList.add("active");
-    }
-
-    /* Scroll to top */
-    window.scrollTo({
-        top:0,
-        behavior:"smooth"
-    });
-
-    /* Replace current history entry */
-    history.replaceState(
-        { vkPage:"home" },
-        "",
-        "#home"
-    );
+    showHome();
 
 }
- 
     
 </script>
 
