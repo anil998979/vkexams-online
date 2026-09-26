@@ -2920,6 +2920,11 @@ history.replaceState(
     "",
     "#" + firstPage
 );
+    history.pushState(
+    { vkPage: firstPage },
+    "",
+    "#" + firstPage
+);
 
 window.addEventListener("popstate", function(event){
 
