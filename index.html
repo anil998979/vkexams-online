@@ -2909,72 +2909,113 @@ document.addEventListener(
     }
 );
 
-
-    /* =========================================
-   VK EXAMS BROWSER BACK NAVIGATION
+/* =========================================
+   VK EXAMS NAVIGATION
 ========================================= */
 
-const firstPage =
+const validPages = [
+    "home",
+    "explore",
+    "course",
+    "syllabus",
+    "testseries",
+    "papers",
+    "examPage",
+    "resultPage",
+    "solutionsPage",
+    "store",
+    "profile",
+    "loginPage"
+];
+
+function getCurrentPage(){
+
+    const activePage =
+        document.querySelector(".page.active");
+
+    return activePage
+        ? activePage.id
+        : "home";
+}
+
+
+/* =========================================
+   INITIAL HISTORY
+========================================= */
+
+let initialPage =
     window.location.hash
     ? window.location.hash.substring(1)
     : "home";
 
+if(!validPages.includes(initialPage)){
+    initialPage = "home";
+}
+
 history.replaceState(
-    { vkPage: firstPage },
+    { vkPage: initialPage },
     "",
-    "#" + firstPage
+    "#" + initialPage
 );
-    history.pushState(
-    { vkPage: firstPage },
-    "",
-    "#" + firstPage
-);
+
+
+/* =========================================
+   BROWSER BACK / FORWARD
+========================================= */
 
 window.addEventListener("popstate", function(event){
 
+    let page = "home";
+
     if(
         event.state &&
-        event.state.vkPage
+        event.state.vkPage &&
+        validPages.includes(event.state.vkPage)
     ){
 
-        showPage(
-            event.state.vkPage,
-            false
-        );
-
-    }else{
-
-        history.pushState(
-            { vkPage:"home" },
-            "",
-            "#home"
-        );
-
-        showPage(
-            "home",
-            false
-        );
+        page = event.state.vkPage;
 
     }
 
+    showPage(page, false);
+
 });
 
-    function goHomeFromLogo(){
 
+/* =========================================
+   VK EXAMS LOGO → HOME
+========================================= */
+
+function goHomeFromLogo(){
+
+    /* Remove active page */
     document.querySelectorAll(".page").forEach(function(page){
         page.classList.remove("active");
     });
 
-    document.getElementById("home").classList.add("active");
+    /* Show Home */
+    const homePage =
+        document.getElementById("home");
 
-    window.scrollTo(0,0);
+    if(homePage){
+        homePage.classList.add("active");
+    }
 
-    history.pushState(
+    /* Scroll to top */
+    window.scrollTo({
+        top:0,
+        behavior:"smooth"
+    });
+
+    /* Replace current history entry */
+    history.replaceState(
         { vkPage:"home" },
         "",
         "#home"
     );
+
 }
+ 
     
 </script>
 
