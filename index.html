@@ -1536,6 +1536,58 @@ id="profileContent">
 </div>
 
 
+<!-- EDIT PROFILE MODAL -->
+
+<div id="editProfileModal" class="modal">
+
+<div class="modal-box">
+
+<h2>
+✏️ Edit Profile
+</h2>
+
+<label>
+Name
+</label>
+
+<input
+id="editNameInput"
+class="form-input"
+placeholder="Enter your name">
+
+<br><br>
+
+<label>
+Email ID
+</label>
+
+<input
+id="editEmailInput"
+class="form-input"
+type="email"
+placeholder="Enter email">
+
+<div class="modal-buttons">
+
+<button
+class="btn btn-light"
+onclick="closeEditProfile()">
+Cancel
+</button>
+
+<button
+class="btn btn-primary"
+onclick="saveEditedProfile()">
+Save Changes
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+
 <!-- LOGIN / REGISTER -->
 
 <div id="loginPage" class="page">
@@ -2872,8 +2924,7 @@ function updateLoginButton(){
     }
 
 }
-
-
+*\
 /* =========================================
    PROFILE
 ========================================= */
@@ -2886,6 +2937,9 @@ function openProfile(){
     const name =
     localStorage.getItem("studentName");
 
+    const email =
+    localStorage.getItem("studentEmail") || "";
+
     if(!mobile){
 
         openLogin();
@@ -2894,10 +2948,12 @@ function openProfile(){
 
     }
 
+
     const coins =
     Number(
         localStorage.getItem("studentCoins") || 0
     );
+
 
     const score =
     localStorage.getItem("lastScore");
@@ -2905,10 +2961,12 @@ function openProfile(){
     const total =
     localStorage.getItem("lastTotal");
 
+
     const initials =
     name
     ? name.substring(0,2).toUpperCase()
     : "ST";
+
 
     document.getElementById("profileContent")
     .innerHTML = `
@@ -2917,12 +2975,17 @@ function openProfile(){
         ${initials}
         </div>
 
+
         <h2 style="text-align:center">
-        ${name}
+        ${name || "Student"}
         </h2>
 
-        <p style="text-align:center;color:#6b7280">
-        Student
+
+        <p style="
+        text-align:center;
+        color:#6b7280;
+        margin-top:5px">
+        VK Exams Student
         </p>
 
 
@@ -2942,7 +3005,9 @@ function openProfile(){
             Watch Ad & Earn 0.5 Coin
             </button>
 
-            <p style="margin-top:10px;font-size:13px">
+            <p style="
+            margin-top:10px;
+            font-size:13px">
             10 coins = payment eligibility
             </p>
 
@@ -2950,51 +3015,209 @@ function openProfile(){
 
 
         <div class="profile-row">
-            <strong>Name</strong>
-            <span>${name}</span>
+            <strong>👤 Name</strong>
+            <span>${name || "-"}</span>
         </div>
 
+
         <div class="profile-row">
-            <strong>Mobile</strong>
+            <strong>📱 Mobile</strong>
             <span>${mobile}</span>
         </div>
 
-        <div class="profile-row">
-            <strong>Purchase Details</strong>
-            <span>No purchase yet</span>
-        </div>
 
         <div class="profile-row">
-            <strong>Test Results</strong>
-            <span>
-            ${
-                score !== null
-                ? score + " / " + total
-                : "No tests completed"
-            }
-            </span>
+            <strong>📧 Email</strong>
+            <span>${email || "Not added"}</span>
         </div>
 
-        <div class="profile-row">
-            <strong>Active Package</strong>
-            <span>No active package</span>
-        </div>
 
         <br>
 
+
         <button
         class="btn btn-blue"
-        style="width:100%"
+        style="width:100%;margin-bottom:10px"
+        onclick="openEditProfile()">
+        ✏️ Edit Profile
+        </button>
+
+
+        <button
+        class="btn btn-light"
+        style="
+        width:100%;
+        margin:0 0 10px 0;
+        border:1px solid #e5e7eb"
+        onclick="openSettings()">
+        ⚙️ Settings
+        </button>
+
+
+        <button
+        class="btn btn-light"
+        style="
+        width:100%;
+        margin:0 0 10px 0;
+        border:1px solid #e5e7eb"
+        onclick="openPurchaseHistory()">
+        🛒 Purchase History
+        </button>
+
+
+        <button
+        class="btn btn-light"
+        style="
+        width:100%;
+        margin:0 0 10px 0;
+        border:1px solid #e5e7eb"
+        onclick="openTestResults()">
+        📝 Test Results
+        </button>
+
+
+        <button
+        class="btn btn-light"
+        style="
+        width:100%;
+        margin:0 0 10px 0;
+        border:1px solid #e5e7eb"
+        onclick="openActivePackage()">
+        📦 Active Package
+        </button>
+
+
+        <button
+        class="btn btn-blue"
+        style="width:100%;margin-top:10px"
         onclick="logoutStudent()">
-        Logout
+        🚪 Logout
         </button>
 
     `;
+
 
     showPage("profile");
 
 }
 
+
+/* =========================================
+   EDIT PROFILE
+========================================= */
+
+function openEditProfile(){
+
+    const name =
+    localStorage.getItem("studentName") || "";
+
+    const email =
+    localStorage.getItem("studentEmail") || "";
+
+
+    document.getElementById("editNameInput")
+    .value = name;
+
+
+    document.getElementById("editEmailInput")
+    .value = email;
+
+
+    document.getElementById(
+        "editProfileModal"
+    ).classList.add("active");
+
+}
+
+
+function closeEditProfile(){
+
+    document.getElementById(
+        "editProfileModal"
+    ).classList.remove("active");
+
+}
+
+
+function saveEditedProfile(){
+
+    const name =
+    document.getElementById(
+        "editNameInput"
+    ).value.trim();
+
+
+    const email =
+    document.getElementById(
+        "editEmailInput"
+    ).value.trim();
+
+
+    if(!name){
+
+        alert("Please enter your name.");
+
+        return;
+
+    }
+
+
+    localStorage.setItem(
+        "studentName",
+        name
+    );
+
+
+    localStorage.setItem(
+        "studentEmail",
+        email
+    );
+
+
+    const mobile =
+    localStorage.getItem(
+        "studentMobile"
+    );
+
+
+    if(mobile){
+
+        const users =
+        JSON.parse(
+            localStorage.getItem(
+                "registeredUsers"
+            ) || "{}"
+        );
+
+
+        if(users[mobile]){
+
+            users[mobile].name = name;
+
+            users[mobile].email = email;
+
+            localStorage.setItem(
+                "registeredUsers",
+                JSON.stringify(users)
+            );
+
+        }
+
+    }
+
+
+    closeEditProfile();
+
+    updateLoginButton();
+
+    openProfile();
+
+
+    alert(
+        "Profile updated successfully."
+    );
+
+}
 
 /* =========================================
    LOGOUT
