@@ -666,7 +666,7 @@ footer p{
 
 <div
     class="logo"
-    onclick="goHomeFromLogo()"
+   onclick="showHome()"
     style="cursor:pointer;"
 >
     VK <span>EXAMS</span>
@@ -1785,6 +1785,9 @@ function showPage(page, addHistory = true){
         );
 
     }
+}
+    function showHome(){
+    showPage("home");
 }
 
 /* =========================================
