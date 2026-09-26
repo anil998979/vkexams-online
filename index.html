@@ -914,8 +914,8 @@ Prepare from mobile, tablet or computer.
 <div class="container">
 
 <span class="back"
-onclick="showHome()">
-← Back to Home
+onclick="goBack()"
+← Back
 </span>
 
 <div class="section-title">
@@ -1787,7 +1787,15 @@ function showPage(page, addHistory = true){
     }
 }
     function showHome(){
+        
     showPage("home");
+        function goBack(){
+    if(history.state && history.state.vkPage){
+        history.back();
+    }else{
+        showHome();
+    }
+}
 }
 
 /* =========================================
