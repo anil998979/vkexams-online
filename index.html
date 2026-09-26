@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>VK Exams Online</title>
 
 <style>
+
 *{
     margin:0;
     padding:0;
@@ -20,6 +22,7 @@ body{
 }
 
 /* HEADER */
+
 header{
     background:#ffffff;
     border-bottom:1px solid #e5e7eb;
@@ -38,9 +41,6 @@ header{
 }
 
 .logo{
-    display:flex;
-    align-items:center;
-    gap:10px;
     font-size:24px;
     font-weight:800;
     color:#1746a2;
@@ -71,6 +71,7 @@ header{
 }
 
 /* HERO */
+
 .hero{
     background:linear-gradient(135deg,#123b91,#2463d4);
     color:white;
@@ -124,6 +125,7 @@ header{
 }
 
 /* MAIN */
+
 .container{
     max-width:1200px;
     margin:auto;
@@ -145,6 +147,7 @@ header{
 }
 
 /* CATEGORY CARDS */
+
 .category-grid{
     display:grid;
     grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
@@ -182,6 +185,7 @@ header{
 }
 
 /* FEATURES */
+
 .features{
     display:grid;
     grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
@@ -205,7 +209,8 @@ header{
     line-height:1.5;
 }
 
-/* PAGE */
+/* PAGES */
+
 .page{
     display:none;
 }
@@ -214,7 +219,8 @@ header{
     display:block;
 }
 
-/* EXAM PAGE */
+/* BACK */
+
 .back{
     color:#1746a2;
     cursor:pointer;
@@ -223,6 +229,8 @@ header{
     display:inline-block;
 }
 
+/* EXAM HEADER */
+
 .exam-header{
     background:linear-gradient(135deg,#1746a2,#3876df);
     color:white;
@@ -230,6 +238,12 @@ header{
     border-radius:15px;
     margin-bottom:30px;
 }
+
+.exam-header h1{
+    margin-bottom:5px;
+}
+
+/* PAPER */
 
 .paper-grid{
     display:grid;
@@ -240,7 +254,7 @@ header{
 .paper-card{
     background:white;
     border-radius:15px;
-    padding:25px;
+    padding:22px;
     border:1px solid #e5e7eb;
     box-shadow:0 5px 18px rgba(0,0,0,.06);
 }
@@ -249,6 +263,13 @@ header{
     color:#1746a2;
     margin-bottom:10px;
 }
+
+.paper-card > p{
+    color:#374151;
+    margin-bottom:15px;
+}
+
+/* TEST */
 
 .test{
     display:flex;
@@ -259,6 +280,7 @@ header{
     border-radius:8px;
     margin-top:10px;
     cursor:pointer;
+    background:white;
 }
 
 .test:hover{
@@ -279,6 +301,7 @@ header{
 }
 
 /* STORE */
+
 .plan-grid{
     display:grid;
     grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
@@ -312,7 +335,19 @@ header{
     cursor:pointer;
 }
 
+/* PROFILE */
+
+.profile-box{
+    max-width:600px;
+    margin:auto;
+    background:white;
+    padding:25px;
+    border-radius:15px;
+    border:1px solid #e5e7eb;
+}
+
 /* FOOTER */
+
 footer{
     background:#111827;
     color:white;
@@ -327,6 +362,7 @@ footer p{
 }
 
 /* MOBILE */
+
 @media(max-width:700px){
 
     .nav-links{
@@ -345,32 +381,59 @@ footer p{
         margin-left:0;
         margin-top:10px;
     }
+
+    .paper-grid{
+        grid-template-columns:1fr;
+    }
+
 }
+
 </style>
+
 </head>
 
 <body>
 
+
+<!-- HEADER -->
+
 <header>
+
 <div class="navbar">
 
 <div class="logo">
-    VK <span>EXAMS</span>
+VK <span>EXAMS</span>
 </div>
 
 <div class="nav-links">
-    <a onclick="showHome()">Home</a>
-    <a onclick="showPage('exams')">Exams</a>
-    <a onclick="showPage('store')">Store</a>
-    <a onclick="showPage('profile')">Profile</a>
-    <a class="login-btn" onclick="showPage('profile')">Login</a>
+
+<a onclick="showHome()">Home</a>
+
+<a onclick="showPage('exams')">
+Exams
+</a>
+
+<a onclick="showPage('store')">
+Store
+</a>
+
+<a onclick="showPage('profile')">
+Profile
+</a>
+
+<a class="login-btn"
+onclick="showPage('profile')">
+Login
+</a>
+
 </div>
 
 </div>
+
 </header>
 
 
-<!-- HOME -->
+<!-- HOME PAGE -->
 
 <div id="home" class="page active">
 
@@ -378,7 +441,10 @@ footer p{
 
 <div class="hero-content">
 
-<h1>Prepare Smart. <span>Score Higher.</span></h1>
+<h1>
+Prepare Smart.
+<span>Score Higher.</span>
+</h1>
 
 <p>
 VK Exams Online is your exam preparation platform for
@@ -388,14 +454,20 @@ competitive examinations.
 
 <div class="hero-buttons">
 
-<button class="btn btn-primary"
+<button
+class="btn btn-primary"
 onclick="showPage('exams')">
+
 Explore Exams
+
 </button>
 
-<button class="btn btn-light"
+<button
+class="btn btn-light"
 onclick="showPage('store')">
+
 View Packages
+
 </button>
 
 </div>
@@ -420,62 +492,103 @@ Select an examination and start your preparation.
 
 <div class="category-grid">
 
+
+<!-- APPSC -->
+
 <div class="category-card"
 onclick="openExam('APPSC')">
 
-<div class="icon">📚</div>
+<div class="icon">
+📚
+</div>
 
-<h3>APPSC</h3>
+<h3>
+APPSC
+</h3>
 
-<p>Group 1, 2, 3, 4 and other APPSC examinations</p>
+<p>
+Group 1, 2, 3, 4 and other APPSC examinations
+</p>
 
 </div>
 
+
+<!-- ENDOWMENT -->
 
 <div class="category-card"
 onclick="openExam('Endowment Officer')">
 
-<div class="icon">🛕</div>
+<div class="icon">
+🛕
+</div>
 
-<h3>Endowment Officer</h3>
+<h3>
+Endowment Officer
+</h3>
 
-<p>Temple system, Hindu philosophy and Endowments Act</p>
+<p>
+Temple system, Hindu philosophy and Endowments Act
+</p>
 
 </div>
 
+
+<!-- HIGH COURT -->
 
 <div class="category-card"
 onclick="openExam('High Court')">
 
-<div class="icon">⚖️</div>
+<div class="icon">
+⚖️
+</div>
 
-<h3>High Court</h3>
+<h3>
+High Court
+</h3>
 
-<p>High Court and District Court examinations</p>
+<p>
+High Court and District Court examinations
+</p>
 
 </div>
 
+
+<!-- POLICE -->
 
 <div class="category-card"
 onclick="openExam('Police')">
 
-<div class="icon">👮</div>
+<div class="icon">
+👮
+</div>
 
-<h3>Police</h3>
+<h3>
+Police
+</h3>
 
-<p>Police recruitment examination preparation</p>
+<p>
+Police recruitment examination preparation
+</p>
 
 </div>
 
+
+<!-- DSC -->
 
 <div class="category-card"
 onclick="openExam('DSC')">
 
-<div class="icon">🎓</div>
+<div class="icon">
+🎓
+</div>
 
-<h3>DSC</h3>
+<h3>
+DSC
+</h3>
 
-<p>Teacher recruitment examination preparation</p>
+<p>
+Teacher recruitment examination preparation
+</p>
 
 </div>
 
@@ -483,9 +596,14 @@ onclick="openExam('DSC')">
 </div>
 
 
-<div class="section-title" style="margin-top:55px">
+<!-- FEATURES -->
 
-<h2>Why VK Exams?</h2>
+<div class="section-title"
+style="margin-top:55px">
+
+<h2>
+Why VK Exams?
+</h2>
 
 </div>
 
@@ -493,23 +611,54 @@ onclick="openExam('DSC')">
 <div class="features">
 
 <div class="feature">
-<h3>📝 Online Tests</h3>
-<p>Practice with exam-oriented online tests.</p>
+
+<h3>
+📝 Online Tests
+</h3>
+
+<p>
+Practice with exam-oriented online tests.
+</p>
+
 </div>
 
-<div class="feature">
-<h3>🎯 Expected Questions</h3>
-<p>AI-assisted expected questions and practice sets.</p>
-</div>
 
 <div class="feature">
-<h3>📊 Instant Results</h3>
-<p>View your score and performance after every test.</p>
+
+<h3>
+🎯 Expected Questions
+</h3>
+
+<p>
+AI-assisted expected questions and practice sets.
+</p>
+
 </div>
 
+
 <div class="feature">
-<h3>📱 Mobile Friendly</h3>
-<p>Prepare for exams from your mobile or computer.</p>
+
+<h3>
+📊 Instant Results
+</h3>
+
+<p>
+View your score and performance after every test.
+</p>
+
+</div>
+
+
+<div class="feature">
+
+<h3>
+📱 Mobile Friendly
+</h3>
+
+<p>
+Prepare for exams from your mobile or computer.
+</p>
+
 </div>
 
 </div>
@@ -525,11 +674,20 @@ onclick="openExam('DSC')">
 
 <div class="container">
 
-<span class="back" onclick="showHome()">← Back to Home</span>
+<span
+class="back"
+onclick="showHome()">
+
+← Back to Home
+
+</span>
+
 
 <div class="exam-header">
 
-<h1 id="examTitle">Exam</h1>
+<h1 id="examTitle">
+Exam
+</h1>
 
 <p>
 Topic-wise Tests • Syllabus Tests • Test Series
@@ -540,268 +698,685 @@ Topic-wise Tests • Syllabus Tests • Test Series
 
 <div class="paper-grid">
 
-<div class="paper-card">
 
-<h3>📘 Paper 1</h3>
-
-<p>General Knowledge & General Studies</p>
-
-<div class="test free"
-onclick="startTest('Free Test 1')">
-
-<span>Free Test 1</span>
-<span class="free">FREE</span>
-
-</div>
-
-<div class="test locked"
-onclick="lockedTest()">
-
-<span>Test 2</span>
-<span>🔒</span>
-
-</div>
-
-<div class="test locked"
-onclick="lockedTest()">
-
-<span>Test 3</span>
-<span>🔒</span>
-
-</div>
-
-<div class="test locked"
-onclick="lockedTest()">
-
-<span>Test 4</span>
-<span>🔒</span>
-
-</div>
-
-<div class="test locked"
-onclick="lockedTest()">
-
-<span>Test 5</span>
-<span>🔒</span>
-
-</div>
-
-<div class="test locked" onclick="lockedTest()">
-<span>Test 6</span><span>🔒</span>
-</div>
-
-<div class="test locked" onclick="lockedTest()">
-<span>Test 7</span><span>🔒</span>
-</div>
-
-<div class="test locked" onclick="lockedTest()">
-<span>Test 8</span><span>🔒</span>
-</div>
-
-<div class="test locked" onclick="lockedTest()">
-<span>Test 9</span><span>🔒</span>
-</div>
-
-<div class="test locked" onclick="lockedTest()">
-<span>Test 10</span><span>🔒</span>
-</div>
-
-<div class="test locked" onclick="lockedTest()">
-<span>Test 11</span><span>🔒</span>
-</div>
-
-<div class="test locked" onclick="lockedTest()">
-<span>Test 12</span><span>🔒</span>
-</div>
-
-<div class="test locked" onclick="lockedTest()">
-<span>Test 13</span><span>🔒</span>
-</div>
-
-<div class="test locked" onclick="lockedTest()">
-<span>Test 14</span><span>🔒</span>
-</div>
-
-<div class="test locked" onclick="lockedTest()">
-<span>Test 15</span><span>🔒</span>
-</div>
-
-</div>
-
+<!-- PAPER 1 -->
 
 <div class="paper-card">
 
-<h3>📕 Paper 2</h3>
+<h3>
+📘 Paper 1
+</h3>
 
-<p>Subject Specific / Hindu Philosophy</p>
+<p id="paper1Description">
+General Knowledge & General Studies
+</p>
+
+
+<!-- TEST 1 -->
 
 <div class="test free"
-onclick="startTest('Paper 2 Free Test 1')">
+onclick="startTest('Paper 1 - Test 1')">
 
-<span>Free Test 1</span>
-<span class="free">FREE</span>
+<span>
+Test 1
+</span>
+
+<span class="free">
+FREE
+</span>
 
 </div>
+
+
+<!-- TEST 2 -->
 
 <div class="test locked"
 onclick="lockedTest()">
 
-<span>Test 2</span>
-<span>🔒</span>
+<span>
+Test 2
+</span>
+
+<span>
+🔒
+</span>
 
 </div>
+
+
+<!-- TEST 3 -->
 
 <div class="test locked"
 onclick="lockedTest()">
 
-<span>Test 3</span>
-<span>🔒</span>
+<span>
+Test 3
+</span>
+
+<span>
+🔒
+</span>
 
 </div>
+
+
+<!-- TEST 4 -->
 
 <div class="test locked"
 onclick="lockedTest()">
 
-<span>Test 4</span>
-<span>🔒</span>
+<span>
+Test 4
+</span>
+
+<span>
+🔒
+</span>
 
 </div>
+
+
+<!-- TEST 5 -->
 
 <div class="test locked"
 onclick="lockedTest()">
 
-<span>Test 5</span>
-<span>🔒</span>
+<span>
+Test 5
+</span>
 
-</div>
-
-<div class="test locked" onclick="lockedTest()">
-<span>Test 6</span><span>🔒</span>
-</div>
-
-<div class="test locked" onclick="lockedTest()">
-<span>Test 7</span><span>🔒</span>
-</div>
-
-<div class="test locked" onclick="lockedTest()">
-<span>Test 8</span><span>🔒</span>
-</div>
-
-<div class="test locked" onclick="lockedTest()">
-<span>Test 9</span><span>🔒</span>
-</div>
-
-<div class="test locked" onclick="lockedTest()">
-<span>Test 10</span><span>🔒</span>
-</div>
-
-<div class="test locked" onclick="lockedTest()">
-<span>Test 11</span><span>🔒</span>
-</div>
-
-<div class="test locked" onclick="lockedTest()">
-<span>Test 12</span><span>🔒</span>
-</div>
-
-<div class="test locked" onclick="lockedTest()">
-<span>Test 13</span><span>🔒</span>
-</div>
-
-<div class="test locked" onclick="lockedTest()">
-<span>Test 14</span><span>🔒</span>
-</div>
-
-<div class="test locked" onclick="lockedTest()">
-<span>Test 15</span><span>🔒</span>
-</div>
-
-</div>
-
-</div>
-
-</div>
+<span>
+🔒
+</span>
 
 </div>
 
 
-<!-- STORE -->
+<!-- TEST 6 -->
+
+<div class="test locked"
+onclick="lockedTest()">
+
+<span>
+Test 6
+</span>
+
+<span>
+🔒
+</span>
+
+</div>
+
+
+<!-- TEST 7 -->
+
+<div class="test locked"
+onclick="lockedTest()">
+
+<span>
+Test 7
+</span>
+
+<span>
+🔒
+</span>
+
+</div>
+
+
+<!-- TEST 8 -->
+
+<div class="test locked"
+onclick="lockedTest()">
+
+<span>
+Test 8
+</span>
+
+<span>
+🔒
+</span>
+
+</div>
+
+
+<!-- TEST 9 -->
+
+<div class="test locked"
+onclick="lockedTest()">
+
+<span>
+Test 9
+</span>
+
+<span>
+🔒
+</span>
+
+</div>
+
+
+<!-- TEST 10 -->
+
+<div class="test locked"
+onclick="lockedTest()">
+
+<span>
+Test 10
+</span>
+
+<span>
+🔒
+</span>
+
+</div>
+
+
+<!-- TEST 11 -->
+
+<div class="test locked"
+onclick="lockedTest()">
+
+<span>
+Test 11
+</span>
+
+<span>
+🔒
+</span>
+
+</div>
+
+
+<!-- TEST 12 -->
+
+<div class="test locked"
+onclick="lockedTest()">
+
+<span>
+Test 12
+</span>
+
+<span>
+🔒
+</span>
+
+</div>
+
+
+<!-- TEST 13 -->
+
+<div class="test locked"
+onclick="lockedTest()">
+
+<span>
+Test 13
+</span>
+
+<span>
+🔒
+</span>
+
+</div>
+
+
+<!-- TEST 14 -->
+
+<div class="test locked"
+onclick="lockedTest()">
+
+<span>
+Test 14
+</span>
+
+<span>
+🔒
+</span>
+
+</div>
+
+
+<!-- TEST 15 -->
+
+<div class="test locked"
+onclick="lockedTest()">
+
+<span>
+Test 15
+</span>
+
+<span>
+🔒
+</span>
+
+</div>
+
+</div>
+
+
+<!-- PAPER 2 -->
+
+<div class="paper-card">
+
+<h3>
+📕 Paper 2
+</h3>
+
+<p id="paper2Description">
+Subject Specific / Hindu Philosophy
+</p>
+
+
+<!-- TEST 1 -->
+
+<div class="test free"
+onclick="startTest('Paper 2 - Test 1')">
+
+<span>
+Test 1
+</span>
+
+<span class="free">
+FREE
+</span>
+
+</div>
+
+
+<!-- TEST 2 -->
+
+<div class="test locked"
+onclick="lockedTest()">
+
+<span>
+Test 2
+</span>
+
+<span>
+🔒
+</span>
+
+</div>
+
+
+<!-- TEST 3 -->
+
+<div class="test locked"
+onclick="lockedTest()">
+
+<span>
+Test 3
+</span>
+
+<span>
+🔒
+</span>
+
+</div>
+
+
+<!-- TEST 4 -->
+
+<div class="test locked"
+onclick="lockedTest()">
+
+<span>
+Test 4
+</span>
+
+<span>
+🔒
+</span>
+
+</div>
+
+
+<!-- TEST 5 -->
+
+<div class="test locked"
+onclick="lockedTest()">
+
+<span>
+Test 5
+</span>
+
+<span>
+🔒
+</span>
+
+</div>
+
+
+<!-- TEST 6 -->
+
+<div class="test locked"
+onclick="lockedTest()">
+
+<span>
+Test 6
+</span>
+
+<span>
+🔒
+</span>
+
+</div>
+
+
+<!-- TEST 7 -->
+
+<div class="test locked"
+onclick="lockedTest()">
+
+<span>
+Test 7
+</span>
+
+<span>
+🔒
+</span>
+
+</div>
+
+
+<!-- TEST 8 -->
+
+<div class="test locked"
+onclick="lockedTest()">
+
+<span>
+Test 8
+</span>
+
+<span>
+🔒
+</span>
+
+</div>
+
+
+<!-- TEST 9 -->
+
+<div class="test locked"
+onclick="lockedTest()">
+
+<span>
+Test 9
+</span>
+
+<span>
+🔒
+</span>
+
+</div>
+
+
+<!-- TEST 10 -->
+
+<div class="test locked"
+onclick="lockedTest()">
+
+<span>
+Test 10
+</span>
+
+<span>
+🔒
+</span>
+
+</div>
+
+
+<!-- TEST 11 -->
+
+<div class="test locked"
+onclick="lockedTest()">
+
+<span>
+Test 11
+</span>
+
+<span>
+🔒
+</span>
+
+</div>
+
+
+<!-- TEST 12 -->
+
+<div class="test locked"
+onclick="lockedTest()">
+
+<span>
+Test 12
+</span>
+
+<span>
+🔒
+</span>
+
+</div>
+
+
+<!-- TEST 13 -->
+
+<div class="test locked"
+onclick="lockedTest()">
+
+<span>
+Test 13
+</span>
+
+<span>
+🔒
+</span>
+
+</div>
+
+
+<!-- TEST 14 -->
+
+<div class="test locked"
+onclick="lockedTest()">
+
+<span>
+Test 14
+</span>
+
+<span>
+🔒
+</span>
+
+</div>
+
+
+<!-- TEST 15 -->
+
+<div class="test locked"
+onclick="lockedTest()">
+
+<span>
+Test 15
+</span>
+
+<span>
+🔒
+</span>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+
+<!-- STORE PAGE -->
 
 <div id="store" class="page">
 
 <div class="container">
 
-<span class="back" onclick="showHome()">← Back to Home</span>
+<span
+class="back"
+onclick="showHome()">
+
+← Back to Home
+
+</span>
+
 
 <div class="section-title">
 
-<h2>📦 VK Exams Store</h2>
+<h2>
+📦 VK Exams Store
+</h2>
 
-<p>Select your exam package</p>
+<p>
+Select your exam package
+</p>
 
 </div>
 
+
+<!-- PACKAGES -->
 
 <div class="category-grid">
 
-<div class="category-card"
-onclick="selectPackage('APPSC')">
-<div class="icon">📚</div>
-<h3>APPSC Package</h3>
-<p>APPSC Test Series</p>
-</div>
 
 <div class="category-card"
-onclick="selectPackage('Endowment')">
-<div class="icon">🛕</div>
-<h3>Endowment Package</h3>
-<p>Endowment Officer Tests</p>
+onclick="selectPackage('APPSC')">
+
+<div class="icon">
+📚
 </div>
+
+<h3>
+APPSC Package
+</h3>
+
+<p>
+APPSC Test Series
+</p>
+
+</div>
+
+
+<div class="category-card"
+onclick="selectPackage('Endowment Officer')">
+
+<div class="icon">
+🛕
+</div>
+
+<h3>
+Endowment Package
+</h3>
+
+<p>
+Endowment Officer Tests
+</p>
+
+</div>
+
 
 <div class="category-card"
 onclick="selectPackage('High Court')">
-<div class="icon">⚖️</div>
-<h3>High Court Package</h3>
-<p>High Court Tests</p>
+
+<div class="icon">
+⚖️
 </div>
+
+<h3>
+High Court Package
+</h3>
+
+<p>
+High Court Tests
+</p>
+
+</div>
+
 
 <div class="category-card"
 onclick="selectPackage('DSC')">
-<div class="icon">🎓</div>
-<h3>DSC Package</h3>
-<p>DSC Test Series</p>
+
+<div class="icon">
+🎓
 </div>
+
+<h3>
+DSC Package
+</h3>
+
+<p>
+DSC Test Series
+</p>
+
+</div>
+
 
 <div class="category-card"
 onclick="selectPackage('Police')">
-<div class="icon">👮</div>
-<h3>Police Package</h3>
-<p>Police Test Series</p>
+
+<div class="icon">
+👮
 </div>
 
+<h3>
+Police Package
+</h3>
+
+<p>
+Police Test Series
+</p>
+
 </div>
 
 
-<div class="section-title" style="margin-top:50px">
+</div>
 
-<h2>Choose Your Plan</h2>
+
+<!-- PLANS -->
+
+<div class="section-title"
+style="margin-top:50px">
+
+<h2>
+Choose Your Plan
+</h2>
 
 </div>
 
 
 <div class="plan-grid">
 
+
 <div class="plan">
 
-<h3>Daily</h3>
+<h3>
+Daily
+</h3>
 
-<div class="price">₹10</div>
+<div class="price">
+₹10
+</div>
 
-<p>1 Day Access</p>
+<p>
+1 Day Access
+</p>
 
 <br>
 
-<button onclick="buyPlan('Daily')">
+<button
+onclick="buyPlan('Daily')">
+
 Select Plan
+
 </button>
 
 </div>
@@ -809,16 +1384,25 @@ Select Plan
 
 <div class="plan">
 
-<h3>Weekly</h3>
+<h3>
+Weekly
+</h3>
 
-<div class="price">₹50</div>
+<div class="price">
+₹50
+</div>
 
-<p>7 Days Access</p>
+<p>
+7 Days Access
+</p>
 
 <br>
 
-<button onclick="buyPlan('Weekly')">
+<button
+onclick="buyPlan('Weekly')">
+
 Select Plan
+
 </button>
 
 </div>
@@ -826,16 +1410,25 @@ Select Plan
 
 <div class="plan">
 
-<h3>Monthly</h3>
+<h3>
+Monthly
+</h3>
 
-<div class="price">₹189</div>
+<div class="price">
+₹189
+</div>
 
-<p>30 Days Access</p>
+<p>
+30 Days Access
+</p>
 
 <br>
 
-<button onclick="buyPlan('Monthly')">
+<button
+onclick="buyPlan('Monthly')">
+
 Select Plan
+
 </button>
 
 </div>
@@ -843,67 +1436,97 @@ Select Plan
 
 <div class="plan">
 
-<h3>Yearly</h3>
+<h3>
+Yearly
+</h3>
 
-<div class="price">₹999</div>
+<div class="price">
+₹999
+</div>
 
-<p>365 Days Access</p>
+<p>
+365 Days Access
+</p>
 
 <br>
 
-<button onclick="buyPlan('Yearly')">
+<button
+onclick="buyPlan('Yearly')">
+
 Select Plan
+
 </button>
 
 </div>
 
-</div>
 
 </div>
 
 </div>
 
+</div>
 
-<!-- PROFILE -->
+
+<!-- PROFILE PAGE -->
 
 <div id="profile" class="page">
 
 <div class="container">
 
-<span class="back" onclick="showHome()">← Back to Home</span>
+<span
+class="back"
+onclick="showHome()">
+
+← Back to Home
+
+</span>
+
 
 <div class="section-title">
 
-<h2>👤 Student Profile</h2>
+<h2>
+👤 Student Profile
+</h2>
 
-<p>Login and manage your exam preparation</p>
+<p>
+Login and manage your exam preparation
+</p>
 
 </div>
 
 
-<div class="paper-card" style="max-width:600px;margin:auto">
+<div class="profile-box">
 
-<h3>Student Login</h3>
+<h3>
+Student Login
+</h3>
 
 <br>
+
 
 <input
 type="tel"
 placeholder="Enter Mobile Number"
 style="width:100%;padding:13px;border:1px solid #ddd;border-radius:7px">
 
+
 <br><br>
+
 
 <button
 class="btn btn-primary"
 onclick="loginDemo()">
+
 Send OTP
+
 </button>
 
-<p style="margin-top:20px;color:#6b7280">
+
+<p
+style="margin-top:20px;color:#6b7280">
 
 OTP login, profile and subscription system
-will be connected to the database in the next stage.
+will be connected in the next stage.
 
 </p>
 
@@ -918,29 +1541,48 @@ will be connected to the database in the next stage.
 
 <footer>
 
-<h2>VK EXAMS ONLINE</h2>
+<h2>
+VK EXAMS ONLINE
+</h2>
 
-<p>Online Exam Preparation Platform</p>
+<p>
+Online Exam Preparation Platform
+</p>
 
-<p>© 2026 VK Exams Online. All Rights Reserved.</p>
+<p>
+© 2026 VK Exams Online. All Rights Reserved.
+</p>
 
 </footer>
 
 
+<!-- JAVASCRIPT -->
+
 <script>
+
+
+/* SHOW PAGE */
 
 function showPage(page){
 
 document.querySelectorAll('.page')
-.forEach(p=>p.classList.remove('active'));
+.forEach(function(p){
+
+p.classList.remove('active');
+
+});
+
 
 document.getElementById(page)
 .classList.add('active');
+
 
 window.scrollTo(0,0);
 
 }
 
+
+/* HOME */
 
 function showHome(){
 
@@ -949,64 +1591,161 @@ showPage('home');
 }
 
 
+/* OPEN EXAM */
+
 function openExam(exam){
 
 document.getElementById('examTitle')
-.innerText=exam;
+.innerText = exam;
+
+
+/* Endowment Officer */
+
+if(exam === 'Endowment Officer'){
+
+document.getElementById('paper1Description')
+.innerText =
+'General Knowledge & General Studies';
+
+document.getElementById('paper2Description')
+.innerText =
+'Hindu Philosophy & Temple System';
+
+}
+
+
+/* APPSC */
+
+else if(exam === 'APPSC'){
+
+document.getElementById('paper1Description')
+.innerText =
+'General Studies & General Knowledge';
+
+document.getElementById('paper2Description')
+.innerText =
+'APPSC Subject Specific';
+
+}
+
+
+/* HIGH COURT */
+
+else if(exam === 'High Court'){
+
+document.getElementById('paper1Description')
+.innerText =
+'General Knowledge & General Studies';
+
+document.getElementById('paper2Description')
+.innerText =
+'Law & Court Related Subjects';
+
+}
+
+
+/* POLICE */
+
+else if(exam === 'Police'){
+
+document.getElementById('paper1Description')
+.innerText =
+'General Knowledge & General Studies';
+
+document.getElementById('paper2Description')
+.innerText =
+'Police & Reasoning Subjects';
+
+}
+
+
+/* DSC */
+
+else if(exam === 'DSC'){
+
+document.getElementById('paper1Description')
+.innerText =
+'General Knowledge & Current Affairs';
+
+document.getElementById('paper2Description')
+.innerText =
+'Education & Teaching Subjects';
+
+}
+
 
 showPage('exams');
 
 }
 
 
+/* START FREE TEST */
+
 function startTest(test){
 
 alert(
-test+
-"\n\nThis is the Free Test.\n\n150 Questions • 150 Marks"
+test +
+'\n\nFREE TEST' +
+'\n\n150 Questions • 150 Marks' +
+'\n\nActual online examination engine will be connected in the next stage.'
 );
 
 }
 
 
+/* LOCKED TEST */
+
 function lockedTest(){
+
+alert(
+'🔒 This test is locked.' +
+'\n\nPlease purchase the required exam package to unlock this test.'
+);
 
 showPage('store');
 
 }
 
 
+/* SELECT PACKAGE */
+
 function selectPackage(packageName){
 
 alert(
-packageName+
-" Package selected.\n\nChoose Daily, Weekly, Monthly or Yearly plan."
+packageName +
+' Package selected.' +
+'\n\nPlease choose your required plan.'
 );
 
 }
 
+
+/* BUY PLAN */
 
 function buyPlan(plan){
 
 alert(
-plan+
-" plan selected.\n\nPayment gateway will be connected in the next stage."
+plan +
+' plan selected.' +
+'\n\nPayment gateway will be connected in the next stage.'
 );
 
 }
 
 
+/* LOGIN */
+
 function loginDemo(){
 
 alert(
-"OTP Login will be connected in the next stage using secure authentication."
+'OTP Login will be connected in the next stage using secure authentication.'
 );
 
 }
 
 </script>
 
-}
-    
+
 </body>
+
 </html>
