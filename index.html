@@ -1757,10 +1757,10 @@ let timeLeft = 900;
    PAGE SYSTEM
 ========================================= */
 
+
 function showPage(page, addHistory = true){
 
-    document.querySelectorAll(".page")
-    .forEach(function(p){
+    document.querySelectorAll(".page").forEach(function(p){
         p.classList.remove("active");
     });
 
@@ -1775,18 +1775,13 @@ function showPage(page, addHistory = true){
     if(addHistory){
 
         history.pushState(
-            { page: page },
+            { vkPage: page },
             "",
-            window.location.href
+            "#" + page
         );
 
     }
 }
-
-function showHome(){
-    showPage("home");
-}
-
 
 /* =========================================
    EXPLORE
@@ -2910,6 +2905,51 @@ document.addEventListener(
     }
 );
 
+
+    /* =========================================
+   VK EXAMS BROWSER BACK NAVIGATION
+========================================= */
+
+const firstPage =
+    window.location.hash
+    ? window.location.hash.substring(1)
+    : "home";
+
+history.replaceState(
+    { vkPage: firstPage },
+    "",
+    "#" + firstPage
+);
+
+window.addEventListener("popstate", function(event){
+
+    if(
+        event.state &&
+        event.state.vkPage
+    ){
+
+        showPage(
+            event.state.vkPage,
+            false
+        );
+
+    }else{
+
+        history.pushState(
+            { vkPage:"home" },
+            "",
+            "#home"
+        );
+
+        showPage(
+            "home",
+            false
+        );
+
+    }
+
+});
+    
 </script>
 
 </body>
