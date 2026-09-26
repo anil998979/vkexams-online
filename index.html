@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>VK Exams Online</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,Helvetica,sans-serif;
+}
+
+body{
+    background:#f5f7fb;
+    color:#172033;
+}
+
+/* HEADER */
+header{
+    background:#ffffff;
+    border-bottom:1px solid #e5e7eb;
+    position:sticky;
+    top:0;
+    z-index:100;
+}
+
+.navbar{
+    max-width:1200px;
+    margin:auto;
+    padding:15px 20px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+}
+
+.logo{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-size:24px;
+    font-weight:800;
+    color:#1746a2;
+}
+
+.logo span{
+    color:#f59e0b;
+}
+
+.nav-links{
+    display:flex;
+    gap:20px;
+    align-items:center;
+}
+
+.nav-links a{
+    text-decoration:none;
+    color:#374151;
+    font-weight:600;
+    cursor:pointer;
+}
+
+.login-btn{
+    background:#1746a2;
+    color:white!important;
+    padding:10px 18px;
+    border-radius:8px;
+}
+
+/* HERO */
+.hero{
+    background:linear-gradient(135deg,#123b91,#2463d4);
+    color:white;
+    padding:65px 20px;
+}
+
+.hero-content{
+    max-width:1200px;
+    margin:auto;
+    text-align:center;
+}
+
+.hero h1{
+    font-size:44px;
+    margin-bottom:15px;
+}
+
+.hero h1 span{
+    color:#ffd54a;
+}
+
+.hero p{
+    font-size:18px;
+    max-width:700px;
+    margin:auto;
+    line-height:1.7;
+}
+
+.hero-buttons{
+    margin-top:28px;
+}
+
+.btn{
+    border:none;
+    padding:13px 24px;
+    border-radius:8px;
+    font-size:16px;
+    font-weight:700;
+    cursor:pointer;
+}
+
+.btn-primary{
+    background:#f59e0b;
+    color:white;
+}
+
+.btn-light{
+    background:white;
+    color:#1746a2;
+    margin-left:10px;
+}
+
+/* MAIN */
+.container{
+    max-width:1200px;
+    margin:auto;
+    padding:45px 20px;
+}
+
+.section-title{
+    text-align:center;
+    margin-bottom:30px;
+}
+
+.section-title h2{
+    font-size:30px;
+}
+
+.section-title p{
+    color:#6b7280;
+    margin-top:8px;
+}
+
+/* CATEGORY CARDS */
+.category-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:20px;
+}
+
+.category-card{
+    background:white;
+    border-radius:14px;
+    padding:25px;
+    text-align:center;
+    box-shadow:0 5px 20px rgba(0,0,0,.07);
+    border:1px solid #e8ebf0;
+    cursor:pointer;
+    transition:.25s;
+}
+
+.category-card:hover{
+    transform:translateY(-5px);
+    box-shadow:0 10px 30px rgba(0,0,0,.12);
+}
+
+.icon{
+    font-size:42px;
+    margin-bottom:15px;
+}
+
+.category-card h3{
+    margin-bottom:8px;
+}
+
+.category-card p{
+    color:#6b7280;
+    font-size:14px;
+}
+
+/* FEATURES */
+.features{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:20px;
+    margin-top:20px;
+}
+
+.feature{
+    background:white;
+    padding:22px;
+    border-radius:12px;
+    border:1px solid #e5e7eb;
+}
+
+.feature h3{
+    margin-bottom:8px;
+}
+
+.feature p{
+    color:#6b7280;
+    line-height:1.5;
+}
+
+/* PAGE */
+.page{
+    display:none;
+}
+
+.page.active{
+    display:block;
+}
+
+/* EXAM PAGE */
+.back{
+    color:#1746a2;
+    cursor:pointer;
+    font-weight:700;
+    margin-bottom:20px;
+    display:inline-block;
+}
+
+.exam-header{
+    background:linear-gradient(135deg,#1746a2,#3876df);
+    color:white;
+    padding:30px;
+    border-radius:15px;
+    margin-bottom:30px;
+}
+
+.paper-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+    gap:25px;
+}
+
+.paper-card{
+    background:white;
+    border-radius:15px;
+    padding:25px;
+    border:1px solid #e5e7eb;
+    box-shadow:0 5px 18px rgba(0,0,0,.06);
+}
+
+.paper-card h3{
+    color:#1746a2;
+    margin-bottom:10px;
+}
+
+.test{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:13px;
+    border:1px solid #e5e7eb;
+    border-radius:8px;
+    margin-top:10px;
+    cursor:pointer;
+}
+
+.test:hover{
+    background:#f8fafc;
+}
+
+.free{
+    color:#15803d;
+    font-weight:700;
+}
+
+.locked{
+    color:#9ca3af;
+}
+
+.lock-icon{
+    margin-left:5px;
+}
+
+/* STORE */
+.plan-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:20px;
+}
+
+.plan{
+    background:white;
+    padding:25px;
+    border-radius:15px;
+    text-align:center;
+    border:1px solid #e5e7eb;
+}
+
+.plan h3{
+    color:#1746a2;
+}
+
+.price{
+    font-size:30px;
+    font-weight:800;
+    margin:15px 0;
+}
+
+.plan button{
+    background:#1746a2;
+    color:white;
+    border:none;
+    padding:11px 22px;
+    border-radius:7px;
+    cursor:pointer;
+}
+
+/* FOOTER */
+footer{
+    background:#111827;
+    color:white;
+    margin-top:50px;
+    padding:35px 20px;
+    text-align:center;
+}
+
+footer p{
+    color:#9ca3af;
+    margin-top:8px;
+}
+
+/* MOBILE */
+@media(max-width:700px){
+
+    .nav-links{
+        display:none;
+    }
+
+    .hero h1{
+        font-size:32px;
+    }
+
+    .hero p{
+        font-size:15px;
+    }
+
+    .btn-light{
+        margin-left:0;
+        margin-top:10px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<div class="navbar">
+
+<div class="logo">
+    VK <span>EXAMS</span>
+</div>
+
+<div class="nav-links">
+    <a onclick="showHome()">Home</a>
+    <a onclick="showPage('exams')">Exams</a>
+    <a onclick="showPage('store')">Store</a>
+    <a onclick="showPage('profile')">Profile</a>
+    <a class="login-btn" onclick="showPage('profile')">Login</a>
+</div>
+
+</div>
+</header>
+
+
+<!-- HOME -->
+
+<div id="home" class="page active">
+
+<section class="hero">
+
+<div class="hero-content">
+
+<h1>Prepare Smart. <span>Score Higher.</span></h1>
+
+<p>
+VK Exams Online is your exam preparation platform for
+APPSC, Endowment, High Court, Police, DSC and other
+competitive examinations.
+</p>
+
+<div class="hero-buttons">
+
+<button class="btn btn-primary"
+onclick="showPage('exams')">
+Explore Exams
+</button>
+
+<button class="btn btn-light"
+onclick="showPage('store')">
+View Packages
+</button>
+
+</div>
+
+</div>
+
+</section>
+
+
+<div class="container">
+
+<div class="section-title">
+
+<h2>Choose Your Exam</h2>
+
+<p>
+Select an examination and start your preparation.
+</p>
+
+</div>
+
+
+<div class="category-grid">
+
+<div class="category-card"
+onclick="openExam('APPSC')">
+
+<div class="icon">📚</div>
+
+<h3>APPSC</h3>
+
+<p>Group 1, 2, 3, 4 and other APPSC examinations</p>
+
+</div>
+
+
+<div class="category-card"
+onclick="openExam('Endowment Officer')">
+
+<div class="icon">🛕</div>
+
+<h3>Endowment Officer</h3>
+
+<p>Temple system, Hindu philosophy and Endowments Act</p>
+
+</div>
+
+
+<div class="category-card"
+onclick="openExam('High Court')">
+
+<div class="icon">⚖️</div>
+
+<h3>High Court</h3>
+
+<p>High Court and District Court examinations</p>
+
+</div>
+
+
+<div class="category-card"
+onclick="openExam('Police')">
+
+<div class="icon">👮</div>
+
+<h3>Police</h3>
+
+<p>Police recruitment examination preparation</p>
+
+</div>
+
+
+<div class="category-card"
+onclick="openExam('DSC')">
+
+<div class="icon">🎓</div>
+
+<h3>DSC</h3>
+
+<p>Teacher recruitment examination preparation</p>
+
+</div>
+
+
+<div class="category-card"
+onclick="openExam('Environment')">
+
+<div class="icon">🌱</div>
+
+<h3>Environment</h3>
+
+<p>Environment topic-wise tests and test series</p>
+
+</div>
+
+</div>
+
+
+<div class="section-title" style="margin-top:55px">
+
+<h2>Why VK Exams?</h2>
+
+</div>
+
+
+<div class="features">
+
+<div class="feature">
+<h3>📝 Online Tests</h3>
+<p>Practice with exam-oriented online tests.</p>
+</div>
+
+<div class="feature">
+<h3>🎯 Expected Questions</h3>
+<p>AI-assisted expected questions and practice sets.</p>
+</div>
+
+<div class="feature">
+<h3>📊 Instant Results</h3>
+<p>View your score and performance after every test.</p>
+</div>
+
+<div class="feature">
+<h3>📱 Mobile Friendly</h3>
+<p>Prepare for exams from your mobile or computer.</p>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+
+<!-- EXAMS PAGE -->
+
+<div id="exams" class="page">
+
+<div class="container">
+
+<span class="back" onclick="showHome()">← Back to Home</span>
+
+<div class="exam-header">
+
+<h1 id="examTitle">Exam</h1>
+
+<p>
+Topic-wise Tests • Syllabus Tests • Test Series
+</p>
+
+</div>
+
+
+<div class="paper-grid">
+
+<div class="paper-card">
+
+<h3>📘 Paper 1</h3>
+
+<p>General Knowledge & General Studies</p>
+
+<div class="test free"
+onclick="startTest('Free Test 1')">
+
+<span>Free Test 1</span>
+<span class="free">FREE</span>
+
+</div>
+
+<div class="test locked"
+onclick="lockedTest()">
+
+<span>Test 2</span>
+<span>🔒</span>
+
+</div>
+
+<div class="test locked"
+onclick="lockedTest()">
+
+<span>Test 3</span>
+<span>🔒</span>
+
+</div>
+
+<div class="test locked"
+onclick="lockedTest()">
+
+<span>Test 4</span>
+<span>🔒</span>
+
+</div>
+
+<div class="test locked"
+onclick="lockedTest()">
+
+<span>Test 5</span>
+<span>🔒</span>
+
+</div>
+
+<div class="test locked"
+onclick="lockedTest()">
+
+<span>Test 6 – Test 15</span>
+<span>🔒</span>
+
+</div>
+
+</div>
+
+
+<div class="paper-card">
+
+<h3>📕 Paper 2</h3>
+
+<p>Subject Specific / Hindu Philosophy</p>
+
+<div class="test free"
+onclick="startTest('Paper 2 Free Test 1')">
+
+<span>Free Test 1</span>
+<span class="free">FREE</span>
+
+</div>
+
+<div class="test locked"
+onclick="lockedTest()">
+
+<span>Test 2</span>
+<span>🔒</span>
+
+</div>
+
+<div class="test locked"
+onclick="lockedTest()">
+
+<span>Test 3</span>
+<span>🔒</span>
+
+</div>
+
+<div class="test locked"
+onclick="lockedTest()">
+
+<span>Test 4</span>
+<span>🔒</span>
+
+</div>
+
+<div class="test locked"
+onclick="lockedTest()">
+
+<span>Test 5</span>
+<span>🔒</span>
+
+</div>
+
+<div class="test locked"
+onclick="lockedTest()">
+
+<span>Test 6 – Test 15</span>
+<span>🔒</span>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+
+<!-- STORE -->
+
+<div id="store" class="page">
+
+<div class="container">
+
+<span class="back" onclick="showHome()">← Back to Home</span>
+
+<div class="section-title">
+
+<h2>📦 VK Exams Store</h2>
+
+<p>Select your exam package</p>
+
+</div>
+
+
+<div class="category-grid">
+
+<div class="category-card"
+onclick="selectPackage('APPSC')">
+<div class="icon">📚</div>
+<h3>APPSC Package</h3>
+<p>APPSC Test Series</p>
+</div>
+
+<div class="category-card"
+onclick="selectPackage('Endowment')">
+<div class="icon">🛕</div>
+<h3>Endowment Package</h3>
+<p>Endowment Officer Tests</p>
+</div>
+
+<div class="category-card"
+onclick="selectPackage('High Court')">
+<div class="icon">⚖️</div>
+<h3>High Court Package</h3>
+<p>High Court Tests</p>
+</div>
+
+<div class="category-card"
+onclick="selectPackage('DSC')">
+<div class="icon">🎓</div>
+<h3>DSC Package</h3>
+<p>DSC Test Series</p>
+</div>
+
+<div class="category-card"
+onclick="selectPackage('Police')">
+<div class="icon">👮</div>
+<h3>Police Package</h3>
+<p>Police Test Series</p>
+</div>
+
+</div>
+
+
+<div class="section-title" style="margin-top:50px">
+
+<h2>Choose Your Plan</h2>
+
+</div>
+
+
+<div class="plan-grid">
+
+<div class="plan">
+
+<h3>Daily</h3>
+
+<div class="price">₹10</div>
+
+<p>1 Day Access</p>
+
+<br>
+
+<button onclick="buyPlan('Daily')">
+Select Plan
+</button>
+
+</div>
+
+
+<div class="plan">
+
+<h3>Weekly</h3>
+
+<div class="price">₹50</div>
+
+<p>7 Days Access</p>
+
+<br>
+
+<button onclick="buyPlan('Weekly')">
+Select Plan
+</button>
+
+</div>
+
+
+<div class="plan">
+
+<h3>Monthly</h3>
+
+<div class="price">₹189</div>
+
+<p>30 Days Access</p>
+
+<br>
+
+<button onclick="buyPlan('Monthly')">
+Select Plan
+</button>
+
+</div>
+
+
+<div class="plan">
+
+<h3>Yearly</h3>
+
+<div class="price">₹999</div>
+
+<p>365 Days Access</p>
+
+<br>
+
+<button onclick="buyPlan('Yearly')">
+Select Plan
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+
+<!-- PROFILE -->
+
+<div id="profile" class="page">
+
+<div class="container">
+
+<span class="back" onclick="showHome()">← Back to Home</span>
+
+<div class="section-title">
+
+<h2>👤 Student Profile</h2>
+
+<p>Login and manage your exam preparation</p>
+
+</div>
+
+
+<div class="paper-card" style="max-width:600px;margin:auto">
+
+<h3>Student Login</h3>
+
+<br>
+
+<input
+type="tel"
+placeholder="Enter Mobile Number"
+style="width:100%;padding:13px;border:1px solid #ddd;border-radius:7px">
+
+<br><br>
+
+<button
+class="btn btn-primary"
+onclick="loginDemo()">
+Send OTP
+</button>
+
+<p style="margin-top:20px;color:#6b7280">
+
+OTP login, profile and subscription system
+will be connected to the database in the next stage.
+
+</p>
+
+</div>
+
+</div>
+
+</div>
+
+
+<!-- FOOTER -->
+
+<footer>
+
+<h2>VK EXAMS ONLINE</h2>
+
+<p>Online Exam Preparation Platform</p>
+
+<p>© 2026 VK Exams Online. All Rights Reserved.</p>
+
+</footer>
+
+
+<script>
+
+function showPage(page){
+
+document.querySelectorAll('.page')
+.forEach(p=>p.classList.remove('active'));
+
+document.getElementById(page)
+.classList.add('active');
+
+window.scrollTo(0,0);
+
+}
+
+
+function showHome(){
+
+showPage('home');
+
+}
+
+
+function openExam(exam){
+
+document.getElementById('examTitle')
+.innerText=exam;
+
+showPage('exams');
+
+}
+
+
+function startTest(test){
+
+alert(
+test+
+"\n\nThis is the Free Test.\n\n150 Questions • 150 Marks"
+);
+
+}
+
+
+function lockedTest(){
+
+showPage('store');
+
+}
+
+
+function selectPackage(packageName){
+
+alert(
+packageName+
+" Package selected.\n\nChoose Daily, Weekly, Monthly or Yearly plan."
+);
+
+}
+
+
+function buyPlan(plan){
+
+alert(
+plan+
+" plan selected.\n\nPayment gateway will be connected in the next stage."
+);
+
+}
+
+
+function loginDemo(){
+
+alert(
+"OTP Login will be connected in the next stage using secure authentication."
+);
+
+}
+
+</script>
+
+</body>
+</html>
