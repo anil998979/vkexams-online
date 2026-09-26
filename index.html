@@ -1757,19 +1757,31 @@ let timeLeft = 900;
    PAGE SYSTEM
 ========================================= */
 
-function showPage(page){
+function showPage(page, addHistory = true){
 
     document.querySelectorAll(".page")
     .forEach(function(p){
         p.classList.remove("active");
     });
 
-    document.getElementById(page)
-    .classList.add("active");
+    const target = document.getElementById(page);
+
+    if(target){
+        target.classList.add("active");
+    }
 
     window.scrollTo(0,0);
-}
 
+    if(addHistory){
+
+        history.pushState(
+            { page: page },
+            "",
+            window.location.href
+        );
+
+    }
+}
 
 function showHome(){
     showPage("home");
