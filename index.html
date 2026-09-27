@@ -1,0 +1,7702 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>VK Exams Online</title>
+
+<meta
+    name="description"
+    content="VK Exams Online - APPSC, Endowment Officer, High Court, Police, DSC and Banking Exam Preparation"
+>
+
+<meta
+    name="theme-color"
+    content="#2563eb"
+>
+
+<style>
+
+/* =========================================================
+   GLOBAL
+========================================================= */
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    background:#f5f7fb;
+    color:#172033;
+    line-height:1.6;
+    min-height:100vh;
+}
+
+body.dark{
+    background:#111827;
+    color:#f3f4f6;
+}
+
+button,
+input,
+select{
+    font-family:inherit;
+}
+
+button{
+    cursor:pointer;
+}
+
+a{
+    text-decoration:none;
+    color:inherit;
+}
+
+img{
+    max-width:100%;
+    display:block;
+}
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+header{
+    position:sticky;
+    top:0;
+    z-index:1000;
+
+    width:100%;
+
+    background:#ffffff;
+
+    border-bottom:1px solid #e5e7eb;
+
+    box-shadow:
+        0 2px 10px rgba(0,0,0,0.05);
+}
+
+body.dark header{
+    background:#1f2937;
+    border-bottom-color:#374151;
+}
+
+.navbar{
+    max-width:1200px;
+    margin:auto;
+
+    min-height:68px;
+
+    padding:10px 18px;
+
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+
+    gap:20px;
+}
+
+.logo{
+    font-size:24px;
+    font-weight:900;
+
+    color:#2563eb;
+
+    cursor:pointer;
+
+    white-space:nowrap;
+}
+
+.logo span{
+    color:#111827;
+}
+
+body.dark .logo span{
+    color:#ffffff;
+}
+
+.nav-links{
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
+
+.nav-btn{
+    border:none;
+    background:transparent;
+
+    padding:9px 13px;
+
+    border-radius:8px;
+
+    color:#374151;
+
+    font-size:15px;
+    font-weight:600;
+}
+
+.nav-btn:hover{
+    background:#eff6ff;
+    color:#2563eb;
+}
+
+body.dark .nav-btn{
+    color:#e5e7eb;
+}
+
+body.dark .nav-btn:hover{
+    background:#374151;
+}
+
+.mobile-menu-btn{
+    display:none;
+
+    border:none;
+    background:#eff6ff;
+
+    color:#2563eb;
+
+    width:42px;
+    height:42px;
+
+    border-radius:9px;
+
+    font-size:22px;
+}
+
+/* =========================================================
+   MOBILE NAV
+========================================================= */
+
+.mobile-menu{
+    display:none;
+
+    background:#ffffff;
+
+    border-top:1px solid #e5e7eb;
+
+    padding:10px 18px;
+}
+
+body.dark .mobile-menu{
+    background:#1f2937;
+    border-top-color:#374151;
+}
+
+.mobile-menu.active{
+    display:block;
+}
+
+.mobile-menu button{
+    width:100%;
+
+    padding:12px;
+
+    margin:4px 0;
+
+    border:none;
+
+    background:transparent;
+
+    text-align:left;
+
+    border-radius:8px;
+
+    font-weight:600;
+
+    color:#374151;
+}
+
+body.dark .mobile-menu button{
+    color:#f3f4f6;
+}
+
+.mobile-menu button:hover{
+    background:#eff6ff;
+}
+
+/* =========================================================
+   PAGE SYSTEM
+========================================================= */
+
+.page{
+    display:none;
+
+    min-height:
+        calc(100vh - 68px);
+}
+
+.page.active{
+    display:block;
+}
+
+/* =========================================================
+   CONTAINER
+========================================================= */
+
+.container{
+    width:100%;
+    max-width:1200px;
+
+    margin:0 auto;
+
+    padding:
+        28px 18px 60px;
+}
+
+/* =========================================================
+   HERO
+========================================================= */
+
+.hero{
+    background:
+        linear-gradient(
+            135deg,
+            #2563eb,
+            #4f46e5
+        );
+
+    color:#ffffff;
+
+    border-radius:20px;
+
+    padding:
+        55px 35px;
+
+    margin-bottom:35px;
+
+    box-shadow:
+        0 15px 35px rgba(37,99,235,0.20);
+}
+
+.hero h1{
+    font-size:
+        clamp(30px,5vw,50px);
+
+    line-height:1.15;
+
+    margin-bottom:14px;
+}
+
+.hero p{
+    font-size:18px;
+
+    max-width:700px;
+
+    opacity:.94;
+
+    margin-bottom:25px;
+}
+
+.hero-actions{
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
+}
+
+/* =========================================================
+   BUTTONS
+========================================================= */
+
+.btn{
+    border:none;
+
+    padding:
+        11px 18px;
+
+    border-radius:9px;
+
+    font-size:15px;
+
+    font-weight:700;
+
+    transition:
+        transform .15s,
+        opacity .15s,
+        box-shadow .15s;
+}
+
+.btn:hover{
+    transform:translateY(-1px);
+}
+
+.btn-primary{
+    background:#2563eb;
+    color:#ffffff;
+
+    box-shadow:
+        0 5px 15px rgba(37,99,235,.18);
+}
+
+.btn-secondary{
+    background:#eef2ff;
+    color:#3730a3;
+}
+
+.btn-success{
+    background:#16a34a;
+    color:#ffffff;
+}
+
+.btn-danger{
+    background:#dc2626;
+    color:#ffffff;
+}
+
+.btn-warning{
+    background:#f59e0b;
+    color:#ffffff;
+}
+
+.btn-light{
+    background:#ffffff;
+    color:#2563eb;
+}
+
+.btn-outline{
+    background:transparent;
+
+    border:1px solid #2563eb;
+
+    color:#2563eb;
+}
+
+.btn-small{
+    padding:8px 12px;
+    font-size:13px;
+}
+
+/* =========================================================
+   SECTION TITLE
+========================================================= */
+
+.section-title{
+    text-align:center;
+
+    margin:
+        30px 0 22px;
+}
+
+.section-title h2{
+    font-size:30px;
+
+    margin-bottom:7px;
+}
+
+.section-title p{
+    color:#6b7280;
+}
+
+body.dark .section-title p{
+    color:#9ca3af;
+}
+
+/* =========================================================
+   CATEGORY GRID
+========================================================= */
+
+.category-grid{
+    display:grid;
+
+    grid-template-columns:
+        repeat(3,1fr);
+
+    gap:20px;
+}
+
+/* =========================================================
+   CATEGORY CARD
+========================================================= */
+
+.category-card{
+    background:#ffffff;
+
+    border:
+        1px solid #e5e7eb;
+
+    border-radius:16px;
+
+    padding:25px 20px;
+
+    text-align:center;
+
+    cursor:pointer;
+
+    transition:
+        transform .18s,
+        box-shadow .18s,
+        border-color .18s;
+
+    box-shadow:
+        0 5px 16px rgba(0,0,0,.04);
+}
+
+.category-card:hover{
+    transform:
+        translateY(-5px);
+
+    border-color:#93c5fd;
+
+    box-shadow:
+        0 12px 28px rgba(37,99,235,.13);
+}
+
+body.dark .category-card{
+    background:#1f2937;
+    border-color:#374151;
+}
+
+.category-card .icon{
+    width:65px;
+    height:65px;
+
+    margin:
+        0 auto 15px;
+
+    border-radius:16px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    background:#eff6ff;
+
+    font-size:32px;
+}
+
+.category-card h3{
+    font-size:20px;
+
+    margin-bottom:7px;
+}
+
+.category-card p{
+    color:#6b7280;
+
+    font-size:14px;
+}
+
+body.dark .category-card p{
+    color:#9ca3af;
+}
+
+/* =========================================================
+   WHY SECTION
+========================================================= */
+
+.feature-grid{
+    display:grid;
+
+    grid-template-columns:
+        repeat(3,1fr);
+
+    gap:18px;
+
+    margin-top:35px;
+}
+
+.feature-card{
+    background:#ffffff;
+
+    border:1px solid #e5e7eb;
+
+    border-radius:14px;
+
+    padding:22px;
+
+    text-align:center;
+}
+
+body.dark .feature-card{
+    background:#1f2937;
+    border-color:#374151;
+}
+
+.feature-card .feature-icon{
+    font-size:32px;
+    margin-bottom:8px;
+}
+
+.feature-card h3{
+    margin-bottom:6px;
+}
+
+.feature-card p{
+    color:#6b7280;
+    font-size:14px;
+}
+
+body.dark .feature-card p{
+    color:#9ca3af;
+}
+
+/* =========================================================
+   PAGE HEADER
+========================================================= */
+
+.page-header{
+    background:#ffffff;
+
+    border:1px solid #e5e7eb;
+
+    border-radius:16px;
+
+    padding:25px;
+
+    margin-bottom:25px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    gap:15px;
+
+    flex-wrap:wrap;
+}
+
+body.dark .page-header{
+    background:#1f2937;
+    border-color:#374151;
+}
+
+.page-header h1{
+    font-size:30px;
+}
+
+.page-header p{
+    color:#6b7280;
+}
+
+body.dark .page-header p{
+    color:#9ca3af;
+}
+
+/* =========================================================
+   CHOICE CARDS
+========================================================= */
+
+.choice-grid{
+    display:grid;
+
+    grid-template-columns:
+        repeat(3,1fr);
+
+    gap:20px;
+}
+
+.choice-card{
+    background:#ffffff;
+
+    border:1px solid #e5e7eb;
+
+    border-radius:16px;
+
+    padding:30px 20px;
+
+    text-align:center;
+
+    cursor:pointer;
+
+    transition:
+        transform .18s,
+        box-shadow .18s,
+        border-color .18s;
+}
+
+.choice-card:hover{
+    transform:translateY(-4px);
+
+    border-color:#93c5fd;
+
+    box-shadow:
+        0 12px 28px rgba(37,99,235,.12);
+}
+
+body.dark .choice-card{
+    background:#1f2937;
+    border-color:#374151;
+}
+
+.big-icon{
+    font-size:42px;
+
+    margin-bottom:12px;
+}
+
+.choice-card h2{
+    margin-bottom:8px;
+}
+
+.choice-card p{
+    color:#6b7280;
+    font-size:14px;
+}
+
+body.dark .choice-card p{
+    color:#9ca3af;
+}
+
+/* =========================================================
+   SYLLABUS
+========================================================= */
+
+.syllabus-list{
+    display:grid;
+
+    grid-template-columns:
+        repeat(2,1fr);
+
+    gap:12px;
+}
+
+.syllabus-item{
+    background:#ffffff;
+
+    border:1px solid #e5e7eb;
+
+    border-radius:10px;
+
+    padding:16px 18px;
+
+    font-weight:600;
+}
+
+body.dark .syllabus-item{
+    background:#1f2937;
+    border-color:#374151;
+}
+
+/* =========================================================
+   TEST SERIES
+========================================================= */
+
+.test-grid{
+    display:grid;
+
+    grid-template-columns:
+        repeat(3,1fr);
+
+    gap:18px;
+}
+
+.test-card{
+    background:#ffffff;
+
+    border:1px solid #e5e7eb;
+
+    border-radius:15px;
+
+    padding:20px;
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:10px;
+}
+
+body.dark .test-card{
+    background:#1f2937;
+    border-color:#374151;
+}
+
+.test-card h3{
+    font-size:19px;
+}
+
+.test-card p{
+    color:#6b7280;
+    font-size:14px;
+}
+
+body.dark .test-card p{
+    color:#9ca3af;
+}
+
+.test-meta{
+    display:flex;
+
+    justify-content:space-between;
+
+    gap:8px;
+
+    font-size:13px;
+
+    color:#6b7280;
+}
+
+/* =========================================================
+   BADGES
+========================================================= */
+
+.badge{
+    display:inline-block;
+
+    padding:
+        4px 9px;
+
+    border-radius:999px;
+
+    font-size:12px;
+
+    font-weight:700;
+}
+
+.badge-free{
+    background:#dcfce7;
+    color:#166534;
+}
+
+.badge-locked{
+    background:#fee2e2;
+    color:#991b1b;
+}
+
+.badge-open{
+    background:#dbeafe;
+    color:#1e40af;
+}
+
+.badge-demo{
+    background:#fef3c7;
+    color:#92400e;
+}
+
+/* =========================================================
+   TOPIC LIST
+========================================================= */
+
+.topic-grid{
+    display:grid;
+
+    grid-template-columns:
+        repeat(2,1fr);
+
+    gap:15px;
+}
+
+.topic-card{
+    background:#ffffff;
+
+    border:1px solid #e5e7eb;
+
+    border-radius:13px;
+
+    padding:18px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    gap:12px;
+}
+
+body.dark .topic-card{
+    background:#1f2937;
+    border-color:#374151;
+}
+
+.topic-card h3{
+    font-size:17px;
+}
+
+.topic-card p{
+    color:#6b7280;
+
+    font-size:13px;
+}
+
+body.dark .topic-card p{
+    color:#9ca3af;
+}
+
+/* =========================================================
+   PAPERS
+========================================================= */
+
+.paper-grid{
+    display:grid;
+
+    grid-template-columns:
+        repeat(3,1fr);
+
+    gap:18px;
+}
+
+.paper-card{
+    background:#ffffff;
+
+    border:1px solid #e5e7eb;
+
+    border-radius:15px;
+
+    padding:22px;
+
+    text-align:center;
+}
+
+body.dark .paper-card{
+    background:#1f2937;
+    border-color:#374151;
+}
+
+.paper-card h3{
+    margin-bottom:7px;
+}
+
+.paper-card p{
+    color:#6b7280;
+
+    margin-bottom:15px;
+}
+
+body.dark .paper-card p{
+    color:#9ca3af;
+}
+
+/* =========================================================
+   EXAM PAGE
+========================================================= */
+
+.exam-top{
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    gap:15px;
+
+    margin-bottom:18px;
+
+    flex-wrap:wrap;
+}
+
+.timer{
+    background:#111827;
+
+    color:#ffffff;
+
+    padding:10px 16px;
+
+    border-radius:10px;
+
+    font-size:20px;
+
+    font-weight:800;
+}
+
+.question-card{
+    background:#ffffff;
+
+    border:1px solid #e5e7eb;
+
+    border-radius:16px;
+
+    padding:25px;
+}
+
+body.dark .question-card{
+    background:#1f2937;
+    border-color:#374151;
+}
+
+.question-number{
+    color:#2563eb;
+
+    font-weight:800;
+
+    margin-bottom:10px;
+}
+
+.question-text{
+    font-size:20px;
+
+    font-weight:700;
+
+    margin-bottom:20px;
+}
+
+.option-list{
+    display:flex;
+
+    flex-direction:column;
+
+    gap:11px;
+}
+
+.option{
+    width:100%;
+
+    text-align:left;
+
+    padding:14px 15px;
+
+    background:#f9fafb;
+
+    border:1px solid #d1d5db;
+
+    border-radius:10px;
+
+    font-size:15px;
+
+    color:#111827;
+}
+
+.option:hover{
+    border-color:#60a5fa;
+
+    background:#eff6ff;
+}
+
+.option.selected{
+    border-color:#2563eb;
+
+    background:#dbeafe;
+
+    color:#1e3a8a;
+
+    font-weight:700;
+}
+
+body.dark .option{
+    background:#111827;
+
+    border-color:#4b5563;
+
+    color:#f3f4f6;
+}
+
+body.dark .option.selected{
+    background:#1e3a8a;
+
+    border-color:#60a5fa;
+
+    color:#ffffff;
+}
+
+.exam-controls{
+    display:flex;
+
+    justify-content:space-between;
+
+    gap:12px;
+
+    margin-top:22px;
+}
+
+/* =========================================================
+   RESULT
+========================================================= */
+
+.result-box{
+    max-width:700px;
+
+    margin:0 auto;
+
+    background:#ffffff;
+
+    border:1px solid #e5e7eb;
+
+    border-radius:18px;
+
+    padding:35px;
+
+    text-align:center;
+}
+
+body.dark .result-box{
+    background:#1f2937;
+
+    border-color:#374151;
+}
+
+.result-score{
+    font-size:50px;
+
+    font-weight:900;
+
+    color:#2563eb;
+
+    margin:10px 0;
+}
+
+.result-actions{
+    display:flex;
+
+    justify-content:center;
+
+    flex-wrap:wrap;
+
+    gap:10px;
+
+    margin-top:22px;
+}
+
+/* =========================================================
+   SOLUTIONS
+========================================================= */
+
+.solution-card{
+    background:#ffffff;
+
+    border:1px solid #e5e7eb;
+
+    border-radius:13px;
+
+    padding:20px;
+
+    margin-bottom:14px;
+}
+
+body.dark .solution-card{
+    background:#1f2937;
+
+    border-color:#374151;
+}
+
+.solution-question{
+    font-weight:800;
+
+    margin-bottom:10px;
+}
+
+.correct{
+    color:#15803d;
+
+    font-weight:700;
+}
+
+.wrong{
+    color:#dc2626;
+
+    font-weight:700;
+}
+
+/* =========================================================
+   STORE
+========================================================= */
+
+.store-course-title{
+    margin:
+        30px 0 15px;
+}
+
+.package-grid{
+    display:grid;
+
+    grid-template-columns:
+        repeat(4,1fr);
+
+    gap:15px;
+}
+
+.package-card{
+    background:#ffffff;
+
+    border:1px solid #e5e7eb;
+
+    border-radius:15px;
+
+    padding:22px;
+
+    text-align:center;
+}
+
+body.dark .package-card{
+    background:#1f2937;
+
+    border-color:#374151;
+}
+
+.package-card h3{
+    margin-bottom:5px;
+}
+
+.package-price{
+    font-size:28px;
+
+    font-weight:900;
+
+    color:#2563eb;
+
+    margin:8px 0 14px;
+}
+
+.package-card p{
+    color:#6b7280;
+
+    font-size:13px;
+
+    margin-bottom:15px;
+}
+
+body.dark .package-card p{
+    color:#9ca3af;
+}
+
+/* =========================================================
+   PROFILE
+========================================================= */
+
+.profile-card{
+    background:#ffffff;
+
+    border:1px solid #e5e7eb;
+
+    border-radius:17px;
+
+    padding:28px;
+
+    margin-bottom:20px;
+}
+
+body.dark .profile-card{
+    background:#1f2937;
+
+    border-color:#374151;
+}
+
+.profile-top{
+    display:flex;
+
+    align-items:center;
+
+    gap:18px;
+
+    margin-bottom:22px;
+}
+
+.avatar{
+    width:70px;
+    height:70px;
+
+    border-radius:50%;
+
+    background:#2563eb;
+
+    color:#ffffff;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    font-size:25px;
+
+    font-weight:900;
+}
+
+.profile-name{
+    font-size:25px;
+
+    font-weight:800;
+}
+
+.profile-email{
+    color:#6b7280;
+}
+
+body.dark .profile-email{
+    color:#9ca3af;
+}
+
+.profile-menu{
+    display:grid;
+
+    grid-template-columns:
+        repeat(2,1fr);
+
+    gap:12px;
+}
+
+.profile-menu button{
+    padding:15px;
+
+    background:#f9fafb;
+
+    border:1px solid #e5e7eb;
+
+    border-radius:10px;
+
+    text-align:left;
+
+    font-weight:700;
+
+    color:#374151;
+}
+
+body.dark .profile-menu button{
+    background:#111827;
+
+    border-color:#374151;
+
+    color:#f3f4f6;
+}
+
+/* =========================================================
+   LOGIN
+========================================================= */
+
+.login-wrapper{
+    max-width:470px;
+
+    margin:
+        25px auto;
+}
+
+.login-card{
+    background:#ffffff;
+
+    border:1px solid #e5e7eb;
+
+    border-radius:18px;
+
+    padding:30px;
+
+    box-shadow:
+        0 10px 30px rgba(0,0,0,.06);
+}
+
+body.dark .login-card{
+    background:#1f2937;
+
+    border-color:#374151;
+}
+
+.login-card h1{
+    text-align:center;
+
+    margin-bottom:8px;
+}
+
+.login-card > p{
+    text-align:center;
+
+    color:#6b7280;
+
+    margin-bottom:20px;
+}
+
+body.dark .login-card > p{
+    color:#9ca3af;
+}
+
+.form-group{
+    margin-bottom:15px;
+}
+
+.form-group label{
+    display:block;
+
+    font-weight:700;
+
+    margin-bottom:6px;
+}
+
+.form-group input{
+    width:100%;
+
+    padding:12px 13px;
+
+    border:
+        1px solid #d1d5db;
+
+    border-radius:9px;
+
+    outline:none;
+
+    background:#ffffff;
+
+    color:#111827;
+}
+
+.form-group input:focus{
+    border-color:#2563eb;
+
+    box-shadow:
+        0 0 0 3px rgba(37,99,235,.10);
+}
+
+body.dark .form-group input{
+    background:#111827;
+
+    border-color:#4b5563;
+
+    color:#ffffff;
+}
+
+.login-actions{
+    display:flex;
+
+    flex-direction:column;
+
+    gap:10px;
+}
+
+.divider{
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+
+    margin:18px 0;
+
+    color:#9ca3af;
+
+    font-size:13px;
+}
+
+.divider::before,
+.divider::after{
+    content:"";
+
+    height:1px;
+
+    flex:1;
+
+    background:#e5e7eb;
+}
+
+body.dark .divider::before,
+body.dark .divider::after{
+    background:#374151;
+}
+
+.login-links{
+    display:flex;
+
+    justify-content:space-between;
+
+    gap:10px;
+
+    margin-top:15px;
+
+    flex-wrap:wrap;
+}
+
+.link-btn{
+    border:none;
+
+    background:transparent;
+
+    color:#2563eb;
+
+    font-weight:700;
+
+    padding:0;
+}
+
+/* =========================================================
+   MODAL
+========================================================= */
+
+.modal-overlay{
+    display:none;
+
+    position:fixed;
+
+    inset:0;
+
+    z-index:3000;
+
+    background:
+        rgba(0,0,0,.55);
+
+    padding:20px;
+
+    align-items:center;
+
+    justify-content:center;
+}
+
+.modal-overlay.active{
+    display:flex;
+}
+
+.modal{
+    width:100%;
+
+    max-width:500px;
+
+    background:#ffffff;
+
+    border-radius:16px;
+
+    padding:25px;
+
+    max-height:90vh;
+
+    overflow:auto;
+}
+
+body.dark .modal{
+    background:#1f2937;
+
+    color:#ffffff;
+}
+
+.modal-header{
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    margin-bottom:18px;
+}
+
+.close-btn{
+    width:35px;
+    height:35px;
+
+    border:none;
+
+    background:#f3f4f6;
+
+    border-radius:8px;
+
+    font-size:20px;
+}
+
+/* =========================================================
+   COINS
+========================================================= */
+
+.coin-box{
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    gap:15px;
+
+    background:#fffbeb;
+
+    border:1px solid #fde68a;
+
+    border-radius:12px;
+
+    padding:17px;
+
+    margin-bottom:18px;
+}
+
+.coin-number{
+    font-size:28px;
+
+    font-weight:900;
+
+    color:#b45309;
+}
+
+/* =========================================================
+   HISTORY
+========================================================= */
+
+.history-list{
+    display:flex;
+
+    flex-direction:column;
+
+    gap:10px;
+}
+
+.history-item{
+    background:#f9fafb;
+
+    border:1px solid #e5e7eb;
+
+    border-radius:10px;
+
+    padding:14px;
+}
+
+body.dark .history-item{
+    background:#111827;
+
+    border-color:#374151;
+}
+
+/* =========================================================
+   EMPTY
+========================================================= */
+
+.empty-box{
+    background:#ffffff;
+
+    border:1px dashed #cbd5e1;
+
+    border-radius:14px;
+
+    padding:35px;
+
+    text-align:center;
+
+    color:#6b7280;
+}
+
+body.dark .empty-box{
+    background:#1f2937;
+
+    border-color:#4b5563;
+
+    color:#9ca3af;
+}
+
+/* =========================================================
+   TOAST
+========================================================= */
+
+.toast{
+    position:fixed;
+
+    left:50%;
+
+    bottom:25px;
+
+    transform:
+        translate(-50%,20px);
+
+    opacity:0;
+
+    pointer-events:none;
+
+    z-index:5000;
+
+    background:#111827;
+
+    color:#ffffff;
+
+    padding:12px 18px;
+
+    border-radius:10px;
+
+    box-shadow:
+        0 8px 25px rgba(0,0,0,.2);
+
+    transition:
+        opacity .2s,
+        transform .2s;
+
+    max-width:
+        calc(100% - 30px);
+
+    text-align:center;
+}
+
+.toast.show{
+    opacity:1;
+
+    transform:
+        translate(-50%,0);
+}
+
+/* =========================================================
+   FOOTER
+========================================================= */
+
+footer{
+    background:#111827;
+
+    color:#ffffff;
+
+    text-align:center;
+
+    padding:30px 18px;
+
+    margin-top:40px;
+}
+
+footer h2{
+    margin-bottom:5px;
+}
+
+footer p{
+    color:#9ca3af;
+
+    font-size:14px;
+}
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media(max-width:900px){
+
+    .category-grid,
+    .feature-grid,
+    .choice-grid,
+    .test-grid,
+    .paper-grid{
+        grid-template-columns:
+            repeat(2,1fr);
+    }
+
+    .package-grid{
+        grid-template-columns:
+            repeat(2,1fr);
+    }
+
+}
+
+@media(max-width:700px){
+
+    .navbar{
+        min-height:60px;
+    }
+
+    .nav-links{
+        display:none;
+    }
+
+    .mobile-menu-btn{
+        display:block;
+    }
+
+    .hero{
+        padding:35px 22px;
+    }
+
+    .hero p{
+        font-size:16px;
+    }
+
+    .container{
+        padding:
+            20px 13px 45px;
+    }
+
+    .category-grid,
+    .feature-grid,
+    .choice-grid,
+    .test-grid,
+    .paper-grid,
+    .syllabus-list,
+    .topic-grid,
+    .package-grid{
+        grid-template-columns:1fr;
+    }
+
+    .page-header{
+        padding:20px;
+    }
+
+    .page-header h1{
+        font-size:25px;
+    }
+
+    .question-card{
+        padding:18px;
+    }
+
+    .question-text{
+        font-size:18px;
+    }
+
+    .exam-controls{
+        flex-direction:column;
+    }
+
+    .exam-controls .btn{
+        width:100%;
+    }
+
+    .profile-menu{
+        grid-template-columns:1fr;
+    }
+
+    .login-card{
+        padding:22px;
+    }
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<!-- ========================================================
+     HEADER
+========================================================= -->
+
+<header>
+
+    <div class="navbar">
+
+        <div
+            class="logo"
+            id="logoBtn"
+        >
+            VK <span>EXAMS</span>
+        </div>
+
+        <nav class="nav-links">
+
+            <button
+                class="nav-btn"
+                data-nav="home"
+            >
+                Home
+            </button>
+
+            <button
+                class="nav-btn"
+                data-nav="store"
+            >
+                Store
+            </button>
+
+            <button
+                class="nav-btn"
+                data-nav="profile"
+            >
+                Profile
+            </button>
+
+            <button
+                class="nav-btn"
+                id="desktopLoginBtn"
+            >
+                Login
+            </button>
+
+        </nav>
+
+        <button
+            class="mobile-menu-btn"
+            id="mobileMenuBtn"
+        >
+            ☰
+        </button>
+
+    </div>
+
+    <div
+        class="mobile-menu"
+        id="mobileMenu"
+    >
+
+        <button data-nav="home">
+            🏠 Home
+        </button>
+
+        <button data-nav="store">
+            🛒 Store
+        </button>
+
+        <button data-nav="profile">
+            👤 Profile
+        </button>
+
+        <button id="mobileLoginBtn">
+            🔐 Login
+        </button>
+
+    </div>
+
+</header>
+
+
+<!-- ========================================================
+     HOME
+========================================================= -->
+
+<section
+    class="page active"
+    id="home"
+>
+
+    <div class="container">
+
+        <div class="hero">
+
+            <h1>
+                Prepare Smart.<br>
+                Score Higher.
+            </h1>
+
+            <p>
+                Affordable and exam-oriented online test series
+                for APPSC, Endowment Officer, High Court, Police,
+                DSC and Banking examinations.
+            </p>
+
+            <div class="hero-actions">
+
+                <button
+                    class="btn btn-light"
+                    data-nav="store"
+                >
+                    View Packages
+                </button>
+
+                <button
+                    class="btn btn-secondary"
+                    id="freeMockHeroBtn"
+                >
+                    Free Mock Test
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <div class="section-title">
+
+            <h2>
+                Choose Your Exam
+            </h2>
+
+            <p>
+                Select an examination to view syllabus and test series.
+            </p>
+
+        </div>
+
+
+        <!-- ==================================================
+             IMPORTANT:
+             HOME COURSE CARDS ARE STATIC.
+             DO NOT REMOVE THIS BLOCK.
+        =================================================== -->
+
+        <div
+            class="category-grid"
+            id="homeCourses"
+        >
+
+            <div
+                class="category-card"
+                data-course="APPSC"
+            >
+
+                <div class="icon">
+                    📚
+                </div>
+
+                <h3>
+                    APPSC
+                </h3>
+
+                <p>
+                    Group 1, 2, 3, 4 and other APPSC examinations
+                </p>
+
+            </div>
+
+
+            <div
+                class="category-card"
+                data-course="Endowment Officer"
+            >
+
+                <div class="icon">
+                    🛕
+                </div>
+
+                <h3>
+                    Endowment Officer
+                </h3>
+
+                <p>
+                    Hindu Philosophy, Temple System and Endowments
+                </p>
+
+            </div>
+
+
+            <div
+                class="category-card"
+                data-course="High Court"
+            >
+
+                <div class="icon">
+                    ⚖️
+                </div>
+
+                <h3>
+                    High Court
+                </h3>
+
+                <p>
+                    High Court and District Court examinations
+                </p>
+
+            </div>
+
+
+            <div
+                class="category-card"
+                data-course="Police"
+            >
+
+                <div class="icon">
+                    👮
+                </div>
+
+                <h3>
+                    Police
+                </h3>
+
+                <p>
+                    Police recruitment examination preparation
+                </p>
+
+            </div>
+
+
+            <div
+                class="category-card"
+                data-course="DSC"
+            >
+
+                <div class="icon">
+                    🎓
+                </div>
+
+                <h3>
+                    DSC
+                </h3>
+
+                <p>
+                    Teacher recruitment examination preparation
+                </p>
+
+            </div>
+
+
+            <div
+                class="category-card"
+                data-course="Banks"
+            >
+
+                <div class="icon">
+                    🏦
+                </div>
+
+                <h3>
+                    Banks
+                </h3>
+
+                <p>
+                    Banking examinations and recruitment tests
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="section-title">
+
+            <h2>
+                Why VK Exams?
+            </h2>
+
+            <p>
+                Simple, affordable and practice-focused preparation.
+            </p>
+
+        </div>
+
+
+        <div class="feature-grid">
+
+            <div class="feature-card">
+
+                <div class="feature-icon">
+                    🎯
+                </div>
+
+                <h3>
+                    Exam Oriented
+                </h3>
+
+                <p>
+                    Practice questions designed around competitive exam preparation.
+                </p>
+
+            </div>
+
+
+            <div class="feature-card">
+
+                <div class="feature-icon">
+                    💰
+                </div>
+
+                <h3>
+                    Low Cost
+                </h3>
+
+                <p>
+                    Affordable plans for students and job aspirants.
+                </p>
+
+            </div>
+
+
+            <div class="feature-card">
+
+                <div class="feature-icon">
+                    📱
+                </div>
+
+                <h3>
+                    Mobile Friendly
+                </h3>
+
+                <p>
+                    Practice tests conveniently from mobile or desktop.
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ========================================================
+     COURSE PAGE
+========================================================= -->
+
+<section
+    class="page"
+    id="course"
+>
+
+    <div class="container">
+
+        <div class="page-header">
+
+            <div>
+
+                <h1 id="courseTitle">
+                    Course
+                </h1>
+
+                <p>
+                    Select what you want to study.
+                </p>
+
+            </div>
+
+            <button
+                class="btn btn-outline"
+                data-back
+            >
+                ← Back
+            </button>
+
+        </div>
+
+
+        <div
+            class="choice-grid"
+            id="courseOptions"
+        >
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ========================================================
+     SYLLABUS PAGE
+========================================================= -->
+
+<section
+    class="page"
+    id="syllabus"
+>
+
+    <div class="container">
+
+        <div class="page-header">
+
+            <div>
+
+                <h1 id="syllabusTitle">
+                    Syllabus
+                </h1>
+
+                <p>
+                    Examination syllabus
+                </p>
+
+            </div>
+
+            <button
+                class="btn btn-outline"
+                data-back
+            >
+                ← Back
+            </button>
+
+        </div>
+
+
+        <div
+            class="syllabus-list"
+            id="syllabusContent"
+        >
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ========================================================
+     TEST SERIES PAGE
+========================================================= -->
+
+<section
+    class="page"
+    id="testseries"
+>
+
+    <div class="container">
+
+        <div class="page-header">
+
+            <div>
+
+                <h1 id="testSeriesTitle">
+                    Test Series
+                </h1>
+
+                <p>
+                    Select your examination stage.
+                </p>
+
+            </div>
+
+            <button
+                class="btn btn-outline"
+                data-back
+            >
+                ← Back
+            </button>
+
+        </div>
+
+
+        <div
+            class="choice-grid"
+            id="testStageOptions"
+        >
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ========================================================
+     TOPIC WISE PAGE
+========================================================= -->
+
+<section
+    class="page"
+    id="topicWise"
+>
+
+    <div class="container">
+
+        <div class="page-header">
+
+            <div>
+
+                <h1>
+                    Topic-wise Tests
+                </h1>
+
+                <p id="topicCourseName">
+                    Endowment Officer
+                </p>
+
+            </div>
+
+            <button
+                class="btn btn-outline"
+                data-back
+            >
+                ← Back
+            </button>
+
+        </div>
+
+
+        <div
+            class="topic-grid"
+            id="topicList"
+        >
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ========================================================
+     PAPERS PAGE
+========================================================= -->
+
+<section
+    class="page"
+    id="papers"
+>
+
+    <div class="container">
+
+        <div class="page-header">
+
+            <div>
+
+                <h1 id="papersTitle">
+                    Test Series
+                </h1>
+
+                <p id="papersSubtitle">
+                    Select a test.
+                </p>
+
+            </div>
+
+            <button
+                class="btn btn-outline"
+                data-back
+            >
+                ← Back
+            </button>
+
+        </div>
+
+
+        <div
+            class="paper-grid"
+            id="paperList"
+        >
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ========================================================
+     EXAM PAGE
+========================================================= -->
+
+<section
+    class="page"
+    id="examPage"
+>
+
+    <div class="container">
+
+        <div class="exam-top">
+
+            <div>
+
+                <h1 id="examTitle">
+                    Online Test
+                </h1>
+
+                <p id="examProgress">
+                    Question 1 of 10
+                </p>
+
+            </div>
+
+            <div
+                class="timer"
+                id="timer"
+            >
+                15:00
+            </div>
+
+        </div>
+
+
+        <div class="question-card">
+
+            <div
+                class="question-number"
+                id="questionNumber"
+            >
+                Question 1
+            </div>
+
+            <div
+                class="question-text"
+                id="questionText"
+            >
+            </div>
+
+
+            <div
+                class="option-list"
+                id="optionList"
+            >
+            </div>
+
+
+            <div class="exam-controls">
+
+                <button
+                    class="btn btn-secondary"
+                    id="previousQuestionBtn"
+                >
+                    ← Previous
+                </button>
+
+                <button
+                    class="btn btn-primary"
+                    id="nextQuestionBtn"
+                >
+                    Next →
+                </button>
+
+                <button
+                    class="btn btn-success"
+                    id="submitExamBtn"
+                >
+                    Submit Test
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ========================================================
+     RESULT PAGE
+========================================================= -->
+
+<section
+    class="page"
+    id="resultPage"
+>
+
+    <div class="container">
+
+        <div class="result-box">
+
+            <h1>
+                Test Completed
+            </h1>
+
+            <p>
+                Your result
+            </p>
+
+            <div
+                class="result-score"
+                id="resultScore"
+            >
+                0 / 10
+            </div>
+
+            <h3 id="resultPercentage">
+                0%
+            </h3>
+
+            <p id="resultMessage">
+                Keep practicing.
+            </p>
+
+
+            <div class="result-actions">
+
+                <button
+                    class="btn btn-primary"
+                    id="solutionsBtn"
+                >
+                    View Solutions
+                </button>
+
+                <button
+                    class="btn btn-secondary"
+                    id="reattemptBtn"
+                >
+                    Reattempt
+                </button>
+
+                <button
+                    class="btn btn-outline"
+                    id="backTestSeriesBtn"
+                >
+                    Back to Test Series
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ========================================================
+     SOLUTIONS PAGE
+========================================================= -->
+
+<section
+    class="page"
+    id="solutionsPage"
+>
+
+    <div class="container">
+
+        <div class="page-header">
+
+            <div>
+
+                <h1>
+                    Solutions
+                </h1>
+
+                <p>
+                    Review your answers.
+                </p>
+
+            </div>
+
+            <button
+                class="btn btn-outline"
+                id="solutionsBackBtn"
+            >
+                ← Back
+            </button>
+
+        </div>
+
+
+        <div id="solutionsContent">
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ========================================================
+     STORE
+========================================================= -->
+
+<section
+    class="page"
+    id="store"
+>
+
+    <div class="container">
+
+        <div class="page-header">
+
+            <div>
+
+                <h1>
+                    Store
+                </h1>
+
+                <p>
+                    Select an examination and choose your package.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div
+            class="category-grid"
+            id="storeCourses"
+        >
+        </div>
+
+
+        <div
+            id="packageArea"
+            style="margin-top:25px;"
+        >
+
+            <div class="empty-box">
+
+                <h3>
+                    Select an examination
+                </h3>
+
+                <p>
+                    Choose a course above to view available packages.
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ========================================================
+     PROFILE
+========================================================= -->
+
+<section
+    class="page"
+    id="profile"
+>
+
+    <div class="container">
+
+        <div class="page-header">
+
+            <div>
+
+                <h1>
+                    My Profile
+                </h1>
+
+                <p>
+                    Manage your VK Exams account.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div
+            class="profile-card"
+            id="profileMainCard"
+        >
+        </div>
+
+
+        <div
+            class="profile-card"
+        >
+
+            <div class="coin-box">
+
+                <div>
+
+                    <div>
+                        Student Coins
+                    </div>
+
+                    <div
+                        class="coin-number"
+                        id="coinBalance"
+                    >
+                        0
+                    </div>
+
+                </div>
+
+                <button
+                    class="btn btn-warning"
+                    id="coinAdBtn"
+                >
+                    🎁 Watch Ad +0.5
+                </button>
+
+            </div>
+
+
+            <div class="profile-menu">
+
+                <button id="editProfileBtn">
+                    👤 Edit Profile
+                </button>
+
+                <button id="settingsBtn">
+                    ⚙️ Settings
+                </button>
+
+                <button id="purchaseHistoryBtn">
+                    🧾 Purchase History
+                </button>
+
+                <button id="testResultsBtn">
+                    📊 Test Results
+                </button>
+
+                <button id="activePackageBtn">
+                    🎫 Active Package
+                </button>
+
+                <button id="helpBtn">
+                    ❓ Help & Support
+                </button>
+
+                <button
+                    id="profileLogoutBtn"
+                    style="color:#dc2626;"
+                >
+                    🚪 Logout
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ========================================================
+     LOGIN PAGE
+========================================================= -->
+
+<section
+    class="page"
+    id="loginPage"
+>
+
+    <div class="container">
+
+        <div class="login-wrapper">
+
+            <div class="login-card">
+
+                <h1 id="loginHeading">
+                    Login
+                </h1>
+
+                <p id="loginDescription">
+                    Login to attempt paid tests and save results.
+                </p>
+
+
+                <form id="authForm">
+
+                    <div
+                        class="form-group"
+                        id="nameGroup"
+                    >
+
+                        <label>
+                            Full Name
+                        </label>
+
+                        <input
+                            type="text"
+                            id="authName"
+                            placeholder="Enter your name"
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Email
+                        </label>
+
+                        <input
+                            type="email"
+                            id="authEmail"
+                            placeholder="Enter email"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Password
+                        </label>
+
+                        <input
+                            type="password"
+                            id="authPassword"
+                            placeholder="Enter password"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="login-actions">
+
+                        <button
+                            type="submit"
+                            class="btn btn-primary"
+                            id="authSubmitBtn"
+                        >
+                            Login
+                        </button>
+
+                        <button
+                            type="button"
+                            class="btn btn-secondary"
+                            id="googleLoginBtn"
+                        >
+                            Continue with Google
+                        </button>
+
+                        <button
+                            type="button"
+                            class="btn btn-outline"
+                            id="guestBtn"
+                        >
+                            Continue as Guest
+                        </button>
+
+                    </div>
+
+                </form>
+
+
+                <div class="divider">
+                    OR
+                </div>
+
+
+                <div class="login-links">
+
+                    <button
+                        class="link-btn"
+                        id="toggleRegisterBtn"
+                    >
+                        Create Account
+                    </button>
+
+                    <button
+                        class="link-btn"
+                        id="forgotPasswordBtn"
+                    >
+                        Forgot Password?
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ========================================================
+     FOOTER
+========================================================= -->
+
+<footer>
+
+    <h2>
+        VK EXAMS ONLINE
+    </h2>
+
+    <p>
+        Online Exam Preparation Platform
+    </p>
+
+    <p>
+        APPSC • Endowment • High Court • Police • DSC • Banks
+    </p>
+
+    <p>
+        © 2026 VK Exams Online. All Rights Reserved.
+    </p>
+
+</footer>
+
+
+<!-- ========================================================
+     TOAST
+========================================================= -->
+
+<div
+    class="toast"
+    id="toast"
+>
+</div>
+
+
+<!-- ========================================================
+     MODAL
+========================================================= -->
+
+<div
+    class="modal-overlay"
+    id="modalOverlay"
+>
+
+    <div class="modal">
+
+        <div class="modal-header">
+
+            <h2 id="modalTitle">
+                Information
+            </h2>
+
+            <button
+                class="close-btn"
+                id="modalCloseBtn"
+            >
+                ×
+            </button>
+
+        </div>
+
+        <div id="modalContent">
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- ========================================================
+     SUPABASE
+========================================================= -->
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+
+<script>
+
+/* =========================================================
+   VK EXAMS ONLINE
+   MAIN JAVASCRIPT
+========================================================= */
+
+
+/* =========================================================
+   SUPABASE CONFIGURATION
+=========================================================
+
+   IMPORTANT:
+
+   Replace these values later with your actual Supabase
+   Project URL and Publishable/Anon Key.
+
+========================================================= */
+
+const SUPABASE_URL =
+    'YOUR_SUPABASE_PROJECT_URL';
+
+const SUPABASE_ANON_KEY =
+    'YOUR_SUPABASE_PUBLISHABLE_OR_ANON_KEY';
+
+let supabaseClient = null;
+
+let supabaseReady = false;
+
+
+try{
+
+    if(
+        window.supabase &&
+        SUPABASE_URL.startsWith('https://') &&
+        !SUPABASE_URL.includes('YOUR_') &&
+        SUPABASE_ANON_KEY &&
+        !SUPABASE_ANON_KEY.includes('YOUR_')
+    ){
+
+        supabaseClient =
+            window.supabase.createClient(
+                SUPABASE_URL,
+                SUPABASE_ANON_KEY
+            );
+
+        supabaseReady = true;
+
+    }
+
+}
+catch(error){
+
+    console.error(
+        'Supabase initialization error:',
+        error
+    );
+
+}
+
+
+/* =========================================================
+   GLOBAL DATA
+========================================================= */
+
+const COURSES = [
+
+    {
+        name:'APPSC',
+        icon:'📚',
+        desc:'Group 1, 2, 3, 4 and other APPSC examinations'
+    },
+
+    {
+        name:'Endowment Officer',
+        icon:'🛕',
+        desc:'Hindu Philosophy, Temple System and Endowments'
+    },
+
+    {
+        name:'High Court',
+        icon:'⚖️',
+        desc:'High Court and District Court examinations'
+    },
+
+    {
+        name:'Police',
+        icon:'👮',
+        desc:'Police recruitment examination preparation'
+    },
+
+    {
+        name:'DSC',
+        icon:'🎓',
+        desc:'Teacher recruitment examination preparation'
+    },
+
+    {
+        name:'Banks',
+        icon:'🏦',
+        desc:'Banking examinations and recruitment tests'
+    }
+
+];
+
+
+const PACKAGES = [
+
+    {
+        id:'day',
+        name:'1 Day',
+        price:10,
+        duration:'1 Day'
+    },
+
+    {
+        id:'week',
+        name:'1 Week',
+        price:50,
+        duration:'7 Days'
+    },
+
+    {
+        id:'month',
+        name:'1 Month',
+        price:189,
+        duration:'30 Days'
+    },
+
+    {
+        id:'year',
+        name:'1 Year',
+        price:999,
+        duration:'365 Days'
+    }
+
+];
+
+
+/* =========================================================
+   GLOBAL STATE
+========================================================= */
+
+let state = {
+
+    course:'',
+
+    stage:'',
+
+    paper:'',
+
+    selectedTest:'',
+
+    topic:'',
+
+    questionIndex:0,
+
+    answers:[],
+
+    questions:[],
+
+    timer:null,
+
+    timeLeft:900,
+
+    lastResult:null
+
+};
+
+
+/* =========================================================
+   SHORTCUT
+========================================================= */
+
+function $(id){
+
+    return document.getElementById(id);
+
+}
+
+
+/* =========================================================
+   TOAST
+========================================================= */
+
+function toast(message){
+
+    const element =
+        $('toast');
+
+    if(!element){
+        return;
+    }
+
+    element.textContent =
+        message;
+
+    element.classList.add('show');
+
+    clearTimeout(
+        toast.timer
+    );
+
+    toast.timer =
+        setTimeout(
+            function(){
+
+                element.classList.remove('show');
+
+            },
+            2500
+        );
+
+}
+
+
+/* =========================================================
+   LOGIN STATUS
+========================================================= */
+
+function isLoggedIn(){
+
+    return !!localStorage.getItem(
+        'studentEmail'
+    );
+
+}
+
+
+function getStudentName(){
+
+    return (
+        localStorage.getItem(
+            'studentName'
+        ) ||
+        'Student'
+    );
+
+}
+
+
+function getStudentEmail(){
+
+    return (
+        localStorage.getItem(
+            'studentEmail'
+        ) ||
+        ''
+    );
+
+}
+
+
+/* =========================================================
+   INITIALS
+========================================================= */
+
+function getInitials(name){
+
+    if(!name){
+        return 'S';
+    }
+
+    const parts =
+        name.trim().split(/\s+/);
+
+    if(parts.length === 1){
+
+        return parts[0]
+            .substring(0,2)
+            .toUpperCase();
+
+    }
+
+    return (
+        parts[0][0] +
+        parts[parts.length - 1][0]
+    ).toUpperCase();
+
+}
+
+
+/* =========================================================
+   PAGE ROUTING
+========================================================= */
+
+const PAGE_IDS = [
+
+    'home',
+    'course',
+    'syllabus',
+    'testseries',
+    'topicWise',
+    'papers',
+    'examPage',
+    'resultPage',
+    'solutionsPage',
+    'store',
+    'profile',
+    'loginPage'
+
+];
+
+
+let routeStack = [];
+
+
+function currentPage(){
+
+    for(
+        let i = 0;
+        i < PAGE_IDS.length;
+        i++
+    ){
+
+        const page =
+            $(PAGE_IDS[i]);
+
+        if(
+            page &&
+            page.classList.contains('active')
+        ){
+
+            return PAGE_IDS[i];
+
+        }
+
+    }
+
+    return 'home';
+
+}
+
+
+function renderPage(
+    page,
+    addHistory = true
+){
+
+    if(
+        !PAGE_IDS.includes(page)
+    ){
+
+        page = 'home';
+
+    }
+
+
+    PAGE_IDS.forEach(
+        function(id){
+
+            const element =
+                $(id);
+
+            if(element){
+
+                element.classList.remove(
+                    'active'
+                );
+
+            }
+
+        }
+    );
+
+
+    const target =
+        $(page);
+
+    if(target){
+
+        target.classList.add(
+            'active'
+        );
+
+    }
+
+
+    window.scrollTo(
+        0,
+        0
+    );
+
+
+    updateLoginButtons();
+
+
+    if(addHistory){
+
+        history.pushState(
+            {
+                vkPage:page
+            },
+            '',
+            '#' + page
+        );
+
+    }
+
+}
+
+
+function go(
+    page,
+    push = true
+){
+
+    const current =
+        currentPage();
+
+    if(
+        push &&
+        current !== page
+    ){
+
+        routeStack.push(
+            current
+        );
+
+    }
+
+    renderPage(
+        page,
+        push
+    );
+
+}
+
+
+function goBack(){
+
+    if(routeStack.length > 0){
+
+        const previous =
+            routeStack.pop();
+
+        renderPage(
+            previous,
+            false
+        );
+
+        return;
+
+    }
+
+    renderPage(
+        'home',
+        false
+    );
+
+}
+
+
+window.addEventListener(
+    'popstate',
+    function(){
+
+        const hash =
+            window.location.hash
+                .replace('#','');
+
+        if(
+            PAGE_IDS.includes(hash)
+        ){
+
+            renderPage(
+                hash,
+                false
+            );
+
+        }
+        else{
+
+            renderPage(
+                'home',
+                false
+            );
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   HOME
+=========================================================
+
+   IMPORTANT:
+
+   Home course cards are STATIC HTML.
+
+   We intentionally DO NOT do:
+
+   $('homeCourses').innerHTML = ...
+
+   This prevents the previous problem where cards disappeared
+   when JavaScript had an error.
+
+========================================================= */
+
+function renderStoreCourses(){
+
+    const container =
+        $('storeCourses');
+
+    if(!container){
+        return;
+    }
+
+
+    container.innerHTML =
+        COURSES.map(
+            function(course){
+
+                return `
+
+                    <div
+                        class="category-card"
+                        data-store-course="${course.name}"
+                    >
+
+                        <div class="icon">
+                            ${course.icon}
+                        </div>
+
+                        <h3>
+                            ${course.name}
+                        </h3>
+
+                        <p>
+                            View Packages
+                        </p>
+
+                    </div>
+
+                `;
+
+            }
+        ).join('');
+
+}
+
+
+/* =========================================================
+   OPEN COURSE
+========================================================= */
+
+function openCourse(course){
+
+    state.course =
+        course;
+
+    const title =
+        $('courseTitle');
+
+    if(title){
+
+        title.textContent =
+            course;
+
+    }
+
+
+    let html = `
+
+        <div
+            class="choice-card"
+            data-course-action="syllabus"
+        >
+
+            <div class="big-icon">
+                📖
+            </div>
+
+            <h2>
+                Syllabus
+            </h2>
+
+            <p>
+                View complete examination syllabus
+            </p>
+
+        </div>
+
+
+        <div
+            class="choice-card"
+            data-course-action="testseries"
+        >
+
+            <div class="big-icon">
+                🎯
+            </div>
+
+            <h2>
+                Test Series
+            </h2>
+
+            <p>
+                Practice examination tests
+            </p>
+
+        </div>
+
+    `;
+
+
+    if(
+        course === 'Endowment Officer'
+    ){
+
+        html += `
+
+            <div
+                class="choice-card"
+                data-course-action="topicwise"
+            >
+
+                <div class="big-icon">
+                    📚
+                </div>
+
+                <h2>
+                    Topic-wise Tests
+                </h2>
+
+                <p>
+                    Practice tests topic by topic
+                </p>
+
+            </div>
+
+        `;
+
+    }
+
+
+    $('courseOptions').innerHTML =
+        html;
+
+
+    go('course');
+
+}
+
+
+/* =========================================================
+   SYLLABUS DATA
+========================================================= */
+
+function getSyllabus(course){
+
+    const data = {
+
+        'APPSC': [
+
+            'General Studies & Current Affairs',
+            'Indian Constitution & Polity',
+            'Indian History',
+            'Andhra Pradesh History',
+            'Indian Geography',
+            'Andhra Pradesh Geography',
+            'Indian Economy',
+            'Andhra Pradesh Economy',
+            'Science & Technology',
+            'Environment & Ecology',
+            'Mental Ability',
+            'Current Affairs'
+
+        ],
+
+
+        'Endowment Officer': [
+
+            'Hindu Philosophy',
+            'Vedic Culture',
+            'Vedas',
+            'Upavedas',
+            'Upanishads',
+            'Dharmas',
+            'Hindu Family Structure',
+            'Temple System',
+            'Temple Administration',
+            'Endowments Act',
+            'Duties of Executive Officers',
+            'Section 29 of Endowments Act',
+            'Section 57 of Endowments Act',
+            'Sources of Temple Income',
+            'Allocation of Funds',
+            'Charitable Institutions',
+            'Current Affairs'
+
+        ],
+
+
+        'High Court': [
+
+            'Indian Constitution',
+            'Indian Polity',
+            'General Knowledge',
+            'Current Affairs',
+            'General English',
+            'Legal Awareness',
+            'Reasoning',
+            'Arithmetic',
+            'Computer Knowledge'
+
+        ],
+
+
+        'Police': [
+
+            'General Studies',
+            'Indian History',
+            'Indian Polity',
+            'Indian Geography',
+            'Indian Economy',
+            'Science',
+            'Current Affairs',
+            'Mental Ability',
+            'Reasoning',
+            'Basic Computer Knowledge'
+
+        ],
+
+
+        'DSC': [
+
+            'General Knowledge',
+            'Current Affairs',
+            'Child Development',
+            'Educational Psychology',
+            'Teaching Methodology',
+            'English',
+            'Telugu',
+            'Mathematics',
+            'Science',
+            'Social Studies'
+
+        ],
+
+
+        'Banks': [
+
+            'Quantitative Aptitude',
+            'Reasoning Ability',
+            'English Language',
+            'General Awareness',
+            'Banking Awareness',
+            'Computer Awareness',
+            'Current Affairs',
+            'Data Interpretation'
+
+        ]
+
+    };
+
+
+    return (
+        data[course] ||
+        [
+            'General Studies',
+            'General Knowledge',
+            'Current Affairs'
+        ]
+    );
+
+}
+
+
+/* =========================================================
+   OPEN SYLLABUS
+========================================================= */
+
+function openSyllabus(){
+
+    const title =
+        $('syllabusTitle');
+
+    if(title){
+
+        title.textContent =
+            state.course +
+            ' – Syllabus';
+
+    }
+
+
+    const container =
+        $('syllabusContent');
+
+    const topics =
+        getSyllabus(
+            state.course
+        );
+
+
+    container.innerHTML =
+        topics.map(
+            function(topic){
+
+                return `
+
+                    <div class="syllabus-item">
+
+                        📌 ${topic}
+
+                    </div>
+
+                `;
+
+            }
+        ).join('');
+
+
+    go('syllabus');
+
+}
+
+
+/* =========================================================
+   OPEN TEST SERIES
+========================================================= */
+
+function openTestSeries(){
+
+    const title =
+        $('testSeriesTitle');
+
+    if(title){
+
+        title.textContent =
+            state.course +
+            ' – Test Series';
+
+    }
+
+
+    const container =
+        $('testStageOptions');
+
+
+    /* HIGH COURT = SINGLE SERIES */
+
+    if(
+        state.course === 'High Court'
+    ){
+
+        container.innerHTML = `
+
+            <div
+                class="choice-card"
+                data-stage="single"
+            >
+
+                <div class="big-icon">
+                    ⚖️
+                </div>
+
+                <h2>
+                    Test Series
+                </h2>
+
+                <p>
+                    High Court Test Series
+                </p>
+
+                <p>
+                    100 Marks
+                </p>
+
+            </div>
+
+        `;
+
+        go('testseries');
+
+        return;
+
+    }
+
+
+    container.innerHTML = `
+
+        <div
+            class="choice-card"
+            data-stage="Prelims"
+        >
+
+            <div class="big-icon">
+                📝
+            </div>
+
+            <h2>
+                Prelims
+            </h2>
+
+            <p>
+                Preliminary examination practice tests
+            </p>
+
+        </div>
+
+
+        <div
+            class="choice-card"
+            data-stage="Mains"
+        >
+
+            <div class="big-icon">
+                📄
+            </div>
+
+            <h2>
+                Mains
+            </h2>
+
+            <p>
+                Main examination practice tests
+            </p>
+
+        </div>
+
+    `;
+
+
+    go('testseries');
+
+}
+
+
+/* =========================================================
+   OPEN PAPERS
+========================================================= */
+
+function openPapers(stage){
+
+    state.stage =
+        stage;
+
+
+    const title =
+        $('papersTitle');
+
+    if(title){
+
+        title.textContent =
+            state.course +
+            ' – ' +
+            stage +
+            ' Test Series';
+
+    }
+
+
+    const subtitle =
+        $('papersSubtitle');
+
+    if(subtitle){
+
+        subtitle.textContent =
+            'Free Mock Test and Test 1 to Test 15';
+
+    }
+
+
+    const container =
+        $('paperList');
+
+
+    const tests = [
+
+        {
+            name:'Free Mock Test',
+            number:0,
+            free:true
+        }
+
+    ];
+
+
+    for(
+        let i = 1;
+        i <= 15;
+        i++
+    ){
+
+        tests.push({
+
+            name:'Test ' + i,
+
+            number:i,
+
+            free:false
+
+        });
+
+    }
+
+
+    container.innerHTML =
+        tests.map(
+            function(test){
+
+                const locked =
+                    !test.free;
+
+                return `
+
+                    <div class="paper-card">
+
+                        <div
+                            style="font-size:36px;margin-bottom:8px;"
+                        >
+                            ${test.free ? '🆓' : '📝'}
+                        </div>
+
+                        <h3>
+                            ${test.name}
+                        </h3>
+
+                        <p>
+                            10 Questions • 15 Minutes
+                        </p>
+
+                        <div style="margin-bottom:12px;">
+
+                            ${
+                                test.free
+
+                                ?
+
+                                '<span class="badge badge-free">FREE</span>'
+
+                                :
+
+                                '<span class="badge badge-locked">PAID</span>'
+
+                            }
+
+                        </div>
+
+
+                        <button
+                            class="btn ${
+                                test.free
+                                ?
+                                'btn-success'
+                                :
+                                'btn-primary'
+                            }"
+                            data-test-number="${test.number}"
+                        >
+
+                            ${
+                                test.free
+                                ?
+                                'Start Free Test'
+                                :
+                                'Start Test'
+                            }
+
+                        </button>
+
+                    </div>
+
+                `;
+
+            }
+        ).join('');
+
+
+    go('papers');
+
+}
+
+
+/* =========================================================
+   TOPIC WISE
+========================================================= */
+
+function openTopicWiseTests(){
+
+    state.course =
+        'Endowment Officer';
+
+
+    $('topicCourseName').textContent =
+        'Endowment Officer – Topic-wise Tests';
+
+
+    const topics = [
+
+        'Hindu Philosophy',
+
+        'Vedic Culture',
+
+        'Vedas',
+
+        'Upavedas',
+
+        'Upanishads',
+
+        'Dharmas',
+
+        'Hindu Family Structure',
+
+        'Temple System',
+
+        'Temple Administration',
+
+        'Endowments Act',
+
+        'Section 29',
+
+        'Section 57',
+
+        'Temple Income',
+
+        'Allocation of Funds',
+
+        'Charitable Institutions',
+
+        'Current Affairs'
+
+    ];
+
+
+    $('topicList').innerHTML =
+        topics.map(
+            function(topic){
+
+                return `
+
+                    <div class="topic-card">
+
+                        <div>
+
+                            <h3>
+                                ${topic}
+                            </h3>
+
+                            <p>
+                                Topic-wise practice test
+                            </p>
+
+                        </div>
+
+                        <button
+                            class="btn btn-primary btn-small"
+                            data-topic="${topic}"
+                        >
+                            Start
+                        </button>
+
+                    </div>
+
+                `;
+
+            }
+        ).join('');
+
+
+    go('topicWise');
+
+}
+
+
+/* =========================================================
+   DEMO QUESTIONS
+========================================================= */
+
+const DEMO_QUESTIONS = [
+
+    {
+
+        question:
+            'The Constitution of India came into force on which date?',
+
+        options:[
+            '15 August 1947',
+            '26 January 1950',
+            '26 November 1949',
+            '2 October 1950'
+        ],
+
+        answer:1,
+
+        explanation:
+            'The Constitution of India came into force on 26 January 1950.'
+
+    },
+
+
+    {
+
+        question:
+            'Who is the constitutional head of the Union of India?',
+
+        options:[
+            'Prime Minister',
+            'President',
+            'Chief Justice of India',
+            'Speaker'
+        ],
+
+        answer:1,
+
+        explanation:
+            'The President is the constitutional head of the Union.'
+
+    },
+
+
+    {
+
+        question:
+            'Which Fundamental Right deals with equality before law?',
+
+        options:[
+            'Article 14',
+            'Article 19',
+            'Article 21',
+            'Article 32'
+        ],
+
+        answer:0,
+
+        explanation:
+            'Article 14 provides equality before law and equal protection of laws.'
+
+    },
+
+
+    {
+
+        question:
+            'The Parliament of India consists of which components?',
+
+        options:[
+            'Lok Sabha only',
+            'Rajya Sabha only',
+            'President and two Houses',
+            'Prime Minister and Lok Sabha'
+        ],
+
+        answer:2,
+
+        explanation:
+            'Parliament consists of the President and the two Houses: Lok Sabha and Rajya Sabha.'
+
+    },
+
+
+    {
+
+        question:
+            'Which body conducts elections in India?',
+
+        options:[
+            'Union Public Service Commission',
+            'Election Commission of India',
+            'Finance Commission',
+            'Planning Commission'
+        ],
+
+        answer:1,
+
+        explanation:
+            'The Election Commission of India conducts elections under the constitutional framework.'
+
+    },
+
+
+    {
+
+        question:
+            'Which is the highest court in India?',
+
+        options:[
+            'High Court',
+            'District Court',
+            'Supreme Court',
+            'Sessions Court'
+        ],
+
+        answer:2,
+
+        explanation:
+            'The Supreme Court is the highest court of India.'
+
+    },
+
+
+    {
+
+        question:
+            'Which organ of government primarily makes laws?',
+
+        options:[
+            'Executive',
+            'Legislature',
+            'Judiciary',
+            'Election Commission'
+        ],
+
+        answer:1,
+
+        explanation:
+            'The Legislature is the primary law-making organ.'
+
+    },
+
+
+    {
+
+        question:
+            'What is the normal term of the Lok Sabha?',
+
+        options:[
+            '3 years',
+            '4 years',
+            '5 years',
+            '6 years'
+        ],
+
+        answer:2,
+
+        explanation:
+            'The normal term of the Lok Sabha is five years unless dissolved earlier.'
+
+    },
+
+
+    {
+
+        question:
+            'Which part of the Constitution contains Fundamental Duties?',
+
+        options:[
+            'Part III',
+            'Part IV',
+            'Part IVA',
+            'Part V'
+        ],
+
+        answer:2,
+
+        explanation:
+            'Fundamental Duties are contained in Part IVA of the Constitution.'
+
+    },
+
+
+    {
+
+        question:
+            'Which Article provides constitutional remedies?',
+
+        options:[
+            'Article 14',
+            'Article 19',
+            'Article 21',
+            'Article 32'
+        ],
+
+        answer:3,
+
+        explanation:
+            'Article 32 provides the right to constitutional remedies.'
+
+    }
+
+];
+
+
+/* =========================================================
+   START EXAM
+========================================================= */
+
+function startExam(testName){
+
+    if(
+        !isLoggedIn()
+    ){
+
+        toast(
+            'Please login before attempting the test.'
+        );
+
+        go('loginPage');
+
+        return;
+
+    }
+
+
+    state.selectedTest =
+        testName;
+
+
+    state.questions =
+        JSON.parse(
+            JSON.stringify(
+                DEMO_QUESTIONS
+            )
+        );
+
+
+    state.questionIndex =
+        0;
+
+
+    state.answers =
+        new Array(
+            state.questions.length
+        ).fill(null);
+
+
+    state.timeLeft =
+        900;
+
+
+    clearInterval(
+        state.timer
+    );
+
+
+    $('examTitle').textContent =
+        state.course +
+        ' – ' +
+        (
+            state.stage
+            ||
+            'Mock Test'
+        ) +
+        ' – ' +
+        testName;
+
+
+    renderQuestion();
+
+
+    go(
+        'examPage'
+    );
+
+
+    startTimer();
+
+}
+
+
+/* =========================================================
+   RENDER QUESTION
+========================================================= */
+
+function renderQuestion(){
+
+    const questions =
+        state.questions;
+
+    if(
+        !questions ||
+        !questions.length
+    ){
+
+        return;
+
+    }
+
+
+    const index =
+        state.questionIndex;
+
+    const question =
+        questions[index];
+
+
+    $('questionNumber').textContent =
+        'Question ' +
+        (index + 1);
+
+
+    $('examProgress').textContent =
+        'Question ' +
+        (index + 1) +
+        ' of ' +
+        questions.length;
+
+
+    $('questionText').textContent =
+        question.question;
+
+
+    $('optionList').innerHTML =
+        question.options.map(
+            function(option,index){
+
+                const selected =
+                    state.answers[
+                        state.questionIndex
+                    ] === index;
+
+
+                return `
+
+                    <button
+                        class="option ${
+                            selected
+                            ?
+                            'selected'
+                            :
+                            ''
+                        }"
+                        data-option-index="${index}"
+                    >
+
+                        <strong>
+                            ${
+                                String.fromCharCode(
+                                    65 + index
+                                )
+                            }.
+                        </strong>
+
+                        ${option}
+
+                    </button>
+
+                `;
+
+            }
+        ).join('');
+
+
+    $('previousQuestionBtn').style.display =
+        index === 0
+        ?
+        'none'
+        :
+        'block';
+
+
+    $('nextQuestionBtn').style.display =
+        index === questions.length - 1
+        ?
+        'none'
+        :
+        'block';
+
+
+    $('submitExamBtn').style.display =
+        index === questions.length - 1
+        ?
+        'block'
+        :
+        'none';
+
+}
+
+
+/* =========================================================
+   SELECT ANSWER
+========================================================= */
+
+function selectAnswer(index){
+
+    state.answers[
+        state.questionIndex
+    ] = index;
+
+
+    renderQuestion();
+
+}
+
+
+/* =========================================================
+   NEXT QUESTION
+========================================================= */
+
+function nextQuestion(){
+
+    if(
+        state.questionIndex <
+        state.questions.length - 1
+    ){
+
+        state.questionIndex++;
+
+        renderQuestion();
+
+    }
+
+}
+
+
+/* =========================================================
+   PREVIOUS QUESTION
+========================================================= */
+
+function previousQuestion(){
+
+    if(
+        state.questionIndex > 0
+    ){
+
+        state.questionIndex--;
+
+        renderQuestion();
+
+    }
+
+}
+
+
+/* =========================================================
+   TIMER
+========================================================= */
+
+function startTimer(){
+
+    updateTimer();
+
+
+    state.timer =
+        setInterval(
+            function(){
+
+                state.timeLeft--;
+
+                updateTimer();
+
+
+                if(
+                    state.timeLeft <= 0
+                ){
+
+                    clearInterval(
+                        state.timer
+                    );
+
+                    toast(
+                        'Time is over. Test submitted automatically.'
+                    );
+
+                    submitExam(
+                        true
+                    );
+
+                }
+
+            },
+            1000
+        );
+
+}
+
+
+/* =========================================================
+   UPDATE TIMER
+========================================================= */
+
+function updateTimer(){
+
+    const total =
+        Math.max(
+            0,
+            state.timeLeft
+        );
+
+
+    const minutes =
+        Math.floor(
+            total / 60
+        );
+
+
+    const seconds =
+        total % 60;
+
+
+    $('timer').textContent =
+        String(minutes).padStart(2,'0') +
+        ':' +
+        String(seconds).padStart(2,'0');
+
+}
+
+
+/* =========================================================
+   SUBMIT EXAM
+========================================================= */
+
+function submitExam(
+    autoSubmit = false
+){
+
+    if(
+        !autoSubmit
+    ){
+
+        const unanswered =
+            state.answers.filter(
+                function(answer){
+
+                    return answer === null;
+
+                }
+            ).length;
+
+
+        if(
+            unanswered > 0
+        ){
+
+            const confirmed =
+                confirm(
+                    'There are ' +
+                    unanswered +
+                    ' unanswered questions. Submit anyway?'
+                );
+
+
+            if(!confirmed){
+
+                return;
+
+            }
+
+        }
+
+    }
+
+
+    clearInterval(
+        state.timer
+    );
+
+
+    let score = 0;
+
+
+    state.questions.forEach(
+        function(question,index){
+
+            if(
+                state.answers[index] ===
+                question.answer
+            ){
+
+                score++;
+
+            }
+
+        }
+    );
+
+
+    const total =
+        state.questions.length;
+
+
+    const percentage =
+        Math.round(
+            (
+                score / total
+            ) * 100
+        );
+
+
+    state.lastResult = {
+
+        course:
+            state.course,
+
+        stage:
+            state.stage,
+
+        test:
+            state.selectedTest,
+
+        score:
+            score,
+
+        total:
+            total,
+
+        percentage:
+            percentage,
+
+        answers:
+            [...state.answers],
+
+        questions:
+            JSON.parse(
+                JSON.stringify(
+                    state.questions
+                )
+            ),
+
+        date:
+            new Date().toISOString()
+
+    };
+
+
+    saveTestResult(
+        state.lastResult
+    );
+
+
+    $('resultScore').textContent =
+        score +
+        ' / ' +
+        total;
+
+
+    $('resultPercentage').textContent =
+        percentage +
+        '%';
+
+
+    if(
+        percentage >= 80
+    ){
+
+        $('resultMessage').textContent =
+            'Excellent performance. Keep practicing.';
+
+    }
+    else if(
+        percentage >= 50
+    ){
+
+        $('resultMessage').textContent =
+            'Good attempt. More practice can improve your score.';
+
+    }
+    else{
+
+        $('resultMessage').textContent =
+            'Keep practicing and review the solutions.';
+
+    }
+
+
+    go(
+        'resultPage'
+    );
+
+}
+
+
+/* =========================================================
+   SAVE TEST RESULT
+========================================================= */
+
+function saveTestResult(result){
+
+    if(
+        !isLoggedIn()
+    ){
+
+        return;
+
+    }
+
+
+    const key =
+        'vkTestResults';
+
+
+    const results =
+        JSON.parse(
+            localStorage.getItem(
+                key
+            ) ||
+            '[]'
+        );
+
+
+    results.unshift(
+        result
+    );
+
+
+    localStorage.setItem(
+        key,
+        JSON.stringify(
+            results.slice(
+                0,
+                100
+            )
+        )
+    );
+
+}
+
+
+/* =========================================================
+   SOLUTIONS
+========================================================= */
+
+function showSolutions(){
+
+    if(
+        !state.lastResult
+    ){
+
+        toast(
+            'No result available.'
+        );
+
+        return;
+
+    }
+
+
+    const result =
+        state.lastResult;
+
+
+    $('solutionsContent').innerHTML =
+        result.questions.map(
+            function(question,index){
+
+                const selected =
+                    result.answers[index];
+
+
+                const correct =
+                    question.answer;
+
+
+                const selectedText =
+                    selected === null
+                    ?
+                    'Not answered'
+                    :
+                    question.options[
+                        selected
+                    ];
+
+
+                const correctText =
+                    question.options[
+                        correct
+                    ];
+
+
+                const isCorrect =
+                    selected === correct;
+
+
+                return `
+
+                    <div class="solution-card">
+
+                        <div class="solution-question">
+
+                            Q${index + 1}.
+                            ${question.question}
+
+                        </div>
+
+
+                        <p>
+
+                            Your Answer:
+                            <span class="${
+                                isCorrect
+                                ?
+                                'correct'
+                                :
+                                'wrong'
+                            }">
+
+                                ${selectedText}
+
+                            </span>
+
+                        </p>
+
+
+                        <p>
+
+                            Correct Answer:
+                            <span class="correct">
+
+                                ${correctText}
+
+                            </span>
+
+                        </p>
+
+
+                        <p style="margin-top:8px;">
+
+                            <strong>
+                                Explanation:
+                            </strong>
+
+                            ${question.explanation}
+
+                        </p>
+
+                    </div>
+
+                `;
+
+            }
+        ).join('');
+
+
+    go(
+        'solutionsPage'
+    );
+
+}
+
+
+/* =========================================================
+   STORE
+========================================================= */
+
+function showStorePackages(
+    course
+){
+
+    state.course =
+        course;
+
+
+    const area =
+        $('packageArea');
+
+
+    area.innerHTML = `
+
+        <div class="section-title">
+
+            <h2>
+                ${course} Packages
+            </h2>
+
+            <p>
+                Choose a package to continue.
+            </p>
+
+        </div>
+
+
+        <div class="package-grid">
+
+            ${PACKAGES.map(
+                function(plan){
+
+                    return `
+
+                        <div class="package-card">
+
+                            <h3>
+                                ${plan.name}
+                            </h3>
+
+                            <div class="package-price">
+                                ₹${plan.price}
+                            </div>
+
+                            <p>
+                                ${plan.duration}
+                            </p>
+
+                            <p>
+                                Access to
+                                ${course}
+                                test series.
+                            </p>
+
+                            <button
+                                class="btn btn-primary"
+                                data-package-id="${plan.id}"
+                            >
+
+                                Select Package
+
+                            </button>
+
+                        </div>
+
+                    `;
+
+                }
+            ).join('')}
+
+        </div>
+
+    `;
+
+}
+
+
+/* =========================================================
+   SELECT PACKAGE
+========================================================= */
+
+function selectPackage(
+    packageId
+){
+
+    const plan =
+        PACKAGES.find(
+            function(item){
+
+                return item.id === packageId;
+
+            }
+        );
+
+
+    if(!plan){
+        return;
+    }
+
+
+    if(
+        !isLoggedIn()
+    ){
+
+        toast(
+            'Please login before purchasing a package.'
+        );
+
+        go(
+            'loginPage'
+        );
+
+        return;
+
+    }
+
+
+    /*
+       DEMO PURCHASE
+
+       Real Razorpay payment must be integrated with a
+       backend/server-side order verification system.
+    */
+
+
+    const confirmed =
+        confirm(
+            'Demo purchase: ' +
+            state.course +
+            ' - ₹' +
+            plan.price +
+            '. Continue?'
+        );
+
+
+    if(!confirmed){
+        return;
+    }
+
+
+    const expiry =
+        new Date();
+
+
+    if(
+        plan.id === 'day'
+    ){
+
+        expiry.setDate(
+            expiry.getDate() + 1
+        );
+
+    }
+    else if(
+        plan.id === 'week'
+    ){
+
+        expiry.setDate(
+            expiry.getDate() + 7
+        );
+
+    }
+    else if(
+        plan.id === 'month'
+    ){
+
+        expiry.setDate(
+            expiry.getDate() + 30
+        );
+
+    }
+    else if(
+        plan.id === 'year'
+    ){
+
+        expiry.setDate(
+            expiry.getDate() + 365
+        );
+
+    }
+
+
+    const purchase = {
+
+        course:
+            state.course,
+
+        plan:
+            plan.name,
+
+        amount:
+            plan.price,
+
+        duration:
+            plan.duration,
+
+        purchaseDate:
+            new Date().toISOString(),
+
+        expiry:
+            expiry.toISOString(),
+
+        status:
+            'Demo Active',
+
+        transactionId:
+            'DEMO-' +
+            Date.now()
+
+    };
+
+
+    localStorage.setItem(
+        'activePackage',
+        JSON.stringify(
+            purchase
+        )
+    );
+
+
+    const history =
+        JSON.parse(
+            localStorage.getItem(
+                'purchaseHistory'
+            ) ||
+            '[]'
+        );
+
+
+    history.unshift(
+        purchase
+    );
+
+
+    localStorage.setItem(
+        'purchaseHistory',
+        JSON.stringify(
+            history
+        )
+    );
+
+
+    toast(
+        'Package activated in demo mode.'
+    );
+
+
+    renderProfile();
+
+}
+
+
+/* =========================================================
+   CHECK ACTIVE PACKAGE
+========================================================= */
+
+function hasActivePackage(){
+
+    const raw =
+        localStorage.getItem(
+            'activePackage'
+        );
+
+
+    if(!raw){
+        return false;
+    }
+
+
+    try{
+
+        const packageData =
+            JSON.parse(raw);
+
+
+        return (
+            new Date(
+                packageData.expiry
+            ) > new Date()
+        );
+
+    }
+    catch(error){
+
+        return false;
+
+    }
+
+}
+
+
+/* =========================================================
+   PROFILE
+========================================================= */
+
+function renderProfile(){
+
+    if(
+        !isLoggedIn()
+    ){
+
+        return;
+
+    }
+
+
+    const name =
+        getStudentName();
+
+
+    const email =
+        getStudentEmail();
+
+
+    $('profileMainCard').innerHTML = `
+
+        <div class="profile-top">
+
+            <div class="avatar">
+                ${getInitials(name)}
+            </div>
+
+            <div>
+
+                <div class="profile-name">
+                    ${escapeHtml(name)}
+                </div>
+
+                <div class="profile-email">
+                    ${escapeHtml(email)}
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div
+            style="
+                display:flex;
+                gap:10px;
+                flex-wrap:wrap;
+            "
+        >
+
+            <span class="badge badge-open">
+                VK Exams Student
+            </span>
+
+            ${
+                hasActivePackage()
+                ?
+                '<span class="badge badge-free">Active Package</span>'
+                :
+                '<span class="badge badge-locked">No Active Package</span>'
+            }
+
+        </div>
+
+    `;
+
+
+    updateCoinBalance();
+
+}
+
+
+/* =========================================================
+   UPDATE LOGIN BUTTONS
+========================================================= */
+
+function updateLoginButtons(){
+
+    const logged =
+        isLoggedIn();
+
+
+    const desktop =
+        $('desktopLoginBtn');
+
+
+    const mobile =
+        $('mobileLoginBtn');
+
+
+    if(desktop){
+
+        desktop.textContent =
+            logged
+            ?
+            'Logout'
+            :
+            'Login';
+
+    }
+
+
+    if(mobile){
+
+        mobile.textContent =
+            logged
+            ?
+            '🚪 Logout'
+            :
+            '🔐 Login';
+
+    }
+
+}
+
+
+/* =========================================================
+   LOGOUT
+========================================================= */
+
+async function logout(){
+
+    if(
+        supabaseReady
+    ){
+
+        try{
+
+            await supabaseClient.auth.signOut();
+
+        }
+        catch(error){
+
+            console.error(
+                error
+            );
+
+        }
+
+    }
+
+
+    localStorage.removeItem(
+        'studentEmail'
+    );
+
+    localStorage.removeItem(
+        'studentName'
+    );
+
+    localStorage.removeItem(
+        'studentProvider'
+    );
+
+
+    toast(
+        'Logged out successfully.'
+    );
+
+
+    updateLoginButtons();
+
+
+    go(
+        'home'
+    );
+
+}
+
+
+/* =========================================================
+   AUTH MODE
+========================================================= */
+
+let registerMode = false;
+
+
+function setAuthMode(
+    register
+){
+
+    registerMode =
+        register;
+
+
+    $('loginHeading').textContent =
+        register
+        ?
+        'Create Account'
+        :
+        'Login';
+
+
+    $('loginDescription').textContent =
+        register
+        ?
+        'Create your VK Exams student account.'
+        :
+        'Login to attempt tests and save results.';
+
+
+    $('nameGroup').style.display =
+        register
+        ?
+        'block'
+        :
+        'none';
+
+
+    $('authName').required =
+        register;
+
+
+    $('authSubmitBtn').textContent =
+        register
+        ?
+        'Create Account'
+        :
+        'Login';
+
+
+    $('toggleRegisterBtn').textContent =
+        register
+        ?
+        'Already have an account? Login'
+        :
+        'Create Account';
+
+}
+
+
+/* =========================================================
+   AUTH FORM
+========================================================= */
+
+async function handleAuthSubmit(
+    event
+){
+
+    event.preventDefault();
+
+
+    const name =
+        $('authName').value.trim();
+
+
+    const email =
+        $('authEmail').value.trim();
+
+
+    const password =
+        $('authPassword').value;
+
+
+    if(
+        !email ||
+        !password
+    ){
+
+        toast(
+            'Please enter email and password.'
+        );
+
+        return;
+
+    }
+
+
+    if(
+        registerMode &&
+        !name
+    ){
+
+        toast(
+            'Please enter your full name.'
+        );
+
+        return;
+
+    }
+
+
+    /* =====================================================
+       SUPABASE AUTH
+    ===================================================== */
+
+    if(
+        supabaseReady
+    ){
+
+        try{
+
+            if(registerMode){
+
+                const {
+                    data,
+                    error
+                } =
+                    await supabaseClient.auth.signUp({
+
+                        email:
+                            email,
+
+                        password:
+                            password,
+
+                        options:{
+
+                            data:{
+
+                                full_name:
+                                    name
+
+                            }
+
+                        }
+
+                    });
+
+
+                if(error){
+                    throw error;
+                }
+
+
+                if(
+                    data &&
+                    data.user
+                ){
+
+                    localStorage.setItem(
+                        'studentEmail',
+                        email
+                    );
+
+                    localStorage.setItem(
+                        'studentName',
+                        name
+                    );
+
+                    localStorage.setItem(
+                        'studentProvider',
+                        'email'
+                    );
+
+
+                    toast(
+                        'Account created successfully.'
+                    );
+
+
+                    renderProfile();
+
+                    go(
+                        'profile'
+                    );
+
+                }
+
+            }
+            else{
+
+                const {
+                    data,
+                    error
+                } =
+                    await supabaseClient.auth.signInWithPassword({
+
+                        email:
+                            email,
+
+                        password:
+                            password
+
+                    });
+
+
+                if(error){
+                    throw error;
+                }
+
+
+                const user =
+                    data.user;
+
+
+                const fullName =
+                    user?.user_metadata?.full_name
+                    ||
+                    user?.email?.split('@')[0]
+                    ||
+                    'Student';
+
+
+                localStorage.setItem(
+                    'studentEmail',
+                    user.email
+                );
+
+                localStorage.setItem(
+                    'studentName',
+                    fullName
+                );
+
+                localStorage.setItem(
+                    'studentProvider',
+                    'email'
+                );
+
+
+                toast(
+                    'Login successful.'
+                );
+
+
+                renderProfile();
+
+                go(
+                    'profile'
+                );
+
+            }
+
+
+            return;
+
+        }
+        catch(error){
+
+            toast(
+                error.message ||
+                'Authentication failed.'
+            );
+
+            return;
+
+        }
+
+    }
+
+
+    /* =====================================================
+       DEMO LOCAL LOGIN
+       Used until Supabase is connected.
+    ===================================================== */
+
+    if(registerMode){
+
+        localStorage.setItem(
+            'studentEmail',
+            email
+        );
+
+        localStorage.setItem(
+            'studentName',
+            name
+        );
+
+        localStorage.setItem(
+            'studentProvider',
+            'demo'
+        );
+
+
+        toast(
+            'Demo account created.'
+        );
+
+    }
+    else{
+
+        localStorage.setItem(
+            'studentEmail',
+            email
+        );
+
+        localStorage.setItem(
+            'studentName',
+            name ||
+            email.split('@')[0]
+        );
+
+        localStorage.setItem(
+            'studentProvider',
+            'demo'
+        );
+
+
+        toast(
+            'Demo login successful.'
+        );
+
+    }
+
+
+    renderProfile();
+
+    go(
+        'profile'
+    );
+
+}
+
+
+/* =========================================================
+   GOOGLE LOGIN
+========================================================= */
+
+async function googleLogin(){
+
+    if(
+        !supabaseReady
+    ){
+
+        toast(
+            'Google Login will work after Supabase configuration.'
+        );
+
+        return;
+
+    }
+
+
+    try{
+
+        const {
+            error
+        } =
+            await supabaseClient.auth.signInWithOAuth({
+
+                provider:'google',
+
+                options:{
+
+                    redirectTo:
+                        window.location.origin +
+                        window.location.pathname
+
+                }
+
+            });
+
+
+        if(error){
+            throw error;
+        }
+
+    }
+    catch(error){
+
+        toast(
+            error.message ||
+            'Google login failed.'
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   FORGOT PASSWORD
+========================================================= */
+
+async function forgotPassword(){
+
+    const email =
+        prompt(
+            'Enter your registered email address:'
+        );
+
+
+    if(!email){
+        return;
+    }
+
+
+    if(
+        !supabaseReady
+    ){
+
+        toast(
+            'Password reset will work after Supabase configuration.'
+        );
+
+        return;
+
+    }
+
+
+    try{
+
+        const {
+            error
+        } =
+            await supabaseClient.auth.resetPasswordForEmail(
+                email.trim(),
+                {
+
+                    redirectTo:
+                        window.location.origin +
+                        window.location.pathname
+
+                }
+            );
+
+
+        if(error){
+            throw error;
+        }
+
+
+        toast(
+            'Password reset email sent.'
+        );
+
+    }
+    catch(error){
+
+        toast(
+            error.message ||
+            'Password reset failed.'
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   GUEST
+========================================================= */
+
+function continueAsGuest(){
+
+    localStorage.removeItem(
+        'studentEmail'
+    );
+
+    localStorage.removeItem(
+        'studentName'
+    );
+
+    localStorage.setItem(
+        'guestMode',
+        'true'
+    );
+
+
+    toast(
+        'Continuing as Guest.'
+    );
+
+
+    go(
+        'home'
+    );
+
+}
+
+
+/* =========================================================
+   COINS
+========================================================= */
+
+function getCoins(){
+
+    return parseFloat(
+        localStorage.getItem(
+            'studentCoins'
+        ) ||
+        '0'
+    );
+
+}
+
+
+function updateCoinBalance(){
+
+    const balance =
+        $('coinBalance');
+
+    if(balance){
+
+        balance.textContent =
+            getCoins().toFixed(1);
+
+    }
+
+}
+
+
+function completeCoinAd(){
+
+    /*
+       Placeholder.
+
+       Real rewarded advertisement will be connected
+       after Google AdMob / AdSense or supported
+       advertising setup.
+    */
+
+
+    const current =
+        getCoins();
+
+
+    const updated =
+        current + 0.5;
+
+
+    localStorage.setItem(
+        'studentCoins',
+        updated.toString()
+    );
+
+
+    updateCoinBalance();
+
+
+    toast(
+        '0.5 Student Coin added in demo mode.'
+    );
+
+}
+
+
+/* =========================================================
+   PURCHASE HISTORY
+========================================================= */
+
+function showPurchaseHistory(){
+
+    const history =
+        JSON.parse(
+            localStorage.getItem(
+                'purchaseHistory'
+            ) ||
+            '[]'
+        );
+
+
+    if(
+        history.length === 0
+    ){
+
+        showModal(
+
+            'Purchase History',
+
+            `
+
+                <div class="empty-box">
+
+                    <h3>
+                        No purchases yet
+                    </h3>
+
+                    <p>
+                        Your package purchases will appear here.
+                    </p>
+
+                </div>
+
+            `
+
+        );
+
+        return;
+
+    }
+
+
+    showModal(
+
+        'Purchase History',
+
+        `
+
+            <div class="history-list">
+
+                ${history.map(
+                    function(item){
+
+                        return `
+
+                            <div class="history-item">
+
+                                <strong>
+                                    ${escapeHtml(item.course)}
+                                </strong>
+
+                                <br>
+
+                                Plan:
+                                ${escapeHtml(item.plan)}
+
+                                <br>
+
+                                Amount:
+                                ₹${item.amount}
+
+                                <br>
+
+                                Status:
+                                ${escapeHtml(item.status)}
+
+                                <br>
+
+                                Transaction:
+                                ${escapeHtml(item.transactionId)}
+
+                                <br>
+
+                                Expiry:
+                                ${formatDate(item.expiry)}
+
+                            </div>
+
+                        `;
+
+                    }
+                ).join('')}
+
+            </div>
+
+        `
+
+    );
+
+}
+
+
+/* =========================================================
+   TEST RESULTS
+========================================================= */
+
+function showTestResults(){
+
+    const results =
+        JSON.parse(
+            localStorage.getItem(
+                'vkTestResults'
+            ) ||
+            '[]'
+        );
+
+
+    if(
+        results.length === 0
+    ){
+
+        showModal(
+
+            'Test Results',
+
+            `
+
+                <div class="empty-box">
+
+                    <h3>
+                        No test results
+                    </h3>
+
+                    <p>
+                        Complete a test to see your results here.
+                    </p>
+
+                </div>
+
+            `
+
+        );
+
+        return;
+
+    }
+
+
+    showModal(
+
+        'Test Results',
+
+        `
+
+            <div class="history-list">
+
+                ${results.map(
+                    function(result){
+
+                        return `
+
+                            <div class="history-item">
+
+                                <strong>
+                                    ${escapeHtml(result.course)}
+                                </strong>
+
+                                <br>
+
+                                ${
+                                    escapeHtml(
+                                        result.stage ||
+                                        ''
+                                    )
+                                }
+
+                                -
+                                ${
+                                    escapeHtml(
+                                        result.test
+                                    )
+                                }
+
+                                <br>
+
+                                Score:
+                                ${result.score}
+                                /
+                                ${result.total}
+
+                                <br>
+
+                                Percentage:
+                                ${result.percentage}%
+
+                                <br>
+
+                                Date:
+                                ${formatDate(result.date)}
+
+                            </div>
+
+                        `;
+
+                    }
+                ).join('')}
+
+            </div>
+
+        `
+
+    );
+
+}
+
+
+/* =========================================================
+   ACTIVE PACKAGE
+========================================================= */
+
+function showActivePackage(){
+
+    const raw =
+        localStorage.getItem(
+            'activePackage'
+        );
+
+
+    if(!raw){
+
+        showModal(
+
+            'Active Package',
+
+            `
+
+                <div class="empty-box">
+
+                    <h3>
+                        No active package
+                    </h3>
+
+                    <p>
+                        Purchase a package from Store.
+                    </p>
+
+                </div>
+
+            `
+
+        );
+
+        return;
+
+    }
+
+
+    try{
+
+        const item =
+            JSON.parse(raw);
+
+
+        const expiry =
+            new Date(
+                item.expiry
+            );
+
+
+        const today =
+            new Date();
+
+
+        const remaining =
+            Math.max(
+                0,
+                Math.ceil(
+                    (
+                        expiry -
+                        today
+                    )
+                    /
+                    (
+                        1000 *
+                        60 *
+                        60 *
+                        24
+                    )
+                )
+            );
+
+
+        showModal(
+
+            'Active Package',
+
+            `
+
+                <div class="history-item">
+
+                    <h3>
+                        ${escapeHtml(item.course)}
+                    </h3>
+
+                    <p>
+                        Plan:
+                        ${escapeHtml(item.plan)}
+                    </p>
+
+                    <p>
+                        Amount:
+                        ₹${item.amount}
+                    </p>
+
+                    <p>
+                        Expiry:
+                        ${formatDate(item.expiry)}
+                    </p>
+
+                    <p>
+                        Remaining Days:
+                        <strong>
+                            ${remaining}
+                        </strong>
+                    </p>
+
+                    <p>
+                        Status:
+                        ${escapeHtml(item.status)}
+                    </p>
+
+                </div>
+
+            `
+
+        );
+
+    }
+    catch(error){
+
+        toast(
+            'Unable to read active package.'
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   EDIT PROFILE
+========================================================= */
+
+function showEditProfile(){
+
+    const currentName =
+        getStudentName();
+
+
+    showModal(
+
+        'Edit Profile',
+
+        `
+
+            <div class="form-group">
+
+                <label>
+                    Full Name
+                </label>
+
+                <input
+                    type="text"
+                    id="editNameInput"
+                    value="${escapeHtml(currentName)}"
+                >
+
+            </div>
+
+
+            <button
+                class="btn btn-primary"
+                id="saveProfileBtn"
+            >
+                Save Changes
+            </button>
+
+        `
+
+    );
+
+}
+
+
+/* =========================================================
+   SAVE PROFILE
+========================================================= */
+
+function saveProfile(){
+
+    const input =
+        $('editNameInput');
+
+
+    if(!input){
+        return;
+    }
+
+
+    const name =
+        input.value.trim();
+
+
+    if(!name){
+
+        toast(
+            'Please enter your name.'
+        );
+
+        return;
+
+    }
+
+
+    localStorage.setItem(
+        'studentName',
+        name
+    );
+
+
+    renderProfile();
+
+    closeModal();
+
+
+    toast(
+        'Profile updated.'
+    );
+
+}
+
+
+/* =========================================================
+   SETTINGS
+========================================================= */
+
+function showSettings(){
+
+    const dark =
+        localStorage.getItem(
+            'darkMode'
+        ) === 'true';
+
+
+    const notifications =
+        localStorage.getItem(
+            'notifications'
+        ) !== 'false';
+
+
+    showModal(
+
+        'Settings',
+
+        `
+
+            <div style="display:flex;flex-direction:column;gap:14px;">
+
+                <label>
+
+                    <input
+                        type="checkbox"
+                        id="notificationSetting"
+                        ${notifications ? 'checked' : ''}
+                    >
+
+                    Enable Notifications
+
+                </label>
+
+
+                <label>
+
+                    <input
+                        type="checkbox"
+                        id="darkModeSetting"
+                        ${dark ? 'checked' : ''}
+                    >
+
+                    Dark Mode
+
+                </label>
+
+
+                <label>
+
+                    Language
+
+                    <select
+                        id="languageSetting"
+                        style="
+                            display:block;
+                            width:100%;
+                            margin-top:6px;
+                            padding:10px;
+                            border:1px solid #d1d5db;
+                            border-radius:8px;
+                        "
+                    >
+
+                        <option>
+                            English
+                        </option>
+
+                        <option>
+                            Telugu
+                        </option>
+
+                    </select>
+
+                </label>
+
+
+                <button
+                    class="btn btn-primary"
+                    id="saveSettingsBtn"
+                >
+                    Save Settings
+                </button>
+
+            </div>
+
+        `
+
+    );
+
+}
+
+
+/* =========================================================
+   SAVE SETTINGS
+========================================================= */
+
+function saveSettings(){
+
+    const notification =
+        $('notificationSetting');
+
+
+    const dark =
+        $('darkModeSetting');
+
+
+    if(notification){
+
+        localStorage.setItem(
+            'notifications',
+            notification.checked
+                ? 'true'
+                : 'false'
+        );
+
+    }
+
+
+    if(dark){
+
+        localStorage.setItem(
+            'darkMode',
+            dark.checked
+                ? 'true'
+                : 'false'
+        );
+
+        applyDarkMode();
+
+    }
+
+
+    closeModal();
+
+
+    toast(
+        'Settings saved.'
+    );
+
+}
+
+
+/* =========================================================
+   DARK MODE
+========================================================= */
+
+function applyDarkMode(){
+
+    const enabled =
+        localStorage.getItem(
+            'darkMode'
+        ) === 'true';
+
+
+    document.body.classList.toggle(
+        'dark',
+        enabled
+    );
+
+}
+
+
+/* =========================================================
+   HELP
+========================================================= */
+
+function showHelp(){
+
+    showModal(
+
+        'Help & Support',
+
+        `
+
+            <p>
+                For support related to VK Exams, please contact
+                the platform administrator.
+            </p>
+
+            <br>
+
+            <p>
+                You can also use the Profile section to check
+                packages, purchase history and test results.
+            </p>
+
+        `
+
+    );
+
+}
+
+
+/* =========================================================
+   MODAL
+========================================================= */
+
+function showModal(
+    title,
+    content
+){
+
+    $('modalTitle').textContent =
+        title;
+
+
+    $('modalContent').innerHTML =
+        content;
+
+
+    $('modalOverlay').classList.add(
+        'active'
+    );
+
+}
+
+
+function closeModal(){
+
+    $('modalOverlay').classList.remove(
+        'active'
+    );
+
+}
+
+
+/* =========================================================
+   FORMAT DATE
+========================================================= */
+
+function formatDate(
+    date
+){
+
+    if(!date){
+        return '-';
+    }
+
+
+    try{
+
+        return new Date(
+            date
+        ).toLocaleString(
+            'en-IN'
+        );
+
+    }
+    catch(error){
+
+        return date;
+
+    }
+
+}
+
+
+/* =========================================================
+   ESCAPE HTML
+========================================================= */
+
+function escapeHtml(
+    value
+){
+
+    return String(
+        value ?? ''
+    )
+    .replace(
+        /&/g,
+        '&amp;'
+    )
+    .replace(
+        /</g,
+        '&lt;'
+    )
+    .replace(
+        />/g,
+        '&gt;'
+    )
+    .replace(
+        /"/g,
+        '&quot;'
+    )
+    .replace(
+        /'/g,
+        '&#039;'
+    );
+
+}
+
+
+/* =========================================================
+   EVENT DELEGATION
+=========================================================
+
+   ONE CENTRAL CLICK HANDLER.
+
+   This avoids the old problem where individual onclick
+   functions or dynamically replaced elements caused
+   navigation problems.
+
+========================================================= */
+
+document.addEventListener(
+    'click',
+    function(event){
+
+        const target =
+            event.target.closest(
+                'button, .category-card, .choice-card'
+            );
+
+
+        if(!target){
+            return;
+        }
+
+
+        /* -----------------------------------------------
+           NAVIGATION BUTTON
+        ------------------------------------------------ */
+
+        const nav =
+            target.dataset.nav;
+
+
+        if(nav){
+
+            if(
+                nav === 'profile'
+            ){
+
+                if(
+                    !isLoggedIn()
+                ){
+
+                    go(
+                        'loginPage'
+                    );
+
+                    return;
+
+                }
+
+                renderProfile();
+
+            }
+
+
+            go(
+                nav
+            );
+
+
+            $('mobileMenu').classList.remove(
+                'active'
+            );
+
+
+            return;
+
+        }
+
+
+        /* -----------------------------------------------
+           HOME COURSE CARD
+        ------------------------------------------------ */
+
+        const course =
+            target.dataset.course;
+
+
+        if(course){
+
+            openCourse(
+                course
+            );
+
+            return;
+
+        }
+
+
+        /* -----------------------------------------------
+           STORE COURSE CARD
+        ------------------------------------------------ */
+
+        const storeCourse =
+            target.dataset.storeCourse;
+
+
+        if(storeCourse){
+
+            showStorePackages(
+                storeCourse
+            );
+
+            return;
+
+        }
+
+
+        /* -----------------------------------------------
+           COURSE OPTIONS
+        ------------------------------------------------ */
+
+        const courseAction =
+            target.dataset.courseAction;
+
+
+        if(courseAction){
+
+            if(
+                courseAction === 'syllabus'
+            ){
+
+                openSyllabus();
+
+            }
+            else if(
+                courseAction === 'testseries'
+            ){
+
+                openTestSeries();
+
+            }
+            else if(
+                courseAction === 'topicwise'
+            ){
+
+                openTopicWiseTests();
+
+            }
+
+            return;
+
+        }
+
+
+        /* -----------------------------------------------
+           TEST STAGE
+        ------------------------------------------------ */
+
+        const stage =
+            target.dataset.stage;
+
+
+        if(stage){
+
+            openPapers(
+                stage
+            );
+
+            return;
+
+        }
+
+
+        /* -----------------------------------------------
+           TEST NUMBER
+        ------------------------------------------------ */
+
+        if(
+            target.dataset.testNumber !== undefined
+        ){
+
+            const testNumber =
+                Number(
+                    target.dataset.testNumber
+                );
+
+
+            const testName =
+                testNumber === 0
+                ?
+                'Free Mock Test'
+                :
+                'Test ' +
+                testNumber;
+
+
+            if(
+                testNumber > 0 &&
+                !hasActivePackage()
+            ){
+
+                toast(
+                    'This test requires an active package.'
+                );
+
+                showStorePackages(
+                    state.course
+                );
+
+                go(
+                    'store'
+                );
+
+                return;
+
+            }
+
+
+            startExam(
+                testName
+            );
+
+            return;
+
+        }
+
+
+        /* -----------------------------------------------
+           TOPIC
+        ------------------------------------------------ */
+
+        const topic =
+            target.dataset.topic;
+
+
+        if(topic){
+
+            state.topic =
+                topic;
+
+
+            state.stage =
+                'Topic-wise';
+
+
+            startExam(
+                topic
+            );
+
+            return;
+
+        }
+
+
+        /* -----------------------------------------------
+           BACK
+        ------------------------------------------------ */
+
+        if(
+            target.hasAttribute(
+                'data-back'
+            )
+        ){
+
+            goBack();
+
+            return;
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   LOGO
+========================================================= */
+
+$('logoBtn').addEventListener(
+    'click',
+    function(){
+
+        routeStack = [];
+
+        renderPage(
+            'home'
+        );
+
+        history.pushState(
+            {
+                vkPage:'home'
+            },
+            '',
+            '#home'
+        );
+
+    }
+);
+
+
+/* =========================================================
+   MOBILE MENU
+========================================================= */
+
+$('mobileMenuBtn').addEventListener(
+    'click',
+    function(){
+
+        $('mobileMenu').classList.toggle(
+            'active'
+        );
+
+    }
+);
+
+
+/* =========================================================
+   DESKTOP LOGIN BUTTON
+========================================================= */
+
+$('desktopLoginBtn').addEventListener(
+    'click',
+    function(){
+
+        if(
+            isLoggedIn()
+        ){
+
+            logout();
+
+        }
+        else{
+
+            go(
+                'loginPage'
+            );
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   MOBILE LOGIN BUTTON
+========================================================= */
+
+$('mobileLoginBtn').addEventListener(
+    'click',
+    function(){
+
+        $('mobileMenu').classList.remove(
+            'active'
+        );
+
+
+        if(
+            isLoggedIn()
+        ){
+
+            logout();
+
+        }
+        else{
+
+            go(
+                'loginPage'
+            );
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   AUTH FORM
+========================================================= */
+
+$('authForm').addEventListener(
+    'submit',
+    handleAuthSubmit
+);
+
+
+/* =========================================================
+   GOOGLE LOGIN
+========================================================= */
+
+$('googleLoginBtn').addEventListener(
+    'click',
+    googleLogin
+);
+
+
+/* =========================================================
+   GUEST
+========================================================= */
+
+$('guestBtn').addEventListener(
+    'click',
+    continueAsGuest
+);
+
+
+/* =========================================================
+   REGISTER TOGGLE
+========================================================= */
+
+$('toggleRegisterBtn').addEventListener(
+    'click',
+    function(){
+
+        setAuthMode(
+            !registerMode
+        );
+
+    }
+);
+
+
+/* =========================================================
+   FORGOT PASSWORD
+========================================================= */
+
+$('forgotPasswordBtn').addEventListener(
+    'click',
+    forgotPassword
+);
+
+
+/* =========================================================
+   PREVIOUS
+========================================================= */
+
+$('previousQuestionBtn').addEventListener(
+    'click',
+    previousQuestion
+);
+
+
+/* =========================================================
+   NEXT
+========================================================= */
+
+$('nextQuestionBtn').addEventListener(
+    'click',
+    nextQuestion
+);
+
+
+/* =========================================================
+   SUBMIT
+========================================================= */
+
+$('submitExamBtn').addEventListener(
+    'click',
+    function(){
+
+        submitExam(
+            false
+        );
+
+    }
+);
+
+
+/* =========================================================
+   QUESTION OPTION CLICK
+========================================================= */
+
+$('optionList').addEventListener(
+    'click',
+    function(event){
+
+        const option =
+            event.target.closest(
+                '[data-option-index]'
+            );
+
+
+        if(!option){
+            return;
+        }
+
+
+        const index =
+            Number(
+                option.dataset.optionIndex
+            );
+
+
+        selectAnswer(
+            index
+        );
+
+    }
+);
+
+
+/* =========================================================
+   SOLUTIONS
+========================================================= */
+
+$('solutionsBtn').addEventListener(
+    'click',
+    showSolutions
+);
+
+
+/* =========================================================
+   REATTEMPT
+========================================================= */
+
+$('reattemptBtn').addEventListener(
+    'click',
+    function(){
+
+        if(
+            state.selectedTest
+        ){
+
+            startExam(
+                state.selectedTest
+            );
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   BACK TEST SERIES
+========================================================= */
+
+$('backTestSeriesBtn').addEventListener(
+    'click',
+    function(){
+
+        openTestSeries();
+
+    }
+);
+
+
+/* =========================================================
+   SOLUTIONS BACK
+========================================================= */
+
+$('solutionsBackBtn').addEventListener(
+    'click',
+    function(){
+
+        go(
+            'resultPage'
+        );
+
+    }
+);
+
+
+/* =========================================================
+   COIN
+========================================================= */
+
+$('coinAdBtn').addEventListener(
+    'click',
+    completeCoinAd
+);
+
+
+/* =========================================================
+   PROFILE
+========================================================= */
+
+$('editProfileBtn').addEventListener(
+    'click',
+    showEditProfile
+);
+
+
+$('settingsBtn').addEventListener(
+    'click',
+    showSettings
+);
+
+
+$('purchaseHistoryBtn').addEventListener(
+    'click',
+    showPurchaseHistory
+);
+
+
+$('testResultsBtn').addEventListener(
+    'click',
+    showTestResults
+);
+
+
+$('activePackageBtn').addEventListener(
+    'click',
+    showActivePackage
+);
+
+
+$('helpBtn').addEventListener(
+    'click',
+    showHelp
+);
+
+
+$('profileLogoutBtn').addEventListener(
+    'click',
+    logout
+);
+
+
+/* =========================================================
+   MODAL EVENTS
+========================================================= */
+
+$('modalCloseBtn').addEventListener(
+    'click',
+    closeModal
+);
+
+
+$('modalOverlay').addEventListener(
+    'click',
+    function(event){
+
+        if(
+            event.target ===
+            $('modalOverlay')
+        ){
+
+            closeModal();
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   DYNAMIC MODAL BUTTONS
+========================================================= */
+
+$('modalContent').addEventListener(
+    'click',
+    function(event){
+
+        if(
+            event.target.id ===
+            'saveProfileBtn'
+        ){
+
+            saveProfile();
+
+        }
+
+
+        if(
+            event.target.id ===
+            'saveSettingsBtn'
+        ){
+
+            saveSettings();
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   PACKAGE BUTTONS
+========================================================= */
+
+document.addEventListener(
+    'click',
+    function(event){
+
+        const packageButton =
+            event.target.closest(
+                '[data-package-id]'
+            );
+
+
+        if(!packageButton){
+            return;
+        }
+
+
+        selectPackage(
+            packageButton.dataset.packageId
+        );
+
+    }
+);
+
+
+/* =========================================================
+   FREE MOCK FROM HERO
+========================================================= */
+
+$('freeMockHeroBtn').addEventListener(
+    'click',
+    function(){
+
+        if(
+            !isLoggedIn()
+        ){
+
+            toast(
+                'Please login to start the Free Mock Test.'
+            );
+
+            go(
+                'loginPage'
+            );
+
+            return;
+
+        }
+
+
+        state.course =
+            'APPSC';
+
+        state.stage =
+            'Free Mock';
+
+
+        startExam(
+            'Free Mock Test'
+        );
+
+    }
+);
+
+
+/* =========================================================
+   APPLY AUTHENTICATED USER
+========================================================= */
+
+async function loadSupabaseSession(){
+
+    if(
+        !supabaseReady
+    ){
+
+        return;
+
+    }
+
+
+    try{
+
+        const {
+            data
+        } =
+            await supabaseClient.auth.getSession();
+
+
+        const session =
+            data?.session;
+
+
+        if(
+            session &&
+            session.user
+        ){
+
+            const user =
+                session.user;
+
+
+            const fullName =
+                user.user_metadata?.full_name
+                ||
+                user.email?.split('@')[0]
+                ||
+                'Student';
+
+
+            localStorage.setItem(
+                'studentEmail',
+                user.email
+            );
+
+
+            localStorage.setItem(
+                'studentName',
+                fullName
+            );
+
+
+            localStorage.setItem(
+                'studentProvider',
+                'supabase'
+            );
+
+
+            updateLoginButtons();
+
+        }
+
+    }
+    catch(error){
+
+        console.error(
+            'Session error:',
+            error
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   SUPABASE AUTH STATE
+========================================================= */
+
+function initializeAuthListener(){
+
+    if(
+        !supabaseReady
+    ){
+
+        return;
+
+    }
+
+
+    supabaseClient.auth.onAuthStateChange(
+        function(
+            event,
+            session
+        ){
+
+            if(
+                session &&
+                session.user
+            ){
+
+                const user =
+                    session.user;
+
+
+                const fullName =
+                    user.user_metadata?.full_name
+                    ||
+                    user.email?.split('@')[0]
+                    ||
+                    'Student';
+
+
+                localStorage.setItem(
+                    'studentEmail',
+                    user.email
+                );
+
+
+                localStorage.setItem(
+                    'studentName',
+                    fullName
+                );
+
+
+                localStorage.setItem(
+                    'studentProvider',
+                    'supabase'
+                );
+
+            }
+
+
+            updateLoginButtons();
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   INITIALIZATION
+========================================================= */
+
+function initializeVKExams(){
+
+    try{
+
+        /*
+           IMPORTANT:
+           We DO NOT call renderHome().
+
+           Home cards are already static HTML.
+        */
+
+        renderStoreCourses();
+
+        applyDarkMode();
+
+        updateLoginButtons();
+
+        setAuthMode(
+            false
+        );
+
+        loadSupabaseSession();
+
+        initializeAuthListener();
+
+
+        const hash =
+            window.location.hash
+                .replace('#','');
+
+
+        if(
+            PAGE_IDS.includes(hash)
+        ){
+
+            renderPage(
+                hash,
+                false
+            );
+
+        }
+        else{
+
+            renderPage(
+                'home',
+                false
+            );
+
+        }
+
+    }
+    catch(error){
+
+        console.error(
+            'VK Exams initialization error:',
+            error
+        );
+
+
+        /*
+           Safety fallback:
+           Even if another JavaScript feature fails,
+           Home page remains visible.
+        */
+
+        PAGE_IDS.forEach(
+            function(id){
+
+                const page =
+                    $(id);
+
+                if(page){
+
+                    page.classList.remove(
+                        'active'
+                    );
+
+                }
+
+            }
+        );
+
+
+        $('home').classList.add(
+            'active'
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   START APPLICATION
+========================================================= */
+
+if(
+    document.readyState ===
+    'loading'
+){
+
+    document.addEventListener(
+        'DOMContentLoaded',
+        initializeVKExams
+    );
+
+}
+else{
+
+    initializeVKExams();
+
+}
+
+</script>
+
+</body>
+
+</html>
