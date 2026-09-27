@@ -754,46 +754,6 @@ footer p{
 
 <body>
 
-<!-- EARLY MOBILE NAVIGATION HANDLER -->
-<script>
-(function(){
-    document.addEventListener("click", function(e){
-        const card = e.target.closest && e.target.closest("#home .category-card");
-        if(card){
-            const title = card.querySelector("h3");
-            const course = title ? title.textContent.trim() : "";
-            if(course){
-                e.preventDefault();
-                e.stopImmediatePropagation();
-                if(typeof openCourse === "function") openCourse(course);
-                return;
-            }
-        }
-
-        const login = e.target.closest && e.target.closest("#loginNav");
-        if(login){
-            e.preventDefault();
-            e.stopImmediatePropagation();
-            if(typeof logoutStudent === "function" && localStorage.getItem("studentEmail")){
-                logoutStudent();
-            } else if(typeof openLogin === "function"){
-                openLogin();
-            }
-            return;
-        }
-
-        const home = e.target.closest && e.target.closest('.nav-links a');
-        if(home){
-            const label = home.textContent.trim();
-            if(label === "Home"){ e.preventDefault(); e.stopImmediatePropagation(); if(typeof showHome === "function") showHome(); return; }
-            if(label === "Store"){ e.preventDefault(); e.stopImmediatePropagation(); if(typeof openStore === "function") openStore(); return; }
-            if(label === "Profile"){ e.preventDefault(); e.stopImmediatePropagation(); if(typeof openProfile === "function") openProfile(); return; }
-        }
-    }, true);
-})();
-</script>
-
-
 <!-- HEADER -->
 
 <header>
@@ -2894,17 +2854,6 @@ function openLogin(){
 
 }
 
-// Extra reliable Login button handler
-document.addEventListener("DOMContentLoaded", function(){
-    const loginButton = document.getElementById("loginNav");
-    if(loginButton){
-        loginButton.addEventListener("click", function(e){
-            e.preventDefault();
-            openLogin();
-        });
-    }
-});
-
 function openRegisterForm(){
 
     document.getElementById("registerName").value = "";
@@ -3769,75 +3718,41 @@ window.addEventListener("popstate", function(event){
     
 
 
+
 /* =========================================
-   MOBILE NAVIGATION RELIABILITY FIX
+   CLEAN MOBILE NAVIGATION
+   Single delegated click handler.
 ========================================= */
-
-(function(){
-    function bindOnce(element, handler){
-        if(!element) return;
-        element.onclick = null;
-        element.addEventListener("click", function(e){
+document.addEventListener("click", function(e){
+    const target = e.target.closest ? e.target.closest(".category-card") : null;
+    if(target){
+        const course = target.querySelector("h3")?.textContent.trim();
+        if(course && courses.includes(course) && target.closest("#home")){
             e.preventDefault();
-            e.stopPropagation();
-            handler(e);
-        }, false);
-    }
-
-    function bindHomeNavigation(){
-        const homeLink = document.querySelector('.nav-links a[onclick="showHome()"]');
-        bindOnce(homeLink, function(){ showPage("home"); });
-
-        const storeLink = document.querySelector('.nav-links a[onclick="openStore()"]');
-        bindOnce(storeLink, function(){ openStore(); });
-
-        const profileLink = document.querySelector('.nav-links a[onclick="openProfile()"]');
-        bindOnce(profileLink, function(){ openProfile(); });
-
-        const loginButton = document.getElementById("loginNav");
-        if(loginButton){
-            loginButton.onclick = null;
-            loginButton.addEventListener("click", function(e){
-                e.preventDefault();
-                e.stopPropagation();
-                if(localStorage.getItem("studentEmail")){
-                    logoutStudent();
-                }else{
-                    openLogin();
-                }
-            }, false);
-        }
-
-        document.querySelectorAll("#home .category-card").forEach(function(card){
-            const title = card.querySelector("h3");
-            if(!title) return;
-            const course = title.innerText.trim();
-            if(courses.indexOf(course) === -1) return;
-            card.onclick = null;
-            card.addEventListener("click", function(e){
-                e.preventDefault();
-                e.stopPropagation();
-                openCourse(course);
-            }, false);
-        });
-
-        const heroStore = document.querySelector("#home .hero-buttons .btn");
-        if(heroStore){
-            heroStore.onclick = null;
-            heroStore.addEventListener("click", function(e){
-                e.preventDefault();
-                e.stopPropagation();
-                openStore();
-            }, false);
+            openCourse(course);
+            return;
         }
     }
 
-    if(document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", bindHomeNavigation);
-    } else {
-        bindHomeNavigation();
+    const nav = e.target.closest ? e.target.closest(".nav-links a") : null;
+    if(nav){
+        e.preventDefault();
+        if(nav.id === "loginNav"){
+            if(localStorage.getItem("studentEmail")){
+                logoutStudent();
+            }else{
+                openLogin();
+            }
+            return;
+        }
+        const label = nav.textContent.trim();
+        if(label === "Home") showHome();
+        else if(label === "Store") openStore();
+        else if(label === "Profile") openProfile();
+        return;
     }
-})();
+}, false);
+
 </script>
 
 </body>
