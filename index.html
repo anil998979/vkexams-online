@@ -741,6 +741,13 @@ footer p{
 
 }
 
+
+/* NAVIGATION RELIABILITY FIX */
+.nav-links a, .category-card, .choice-card, .btn, button {
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
 </style>
 
 </head>
@@ -3721,6 +3728,77 @@ window.addEventListener("popstate", function(event){
 
 }
     
+
+
+/* =========================================
+   MOBILE NAVIGATION RELIABILITY FIX
+========================================= */
+
+(function(){
+    function bindOnce(element, handler){
+        if(!element) return;
+        element.onclick = null;
+        element.addEventListener("click", function(e){
+            e.preventDefault();
+            e.stopPropagation();
+            handler(e);
+        }, false);
+    }
+
+    function bindHomeNavigation(){
+        const homeLink = document.querySelector('.nav-links a[onclick="showHome()"]');
+        bindOnce(homeLink, function(){ showPage("home"); });
+
+        const storeLink = document.querySelector('.nav-links a[onclick="openStore()"]');
+        bindOnce(storeLink, function(){ openStore(); });
+
+        const profileLink = document.querySelector('.nav-links a[onclick="openProfile()"]');
+        bindOnce(profileLink, function(){ openProfile(); });
+
+        const loginButton = document.getElementById("loginNav");
+        if(loginButton){
+            loginButton.onclick = null;
+            loginButton.addEventListener("click", function(e){
+                e.preventDefault();
+                e.stopPropagation();
+                if(localStorage.getItem("studentEmail")){
+                    logoutStudent();
+                }else{
+                    openLogin();
+                }
+            }, false);
+        }
+
+        document.querySelectorAll("#home .category-card").forEach(function(card){
+            const title = card.querySelector("h3");
+            if(!title) return;
+            const course = title.innerText.trim();
+            if(courses.indexOf(course) === -1) return;
+            card.onclick = null;
+            card.addEventListener("click", function(e){
+                e.preventDefault();
+                e.stopPropagation();
+                openCourse(course);
+            }, false);
+        });
+
+        const heroStore = document.querySelector("#home .hero-buttons .btn");
+        if(heroStore){
+            heroStore.onclick = null;
+            heroStore.addEventListener("click", function(e){
+                e.preventDefault();
+                e.stopPropagation();
+                openStore();
+            }, false);
+        }
+    }
+
+    if(document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", bindHomeNavigation);
+    } else {
+        bindHomeNavigation();
+    }
+})();
 </script>
 
 </body>
