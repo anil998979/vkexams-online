@@ -2087,6 +2087,18 @@ function openTestSeries(){
                 <h2>Test Series</h2>
                 <p>100 Marks</p>
             </div>`;
+    } else if(currentCourse === "Endowment Officer"){
+        list.innerHTML = `
+            <div class="choice-card" onclick="openPaper('Paper 1')">
+                <div class="big-icon">📘</div>
+                <h2>Paper 1</h2>
+                <p>Endowment Officer – Paper 1 Tests</p>
+            </div>
+            <div class="choice-card" onclick="openPaper('Paper 2')">
+                <div class="big-icon">📕</div>
+                <h2>Paper 2</h2>
+                <p>Endowment Officer – Paper 2 Tests</p>
+            </div>`;
     } else {
         list.innerHTML = `
             <div class="choice-card" onclick="openPaper('Prelims')">
