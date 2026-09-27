@@ -772,8 +772,11 @@ footer p{
 <a onclick="openProfile()">Profile</a>
 
 <a id="loginNav"
+href="javascript:void(0)"
 class="login-btn"
-onclick="openLogin()">
+role="button"
+tabindex="0"
+onclick="openLogin(); return false;">
 Login
 </a>
 
@@ -2841,8 +2844,20 @@ function reattempt(){
 function openLogin(){
 
     showPage("loginPage");
+    return false;
 
 }
+
+// Extra reliable Login button handler
+document.addEventListener("DOMContentLoaded", function(){
+    const loginButton = document.getElementById("loginNav");
+    if(loginButton){
+        loginButton.addEventListener("click", function(e){
+            e.preventDefault();
+            openLogin();
+        });
+    }
+});
 
 function openRegisterForm(){
 
