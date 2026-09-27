@@ -754,6 +754,45 @@ footer p{
 
 <body>
 
+<!-- EARLY MOBILE NAVIGATION HANDLER -->
+<script>
+(function(){
+    document.addEventListener("click", function(e){
+        const card = e.target.closest && e.target.closest("#home .category-card");
+        if(card){
+            const title = card.querySelector("h3");
+            const course = title ? title.textContent.trim() : "";
+            if(course){
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                if(typeof openCourse === "function") openCourse(course);
+                return;
+            }
+        }
+
+        const login = e.target.closest && e.target.closest("#loginNav");
+        if(login){
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            if(typeof logoutStudent === "function" && localStorage.getItem("studentEmail")){
+                logoutStudent();
+            } else if(typeof openLogin === "function"){
+                openLogin();
+            }
+            return;
+        }
+
+        const home = e.target.closest && e.target.closest('.nav-links a');
+        if(home){
+            const label = home.textContent.trim();
+            if(label === "Home"){ e.preventDefault(); e.stopImmediatePropagation(); if(typeof showHome === "function") showHome(); return; }
+            if(label === "Store"){ e.preventDefault(); e.stopImmediatePropagation(); if(typeof openStore === "function") openStore(); return; }
+            if(label === "Profile"){ e.preventDefault(); e.stopImmediatePropagation(); if(typeof openProfile === "function") openProfile(); return; }
+        }
+    }, true);
+})();
+</script>
+
 
 <!-- HEADER -->
 
