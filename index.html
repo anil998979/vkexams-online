@@ -766,7 +766,6 @@ footer p{
 
 <a onclick="showHome()">Home</a>
 
-<a onclick="openExplore()">Exams</a>
 
 <a onclick="openStore()">Store</a>
 
@@ -806,12 +805,6 @@ competitive examinations, government jobs and professional entrance tests.
 
 <button
 class="btn btn-primary"
-onclick="openAPPSC()">
-Explore Exams
-</button>
-
-<button
-class="btn btn-light"
 onclick="openStore()">
 View Packages
 </button>
@@ -997,36 +990,6 @@ Prepare from mobile, tablet or computer.
 </div>
 
 
-<!-- EXPLORE PAGE -->
-
-<div id="explore" class="page">
-
-<div class="container">
-
-<span class="back"
-onclick="showHome()">
-← Back to Home
-</span>
-
-<div class="section-title">
-
-<h2>
-Explore Exams
-</h2>
-
-<p>
-Choose an examination.
-</p>
-
-</div>
-
-<div id="exploreList"></div>
-
-</div>
-
-</div>
-
-
 <!-- COURSE PAGE -->
 
 <div id="course" class="page">
@@ -1051,44 +1014,7 @@ Choose Syllabus or Test Series
 </div>
 
 
-<div class="choice-grid">
-
-<div class="choice-card"
-onclick="openSyllabus()">
-
-<div class="big-icon">
-📖
-</div>
-
-<h2>
-Syllabus
-</h2>
-
-<p>
-View complete examination syllabus
-</p>
-
-</div>
-
-
-<div class="choice-card"
-onclick="openTestSeries()">
-
-<div class="big-icon">
-🎯
-</div>
-
-<h2>
-Test Series
-</h2>
-
-<p>
-Practice Paper 1 and Paper 2 tests
-</p>
-
-</div>
-
-</div>
+<div id="courseOptions" class="choice-grid"></div>
 
 </div>
 
@@ -1142,65 +1068,32 @@ class="syllabus-list">
 
 <div class="container">
 
-<span class="back"
-onclick="openCourse(currentCourse)">
+<span class="back" onclick="openCourse(currentCourse)">
 ← Back
 </span>
 
 <div class="exam-header">
+<h1 id="seriesTitle">Test Series</h1>
+<p id="seriesSubtitle">Select your test category</p>
+</div>
 
-<h1 id="seriesTitle">
-Test Series
-</h1>
+<div id="testSeriesOptions" class="paper-grid"></div>
 
-<p>
-Select Paper 1 or Paper 2
-</p>
-
+</div>
 </div>
 
 
-<div class="paper-grid">
+<!-- TOPIC WISE TESTS PAGE -->
 
-<div class="choice-card"
-onclick="openPaper(1)">
-
-<div class="big-icon">
-📘
+<div id="topicWise" class="page">
+<div class="container">
+<span class="back" onclick="openCourse(currentCourse)">← Back</span>
+<div class="exam-header">
+<h1>Topic-wise Tests</h1>
+<p>Practice tests by individual topic</p>
 </div>
-
-<h2>
-Paper - 1
-</h2>
-
-<p>
-General / Common Examination Paper
-</p>
-
+<div id="topicWiseList" class="paper-grid"></div>
 </div>
-
-
-<div class="choice-card"
-onclick="openPaper(2)">
-
-<div class="big-icon">
-📕
-</div>
-
-<h2>
-Paper - 2
-</h2>
-
-<p>
-Subject Specific Examination Paper
-</p>
-
-</div>
-
-</div>
-
-</div>
-
 </div>
 
 
@@ -1983,66 +1876,6 @@ function showHome(){
 
 
 /* =========================================
-   EXPLORE
-========================================= */
-
-function openExplore(){
-
-    const list =
-    document.getElementById("exploreList");
-
-    list.innerHTML = "";
-
-    courses.forEach(function(course){
-
-        const card =
-        document.createElement("div");
-
-        card.className = "category-card";
-
-        card.style.marginBottom = "18px";
-
-        card.innerHTML = `
-            <div class="icon">${getCourseIcon(course)}</div>
-            <h3>${course}</h3>
-            <p>Open ${course} examination</p>
-        `;
-
-        card.onclick = function(){
-            openCourse(course);
-        };
-
-        list.appendChild(card);
-
-    });
-
-    showPage("explore");
-}
-
-
-function getCourseIcon(course){
-
-    if(course === "APPSC") return "📚";
-    if(course === "Endowment Officer") return "🛕";
-    if(course === "High Court") return "⚖️";
-    if(course === "Police") return "👮";
-    if(course === "DSC") return "🎓";
-    if(course === "Banks") return "🏦";
-
-    return "📘";
-}
-
-
-/* Explore Exams button -> APPSC */
-
-function openAPPSC(){
-
-    openCourse("APPSC");
-
-}
-
-
-/* =========================================
    COURSE
 ========================================= */
 
@@ -2050,8 +1883,32 @@ function openCourse(course){
 
     currentCourse = course;
 
-    document.getElementById("courseTitle")
-    .innerText = course;
+    document.getElementById("courseTitle").innerText = course;
+
+    const options = document.getElementById("courseOptions");
+
+    options.innerHTML = `
+        <div class="choice-card" onclick="openSyllabus()">
+            <div class="big-icon">📖</div>
+            <h2>Syllabus</h2>
+            <p>View complete examination syllabus</p>
+        </div>
+        <div class="choice-card" onclick="openTestSeries()">
+            <div class="big-icon">🎯</div>
+            <h2>Test Series</h2>
+            <p>Practice examination tests</p>
+        </div>
+    `;
+
+    if(course === "Endowment Officer"){
+        options.innerHTML += `
+            <div class="choice-card" onclick="openTopicWiseTests()">
+                <div class="big-icon">📚</div>
+                <h2>Topic-wise Tests</h2>
+                <p>Practice tests topic by topic</p>
+            </div>
+        `;
+    }
 
     showPage("course");
 
@@ -2218,12 +2075,57 @@ function getSyllabus(course){
 
 function openTestSeries(){
 
-    document.getElementById("seriesTitle")
-    .innerText =
-    currentCourse + " – Test Series";
+    document.getElementById("seriesTitle").innerText = currentCourse + " – Test Series";
+
+    const list = document.getElementById("testSeriesOptions");
+    list.innerHTML = "";
+
+    if(currentCourse === "High Court"){
+        list.innerHTML = `
+            <div class="choice-card" onclick="openPaper('High Court')">
+                <div class="big-icon">⚖️</div>
+                <h2>Test Series</h2>
+                <p>100 Marks</p>
+            </div>`;
+    } else {
+        list.innerHTML = `
+            <div class="choice-card" onclick="openPaper('Prelims')">
+                <div class="big-icon">📘</div>
+                <h2>Prelims</h2>
+                <p>Preliminary Examination Tests</p>
+            </div>
+            <div class="choice-card" onclick="openPaper('Mains')">
+                <div class="big-icon">📕</div>
+                <h2>Mains</h2>
+                <p>Main Examination Tests</p>
+            </div>`;
+    }
 
     showPage("testseries");
 
+}
+
+
+/* =========================================
+   TOPIC-WISE TESTS
+========================================= */
+
+function openTopicWiseTests(){
+
+    const list = document.getElementById("topicWiseList");
+    list.innerHTML = "";
+
+    getSyllabus("Endowment Officer").forEach(function(topic,index){
+        list.innerHTML += `
+            <div class="choice-card">
+                <div class="big-icon">📝</div>
+                <h2>${topic}</h2>
+                <p>Topic-wise practice tests</p>
+                <button class="btn btn-blue" style="margin-top:15px" onclick="openLockedTest(${index+1})">Start Test</button>
+            </div>`;
+    });
+
+    showPage("topicWise");
 }
 
 
@@ -2235,39 +2137,28 @@ function openPaper(paper){
 
     currentPaper = paper;
 
-    document.getElementById("paperTitle")
-    .innerText =
-    currentCourse +
-    " – Paper " +
-    paper;
+    let displayName = paper;
+    if(currentCourse === "High Court") displayName = "Test Series";
 
-    const list =
-    document.getElementById("testList");
+    document.getElementById("paperTitle").innerText =
+        currentCourse + " – " + displayName;
 
+    const list = document.getElementById("testList");
     list.innerHTML = "";
 
     for(let i=1;i<=15;i++){
-
         list.innerHTML += `
-        <div
-        class="test-item locked"
-        onclick="openLockedTest(${i})">
+        <div class="test-item locked" onclick="openLockedTest(${i})">
+            <span>Test-${i}</span>
+            <span class="locked-label">🔒</span>
+        </div>`;
+    }
 
-            <span>
-            Test-${i}
-            </span>
-
-            <span class="locked-label">
-            🔒
-            </span>
-
-        </div>
-        `;
-
+    if(currentCourse === "High Court"){
+        document.getElementById("paperTitle").innerText = "High Court – Test Series";
     }
 
     showPage("papers");
-
 }
 
 
