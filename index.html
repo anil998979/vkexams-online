@@ -1583,8 +1583,6 @@ Close
 
 <!-- LOGIN / REGISTER -->
 
-
-
 <div id="loginPage" class="page">
 
 <div class="container">
@@ -1596,57 +1594,63 @@ Close
 </h2>
 
 <p style="color:#6b7280;margin:10px 0 20px">
-Login or register using your mobile number
+Create your account or login to continue.
 </p>
 
-<label>
-Mobile Number
-</label>
+<label>Email Address</label>
 
 <input
-id="mobileInput"
+id="loginEmail"
 class="form-input"
-type="tel"
-maxlength="10"
-placeholder="Enter 10 digit mobile number">
+type="email"
+autocomplete="email"
+placeholder="Enter your email">
 
 <br><br>
+
+<label>Password</label>
+
+<input
+id="loginPassword"
+class="form-input"
+type="password"
+autocomplete="current-password"
+placeholder="Enter your password">
+
+<br>
 
 <button
 class="btn btn-blue"
 style="width:100%"
-onclick="sendOTP()">
-Send OTP
+onclick="emailPasswordLogin()">
+Login
 </button>
-
-<div id="otpArea"
-style="display:none;margin-top:20px">
-
-<label>
-Enter OTP
-</label>
-
-<input
-id="otpInput"
-class="form-input"
-type="number"
-maxlength="6"
-placeholder="Enter OTP">
-
-<br><br>
 
 <button
-class="btn btn-primary"
-style="width:100%"
-onclick="verifyOTP()">
-Verify OTP
+class="btn btn-light"
+style="width:100%;margin:12px 0 0"
+onclick="openRegisterForm()">
+Create Account
 </button>
 
-<p style="font-size:13px;color:#6b7280;margin-top:10px">
-Demo OTP: 123456
-</p>
-
+<div style="display:flex;align-items:center;gap:10px;margin:18px 0;color:#9ca3af">
+    <div style="height:1px;background:#e5e7eb;flex:1"></div>
+    <span style="font-size:13px">OR</span>
+    <div style="height:1px;background:#e5e7eb;flex:1"></div>
 </div>
+
+<button
+class="btn btn-google"
+style="width:100%;background:#fff;color:#172033;border:1px solid #d1d5db"
+onclick="signInWithGoogle()">
+<span style="font-weight:800;font-size:18px">G</span>&nbsp; Continue with Google
+</button>
+
+<button
+style="border:0;background:none;color:#1746a2;font-weight:600;margin-top:16px"
+onclick="openForgotPassword()">
+Forgot Password?
+</button>
 
 <div style="margin-top:25px;text-align:center">
 
@@ -1659,7 +1663,7 @@ Skip for now
 
 <p style="font-size:13px;color:#6b7280;margin-top:10px">
 You can browse the website without login.<br>
-Login / Register is required to attempt tests.
+Login is required to attempt tests.
 </p>
 
 </div>
@@ -1671,40 +1675,60 @@ Login / Register is required to attempt tests.
 </div>
 
 
-<!-- REGISTRATION MODAL -->
+<!-- CREATE ACCOUNT MODAL -->
 
 <div id="registerModal" class="modal">
 
 <div class="modal-box">
 
 <h2>
-🎓 Complete Registration
+🎓 Create Student Account
 </h2>
 
 <p style="color:#6b7280;margin-bottom:20px">
-Enter your details to complete your student profile.
+Enter your details to create your VK Exams account.
 </p>
 
-<label>
-Name
-</label>
+<label>Name</label>
 
 <input
 id="registerName"
 class="form-input"
+autocomplete="name"
 placeholder="Enter your name">
 
 <br><br>
 
-<label>
-Email ID <span style="color:#9ca3af">(Optional)</span>
-</label>
+<label>Email Address</label>
 
 <input
 id="registerEmail"
 class="form-input"
 type="email"
+autocomplete="email"
 placeholder="Enter your email">
+
+<br><br>
+
+<label>Password</label>
+
+<input
+id="registerPassword"
+class="form-input"
+type="password"
+autocomplete="new-password"
+placeholder="Create a password (minimum 6 characters)">
+
+<br><br>
+
+<label>Confirm Password</label>
+
+<input
+id="registerConfirmPassword"
+class="form-input"
+type="password"
+autocomplete="new-password"
+placeholder="Confirm your password">
 
 <div class="modal-buttons">
 
@@ -1712,6 +1736,106 @@ placeholder="Enter your email">
 class="btn btn-primary"
 onclick="registerStudent()">
 Register
+</button>
+
+<button
+class="btn btn-light"
+onclick="closeRegisterForm()">
+Cancel
+</button>
+
+</div>
+
+<div style="display:flex;align-items:center;gap:10px;margin:18px 0;color:#9ca3af">
+    <div style="height:1px;background:#e5e7eb;flex:1"></div>
+    <span style="font-size:13px">OR</span>
+    <div style="height:1px;background:#e5e7eb;flex:1"></div>
+</div>
+
+<button
+class="btn btn-light"
+style="width:100%;border:1px solid #d1d5db"
+onclick="signInWithGoogle()">
+<span style="font-weight:800;font-size:18px">G</span>&nbsp; Sign up with Google
+</button>
+
+</div>
+
+</div>
+
+
+<!-- FORGOT PASSWORD MODAL -->
+
+<div id="forgotPasswordModal" class="modal">
+
+<div class="modal-box">
+
+<h2>
+🔐 Forgot Password
+</h2>
+
+<p style="color:#6b7280;margin-bottom:20px">
+Enter your registered email. We will send a password reset link.
+</p>
+
+<input
+id="forgotEmail"
+class="form-input"
+type="email"
+autocomplete="email"
+placeholder="Enter your email">
+
+<div class="modal-buttons">
+
+<button class="btn btn-primary" onclick="sendPasswordReset()">
+Send Reset Link
+</button>
+
+<button class="btn btn-light" onclick="closeForgotPassword()">
+Cancel
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+
+<!-- RESET PASSWORD MODAL -->
+
+<div id="resetPasswordModal" class="modal">
+
+<div class="modal-box">
+
+<h2>
+🔑 Set New Password
+</h2>
+
+<p style="color:#6b7280;margin-bottom:20px">
+Enter your new password below.
+</p>
+
+<input
+id="newPassword"
+class="form-input"
+type="password"
+autocomplete="new-password"
+placeholder="New password">
+
+<br><br>
+
+<input
+id="confirmNewPassword"
+class="form-input"
+type="password"
+autocomplete="new-password"
+placeholder="Confirm new password">
+
+<div class="modal-buttons">
+
+<button class="btn btn-primary" onclick="updatePassword()">
+Update Password
 </button>
 
 </div>
@@ -1812,7 +1936,38 @@ Online Exam Preparation Platform
 </footer>
 
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <script>
+
+/* =========================================
+   SUPABASE AUTH CONFIGURATION
+   Replace these two values with your Supabase Project URL
+   and Publishable/Anon key from Supabase Dashboard.
+========================================= */
+
+const SUPABASE_URL = "YOUR_SUPABASE_PROJECT_URL";
+const SUPABASE_ANON_KEY = "YOUR_SUPABASE_PUBLISHABLE_OR_ANON_KEY";
+
+let supabase = null;
+let supabaseReady = false;
+
+if(
+    SUPABASE_URL.startsWith("https://") &&
+    !SUPABASE_URL.includes("YOUR_") &&
+    SUPABASE_ANON_KEY &&
+    !SUPABASE_ANON_KEY.includes("YOUR_")
+){
+    supabase = window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_ANON_KEY
+    );
+    supabaseReady = true;
+}
+
+function getAuthRedirectUrl(){
+    return window.location.origin + window.location.pathname;
+}
 
 /* =========================================
    GLOBAL DATA
@@ -2087,18 +2242,6 @@ function openTestSeries(){
                 <h2>Test Series</h2>
                 <p>100 Marks</p>
             </div>`;
-    } else if(currentCourse === "Endowment Officer"){
-        list.innerHTML = `
-            <div class="choice-card" onclick="openPaper('Paper 1')">
-                <div class="big-icon">📘</div>
-                <h2>Paper 1</h2>
-                <p>Endowment Officer – Paper 1 Tests</p>
-            </div>
-            <div class="choice-card" onclick="openPaper('Paper 2')">
-                <div class="big-icon">📕</div>
-                <h2>Paper 2</h2>
-                <p>Endowment Officer – Paper 2 Tests</p>
-            </div>`;
     } else {
         list.innerHTML = `
             <div class="choice-card" onclick="openPaper('Prelims')">
@@ -2259,7 +2402,7 @@ function buyPlan(plan){
 
 function isStudentLoggedIn(){
 
-    return !!localStorage.getItem("studentMobile");
+    return !!localStorage.getItem("studentEmail");
 
 }
 
@@ -2701,245 +2844,274 @@ function openLogin(){
 
 }
 
+function openRegisterForm(){
 
-function sendOTP(){
-
-    const mobile =
-    document.getElementById("mobileInput")
-    .value.trim();
-
-    if(!/^[0-9]{10}$/.test(mobile)){
-
-        alert("Please enter a valid 10 digit mobile number.");
-
-        return;
-
-    }
-
-    localStorage.setItem(
-        "pendingMobile",
-        mobile
-    );
-
-    document.getElementById("otpArea")
-    .style.display = "block";
-
-    alert(
-        "Demo OTP sent.\n\nFor testing use: 123456"
-    );
+    document.getElementById("registerName").value = "";
+    document.getElementById("registerEmail").value = document.getElementById("loginEmail")?.value.trim() || "";
+    document.getElementById("registerPassword").value = "";
+    document.getElementById("registerConfirmPassword").value = "";
+    document.getElementById("registerModal").classList.add("active");
 
 }
 
+function closeRegisterForm(){
 
-function verifyOTP(){
-
-    const otp =
-    document.getElementById("otpInput")
-    .value.trim();
-
-    if(otp !== "123456"){
-
-        alert("Invalid OTP.");
-
-        return;
-
-    }
-
-    const mobile =
-    localStorage.getItem("pendingMobile");
-
-    if(!mobile){
-
-        alert("Mobile number not found. Please try again.");
-
-        return;
-
-    }
-
-    const registeredUsers =
-    JSON.parse(
-        localStorage.getItem("registeredUsers") || "{}"
-    );
-
-    const existingUser =
-    registeredUsers[mobile];
-
-
-    /* EXISTING REGISTERED USER */
-
-    if(existingUser){
-
-        localStorage.setItem(
-            "studentMobile",
-            mobile
-        );
-
-        localStorage.setItem(
-            "studentName",
-            existingUser.name
-        );
-
-        localStorage.setItem(
-            "studentEmail",
-            existingUser.email || ""
-        );
-
-        localStorage.setItem(
-            "guestMode",
-            "false"
-        );
-
-        updateLoginButton();
-
-        alert(
-            "Welcome back, " +
-            existingUser.name + "!"
-        );
-
-        showHome();
-
-        return;
-
-    }
-
-
-    /* NEW USER */
-
-    document.getElementById("registerName")
-    .value = "";
-
-    document.getElementById("registerEmail")
-    .value = "";
-
-    document.getElementById("registerModal")
-    .classList.add("active");
+    document.getElementById("registerModal").classList.remove("active");
 
 }
 
+async function emailPasswordLogin(){
 
-function registerStudent(){
+    const email = document.getElementById("loginEmail").value.trim();
+    const password = document.getElementById("loginPassword").value;
 
-    const name =
-    document.getElementById("registerName")
-    .value.trim();
-
-    const email =
-    document.getElementById("registerEmail")
-    .value.trim();
-
-    if(!name){
-
-        alert("Please enter your name.");
-
+    if(!email || !/^\S+@\S+\.\S+$/.test(email)){
+        alert("Please enter a valid email address.");
         return;
-
     }
 
-    const mobile =
-    localStorage.getItem("pendingMobile");
-
-    if(!mobile){
-
-        alert("Mobile number not found. Please login again.");
-
+    if(!password){
+        alert("Please enter your password.");
         return;
-
     }
 
-    const registeredUsers =
-    JSON.parse(
-        localStorage.getItem("registeredUsers") || "{}"
-    );
+    if(!supabaseReady){
+        alert("Supabase Auth is not configured yet. Add your Supabase Project URL and Publishable/Anon Key in the code first.");
+        return;
+    }
 
-    registeredUsers[mobile] = {
-        name:name,
-        email:email
-    };
+    const { data, error } = await supabase.auth.signInWithPassword({
+        email: email,
+        password: password
+    });
 
-    localStorage.setItem(
-        "registeredUsers",
-        JSON.stringify(registeredUsers)
-    );
+    if(error){
+        alert(error.message);
+        return;
+    }
 
-    localStorage.setItem(
-        "studentMobile",
-        mobile
-    );
-
-    localStorage.setItem(
-        "studentName",
-        name
-    );
-
-    localStorage.setItem(
-        "studentEmail",
-        email
-    );
-
-    localStorage.setItem(
-        "guestMode",
-        "false"
-    );
-
-    document.getElementById("registerModal")
-    .classList.remove("active");
-
-    updateLoginButton();
-
-    alert(
-        "Registration successful!\n\nWelcome to VK Exams, " +
-        name + "!"
-    );
-
+    await applyAuthenticatedUser(data.user);
     showHome();
 
 }
 
+async function registerStudent(){
+
+    const name = document.getElementById("registerName").value.trim();
+    const email = document.getElementById("registerEmail").value.trim();
+    const password = document.getElementById("registerPassword").value;
+    const confirmPassword = document.getElementById("registerConfirmPassword").value;
+
+    if(!name){
+        alert("Please enter your name.");
+        return;
+    }
+
+    if(!email || !/^\S+@\S+\.\S+$/.test(email)){
+        alert("Please enter a valid email address.");
+        return;
+    }
+
+    if(password.length < 6){
+        alert("Password must be at least 6 characters.");
+        return;
+    }
+
+    if(password !== confirmPassword){
+        alert("Passwords do not match.");
+        return;
+    }
+
+    if(!supabaseReady){
+        alert("Supabase Auth is not configured yet. Add your Supabase Project URL and Publishable/Anon Key in the code first.");
+        return;
+    }
+
+    const { data, error } = await supabase.auth.signUp({
+        email: email,
+        password: password,
+        options: {
+            data: {
+                full_name: name
+            },
+            emailRedirectTo: getAuthRedirectUrl()
+        }
+    });
+
+    if(error){
+        alert(error.message);
+        return;
+    }
+
+    document.getElementById("registerModal").classList.remove("active");
+
+    if(data.user && data.session){
+        await applyAuthenticatedUser(data.user);
+        alert("Registration successful!\n\nWelcome to VK Exams, " + name + "!");
+        showHome();
+    }else{
+        alert("Account created successfully. Please check your email and click the confirmation link before logging in.");
+        document.getElementById("loginEmail").value = email;
+        document.getElementById("loginPassword").value = "";
+        showPage("loginPage");
+    }
+
+}
+
+async function signInWithGoogle(){
+
+    if(!supabaseReady){
+        alert("Supabase Auth is not configured yet. Add your Supabase Project URL and Publishable/Anon Key in the code first.");
+        return;
+    }
+
+    const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+            redirectTo: getAuthRedirectUrl()
+        }
+    });
+
+    if(error){
+        alert(error.message);
+    }
+
+}
+
+function openForgotPassword(){
+
+    const currentEmail = document.getElementById("loginEmail")?.value.trim() || "";
+    document.getElementById("forgotEmail").value = currentEmail;
+    document.getElementById("forgotPasswordModal").classList.add("active");
+
+}
+
+function closeForgotPassword(){
+
+    document.getElementById("forgotPasswordModal").classList.remove("active");
+
+}
+
+async function sendPasswordReset(){
+
+    const email = document.getElementById("forgotEmail").value.trim();
+
+    if(!email || !/^\S+@\S+\.\S+$/.test(email)){
+        alert("Please enter a valid email address.");
+        return;
+    }
+
+    if(!supabaseReady){
+        alert("Supabase Auth is not configured yet. Add your Supabase Project URL and Publishable/Anon Key in the code first.");
+        return;
+    }
+
+    const { error } = await supabase.auth.resetPasswordForEmail(email,{
+        redirectTo: getAuthRedirectUrl()
+    });
+
+    if(error){
+        alert(error.message);
+        return;
+    }
+
+    closeForgotPassword();
+    alert("Password reset link sent. Please check your email.");
+
+}
+
+async function updatePassword(){
+
+    const password = document.getElementById("newPassword").value;
+    const confirmPassword = document.getElementById("confirmNewPassword").value;
+
+    if(password.length < 6){
+        alert("Password must be at least 6 characters.");
+        return;
+    }
+
+    if(password !== confirmPassword){
+        alert("Passwords do not match.");
+        return;
+    }
+
+    if(!supabaseReady){
+        alert("Supabase Auth is not configured yet.");
+        return;
+    }
+
+    const { error } = await supabase.auth.updateUser({
+        password: password
+    });
+
+    if(error){
+        alert(error.message);
+        return;
+    }
+
+    document.getElementById("resetPasswordModal").classList.remove("active");
+    alert("Password updated successfully. You can now login with your new password.");
+    showPage("loginPage");
+
+}
+
+async function applyAuthenticatedUser(user){
+
+    if(!user){
+        return;
+    }
+
+    const metadata = user.user_metadata || {};
+    const name = metadata.full_name || metadata.name || (user.email ? user.email.split("@")[0] : "Student");
+
+    localStorage.setItem("studentEmail", user.email || "");
+    localStorage.setItem("studentName", name);
+    localStorage.setItem("guestMode", "false");
+    localStorage.removeItem("studentMobile");
+    localStorage.removeItem("pendingMobile");
+    localStorage.setItem("authProvider", user.app_metadata?.provider || "email");
+
+    updateLoginButton();
+
+}
+
+async function handleAuthSession(session){
+
+    if(session && session.user){
+        await applyAuthenticatedUser(session.user);
+    }
+
+}
 
 function skipLogin(){
 
-    localStorage.removeItem("studentMobile");
-
-    localStorage.setItem(
-        "guestMode",
-        "true"
-    );
+    localStorage.removeItem("studentEmail");
+    localStorage.removeItem("studentName");
+    localStorage.setItem("guestMode", "true");
 
     updateLoginButton();
-
     showHome();
 
 }
 
-
 function updateLoginButton(){
 
-    const logged =
-    localStorage.getItem("studentMobile");
-
-    const button =
-    document.getElementById("loginNav");
+    const logged = localStorage.getItem("studentEmail");
+    const button = document.getElementById("loginNav");
 
     if(!button){
         return;
     }
 
     if(logged){
-
         button.innerText = "Logout";
-
         button.onclick = logoutStudent;
-
     }else{
-
         button.innerText = "Login";
-
         button.onclick = openLogin;
-
     }
 
 }
-
 
 /* =========================================
    PROFILE
@@ -2954,9 +3126,9 @@ function getStudentName(){
 
 function openProfile(){
 
-    const mobile = localStorage.getItem("studentMobile");
+    const email = localStorage.getItem("studentEmail");
 
-    if(!mobile){
+    if(!email){
 
         openLogin();
 
@@ -2965,7 +3137,6 @@ function openProfile(){
     }
 
     const name = getStudentName();
-    const email = localStorage.getItem("studentEmail") || "";
     const coins = Number(localStorage.getItem("studentCoins") || 0);
     const score = localStorage.getItem("lastScore");
     const total = localStorage.getItem("lastTotal");
@@ -3009,8 +3180,8 @@ function openProfile(){
             </div>
 
             <div class="profile-row">
-                <strong>📱 Mobile</strong>
-                <span>${mobile}</span>
+                <strong>🔐 Login</strong>
+                <span>Email / Google</span>
             </div>
 
             <div class="profile-row">
@@ -3082,44 +3253,49 @@ function closeEditProfile(){
 }
 
 
-function saveEditedProfile(){
+async function saveEditedProfile(){
 
     const name = document.getElementById("editNameInput").value.trim();
     const email = document.getElementById("editEmailInput").value.trim();
-    const mobile = localStorage.getItem("studentMobile");
+    const currentEmail = localStorage.getItem("studentEmail") || "";
 
     if(!name){
-
         alert("Please enter your name.");
         return;
+    }
 
+    if(!email || !/^\S+@\S+\.\S+$/.test(email)){
+        alert("Please enter a valid email address.");
+        return;
+    }
+
+    if(supabaseReady){
+        const updateData = { data:{ full_name:name } };
+
+        if(email !== currentEmail){
+            updateData.email = email;
+        }
+
+        const { error } = await supabase.auth.updateUser(updateData);
+
+        if(error){
+            alert(error.message);
+            return;
+        }
     }
 
     localStorage.setItem("studentName",name);
     localStorage.setItem("studentEmail",email);
 
-    if(mobile){
-
-        const users = JSON.parse(
-            localStorage.getItem("registeredUsers") || "{}"
-        );
-
-        if(users[mobile]){
-            users[mobile].name = name;
-            users[mobile].email = email;
-            localStorage.setItem(
-                "registeredUsers",
-                JSON.stringify(users)
-            );
-        }
-
-    }
-
     closeEditProfile();
     updateLoginButton();
     openProfile();
 
-    alert("Profile updated successfully.");
+    if(email !== currentEmail){
+        alert("Profile updated. If email confirmation is enabled, please confirm the new email from your inbox.");
+    }else{
+        alert("Profile updated successfully.");
+    }
 
 }
 
@@ -3163,7 +3339,7 @@ function openSettings(){
             <div>
                 <strong>Account</strong>
                 <p style="font-size:13px;color:#6b7280;margin-top:4px">
-                Your account is protected by mobile OTP login.
+                Your account uses Email & Password or Google Sign-In.
                 </p>
             </div>
         </div>
@@ -3333,23 +3509,21 @@ function openActivePackage(){
    LOGOUT
 ========================================= */
 
-function logoutStudent(){
+async function logoutStudent(){
 
-    localStorage.removeItem("studentMobile");
-
-    localStorage.removeItem("studentName");
+    if(supabaseReady){
+        await supabase.auth.signOut();
+    }
 
     localStorage.removeItem("studentEmail");
-
+    localStorage.removeItem("studentName");
+    localStorage.removeItem("studentMobile");
     localStorage.removeItem("pendingMobile");
+    localStorage.removeItem("authProvider");
 
-    localStorage.setItem(
-        "guestMode",
-        "false"
-    );
+    localStorage.setItem("guestMode","false");
 
     updateLoginButton();
-
     showHome();
 
 }
@@ -3399,34 +3573,52 @@ function completeCoinAd(){
 
 updateLoginButton();
 
+async function initializeAuth(){
 
-const loggedStudent =
-localStorage.getItem("studentMobile");
+    if(supabaseReady){
 
-const guestMode =
-localStorage.getItem("guestMode");
+        supabase.auth.onAuthStateChange(function(event,session){
 
+            if(event === "SIGNED_IN" || event === "TOKEN_REFRESHED" || event === "INITIAL_SESSION"){
+                handleAuthSession(session);
+            }
 
-/*
-   First-time visitor -> Login/Register page
-   Logged-in visitor -> Home
-   Guest visitor -> Home
-*/
+            if(event === "PASSWORD_RECOVERY"){
+                document.getElementById("resetPasswordModal").classList.add("active");
+            }
 
-setTimeout(function(){
+            if(event === "SIGNED_OUT"){
+                localStorage.removeItem("studentEmail");
+                localStorage.removeItem("studentName");
+                updateLoginButton();
+            }
 
-    if(!loggedStudent && guestMode !== "true"){
+        });
 
-        showPage("loginPage", false);
+        const { data } = await supabase.auth.getSession();
 
-    }else{
-
-        showPage("home", false);
+        if(data.session){
+            await handleAuthSession(data.session);
+        }
 
     }
 
-},100);
+    const loggedStudent = localStorage.getItem("studentEmail");
+    const guestMode = localStorage.getItem("guestMode");
 
+    setTimeout(function(){
+
+        if(!loggedStudent && guestMode !== "true"){
+            showPage("loginPage", false);
+        }else{
+            showPage("home", false);
+        }
+
+    },100);
+
+}
+
+initializeAuth();
 
 /* =========================================
    BASIC SCREENSHOT / CONTEXT MENU
