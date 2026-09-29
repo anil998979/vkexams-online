@@ -6297,17 +6297,23 @@ async function startFreeMock(testNumber){
             },1000);
 
 
-    }catch(error){
-
-        console.error(error);
-
-        toast(
-            "Unable to start the test."
-        );
-
     }
+   catch(error){
 
-}
+    console.error(
+        "FREE MOCK START ERROR:",
+        error
+    );
+
+    toast(
+        "Free Mock Error: " +
+        (
+            error?.message ||
+            "Unknown error"
+        )
+    );
+
+   }
 
 /* =====================================================
    QUESTION
