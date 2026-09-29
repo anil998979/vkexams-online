@@ -3417,7 +3417,7 @@ Advertisement
 <p
 style="margin-top:8px">
 
-Rewarded advertisement placeholder.
+Google rewarded advertisement will appear here after Google Ad Manager setup.
 
 </p>
 
@@ -3429,7 +3429,7 @@ color:#6b7280;
 margin-top:8px;
 ">
 
-Complete the full ad timer to earn 0.5 coin. Closing early gives no coin.
+Only a real rewarded-ad completion can award 0.5 coin. Closing early gives no coin.
 
 </p>
 
@@ -3448,7 +3448,7 @@ Ready to start
 class="btn btn-primary"
 onclick="completeCoinAd()">
 
-Start Rewarded Ad
+Watch Rewarded Ad +0.5
 
 </button>
 
@@ -3721,28 +3721,6 @@ function toast(message){
 
 
 /* =====================================================
-   SAFE TEXT HELPERS
-===================================================== */
-
-function escapeHtml(value){
-
-    return String(value ?? "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#39;");
-
-}
-
-function escapeAttr(value){
-
-    return escapeHtml(value);
-
-}
-
-
-/* =====================================================
    FREE MOCK TESTS
 ===================================================== */
 
@@ -3809,7 +3787,7 @@ function openFreeMockTests(course){
             }
         ).join("");
 
-    showPage("freeMocks", false);
+    showPage("freeMocks");
 
 }
 
@@ -5456,19 +5434,30 @@ function renderProfile(){
             </div>
 
             <div class="coin-number">
-                ${coins}
+                ${guest ? 0 : coins}
             </div>
 
-            <p style="font-size:13px;color:#6b7280;margin-top:6px">
-                ${coins >= 10 ? "Eligible for the 10-coin reward mechanism." : "Complete full rewarded ads to earn +0.5 coin each."}
-            </p>
-
-            <button
-            class="btn btn-primary"
-            style="margin-top:10px"
-            onclick="earnCoins()">
-                Watch Ad +0.5
-            </button>
+            ${guest ? `
+                <p style="font-size:13px;color:#6b7280;margin-top:6px">
+                    Student Coins are available only for registered users.
+                </p>
+                <button
+                class="btn btn-outline"
+                style="margin-top:10px"
+                onclick="openRegister()">
+                    Please Register to Earn Coins
+                </button>
+            ` : `
+                <p style="font-size:13px;color:#6b7280;margin-top:6px">
+                    ${coins >= 10 ? "Eligible for the 10-coin reward mechanism." : "Complete a full rewarded ad to earn +0.5 coin."}
+                </p>
+                <button
+                class="btn btn-primary"
+                style="margin-top:10px"
+                onclick="earnCoins()">
+                    Watch Ad +0.5
+                </button>
+            `}
 
         </div>
 
@@ -5683,9 +5672,15 @@ function showActivePackage(){
 
 function earnCoins(){
 
-    if(!isLoggedIn() && !isGuest()){
+    /* Guest users are NOT eligible for Student Coins. */
+    if(isGuest()){
+        toast("Student Coins are available only for registered users. Please Register.");
+        return;
+    }
+
+    if(!isLoggedIn()){
         openLogin();
-        toast("Please login or continue as Guest to earn coins.");
+        toast("Please login/register to earn Student Coins.");
         return;
     }
 
@@ -5745,6 +5740,15 @@ function earnCoins(){
 
 
 function completeCoinAd(){
+
+    /* Never award coins to Guest/anonymous users. */
+    if(!isLoggedIn() || isGuest()){
+        clearInterval(coinAdTimer);
+        coinAdReady = false;
+        closeModal("coinModal");
+        toast("Student Coins are available only for registered users.");
+        return;
+    }
 
     if(!coinAdReady){
         toast("Please complete the full advertisement first.");
