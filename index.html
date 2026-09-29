@@ -377,7 +377,21 @@ function viewSolutions(){
 }
 function reattempt(){if(currentTest?.is_free)startFreeMock(freeMockCourse,freeMockNumber);else if(currentTest?.id)startDbTest(currentTest.id,false)}
 function backFromExam(){if(currentCourse==='APPSC'&&currentGroup)openSeriesRoot('APPSC',currentGroup);else openSeriesRoot(currentCourse,currentGroup)}
+function openStore(){
 
+    $("selectedCourseArea").style.display = "none";
+
+    renderHome();
+
+    showPage("store");
+}
+
+
+function openFreeMocks(){
+
+    showPage("freeMocks");
+
+}
 function selectStoreCourse(course){
 
     currentCourse = course;
@@ -494,6 +508,15 @@ function selectStoreCourse(course){
     /*
         KEEP STORE PAGE OPEN
     */
+
+    showPage("store");
+}
+
+  function resetStoreCourses(){
+
+    $("selectedCourseArea").style.display = "none";
+
+    renderHome();
 
     showPage("store");
 }
