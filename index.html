@@ -4526,13 +4526,12 @@ function updateLoginButton(){
     const b =
         $("loginNav");
 
-
     if(!b)
         return;
 
-
     if(
-        isLoggedIn()
+        isLoggedIn() ||
+        isGuest()
     ){
 
         b.textContent =
@@ -4554,7 +4553,6 @@ function updateLoginButton(){
     }
 
 }
-
 
 /* =====================================================
    EMAIL LOGIN
@@ -4921,31 +4919,61 @@ async function googleLogin(){
    GUEST
 ===================================================== */
 
-function continueAsGuest(){
+async function continueAsGuest(){
+
+    if(!supabaseClient){
+
+        alert("Supabase is not connected.");
+        return;
+
+    }
+
+    const {
+        data,
+        error
+    } =
+    await supabaseClient
+        .auth
+        .signInAnonymously();
+
+    if(error){
+
+        alert(
+            "Guest login failed: " +
+            error.message
+        );
+
+        return;
+
+    }
 
     localStorage.setItem(
         "guestMode",
         "true"
     );
 
-
     localStorage.removeItem(
         "studentEmail"
     );
-
 
     localStorage.removeItem(
         "studentName"
     );
 
+    localStorage.setItem(
+        "authProvider",
+        "anonymous"
+    );
 
     updateLoginButton();
 
     showHome();
 
+    toast(
+        "Welcome to VK Exams!"
+    );
+
 }
-
-
 /* =====================================================
    LOGOUT
 ===================================================== */
@@ -5280,7 +5308,7 @@ function renderProfile(){
                 ${
                     guest
                     ?
-                    "Guest User"
+                    "User"
                     :
                     (
                         name ||
@@ -5299,7 +5327,7 @@ function renderProfile(){
                 ${
                     guest
                     ?
-                    "Guest Mode"
+                    "Please Register"
                     :
                     email
                 }
