@@ -6254,8 +6254,11 @@ async function startFreeMock(testNumber){
             testNumber;
 
 
-        $("totalQuestions").textContent =
-            examQuestions.length;
+        const totalQuestions = $("totalQuestions");
+
+if(totalQuestions){
+    totalQuestions.textContent = examQuestions.length;
+}
 
 
         /* -----------------------------------------
