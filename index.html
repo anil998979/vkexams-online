@@ -6468,145 +6468,266 @@ function nextQuestion(){
    SUBMIT
 ===================================================== */
 
-function submitExam(){
+async function submitExam(timeout = false){
 
-    if(
-        !examQuestions.length
-    )
+    if(!examQuestions.length){
         return;
+    }
 
+    clearInterval(timerInterval);
 
-    clearInterval(
-        timerInterval
-    );
+    /* -----------------------------------------
+       Build answers for Supabase
+       question.id -> selected option
+       ----------------------------------------- */
 
+    const payload = {};
 
-    let score =
-        0;
+    examQuestions.forEach(function(q, index){
 
-
-    examQuestions.forEach(
-
-        function(
-            question,
-            index
+        if(
+            userAnswers[index] !== null &&
+            userAnswers[index] !== undefined
         ){
 
-            if(
-                userAnswers[index] ===
-                question.a
-            ){
-
-                score++;
-
-            }
+            payload[q.id] =
+                Number(userAnswers[index]);
 
         }
-
-    );
-
-
-    lastResult = {
-
-        score:
-            score,
-
-        total:
-            examQuestions.length,
-
-        course:
-            currentCourse ||
-            "VK Exams",
-
-        paper:
-            currentPaper ||
-            "Free Mock Test",
-
-        answers:
-            [
-                ...userAnswers
-            ],
-
-        questions:
-            examQuestions,
-
-        date:
-            new Date()
-            .toLocaleString()
-
-    };
-
-
-    const results =
-        JSON.parse(
-            localStorage.getItem(
-                "testResults"
-            ) || "[]"
-        );
-
-
-    results.unshift({
-
-        score:
-            score,
-
-        total:
-            examQuestions.length,
-
-        course:
-            lastResult.course,
-
-        paper:
-            lastResult.paper,
-
-        date:
-            lastResult.date
 
     });
 
 
-    localStorage.setItem(
+    /* -----------------------------------------
+       Server-side grading
+       ----------------------------------------- */
 
-        "testResults",
+    if(
+        currentAttemptId &&
+        supabaseClient
+    ){
 
-        JSON.stringify(
-            results.slice(
-                0,
-                30
-            )
-        )
+        try{
 
-    );
+            const {
+                data,
+                error
+            } = await supabaseClient.rpc(
+                "submit_test_attempt",
+                {
+                    p_attempt_id:
+                        currentAttemptId,
 
-
-    $("scoreText")
-        .textContent =
-
-        score +
-
-        " / " +
-
-        examQuestions.length;
-
-
-    $("resultMessage")
-        .textContent =
-
-        "You scored " +
-
-        Math.round(
-            score /
-            examQuestions.length *
-            100
-        )
-
-        +
-
-        "%.";
+                    p_answers:
+                        payload
+                }
+            );
 
 
-    showPage(
-        "resultPage"
+            if(error){
+
+                console.error(
+                    "Submit error:",
+                    error
+                );
+
+                toast(
+                    error.message ||
+                    "Unable to submit test."
+                );
+
+                return;
+            }
+
+
+            /*
+              The server is the source of truth
+              for score and result.
+            */
+
+            console.log(
+                "Server grading result:",
+                data
+            );
+
+
+            /* ---------------------------------
+               Try to read returned result
+            --------------------------------- */
+
+            let result = data;
+
+            if(
+                Array.isArray(data) &&
+                data.length
+            ){
+
+                result = data[0];
+
+            }
+
+
+            const score =
+                Number(
+                    result?.score ?? 0
+                );
+
+            const total =
+                Number(
+                    result?.total_marks ??
+                    examQuestions.reduce(
+                        function(sum,q){
+                            return sum +
+                                Number(q.marks || 1);
+                        },
+                        0
+                    )
+                );
+
+            const percentage =
+                Number(
+                    result?.percentage ??
+                    (
+                        total > 0
+                        ? (score / total) * 100
+                        : 0
+                    )
+                );
+
+
+            const correct =
+                Number(
+                    result?.correct_answers ?? 0
+                );
+
+            const wrong =
+                Number(
+                    result?.wrong_answers ?? 0
+                );
+
+            const unanswered =
+                Number(
+                    result?.unanswered ?? 0
+                );
+
+
+            lastResult = {
+
+                questions:
+                    examQuestions,
+
+                answers:
+                    [...userAnswers],
+
+                score:
+                    score,
+
+                total:
+                    total,
+
+                percentage:
+                    percentage,
+
+                correct:
+                    correct,
+
+                wrong:
+                    wrong,
+
+                unanswered:
+                    unanswered,
+
+                title:
+                    $("examTitle").textContent,
+
+                timeout:
+                    timeout
+
+            };
+
+
+            /* ---------------------------------
+               Result screen
+            --------------------------------- */
+
+            $("scoreText").textContent =
+                score +
+                " / " +
+                total;
+
+
+            $("resultMessage").textContent =
+                "You scored " +
+                Math.round(percentage) +
+                "%." +
+                (
+                    timeout
+                    ? " Time expired and the test was auto-submitted."
+                    : ""
+                );
+
+
+            const resultStats =
+                $("resultStats");
+
+
+            if(resultStats){
+
+                resultStats.innerHTML = `
+
+                    <div class="stat">
+                        <b>${correct}</b>
+                        Correct
+                    </div>
+
+                    <div class="stat">
+                        <b>${wrong}</b>
+                        Wrong
+                    </div>
+
+                    <div class="stat">
+                        <b>${unanswered}</b>
+                        Unanswered
+                    </div>
+
+                    <div class="stat">
+                        <b>${Math.round(percentage)}%</b>
+                        Percentage
+                    </div>
+
+                `;
+
+            }
+
+
+            showPage(
+                "resultPage"
+            );
+
+
+        }catch(error){
+
+            console.error(
+                "Unexpected submit error:",
+                error
+            );
+
+            toast(
+                "Something went wrong while submitting the test."
+            );
+
+        }
+
+        return;
+    }
+
+
+    /* -----------------------------------------
+       Safety fallback
+    ----------------------------------------- */
+
+    toast(
+        "Test session is not connected to Supabase."
     );
 
 }
