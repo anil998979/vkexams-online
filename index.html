@@ -41,6 +41,8 @@ header{position:sticky;top:0;z-index:1000;background:#fff;border-bottom:1px soli
 .examtop{display:flex;justify-content:space-between;gap:10px;align-items:center;background:#fff;border:1px solid #e5e7eb;padding:15px;border-radius:10px;margin-bottom:15px}.timer{font-weight:900;color:#dc2626}.question{background:#fff;border:1px solid #e5e7eb;border-radius:15px;padding:24px}.qno{color:#2563eb;font-weight:900;margin-bottom:10px}.question h2{font-size:20px;line-height:1.5}.option{display:block;width:100%;text-align:left;padding:13px;margin-top:10px;border:1px solid #dfe3ea;border-radius:9px;background:#fff}.option.selected{background:#eff6ff;border-color:#2563eb}.examnav{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-top:20px}
 .result{max-width:650px;margin:auto;text-align:center;background:#fff;border:1px solid #e5e7eb;border-radius:15px;padding:30px}.score{font-size:42px;font-weight:900;color:#2563eb;margin:15px}.resultgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:20px 0}.stat{padding:12px;background:#f8fafc;border-radius:9px}.stat b{display:block;font-size:20px}.solution{background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:16px;margin-bottom:10px}.correct{color:#15803d}.wrong{color:#dc2626}
 .modal{position:fixed;inset:0;background:rgba(15,23,42,.58);display:none;align-items:center;justify-content:center;z-index:3000;padding:15px}.modal.show{display:flex}.modalbox{background:#fff;border-radius:14px;padding:25px;max-width:430px;width:100%;box-shadow:0 20px 50px rgba(0,0,0,.25)}.modalbox h3{margin-bottom:10px}.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
+.topic-card{text-align:center;background:#fff;border:1px solid #e5e7eb;border-radius:15px;padding:24px;box-shadow:0 8px 22px rgba(37,99,235,.07)}
+.ad-complete{color:#15803d;font-weight:900}
 footer{padding:25px;text-align:center;color:#6b7280;font-size:13px}
 @media(max-width:900px){.grid4{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:repeat(2,1fr)}.hero h1{font-size:37px}}
 @media(max-width:620px){.nav{padding:10px 12px}.navlinks button{padding:8px 7px;font-size:12px}.logo{font-size:19px}.container{padding:25px 12px}.grid,.grid2,.grid4{grid-template-columns:1fr}.hero{padding:45px 14px}.hero h1{font-size:32px}.examtop{flex-direction:column;align-items:flex-start}.resultgrid{grid-template-columns:repeat(2,1fr)}}
@@ -95,7 +97,7 @@ footer{padding:25px;text-align:center;color:#6b7280;font-size:13px}
 
 <section id="papers" class="page"><div class="container"><span class="back" onclick="backFromTests()">← Back</span><div class="examhead"><h1 id="paperTitle"></h1><p>One Free Test and Test 1 to Test 10.</p></div><div class="testlist" id="testList"></div></div></section>
 
-<section id="topicWise" class="page"><div class="container"><span class="back" onclick="openCourse('Endowment Officer')">← Back to Endowment Officer</span><div class="examhead"><h1>Endowment Officer – Topic-wise Tests</h1><p>Practice individual topics.</p></div><div id="topicList" class="grid2"></div></div></section>
+<section id="topicWise" class="page"><div class="container"><span class="back" onclick="openCourse('Endowment Officer',false)">← Back to Endowment Officer</span><div class="examhead"><h1>Endowment Officer – Topic-wise Tests</h1><p>Practice individual topics.</p></div><div id="topicList" class="grid2"></div></div></section>
 
 <section id="freeMocks" class="page"><div class="container"><span class="back" onclick="showHome()">← Back to Home</span><div class="title"><h2>Free Mock Tests</h2><p>Choose a course. Each course contains 5 free mock tests.</p></div><div id="freeMockCourses" class="grid"></div></div></section>
 
@@ -117,7 +119,8 @@ footer{padding:25px;text-align:center;color:#6b7280;font-size:13px}
 
 <section id="solutionsPage" class="page"><div class="container"><span class="back" onclick="showPage('resultPage')">← Back to Results</span><div class="examhead"><h1>View Solutions</h1><p>Correct answers and explanations.</p></div><div id="solutions"></div></div></section>
 
-<div id="modal" class="modal"><div class="modalbox"><h3 id="modalTitle"></h3><div id="modalBody"></div><div class="modal-actions"><button class="btn light" onclick="closeModal()">Cancel</button><button id="modalAction" class="btn blue" onclick="modalAction()">Continue</button></div></div></div>
+<div id="modal" class="modal"><div class="modalbox"><h3 id="modalTitle"></h3><div id="modalBody"></div><div class="modal-actions"><button id="modalCancel" class="btn light" onclick="closeModal()">Cancel</button><button id="modalAction" class="btn blue" onclick="modalAction()">Continue</button></div></div></div>
+<div id="adModal" class="modal"><div class="modalbox" style="text-align:center"><div style="font-size:13px;color:#6b7280;font-weight:800;letter-spacing:.4px">ADVERTISEMENT</div><h3 style="margin-top:10px">Please watch the complete ad</h3><div id="adCreative" style="margin:16px 0;padding:28px 15px;border-radius:12px;background:linear-gradient(135deg,#eff6ff,#f5f3ff);border:1px solid #c7d2fe"><div style="font-size:42px">📢</div><div style="font-weight:900;margin-top:8px">VK Exams</div><div class="muted" style="margin-top:5px">Reward will be added after completion.</div></div><div style="height:9px;background:#e5e7eb;border-radius:99px;overflow:hidden"><div id="adProgress" style="height:100%;width:0%;background:linear-gradient(90deg,#2563eb,#7c3aed);transition:width 1s linear"></div></div><p id="adTimerText" class="muted" style="margin-top:10px">Ad loading…</p><div class="modal-actions" style="justify-content:center"><button id="adCloseBtn" class="btn light" onclick="closeRewardAd()">Close</button></div></div></div>
 
 <script>
 const SUPABASE_URL='https://uhxudsqndyxekybwtzar.supabase.co';
@@ -190,7 +193,7 @@ function updateLoginButton(){
  else{b.textContent='Login';b.onclick=openLogin}
 }
 function clearLocalAuth(){
- ['studentEmail','studentName','authProvider'].forEach(k=>localStorage.removeItem(k));
+ ['studentEmail','studentName','authProvider','guestStudentCoins','studentCoins'].forEach(k=>localStorage.removeItem(k));
  localStorage.setItem('guestMode','false');
 }
 function safeName(){return localStorage.getItem('studentName')||'VK Exams'}
@@ -204,32 +207,32 @@ function renderHome(){
  $('storeCourses').innerHTML=COURSES.map(c=>`<div class="card course" onclick="selectStoreCourse('${c.name}')"><div class="icon">${c.icon}</div><h3>${c.name}</h3><p class="muted">View ${c.name} packages</p></div>`).join('');
  $('freeMockCourses').innerHTML=COURSES.map(c=>`<div class="card course" onclick="openFreeMockCourse('${c.name}')"><div class="icon">${c.icon}</div><h3>${c.name}</h3><p class="muted">5 free mocks × 20 questions</p></div>`).join('');
 }
-function openCourse(course){
+function openCourse(course,push=true){
  currentCourse=course;
  $('courseTitle').textContent=course;
  $('courseSub').textContent=course==='APPSC'?'Select Group 2 or Group 4.':`Select the available ${course} section.`;
  const box=$('courseOptions');
  if(course==='APPSC'){
    box.innerHTML=groupCard('Group 2','📘')+groupCard('Group 4','📕');
-   showPage('course'); return;
+   showPage('course',push); return;
  }
  if(course==='Endowment Officer'){
    box.innerHTML=choiceCard('Syllabus','📚',"openSyllabus('Endowment Officer','')")+choiceCard('Test Series','📝',"openSeriesRoot('Endowment Officer')")+choiceCard('Topic-wise Tests','🎯',"openTopicWise()");
-   showPage('course'); return;
+   showPage('course',push); return;
  }
  if(course==='High Court'){
    box.innerHTML=choiceCard('Syllabus','📚',"openSyllabus('High Court','')")+choiceCard('Test Series','⚖️',"openSeriesRoot('High Court')");
-   showPage('course'); return;
+   showPage('course',push); return;
  }
  box.innerHTML=choiceCard('Syllabus','📚',`openSyllabus('${course}','')`)+choiceCard('Test Series','📝',`openSeriesRoot('${course}')`);
- showPage('course');
+ showPage('course',push);
 }
 function groupCard(group,icon){return `<div class="card choice" onclick="openGroup('${group}')"><div class="icon">${icon}</div><h2>${group}</h2><p class="muted">Syllabus and Test Series</p></div>`}
 function choiceCard(title,icon,fn){return `<div class="card choice" onclick="${fn}"><div class="icon">${icon}</div><h2>${title}</h2><p class="muted">Open ${title}</p></div>`}
-function openGroup(group){
+function openGroup(group,push=true){
  currentGroup=group;$('groupTitle').textContent=`APPSC ${group}`;
  $('groupOptions').innerHTML=choiceCard('Syllabus','📚',`openSyllabus('APPSC','${group}')`)+choiceCard('Test Series','📝',`openAPPSCSeries('${group}')`);
- showPage('group');
+ showPage('group',push);
 }
 async function openSyllabus(course,group){
  $('syllabusTitle').textContent=group?`${course} ${group} Syllabus`:`${course} Syllabus`;
@@ -248,10 +251,10 @@ async function courseId(name){
  return data?.id||null;
 }
 function openAPPSCSeries(group){openSeriesRoot('APPSC',group)}
-async function openSeriesRoot(course,group=''){
+async function openSeriesRoot(course,group='',push=true){
  currentCourse=course;currentGroup=group;
  $('seriesTitle').textContent=group?`${course} ${group} – Test Series`:`${course} – Test Series`;
- const box=$('seriesOptions');box.innerHTML='<div class="empty">Loading…</div>';showPage('testseries');
+ const box=$('seriesOptions');box.innerHTML='<div class="empty">Loading…</div>';showPage('testseries',push);
  if(!supabaseClient){renderFallbackSeries(course,group);return}
  const cid=await courseId(course);
  let q=supabaseClient.from('test_series').select('*').eq('course_id',cid).eq('is_active',true);
@@ -292,8 +295,14 @@ async function openTopicWise(){
    if(data?.length)$('topicList').innerHTML=data.map((x,i)=>`<div class="card"><h3>📝 ${escapeHtml(x.title)}</h3><p class="muted" style="margin-top:6px">${escapeHtml(x.description||'Topic-wise practice test')}</p><button class="btn blue" style="margin-top:12px" onclick="openPaidAccess()">Start Test</button></div>`).join('');
  }
 }
-function backFromSyllabus(){if(currentCourse==='APPSC'&&currentGroup)openGroup(currentGroup);else openCourse(currentCourse)}
-function backFromSeries(){if(currentCourse==='APPSC'&&currentGroup)openGroup(currentGroup);else openCourse(currentCourse)}
+function backFromSyllabus(){
+  if(currentCourse==='APPSC'&&currentGroup)openGroup(currentGroup,false);
+  else openCourse(currentCourse,false);
+}
+function backFromSeries(){
+  if(currentCourse==='APPSC'&&currentGroup)openGroup(currentGroup,false);
+  else openCourse(currentCourse,false);
+}
 function backFromTests(){backFromSeries()}
 
 function openFreeMocks(){showPage('freeMocks')}
@@ -376,7 +385,14 @@ function viewSolutions(){
  }).join('');showPage('solutionsPage')
 }
 function reattempt(){if(currentTest?.is_free)startFreeMock(freeMockCourse,freeMockNumber);else if(currentTest?.id)startDbTest(currentTest.id,false)}
-function backFromExam(){if(currentCourse==='APPSC'&&currentGroup)openSeriesRoot('APPSC',currentGroup);else openSeriesRoot(currentCourse,currentGroup)}
+function backFromExam(){
+  if(currentTest?.is_free){
+    if(freeMockCourse)openFreeMockCourse(freeMockCourse);else showPage('freeMocks');
+    return;
+  }
+  if(currentCourse==='APPSC'&&currentGroup)openSeriesRoot('APPSC',currentGroup);
+  else openSeriesRoot(currentCourse,currentGroup);
+}
 function openStore(){
 
     $("selectedCourseArea").style.display = "none";
@@ -549,15 +565,45 @@ async function renderProfile(){
   $('profileContent').innerHTML=`<div class="summary"><div class="avatar">?</div><h2>Student Profile</h2><p class="muted" style="margin-top:6px">Login to access your profile.</p><button class="btn blue" style="margin-top:15px" onclick="openLogin()">Login / Register</button></div>`;return;
  }
  let coins=0;let active=null;
+ if(isGuest()){
+   coins=Number(localStorage.getItem('guestStudentCoins')||0);
+ }
  if(isLoggedIn()&&supabaseClient){
    try{
-     const {data}=await supabaseClient.from('student_coins').select('coins').eq('user_id',(await supabaseClient.auth.getUser()).data.user.id).maybeSingle();coins=Number(data?.coins||0)
+     const uid=(await supabaseClient.auth.getUser()).data.user?.id;
+     const {data}=await supabaseClient.from('student_coins').select('coins').eq('user_id',uid).maybeSingle();
+     coins=Number(data?.coins||0);
    }catch(e){}
-   const cid=await courseId(currentCourse||'APPSC');
-   if(cid){try{const {data}=await supabaseClient.rpc('get_active_package',{p_course_id:cid});active=data||null}catch(e){}}
+   if(currentCourse){
+     const cid=await courseId(currentCourse);
+     if(cid){
+       try{
+         const uid=(await supabaseClient.auth.getUser()).data.user?.id;
+         const {data,error}=await supabaseClient
+           .from('purchases')
+           .select('id,amount,starts_at,expires_at,payment_status,package_id,course_id,packages(name,price),courses(name)')
+           .eq('user_id',uid)
+           .eq('course_id',cid)
+           .eq('payment_status','paid')
+           .gt('expires_at',new Date().toISOString())
+           .order('expires_at',{ascending:false})
+           .limit(1);
+         if(!error && data?.length){
+           const x=data[0];
+           active={
+             course_name:x.courses?.name||currentCourse,
+             package_name:x.packages?.name||'Package',
+             price:x.packages?.price||x.amount,
+             starts_at:x.starts_at,
+             expires_at:x.expires_at
+           };
+         }
+       }catch(e){}
+     }
+   }
  }
  $('profileContent').innerHTML=`<div class="summary"><div class="avatar">${initials(guest?'User':name,email)}</div><h2>${guest?'User':escapeHtml(name||'Student')}</h2><p class="muted">${guest?'Please Register':escapeHtml(email)}</p></div>
- <div class="coins"><div>🪙 Student Coins</div><div class="coinno">${coins}</div><button class="btn primary" onclick="earnCoins()">Watch Ad +0.5</button></div>
+ <div class="coins"><div>🪙 Student Coins</div><div class="coinno">${coins}</div>${coins>=10?`<div style="color:#15803d;font-weight:800;margin-bottom:8px">🎉 10 coins reached — eligible for the coin reward.</div>`:`<div class="muted" style="margin-bottom:8px">Reach 10 coins to become eligible for the coin reward.</div>`}<button class="btn primary" onclick="earnCoins()">Watch Ad +0.5</button></div>
  ${active?renderActive(active):`<div class="packagebox"><b>No Active Package</b><p class="muted" style="margin-top:5px">You have not purchased an active package.</p><button class="btn blue" style="margin-top:10px" onclick="openStore()">View Packages</button></div>`}
  <div class="profilemenu">
  <button onclick="editProfile()">👤 Edit Profile <span>›</span></button>
@@ -584,14 +630,18 @@ function openSettings(){alert('Settings\\n\\nNotifications: ON\\nDark Mode: OFF\
 async function showPurchaseHistory(){
  if(isGuest()){toast('Please Register');return}
  if(!supabaseClient){toast('Purchase history requires Supabase.');return}
- const {data,error}=await supabaseClient.from('purchases').select('*,packages(name,price),courses(name)').order('purchased_at',{ascending:false});
+ const uid=(await supabaseClient.auth.getUser()).data.user?.id;
+  if(!uid){toast('Please login again.');return}
+  const {data,error}=await supabaseClient.from('purchases').select('*,packages(name,price),courses(name)').eq('user_id',uid).order('purchased_at',{ascending:false});
  if(error||!data?.length){toast('No purchase history yet.');return}
  alert(data.map((x,i)=>`${i+1}. ${x.courses?.name||'Course'} - ${x.packages?.name||'Package'}\\n₹${x.amount} | ${x.payment_status}\\n${x.purchased_at?new Date(x.purchased_at).toLocaleString():''}`).join('\\n\\n'))
 }
 async function showTestResults(){
  if(isGuest()){toast('Please Register');return}
  if(!supabaseClient){toast('No test results yet.');return}
- const {data,error}=await supabaseClient.from('test_results').select('score,total_marks,percentage,completed_at,tests(title)').order('completed_at',{ascending:false});
+ const uid=(await supabaseClient.auth.getUser()).data.user?.id;
+  if(!uid){toast('Please login again.');return}
+  const {data,error}=await supabaseClient.from('test_results').select('score,total_marks,percentage,completed_at,tests(title)').eq('user_id',uid).order('completed_at',{ascending:false});
  if(error||!data?.length){toast('No test results yet.');return}
  alert(data.map((x,i)=>`${i+1}. ${x.tests?.title||'Test'}\\nScore: ${x.score}/${x.total_marks}\\nPercentage: ${x.percentage}%`).join('\\n\\n'))
 }
@@ -600,8 +650,61 @@ async function showActivePackage(){
  openStore();
 }
 function showHelp(){alert('Help & Support\\n\\nsupport@vkexams.online')}
-function earnCoins(){openModal('Student Coins','Complete the advertisement to receive +0.5 coin. Closing the ad early does not award a coin.','Complete Ad',completeCoinAd)}
-function completeCoinAd(){let c=Number(localStorage.getItem('studentCoins')||0)+0.5;localStorage.setItem('studentCoins',String(c));closeModal();renderProfile();toast('0.5 Student Coin added.')}
+let rewardAdTimer=null;
+let rewardAdRemaining=15;
+
+function earnCoins(){
+  if(rewardAdTimer){toast('An advertisement is already running.');return}
+  startRewardAd();
+}
+function startRewardAd(){
+  rewardAdRemaining=15;
+  $('adProgress').style.width='0%';
+  $('adTimerText').textContent='Ad loading… 15s';
+  $('adCloseBtn').textContent='Close';
+  $('adCloseBtn').className='btn light';
+  $('adCloseBtn').onclick=closeRewardAd;
+  $('adModal').classList.add('show');
+  clearInterval(rewardAdTimer);
+  rewardAdTimer=setInterval(()=>{
+    rewardAdRemaining--;
+    $('adProgress').style.width=((15-rewardAdRemaining)/15*100)+'%';
+    if(rewardAdRemaining>0){
+      $('adTimerText').textContent='Please continue watching… '+rewardAdRemaining+'s';
+    }else{
+      clearInterval(rewardAdTimer);rewardAdTimer=null;
+      $('adProgress').style.width='100%';
+      $('adTimerText').innerHTML='<span class="ad-complete">Ad completed ✓</span>';
+      $('adCloseBtn').textContent='Claim +0.5 Coin';
+      $('adCloseBtn').className='btn primary';
+      $('adCloseBtn').onclick=completeCoinAd;
+    }
+  },1000);
+}
+function closeRewardAd(){
+  clearInterval(rewardAdTimer);rewardAdTimer=null;
+  $('adModal').classList.remove('show');
+  $('adCloseBtn').onclick=closeRewardAd;$('adCloseBtn').className='btn light';$('adCloseBtn').textContent='Close';
+  $('adProgress').style.width='0%';
+}
+async function completeCoinAd(){
+  clearInterval(rewardAdTimer);rewardAdTimer=null;
+  let awarded=false;
+  if(isLoggedIn()&&supabaseClient){
+    try{
+      const {error}=await supabaseClient.rpc('award_ad_coin',{p_amount:0.5});
+      if(!error)awarded=true;
+    }catch(e){}
+  }
+  if(!awarded){
+    const key=isGuest()?'guestStudentCoins':'studentCoins';
+    localStorage.setItem(key,String(Number(localStorage.getItem(key)||0)+0.5));
+  }
+  $('adModal').classList.remove('show');
+  $('adCloseBtn').onclick=closeRewardAd;$('adCloseBtn').className='btn light';$('adCloseBtn').textContent='Close';
+  $('adProgress').style.width='0%';
+  renderProfile();toast('0.5 Student Coin added.');
+}
 function openModal(title,body,action,cb){$('modalTitle').textContent=title;$('modalBody').innerHTML=`<p class="muted">${body}</p>`;$('modalAction').textContent=action;modalCallback=cb;$('modal').classList.add('show')}
 function modalAction(){if(modalCallback)modalCallback()}
 function closeModal(){$('modal').classList.remove('show');modalCallback=null}
