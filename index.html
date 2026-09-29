@@ -3585,6 +3585,9 @@ let timerInterval = null;
 let timeLeft = 900;
 
 let lastResult = null;
+   let currentFreeMockTestId = null;
+let currentFreeMockNumber = null;
+let currentAttemptId = null;
 
 
 const $ = id =>
@@ -3754,43 +3757,32 @@ function openFreeMocks(){
 
 function openFreeMockTests(course){
 
-    freeMockCourse = course;
+    currentCourse = course;
 
-    $("freeMockCourses").innerHTML =
-        Array.from(
-            {length:5},
-            function(_, index){
+    let html = "";
 
-                const number =
-                    index + 1;
+    for(let i = 1; i <= 5; i++){
 
-                return `
-                    <div
-                        class="choice-card"
-                        onclick="startFreeMock('${escapeAttr(course)}',${number})"
-                    >
+        html += `
+        <div class="choice-card"
+             onclick="startFreeMock(${i})">
 
-                        <div class="big-icon">
-                            📝
-                        </div>
+            <div class="big-icon">📝</div>
 
-                        <h2>
-                            ${escapeHtml(course)}
-                            – Free Mock Test ${number}
-                        </h2>
+            <h2>${course} – Free Mock Test ${i}</h2>
 
-                        <p>
-                            10 Questions • 10 Minutes • FREE
-                        </p>
+            <p>
+                10 Questions • 10 Minutes • FREE
+            </p>
 
-                    </div>
-                `;
+        </div>
+        `;
 
-            }
-        ).join("");
+    }
+
+    $("freeMockCourses").innerHTML = html;
 
     showPage("freeMocks");
-
 }
 
 
@@ -5978,15 +5970,9 @@ const QUESTIONS = [
 /* =====================================================
    START FREE MOCK
 ===================================================== */
+async function startFreeMock(testNumber){
 
-function startFreeMock(course, number){
-
-    if(
-        !isLoggedIn() &&
-        !isGuest()
-    ){
-
-        window.__pendingFreeMocks = true;
+    if(!isLoggedIn() && !isGuest()){
 
         openLogin();
 
@@ -5995,150 +5981,333 @@ function startFreeMock(course, number){
         );
 
         return;
-
     }
 
-    freeMockCourse =
-        course ||
-        freeMockCourse ||
-        currentCourse ||
-        "VK Exams";
+    if(!supabaseClient){
 
-    freeMockNumber =
-        Number(number) ||
-        1;
+        toast("Supabase is not connected.");
 
-    currentCourse =
-        freeMockCourse;
+        return;
+    }
 
-    examQuestions =
-        Array.from(
-            {length:10},
-            function(_, index){
+    try{
 
-                const x =
-                    QUESTIONS[
-                        index %
-                        QUESTIONS.length
-                    ];
+        /* -----------------------------------------
+           1. Find Course
+        ----------------------------------------- */
+
+        const {
+            data: courseData,
+            error: courseError
+        } = await supabaseClient
+            .from("courses")
+            .select("id")
+            .eq("name", currentCourse)
+            .single();
+
+        if(courseError || !courseData){
+
+            toast("Course not found.");
+
+            console.error(courseError);
+
+            return;
+        }
+
+
+        /* -----------------------------------------
+           2. Find Free Mock Test Series
+        ----------------------------------------- */
+
+        const {
+            data: seriesData,
+            error: seriesError
+        } = await supabaseClient
+            .from("test_series")
+            .select("id")
+            .eq("course_id", courseData.id)
+            .eq("name", "Free Mock Tests")
+            .single();
+
+        if(seriesError || !seriesData){
+
+            toast("Free Mock Test series not found.");
+
+            console.error(seriesError);
+
+            return;
+        }
+
+
+        /* -----------------------------------------
+           3. Find Selected Test
+        ----------------------------------------- */
+
+        const {
+            data: testData,
+            error: testError
+        } = await supabaseClient
+            .from("tests")
+            .select(
+                "id,title,test_number,duration_minutes,total_marks,is_free"
+            )
+            .eq(
+                "test_series_id",
+                seriesData.id
+            )
+            .eq(
+                "test_number",
+                testNumber
+            )
+            .eq(
+                "is_free",
+                true
+            )
+            .single();
+
+        if(testError || !testData){
+
+            toast(
+                "This Free Mock Test is not available yet."
+            );
+
+            console.error(testError);
+
+            return;
+        }
+
+
+        /* -----------------------------------------
+           4. Save Current Test
+        ----------------------------------------- */
+
+        currentFreeMockTestId =
+            testData.id;
+
+        currentFreeMockNumber =
+            testNumber;
+
+
+        /* -----------------------------------------
+           5. Start Secure Attempt
+        ----------------------------------------- */
+
+        const {
+            data: attemptData,
+            error: attemptError
+        } = await supabaseClient
+            .rpc(
+                "start_test_attempt",
+                {
+                    p_test_id:
+                        testData.id
+                }
+            );
+
+        if(attemptError){
+
+            toast(
+                attemptError.message ||
+                "Unable to start test."
+            );
+
+            console.error(attemptError);
+
+            return;
+        }
+
+
+        currentAttemptId =
+            attemptData?.id ||
+            attemptData;
+
+
+        /* -----------------------------------------
+           6. Load Questions
+           Correct answers are NOT loaded here.
+        ----------------------------------------- */
+
+        const {
+            data: questionData,
+            error: questionError
+        } = await supabaseClient
+            .from("questions")
+            .select(`
+                id,
+                question_number,
+                question_text,
+                option_a,
+                option_b,
+                option_c,
+                option_d,
+                marks,
+                negative_marks
+            `)
+            .eq(
+                "test_id",
+                testData.id
+            )
+            .eq(
+                "is_active",
+                true
+            )
+            .order(
+                "question_number",
+                {
+                    ascending:true
+                }
+            );
+
+        if(questionError){
+
+            toast(
+                "Unable to load questions."
+            );
+
+            console.error(questionError);
+
+            return;
+        }
+
+
+        if(!questionData || questionData.length === 0){
+
+            toast(
+                "No questions are available for this test yet."
+            );
+
+            return;
+        }
+
+
+        /* -----------------------------------------
+           7. Convert DB format to Exam Engine format
+        ----------------------------------------- */
+
+        examQuestions =
+            questionData.map(function(q){
 
                 return {
-                    ...x,
+
+                    id:
+                        q.id,
+
+                    number:
+                        q.question_number,
+
                     q:
-                        "Q" +
-                        (index + 1) +
-                        ". " +
-                        x.q,
-                    o:[...x.o]
+                        q.question_text,
+
+                    o:[
+                        q.option_a,
+                        q.option_b,
+                        q.option_c,
+                        q.option_d
+                    ],
+
+                    marks:
+                        Number(q.marks || 1),
+
+                    negative:
+                        Number(
+                            q.negative_marks || 0
+                        )
+
                 };
 
-            }
+            });
+
+
+        /* -----------------------------------------
+           8. Reset Exam State
+        ----------------------------------------- */
+
+        userAnswers =
+            new Array(
+                examQuestions.length
+            ).fill(null);
+
+        currentQuestionIndex = 0;
+
+
+        /* -----------------------------------------
+           9. Timer
+        ----------------------------------------- */
+
+        timeLeft =
+            Number(
+                testData.duration_minutes || 10
+            ) * 60;
+
+        clearInterval(
+            timerInterval
         );
 
-    userAnswers =
-        new Array(
-            examQuestions.length
-        )
-        .fill(null);
 
-    currentQuestionIndex =
-        0;
+        /* -----------------------------------------
+           10. Exam Title
+        ----------------------------------------- */
 
-    timeLeft =
-        600;
-
-    currentPaper =
-        "Free Mock Test " +
-        freeMockNumber;
-
-    clearInterval(
-        timerInterval
-    );
-
-    $("examTitle")
-        .textContent =
-            freeMockCourse +
+        $("examTitle").textContent =
+            currentCourse +
             " – Free Mock Test " +
-            freeMockNumber;
+            testNumber;
 
-    showPage(
-        "examPage"
-    );
 
-    renderQuestion();
+        $("totalQuestions").textContent =
+            examQuestions.length;
 
-    timerInterval =
-        setInterval(
-            function(){
+
+        /* -----------------------------------------
+           11. Open Exam
+        ----------------------------------------- */
+
+        showPage("examPage");
+
+        renderQuestion();
+
+        renderTimer();
+
+
+        /* -----------------------------------------
+           12. Start Timer
+        ----------------------------------------- */
+
+        timerInterval =
+            setInterval(function(){
 
                 timeLeft--;
 
                 renderTimer();
 
-                if(
-                    timeLeft <= 0
-                ){
+                if(timeLeft <= 0){
 
                     clearInterval(
                         timerInterval
+                    );
+
+                    toast(
+                        "Time is over. Submitting your test..."
                     );
 
                     submitExam();
 
                 }
 
-            },
-            1000
+            },1000);
+
+
+    }catch(error){
+
+        console.error(error);
+
+        toast(
+            "Unable to start the test."
         );
 
-    renderTimer();
+    }
 
 }
-
-
-/* =====================================================
-   TIMER
-===================================================== */
-
-function renderTimer(){
-
-    const minutes =
-        Math.floor(
-            timeLeft / 60
-        );
-
-
-    const seconds =
-        timeLeft % 60;
-
-
-    $("timer")
-        .textContent =
-
-        String(
-            minutes
-        )
-        .padStart(
-            2,
-            "0"
-        )
-
-        +
-
-        ":"
-
-        +
-
-        String(
-            seconds
-        )
-        .padStart(
-            2,
-            "0"
-        );
-
-}
-
 
 /* =====================================================
    QUESTION
