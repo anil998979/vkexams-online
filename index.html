@@ -1832,7 +1832,7 @@ onclick="openStore()">
 
 <button
 class="btn btn-light"
-onclick="startFreeMock()">
+onclick="openFreeMocks()">
 
 🎯 Free Mock Test
 
@@ -3743,7 +3743,7 @@ function openFreeMocks(){
         <div class="choice-card" onclick="openFreeMockTests('${item[0]}')">
             <div class="big-icon">${item[1]}</div>
             <h2>${item[0]}</h2>
-            <p>5 Free Mock Tests • 20 Questions Each</p>
+            <p>5 Free Mock Tests • 10 Questions Each</p>
         </div>`;
     }).join("");
 
@@ -3751,35 +3751,44 @@ function openFreeMocks(){
 }
 
 function openFreeMockTests(course){
-    currentCourse = course;
-    $("freeMockCourses").innerHTML = `
-        <div class="choice-card" onclick="startFreeMock()">
-            <div class="big-icon">📝</div>
-            <h2>${course} – Free Test 1</h2>
-            <p>20 Questions • 15 Minutes • FREE</p>
-        </div>
-        <div class="choice-card" onclick="startFreeMock()">
-            <div class="big-icon">📝</div>
-            <h2>${course} – Free Test 2</h2>
-            <p>20 Questions • 15 Minutes • FREE</p>
-        </div>
-        <div class="choice-card" onclick="startFreeMock()">
-            <div class="big-icon">📝</div>
-            <h2>${course} – Free Test 3</h2>
-            <p>20 Questions • 15 Minutes • FREE</p>
-        </div>
-        <div class="choice-card" onclick="startFreeMock()">
-            <div class="big-icon">📝</div>
-            <h2>${course} – Free Test 4</h2>
-            <p>20 Questions • 15 Minutes • FREE</p>
-        </div>
-        <div class="choice-card" onclick="startFreeMock()">
-            <div class="big-icon">📝</div>
-            <h2>${course} – Free Test 5</h2>
-            <p>20 Questions • 15 Minutes • FREE</p>
-        </div>`;
+
+    freeMockCourse = course;
+
+    $("freeMockCourses").innerHTML =
+        Array.from(
+            {length:5},
+            function(_, index){
+
+                const number =
+                    index + 1;
+
+                return `
+                    <div
+                        class="choice-card"
+                        onclick="startFreeMock('${escapeAttr(course)}',${number})"
+                    >
+
+                        <div class="big-icon">
+                            📝
+                        </div>
+
+                        <h2>
+                            ${escapeHtml(course)}
+                            – Free Mock Test ${number}
+                        </h2>
+
+                        <p>
+                            10 Questions • 10 Minutes • FREE
+                        </p>
+
+                    </div>
+                `;
+
+            }
+        ).join("");
 
     showPage("freeMocks");
+
 }
 
 
@@ -4340,7 +4349,7 @@ function openPaper(paper){
     const list = $("testList");
 
     let html = `
-        <div class="test-item free" onclick="startFreeMock()">
+        <div class="test-item free" onclick="startFreeMock(currentCourse,1)">
             <span>🎯 Free Mock Test</span>
             <span class="free-label">FREE</span>
         </div>
@@ -5942,12 +5951,14 @@ const QUESTIONS = [
    START FREE MOCK
 ===================================================== */
 
-function startFreeMock(){
+function startFreeMock(course, number){
 
     if(
         !isLoggedIn() &&
         !isGuest()
     ){
+
+        window.__pendingFreeMocks = true;
 
         openLogin();
 
@@ -5959,17 +5970,42 @@ function startFreeMock(){
 
     }
 
+    freeMockCourse =
+        course ||
+        freeMockCourse ||
+        currentCourse ||
+        "VK Exams";
+
+    freeMockNumber =
+        Number(number) ||
+        1;
+
+    currentCourse =
+        freeMockCourse;
 
     examQuestions =
-        Array.from({length:20}, function(_, index){
-            const x = QUESTIONS[index % QUESTIONS.length];
-            return {
-                ...x,
-                q: "Q" + (index + 1) + ". " + x.q,
-                o:[...x.o]
-            };
-        });
+        Array.from(
+            {length:10},
+            function(_, index){
 
+                const x =
+                    QUESTIONS[
+                        index %
+                        QUESTIONS.length
+                    ];
+
+                return {
+                    ...x,
+                    q:
+                        "Q" +
+                        (index + 1) +
+                        ". " +
+                        x.q,
+                    o:[...x.o]
+                };
+
+            }
+        );
 
     userAnswers =
         new Array(
@@ -5977,57 +6013,39 @@ function startFreeMock(){
         )
         .fill(null);
 
-
     currentQuestionIndex =
         0;
 
-
     timeLeft =
-        900;
+        600;
 
+    currentPaper =
+        "Free Mock Test " +
+        freeMockNumber;
 
     clearInterval(
         timerInterval
     );
 
-
     $("examTitle")
         .textContent =
-
-        (
-            currentCourse ||
-            "VK Exams"
-        )
-
-        +
-
-        " – "
-
-        +
-
-        (
-            currentPaper ||
-            "Free Mock Test"
-        );
-
+            freeMockCourse +
+            " – Free Mock Test " +
+            freeMockNumber;
 
     showPage(
         "examPage"
     );
 
-
     renderQuestion();
-
 
     timerInterval =
         setInterval(
-
             function(){
 
                 timeLeft--;
 
                 renderTimer();
-
 
                 if(
                     timeLeft <= 0
@@ -6037,21 +6055,15 @@ function startFreeMock(){
                         timerInterval
                     );
 
-
-                    alert(
-                        "Time is over. Your test will be submitted automatically."
-                    );
-
-
                     submitExam();
 
                 }
 
             },
-
             1000
-
         );
+
+    renderTimer();
 
 }
 
