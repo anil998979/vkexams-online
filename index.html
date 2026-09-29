@@ -95,7 +95,7 @@ footer{padding:25px;text-align:center;color:#6b7280;font-size:13px}
 
 <section id="testseries" class="page"><div class="container"><span class="back" onclick="backFromSeries()">← Back</span><div class="examhead"><h1 id="seriesTitle"></h1><p>Select the examination series.</p></div><div id="seriesOptions" class="grid2"></div></div></section>
 
-<section id="papers" class="page"><div class="container"><span class="back" onclick="backFromTests()">← Back</span><div class="examhead"><h1 id="paperTitle"></h1><p>One Free Test and Test 1 to Test 10.</p></div><div class="testlist" id="testList"></div></div></section>
+<section id="papers" class="page"><div class="container"><span class="back"" onclick="backFromTests()">← Back</span><div class="examhead"><h1 id="paperTitle"></h1><p>One Free Test and Test 1 to Test 10.</p></div><div class="testlist" id="testList"></div></div></section>
 
 <section id="topicWise" class="page"><div class="container"><span class="back" onclick="openCourse('Endowment Officer',false)">← Back to Endowment Officer</span><div class="examhead"><h1>Endowment Officer – Topic-wise Tests</h1><p>Practice individual topics.</p></div><div id="topicList" class="grid2"></div></div></section>
 
@@ -275,12 +275,41 @@ async function openSeriesByName(course,group,name){
 }
 async function renderTestsForSeries(id,name){
  $('paperTitle').textContent=`${currentCourse}${currentGroup?' '+currentGroup:''} – ${name}`;
- $('testList').innerHTML='<div class="empty">Loading tests…</div>';showPage('papers');
- if(!supabaseClient||!id){renderFallbackTests(name);return}
- const {data,error}=await supabaseClient.from('tests').select('*').eq('test_series_id',id).eq('is_active',true).order('display_order');
- if(error||!data?.length){renderFallbackTests(name);return}
- currentTestList=data;
- $('testList').innerHTML=data.map(t=>testRow(t)).join('');
+ $('testList').innerHTML='<div class="empty">Loading tests…</div>';
+ showPage('papers');
+
+ if(!supabaseClient||!id){
+   renderFallbackTests(name);
+   return;
+ }
+
+ const {data,error}=await supabaseClient
+   .from('tests')
+   .select('*')
+   .eq('test_series_id',id)
+   .eq('is_active',true)
+   .order('display_order');
+
+ if(error||!data?.length){
+   renderFallbackTests(name);
+   return;
+ }
+
+ /*
+   Every normal Test Series must show exactly:
+   Free Mock Test + Test 1 to Test 10.
+   If older database rows contain Test 11, Test 12, etc.,
+   they are not exposed in the student UI.
+ */
+ const freeTests=data.filter(t=>t.is_free);
+ const paidTests=data
+   .filter(t=>!t.is_free)
+   .sort((a,b)=>(a.test_number??999)-(b.test_number??999))
+   .slice(0,10);
+
+ currentTestList=[...freeTests.slice(0,1),...paidTests];
+
+ $('testList').innerHTML=currentTestList.map(t=>testRow(t)).join('');
 }
 function renderFallbackTests(name){
  currentTestList=[];
@@ -288,22 +317,119 @@ function renderFallbackTests(name){
 }
 function testRow(t){return `<div class="testitem ${t.is_free?'free':'locked'}" onclick="${t.is_free?`startDbTest('${t.id}',true)`: `startDbTest('${t.id}',false)`}"><span>${escapeHtml(t.title)}</span><span class="badge ${t.is_free?'freebadge':'lockbadge'}">${t.is_free?'FREE':'🔒'}</span></div>`}
 async function openTopicWise(){
- currentCourse='Endowment Officer';$('topicList').innerHTML='<div class="empty">Topic-wise tests will appear here.</div>';showPage('topicWise');
- if(supabaseClient){
-   const cid=await courseId('Endowment Officer');
-   const {data}=await supabaseClient.from('course_syllabi').select('*').eq('course_id',cid).eq('is_active',true).order('display_order');
-   if(data?.length)$('topicList').innerHTML=data.map((x,i)=>`<div class="card"><h3>📝 ${escapeHtml(x.title)}</h3><p class="muted" style="margin-top:6px">${escapeHtml(x.description||'Topic-wise practice test')}</p><button class="btn blue" style="margin-top:12px" onclick="openPaidAccess()">Start Test</button></div>`).join('');
+ currentCourse='Endowment Officer';
+ currentGroup='';
+ $('topicList').innerHTML='<div class="empty">Loading topics…</div>';
+ showPage('topicWise');
+
+ /*
+   Topic-wise Tests are a separate feature.
+   They must NOT reuse the normal Paper/Test-1/Test-10 list.
+ */
+ if(!supabaseClient){
+   renderTopicWiseFallback();
+   return;
  }
+
+ const cid=await courseId('Endowment Officer');
+
+ if(!cid){
+   renderTopicWiseFallback();
+   return;
+ }
+
+ const {data,error}=await supabaseClient
+   .from('course_syllabi')
+   .select('id,title,description,display_order')
+   .eq('course_id',cid)
+   .eq('is_active',true)
+   .order('display_order');
+
+ if(error||!data?.length){
+   renderTopicWiseFallback();
+   return;
+ }
+
+ $('topicList').innerHTML=data.map((x,i)=>`
+   <div class="card choice">
+     <div class="icon">📚</div>
+     <h2>${escapeHtml(x.title)}</h2>
+     <p class="muted">${escapeHtml(x.description||'Topic-wise practice test')}</p>
+     <button class="btn blue" style="margin-top:12px"
+       onclick="openTopicTest('${escapeAttr(x.id)}','${escapeAttr(x.title)}')">
+       Start Topic Test
+     </button>
+   </div>
+ `).join('');
 }
+
+function renderTopicWiseFallback(){
+ const topics=[
+   'Hindu Philosophy',
+   'Temple System',
+   'Vedic Culture',
+   'Vedas',
+   'Upavedas',
+   'Upanishads',
+   'Dharmas',
+   'Endowments Act',
+   'Duties of Executive Officers'
+ ];
+
+ $('topicList').innerHTML=topics.map((topic,i)=>`
+   <div class="card choice">
+     <div class="icon">📚</div>
+     <h2>${escapeHtml(topic)}</h2>
+     <p class="muted">Topic-wise practice test</p>
+     <button class="btn blue" style="margin-top:12px"
+       onclick="openTopicTest('fallback-${i}','${escapeAttr(topic)}')">
+       Start Topic Test
+     </button>
+   </div>
+ `).join('');
+}
+
+function openTopicTest(topicId,topicTitle){
+ if(!isLoggedIn()){
+   openLogin();
+   toast('Please login/register to continue.');
+   return;
+ }
+
+ toast(
+   topicTitle +
+   ' topic test will be connected after topic-wise questions are added.'
+ );
+}
+
 function backFromSyllabus(){
-  if(currentCourse==='APPSC'&&currentGroup)openGroup(currentGroup,false);
-  else openCourse(currentCourse,false);
+  if(currentCourse==='APPSC'&&currentGroup){
+    openGroup(currentGroup,false);
+  }else{
+    openCourse(currentCourse,false);
+  }
 }
+
+/*
+  Test Series page is the parent of the Paper/Prelims/Mains page.
+  Therefore Back from Test/Paper must ALWAYS return to the
+  immediately previous Test Series screen, not the course screen.
+*/
+function backFromTests(){
+  openSeriesRoot(
+    currentCourse,
+    currentGroup,
+    false
+  );
+}
+
 function backFromSeries(){
-  if(currentCourse==='APPSC'&&currentGroup)openGroup(currentGroup,false);
-  else openCourse(currentCourse,false);
+  if(currentCourse==='APPSC'&&currentGroup){
+    openGroup(currentGroup,false);
+  }else{
+    openCourse(currentCourse,false);
+  }
 }
-function backFromTests(){backFromSeries()}
 
 function openFreeMocks(){showPage('freeMocks')}
 function openFreeMockCourse(course){
