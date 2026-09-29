@@ -4367,9 +4367,7 @@ function buyPlan(
     days
 ){
 
-    if(
-        !selectedStoreCourse
-    ){
+    if(!selectedStoreCourse){
 
         toast(
             "Please select a course first."
@@ -4379,51 +4377,29 @@ function buyPlan(
 
     }
 
+    if(!isLoggedIn()){
 
-    localStorage.setItem(
-        "selectedPackage",
+        openLogin();
 
-        JSON.stringify({
+        toast(
+            "Please login/register to purchase a package."
+        );
 
-            course:
-                selectedStoreCourse,
+        return;
 
-            plan:
-                plan,
-
-            amount:
-                amount,
-
-            days:
-                days,
-
-            selectedAt:
-                new Date()
-                .toISOString(),
-
-            status:
-                "Demo Selected"
-
-        })
-    );
-
+    }
 
     alert(
-
         selectedStoreCourse +
         " - " +
         plan +
-        " plan selected.\n\n" +
-
-        "Real payment gateway will be connected in the next stage."
-
+        " plan (₹" +
+        amount +
+        ") selected.\n\n" +
+        "Razorpay payment connection will be used here. No package is activated until payment is successfully verified."
     );
 
-
-    renderProfile();
-
 }
-
 
 /* =====================================================
    LOGIN STATE
@@ -4462,14 +4438,40 @@ function isGuest(){
 function applyUser(
     email,
     name,
-    provider
+    provider,
+    isAnonymous = false
 ){
+
+    if(isAnonymous){
+
+        localStorage.removeItem(
+            "studentEmail"
+        );
+
+        localStorage.removeItem(
+            "studentName"
+        );
+
+        localStorage.setItem(
+            "authProvider",
+            "anonymous"
+        );
+
+        localStorage.setItem(
+            "guestMode",
+            "true"
+        );
+
+        updateLoginButton();
+
+        return;
+
+    }
 
     localStorage.setItem(
         "studentEmail",
         email || ""
     );
-
 
     localStorage.setItem(
         "studentName",
@@ -4478,23 +4480,19 @@ function applyUser(
         "Student"
     );
 
-
     localStorage.setItem(
         "authProvider",
         provider || "email"
     );
-
 
     localStorage.setItem(
         "guestMode",
         "false"
     );
 
-
     updateLoginButton();
 
 }
-
 
 function clearUser(){
 
@@ -4978,23 +4976,23 @@ async function continueAsGuest(){
    LOGOUT
 ===================================================== */
 
-function logout(){
+async function logout(){
 
-    if(
-        supabaseClient
-    ){
+    localStorage.removeItem("studentEmail");
+    localStorage.removeItem("studentName");
+    localStorage.removeItem("authProvider");
+    localStorage.setItem("guestMode","false");
 
-        supabaseClient
-            .auth
-            .signOut()
-            .catch(
-                function(){}
-            );
+    updateLoginButton();
+
+    if(supabaseClient){
+
+        try{
+            await supabaseClient.auth.signOut();
+        }
+        catch(e){}
 
     }
-
-
-    clearUser();
 
     showHome();
 
@@ -5214,16 +5212,13 @@ function renderProfile(){
             "studentEmail"
         ) || "";
 
-
     const name =
         localStorage.getItem(
             "studentName"
         ) || "";
 
-
     const guest =
         isGuest();
-
 
     const coins =
         Number(
@@ -5231,15 +5226,6 @@ function renderProfile(){
                 "studentCoins"
             ) || 0
         );
-
-
-    const pkg =
-        JSON.parse(
-            localStorage.getItem(
-                "selectedPackage"
-            ) || "null"
-        );
-
 
     if(
         !email &&
@@ -5249,8 +5235,7 @@ function renderProfile(){
         $("profileContent")
             .innerHTML = `
 
-            <div
-            class="profile-summary">
+            <div class="profile-summary">
 
                 <div class="avatar">
                     ?
@@ -5260,23 +5245,15 @@ function renderProfile(){
                     Student Profile
                 </h2>
 
-                <p
-                style="
-                color:#6b7280;
-                margin-top:7px;
-                ">
-
+                <p style="color:#6b7280;margin-top:7px">
                     Login to access your profile.
-
                 </p>
 
                 <button
                 class="btn btn-blue"
                 style="margin-top:16px"
                 onclick="openLogin()">
-
                     Login / Register
-
                 </button>
 
             </div>
@@ -5287,55 +5264,24 @@ function renderProfile(){
 
     }
 
-
     $("profileContent")
         .innerHTML = `
 
-        <div
-        class="profile-summary">
+        <div class="profile-summary">
 
             <div class="avatar">
-
-                ${getInitials(
-                    name,
-                    email
-                )}
-
+                ${guest ? "U" : getInitials(name,email)}
             </div>
 
             <h2>
-
-                ${
-                    guest
-                    ?
-                    "User"
-                    :
-                    (
-                        name ||
-                        "Student"
-                    )
-                }
-
+                ${guest ? "User" : (name || "Student")}
             </h2>
 
-            <p
-            style="
-            color:#6b7280;
-            margin-top:6px;
-            ">
-
-                ${
-                    guest
-                    ?
-                    "Please Register"
-                    :
-                    email
-                }
-
+            <p style="color:#6b7280;margin-top:6px">
+                ${guest ? "Please Register" : email}
             </p>
 
         </div>
-
 
         <div class="coins-box">
 
@@ -5344,168 +5290,77 @@ function renderProfile(){
             </div>
 
             <div class="coin-number">
-
                 ${coins}
-
             </div>
 
             <button
             class="btn btn-primary"
             style="margin-top:10px"
             onclick="earnCoins()">
-
                 Watch Ad +0.5
-
             </button>
 
         </div>
 
+        <div class="profile-info-card">
 
-        ${
-            pkg
-            ?
-            `
+            <strong>
+                Active Package
+            </strong>
 
-            <div
-            class="profile-info-card">
-
-                <strong>
-                    Active Package (Demo)
-                </strong>
-
-                <p
-                style="margin-top:7px">
-
-                    ${pkg.course}
-
-                    •
-                    ${pkg.plan}
-
-                    •
-                    ₹${pkg.amount}
-
-                </p>
-
-                <p
-                style="
-                color:#6b7280;
-                margin-top:4px;
-                ">
-
-                    Selected:
-                    ${
-                        new Date(
-                            pkg.selectedAt
-                        )
-                        .toLocaleDateString()
-                    }
-
-                </p>
-
-            </div>
-
-            `
-            :
-            ""
-        }
-
-
-        <div
-        class="profile-menu">
-
+            <p style="margin-top:7px;color:#6b7280">
+                No Active Package
+            </p>
 
             <button
-            class="profile-menu-btn"
-            onclick="editProfile()">
+            class="btn btn-blue"
+            style="margin-top:10px"
+            onclick="openStore()">
+                View Packages
+            </button>
 
+        </div>
+
+        <div class="profile-menu">
+
+            <button class="profile-menu-btn" onclick="editProfile()">
                 👤 Edit Profile
-
-                <span>
-                    ›
-                </span>
-
+                <span>›</span>
             </button>
 
-
-            <button
-            class="profile-menu-btn"
-            onclick="openSettings()">
-
+            <button class="profile-menu-btn" onclick="openSettings()">
                 ⚙️ Settings
-
-                <span>
-                    ›
-                </span>
-
+                <span>›</span>
             </button>
 
-
-            <button
-            class="profile-menu-btn"
-            onclick="showPurchaseHistory()">
-
+            <button class="profile-menu-btn" onclick="showPurchaseHistory()">
                 🧾 Purchase History
-
-                <span>
-                    ›
-                </span>
-
+                <span>›</span>
             </button>
 
-
-            <button
-            class="profile-menu-btn"
-            onclick="showTestResults()">
-
+            <button class="profile-menu-btn" onclick="showTestResults()">
                 📊 Test Results
-
-                <span>
-                    ›
-                </span>
-
+                <span>›</span>
             </button>
 
-
-            <button
-            class="profile-menu-btn"
-            onclick="showActivePackage()">
-
+            <button class="profile-menu-btn" onclick="showActivePackage()">
                 🎫 Active Package
-
-                <span>
-                    ›
-                </span>
-
+                <span>›</span>
             </button>
-
 
             <button
             class="profile-menu-btn"
-            onclick="
-            alert(
-            'Help & Support: support@vkexams.online'
-            )">
-
+            onclick="alert('Help & Support: support@vkexams.online')">
                 ❓ Help & Support
-
-                <span>
-                    ›
-                </span>
-
+                <span>›</span>
             </button>
-
 
             <button
             class="profile-menu-btn"
             style="color:#dc2626"
             onclick="logout()">
-
                 🚪 Logout
-
-                <span>
-                    ›
-                </span>
-
+                <span>›</span>
             </button>
 
         </div>
@@ -5562,42 +5417,8 @@ function openSettings(){
 
 function showPurchaseHistory(){
 
-    const pkg =
-        JSON.parse(
-            localStorage.getItem(
-                "selectedPackage"
-            ) || "null"
-        );
-
-
-    if(!pkg){
-
-        alert(
-            "No purchase history yet."
-        );
-
-        return;
-
-    }
-
-
     alert(
-
-        "Purchase History (Demo)\n\n" +
-
-        pkg.course +
-        "\n" +
-
-        pkg.plan +
-        "\n" +
-
-        "₹" +
-        pkg.amount +
-        "\n" +
-
-        "Status: " +
-        pkg.status
-
+        "No purchase history yet."
     );
 
 }
@@ -5673,45 +5494,9 @@ function showTestResults(){
 
 function showActivePackage(){
 
-    const pkg =
-        JSON.parse(
-            localStorage.getItem(
-                "selectedPackage"
-            ) || "null"
-        );
-
-
-    if(!pkg){
-
-        alert(
-            "No active package selected."
-        );
-
-        return;
-
-    }
-
-
     alert(
-
-        "Active Package (Demo)\n\n" +
-
-        pkg.course +
-
-        "\n" +
-
-        pkg.plan +
-
-        "\n₹" +
-
-        pkg.amount +
-
-        "\nAccess: " +
-
-        pkg.days +
-
-        " days"
-
+        "No Active Package.\n\n" +
+        "Purchase a package from the Store after successful payment verification."
     );
 
 }
@@ -5969,13 +5754,14 @@ const QUESTIONS = [
 function startFreeMock(){
 
     if(
-        !isLoggedIn()
+        !isLoggedIn() &&
+        !isGuest()
     ){
 
         openLogin();
 
         toast(
-            "Login/Register is required to attempt tests."
+            "Please login or continue as Guest to attempt free mocks."
         );
 
         return;
@@ -6558,104 +6344,91 @@ function reattempt(){
 
 async function initializeAuth(){
 
-    if(
-        !supabaseClient
-    ){
+    if(!supabaseClient){
 
         updateLoginButton();
-
         return;
 
     }
 
+    const { data } =
+        await supabaseClient.auth.getSession();
 
-    const {
-        data
-    } =
-    await supabaseClient
-        .auth
-        .getSession();
-
-
-    if(
-        data.session
-    ){
+    if(data.session){
 
         const user =
             data.session.user;
 
+        if(user.is_anonymous){
 
-        applyUser(
+            applyUser(
+                "",
+                "User",
+                "anonymous",
+                true
+            );
 
-            user.email,
+        }
+        else{
 
-            user
-                .user_metadata
-                ?.full_name
+            applyUser(
+                user.email,
+                user.user_metadata?.full_name ||
+                user.email?.split("@")[0] ||
+                "Student",
+                "supabase"
+            );
 
-                ||
-
-                user.email
-                .split("@")[0],
-
-            "supabase"
-
-        );
+        }
 
     }
-
     else{
 
         updateLoginButton();
 
     }
 
+    supabaseClient.auth.onAuthStateChange(
 
-    supabaseClient
-        .auth
-        .onAuthStateChange(
+        function(event, session){
 
-            function(
-                event,
-                session
-            ){
+            if(session){
 
-                if(
-                    session
-                ){
+                const user =
+                    session.user;
 
-                    const user =
-                        session.user;
-
+                if(user.is_anonymous){
 
                     applyUser(
+                        "",
+                        "User",
+                        "anonymous",
+                        true
+                    );
 
+                }
+                else{
+
+                    applyUser(
                         user.email,
-
-                        user
-                            .user_metadata
-                            ?.full_name
-
-                            ||
-
-                            user.email
-                            .split("@")[0],
-
+                        user.user_metadata?.full_name ||
+                        user.email?.split("@")[0] ||
+                        "Student",
                         "supabase"
-
                     );
 
                 }
 
-                else{
+            }
+            else{
 
-                    updateLoginButton();
-
-                }
+                updateLoginButton();
 
             }
 
-        );
+        }
+
+    );
 
 }
 
@@ -6699,6 +6472,9 @@ window.addEventListener(
 
 );
 
+
+/* Remove legacy demo package data. Real purchases will come from the database. */
+localStorage.removeItem("selectedPackage");
 
 /* =====================================================
    INITIALIZATION
