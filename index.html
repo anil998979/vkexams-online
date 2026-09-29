@@ -379,9 +379,123 @@ function reattempt(){if(currentTest?.is_free)startFreeMock(freeMockCourse,freeMo
 function backFromExam(){if(currentCourse==='APPSC'&&currentGroup)openSeriesRoot('APPSC',currentGroup);else openSeriesRoot(currentCourse,currentGroup)}
 
 function selectStoreCourse(course){
- $('selectedCourseArea').style.display='block';$('selectedCourseName').textContent=course;
- $('plans').innerHTML=PLANS.map(p=>`<div class="card plan"><h3>${p.name}</h3><div class="price">₹${p.price}</div><p>${p.days} day${p.days>1?'s':''} access</p><button class="btn blue" onclick="buyPlan('${p.name}',${p.price},${p.days})">Buy Now</button></div>`).join('');
- showPage('store');
+
+    currentCourse = course;
+
+    /*
+        STORE FLOW
+
+        1. Initially all 6 courses are shown.
+        2. When one course is selected,
+           only that course remains visible.
+        3. Only the selected course packages are shown.
+        4. Change Course returns to all 6 courses.
+    */
+
+    const storeCourses = $("storeCourses");
+
+    const selectedCourse =
+        COURSES.find(function(c){
+            return c.name === course;
+        });
+
+    storeCourses.innerHTML = `
+        <div
+            class="card course"
+            style="
+                grid-column:1/-1;
+                max-width:420px;
+                margin:0 auto;
+                cursor:default;
+            "
+        >
+
+            <div class="icon">
+                ${selectedCourse ? selectedCourse.icon : "📚"}
+            </div>
+
+            <h3>
+                ${escapeHtml(course)}
+            </h3>
+
+            <p class="muted">
+                ${
+                    selectedCourse
+                    ? escapeHtml(selectedCourse.desc)
+                    : "Selected course"
+                }
+            </p>
+
+            <button
+                class="btn outline"
+                style="margin-top:12px"
+                onclick="resetStoreCourses()"
+            >
+                Change Course
+            </button>
+
+        </div>
+    `;
+
+
+    /*
+        SHOW SELECTED COURSE
+    */
+
+    $("selectedCourseArea").style.display = "block";
+
+    $("selectedCourseName").textContent =
+        course;
+
+
+    /*
+        SHOW ONLY THIS COURSE'S PACKAGES
+    */
+
+    $("plans").innerHTML =
+        PLANS.map(function(p){
+
+            return `
+                <div class="card plan">
+
+                    <h3>
+                        ${escapeHtml(p.name)}
+                    </h3>
+
+                    <div class="price">
+                        ₹${p.price}
+                    </div>
+
+                    <p>
+                        ${p.days}
+                        day${p.days > 1 ? "s" : ""}
+                        access
+                    </p>
+
+                    <button
+                        class="btn blue"
+                        onclick="
+                            buyPlan(
+                                '${escapeAttr(p.name)}',
+                                ${p.price},
+                                ${p.days}
+                            )
+                        "
+                    >
+                        Buy Now
+                    </button>
+
+                </div>
+            `;
+
+        }).join("");
+
+
+    /*
+        KEEP STORE PAGE OPEN
+    */
+
+    showPage("store");
 }
 async function buyPlan(plan,amount,days){
  if(!isLoggedIn()){openLogin();toast('Please login/register before purchasing a package.');return}
