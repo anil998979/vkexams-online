@@ -4834,8 +4834,65 @@ if(orderError || !orderData?.success){
     );
 
     return;
-
 }
+   const options = {
+
+    key: orderData.key_id,
+
+    amount: orderData.amount,
+
+    currency: orderData.currency || "INR",
+
+    name: "VK Exams",
+
+    description:
+        `${orderData.package_name} - ${selectedStoreCourse}`,
+
+    order_id: orderData.order_id,
+
+    handler: async function(response){
+
+        console.log(
+            "Razorpay payment response:",
+            response
+        );
+
+        toast(
+            "Payment received. Verifying payment..."
+        );
+
+    },
+
+    prefill: {
+
+        email:
+            localStorage.getItem("userEmail") || ""
+
+    },
+
+    theme: {
+
+        color: "#2563eb"
+
+    },
+
+    modal: {
+
+        ondismiss: function(){
+
+            toast(
+                "Payment cancelled."
+            );
+
+        }
+
+    }
+
+};
+
+const razorpay = new Razorpay(options);
+
+razorpay.open();
 /* =====================================================
    LOGIN STATE
 ===================================================== */
