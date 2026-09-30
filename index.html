@@ -6556,9 +6556,12 @@ async function submitExam(timeout = false){
             userAnswers[index] !== null &&
             userAnswers[index] !== undefined
         ){
+const optionLetters = ["A","B","C","D"];
 
-            payload[q.id] =
-                Number(userAnswers[index]);
+payload[q.id] =
+    optionLetters[
+        Number(userAnswers[index])
+    ];
 
         }
 
