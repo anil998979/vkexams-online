@@ -3985,6 +3985,8 @@ function openFreeMocks(){
             course
         );
 
+        return cache;
+
     }
     catch(error){
 
@@ -3993,16 +3995,24 @@ function openFreeMocks(){
             error
         );
 
+        toast("Unable to load Free Mock Tests.");
+        return null;
+
     }
 
 }
    
 
-function openFreeMockTests(course){
+async function openFreeMockTests(course){
 
     currentCourse = course;
 
-    preloadFreeMockData(course);
+    toast("Loading Free Mock Tests...");
+
+    /* Wait for all 5 tests and their questions to preload before
+       displaying the test cards. This removes the delay that
+       otherwise occurs when a test card is clicked immediately. */
+    await preloadFreeMockData(course);
 
     let html = "";
 
@@ -6427,19 +6437,27 @@ if(!testData){
                     );
         }
 
-        const attemptResult =
-            await attemptPromise;
+        let attemptResult;
+        let questionResult = null;
 
         if(questionPromise){
 
-            const questionResult =
-                await questionPromise;
+            [attemptResult, questionResult] =
+                await Promise.all([
+                    attemptPromise,
+                    questionPromise
+                ]);
 
             questionData =
                 questionResult.data;
 
             var questionError =
                 questionResult.error;
+
+        }else{
+
+            attemptResult =
+                await attemptPromise;
 
         }
 
