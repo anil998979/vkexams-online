@@ -6325,19 +6325,6 @@ if(!testData){
 
        const cachedQuestions =
     cache.questions?.[testNumber]; 
-       const [
-            attemptResult,
-            questionResult
-        ] = await Promise.all([
-
-            supabaseClient.rpc(
-                "start_test_attempt",
-                {
-                    p_test_id:
-                        testData.id
-                }
-            ),
-
        const attemptResult =
     await supabaseClient.rpc(
         "start_test_attempt",
@@ -6348,7 +6335,7 @@ if(!testData){
     );
 
 let questionData =
-    cachedQuestions;
+    cache.questions?.[testNumber];
 
 let questionError = null;
 
@@ -6389,6 +6376,8 @@ if(!questionData){
     questionError =
         result.error;
 }
+
+ 
 
         /* =========================================
            ATTEMPT RESULT
