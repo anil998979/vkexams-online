@@ -3756,6 +3756,191 @@ function openFreeMocks(){
     showPage("freeMocks");
 }
 
+   async function preloadFreeMockData(course){
+
+    if(!supabaseClient){
+        return;
+    }
+
+    try{
+
+        window.__freeMockCache =
+            window.__freeMockCache || {};
+
+        const cacheKey = course;
+
+        let cache =
+            window.__freeMockCache[cacheKey];
+
+        if(!cache){
+            cache = {};
+
+            const {
+                data: courseData,
+                error: courseError
+            } = await supabaseClient
+                .from("courses")
+                .select("id")
+                .eq("name", course)
+                .single();
+
+            if(courseError || !courseData){
+                console.error(
+                    "Preload course error:",
+                    courseError
+                );
+                return;
+            }
+
+            const {
+                data: seriesData,
+                error: seriesError
+            } = await supabaseClient
+                .from("test_series")
+                .select("id")
+                .eq("course_id", courseData.id)
+                .eq("name", "Free Mock Tests")
+                .single();
+
+            if(seriesError || !seriesData){
+                console.error(
+                    "Preload series error:",
+                    seriesError
+                );
+                return;
+            }
+
+            cache.courseId =
+                courseData.id;
+
+            cache.seriesId =
+                seriesData.id;
+
+            window.__freeMockCache[cacheKey] =
+                cache;
+        }
+
+        if(cache.preloaded){
+            return;
+        }
+
+        const {
+            data: tests,
+            error: testError
+        } = await supabaseClient
+            .from("tests")
+            .select(
+                "id,title,test_number,duration_minutes,total_marks,is_free"
+            )
+            .eq(
+                "test_series_id",
+                cache.seriesId
+            )
+            .eq(
+                "is_free",
+                true
+            )
+            .in(
+                "test_number",
+                [1,2,3,4,5]
+            )
+            .order(
+                "test_number",
+                {
+                    ascending:true
+                }
+            );
+
+        if(testError){
+            console.error(
+                "Preload tests error:",
+                testError
+            );
+            return;
+        }
+
+        cache.tests = {};
+
+        (tests || []).forEach(
+            function(test){
+
+                cache.tests[
+                    test.test_number
+                ] = test;
+
+            }
+        );
+
+        cache.questions = {};
+
+        await Promise.all(
+            (tests || []).map(
+                async function(test){
+
+                    const {
+                        data: questions,
+                        error
+                    } = await supabaseClient
+                        .from("questions")
+                        .select(`
+                            id,
+                            question_number,
+                            question_text,
+                            option_a,
+                            option_b,
+                            option_c,
+                            option_d,
+                            marks,
+                            negative_marks
+                        `)
+                        .eq(
+                            "test_id",
+                            test.id
+                        )
+                        .eq(
+                            "is_active",
+                            true
+                        )
+                        .order(
+                            "question_number",
+                            {
+                                ascending:true
+                            }
+                        );
+
+                    if(!error){
+                        cache.questions[
+                            test.test_number
+                        ] = questions || [];
+                    }
+
+                }
+            )
+        );
+
+        cache.preloaded = true;
+
+        window.__freeMockCache[cacheKey] =
+            cache;
+
+        console.log(
+            "Free Mock Tests preloaded:",
+            course
+        );
+
+    }
+    catch(error){
+
+        console.error(
+            "Free Mock preload error:",
+            error
+        );
+
+    }
+
+}
+   
+
 function openFreeMockTests(course){
 
     currentCourse = course;
@@ -6078,10 +6263,16 @@ async function startFreeMock(testNumber){
            FIND TEST
         ========================================= */
 
-        const {
-            data: testData,
-            error: testError
-        } = await supabaseClient
+
+       let testData =
+    cache.tests?.[testNumber];
+
+let testError = null;
+
+if(!testData){
+
+    const result =
+        await supabaseClient
             .from("tests")
             .select(
                 "id,title,test_number,duration_minutes,total_marks,is_free"
@@ -6099,6 +6290,14 @@ async function startFreeMock(testNumber){
                 true
             )
             .single();
+
+    testData =
+        result.data;
+
+    testError =
+        result.error;
+}
+       
 
         if(testError || !testData){
 
@@ -6124,7 +6323,9 @@ async function startFreeMock(testNumber){
            AT THE SAME TIME
         ========================================= */
 
-        const [
+       const cachedQuestions =
+    cache.questions?.[testNumber]; 
+       const [
             attemptResult,
             questionResult
         ] = await Promise.all([
@@ -6137,35 +6338,57 @@ async function startFreeMock(testNumber){
                 }
             ),
 
-            supabaseClient
-                .from("questions")
-                .select(`
-                    id,
-                    question_number,
-                    question_text,
-                    option_a,
-                    option_b,
-                    option_c,
-                    option_d,
-                    marks,
-                    negative_marks
-                `)
-                .eq(
-                    "test_id",
-                    testData.id
-                )
-                .eq(
-                    "is_active",
-                    true
-                )
-                .order(
-                    "question_number",
-                    {
-                        ascending:true
-                    }
-                )
-        ]);
+       const attemptResult =
+    await supabaseClient.rpc(
+        "start_test_attempt",
+        {
+            p_test_id:
+                testData.id
+        }
+    );
 
+let questionData =
+    cachedQuestions;
+
+let questionError = null;
+
+if(!questionData){
+
+    const result =
+        await supabaseClient
+            .from("questions")
+            .select(`
+                id,
+                question_number,
+                question_text,
+                option_a,
+                option_b,
+                option_c,
+                option_d,
+                marks,
+                negative_marks
+            `)
+            .eq(
+                "test_id",
+                testData.id
+            )
+            .eq(
+                "is_active",
+                true
+            )
+            .order(
+                "question_number",
+                {
+                    ascending:true
+                }
+            );
+
+    questionData =
+        result.data;
+
+    questionError =
+        result.error;
+}
 
         /* =========================================
            ATTEMPT RESULT
