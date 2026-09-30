@@ -4778,7 +4778,7 @@ const { data: packageData, error: packageError } =
     await supabaseClient
         .from("packages")
         .select("id, name, duration_days, price")
-        .eq("name", plan)
+      .eq("name", plan + " Plan")
         .eq("duration_days", days)
         .eq("price", amount)
         .eq("is_active", true)
