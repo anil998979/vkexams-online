@@ -6234,15 +6234,35 @@ async function startFreeMock(testNumber){
            9. Timer
         ----------------------------------------- */
 
-        timeLeft =
-            Number(
-                testData.duration_minutes || 10
-            ) * 60;
+    timeLeft =
+    Number(testData.duration_minutes || 10) * 60;
 
-        clearInterval(
-            timerInterval
+clearInterval(timerInterval);
+
+renderTimer();
+
+timerInterval = window.setInterval(function(){
+
+    if(timeLeft > 0){
+
+        timeLeft--;
+
+        renderTimer();
+
+    }
+
+    if(timeLeft <= 0){
+
+        clearInterval(timerInterval);
+
+        toast(
+            "Time is over. Submitting your test..."
         );
 
+        submitExam(true);
+    }
+
+}, 1000);
 
         /* -----------------------------------------
            10. Exam Title
