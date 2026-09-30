@@ -6376,61 +6376,73 @@ if(!testData){
 
 
         /* =========================================
-           START ATTEMPT + LOAD QUESTIONS
-           AT THE SAME TIME
+           START ATTEMPT + LOAD QUESTIONS IN PARALLEL
+           This removes the unnecessary wait where the
+           attempt RPC finished before questions were read.
         ========================================= */
 
-    const attemptResult =
-    await supabaseClient.rpc(
-        "start_test_attempt",
-        {
-            p_test_id:
-                testData.id
-        }
-    );
-
-let questionData =
-    cache.questions?.[testNumber];
-
-let questionError = null;
-
-if(!questionData){
-
-    const result =
-        await supabaseClient
-            .from("questions")
-            .select(`
-                id,
-                question_number,
-                question_text,
-                option_a,
-                option_b,
-                option_c,
-                option_d,
-                marks,
-                negative_marks
-            `)
-            .eq(
-                "test_id",
-                testData.id
-            )
-            .eq(
-                "is_active",
-                true
-            )
-            .order(
-                "question_number",
+        const attemptPromise =
+            supabaseClient.rpc(
+                "start_test_attempt",
                 {
-                    ascending:true
+                    p_test_id:
+                        testData.id
                 }
             );
 
-    questionData =
-        result.data;
+        let questionData =
+            cache.questions?.[testNumber];
 
-    questionError =
-        result.error;
-}
+        let questionPromise = null;
+
+        if(!questionData){
+
+            questionPromise =
+                supabaseClient
+                    .from("questions")
+                    .select(`
+                        id,
+                        question_number,
+                        question_text,
+                        option_a,
+                        option_b,
+                        option_c,
+                        option_d,
+                        marks,
+                        negative_marks
+                    `)
+                    .eq(
+                        "test_id",
+                        testData.id
+                    )
+                    .eq(
+                        "is_active",
+                        true
+                    )
+                    .order(
+                        "question_number",
+                        {
+                            ascending:true
+                        }
+                    );
+        }
+
+        const attemptResult =
+            await attemptPromise;
+
+        if(questionPromise){
+
+            const questionResult =
+                await questionPromise;
+
+            questionData =
+                questionResult.data;
+
+            var questionError =
+                questionResult.error;
+
+        }
+
 
  
 
