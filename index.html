@@ -4823,6 +4823,19 @@ if(orderError || !orderData?.success){
     return;
 
 }
+   if(
+    !orderData.order_id ||
+    !orderData.key_id ||
+    !orderData.amount
+){
+
+    toast(
+        "Invalid payment order received."
+    );
+
+    return;
+
+}
 /* =====================================================
    LOGIN STATE
 ===================================================== */
