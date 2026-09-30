@@ -6887,14 +6887,16 @@ payload[q.id] =
                     result?.unanswered ?? 0
                 );
 
+lastResult = {
 
-            lastResult = {
+    attemptId:
+        currentAttemptId,
 
-                questions:
-                    examQuestions,
+    questions:
+        examQuestions,
 
-                answers:
-                    [...userAnswers],
+    answers:
+        [...userAnswers],
 
                 score:
                     score,
@@ -7024,27 +7026,23 @@ async function viewSolutions(){
         return;
     }
 
-    try{
+    if(!currentAttemptId){
+        toast("Test attempt information is missing.");
+        return;
+    }
 
-        const questionIds =
-            lastResult.questions.map(function(q){
-                return q.id;
-            });
+    try{
 
         const {
             data: answerData,
             error: answerError
-        } = await supabaseClient
-            .from("question_answers")
-            .select(`
-                question_id,
-                correct_option,
-                explanation
-            `)
-            .in(
-                "question_id",
-                questionIds
-            );
+        } = await supabaseClient.rpc(
+            "get_test_solutions",
+            {
+                p_attempt_id:
+                    currentAttemptId
+            }
+        );
 
         if(answerError){
 
@@ -7054,6 +7052,7 @@ async function viewSolutions(){
             );
 
             toast(
+                answerError.message ||
                 "Unable to load solutions."
             );
 
@@ -7076,7 +7075,7 @@ async function viewSolutions(){
 
             lastResult.questions
             .map(
-                function(question, index){
+                function(question,index){
 
                     const answer =
                         answerMap[
@@ -7087,11 +7086,15 @@ async function viewSolutions(){
                         answer?.correct_option || "";
 
                     const correctIndex =
-                        ["A","B","C","D"]
-                        .indexOf(
+                        [
+                            "A",
+                            "B",
+                            "C",
+                            "D"
+                        ].indexOf(
                             String(
                                 correctOption
-                            ).toUpperCase()
+                            ).trim().toUpperCase()
                         );
 
                     const correctText =
@@ -7115,16 +7118,14 @@ async function viewSolutions(){
 
                     return `
 
-                        <div
-                        class="solution-card">
+                        <div class="solution-card">
 
                             <h3>
                                 Q${index + 1}.
                                 ${question.q}
                             </h3>
 
-                            <p
-                            style="margin-top:8px">
+                            <p style="margin-top:8px">
 
                                 Your Answer:
 
@@ -7183,8 +7184,6 @@ async function viewSolutions(){
     }
 
 }
-
-
 
 /* =====================================================
    REATTEMPT
