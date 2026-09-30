@@ -7164,14 +7164,11 @@ function nextQuestion(){
 
         renderQuestion();
 
+        return;
     }
 
-    else{
-
-        showLastQuestionPopup();
-
-    }
-
+    // Last question
+    showLastQuestionPopup();
 }
 
 
@@ -7182,11 +7179,23 @@ function showLastQuestionPopup(){
             "lastQuestionPopup"
         );
 
-    if(popup){
+    if(!popup){
 
-        popup.classList.add("active");
+        console.error(
+            "lastQuestionPopup element not found."
+        );
 
+        return;
     }
+
+    // Force the existing modal to become visible
+    popup.classList.add("active");
+
+    popup.style.setProperty(
+        "display",
+        "flex",
+        "important"
+    );
 
 }
 
@@ -7198,14 +7207,19 @@ function closeLastQuestionPopup(){
             "lastQuestionPopup"
         );
 
-    if(popup){
-
-        popup.classList.remove("active");
-
+    if(!popup){
+        return;
     }
 
-}
+    popup.classList.remove("active");
 
+    popup.style.setProperty(
+        "display",
+        "none",
+        "important"
+    );
+
+}
 /* =====================================================
    SUBMIT
 ===================================================== */
