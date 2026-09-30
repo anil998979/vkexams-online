@@ -4794,8 +4794,35 @@ if(packageError || !packageData){
 
 }
 
-}
 
+   // IKKADA RAZORPAY ORDER CODE PETTALI
+
+const { data: orderData, error: orderError } =
+    await supabaseClient.functions.invoke(
+        "create-razorpay-order",
+        {
+            body: {
+                package_id: packageData.id,
+                course_id: courseData.id
+            }
+        }
+    );
+
+if(orderError || !orderData?.success){
+
+    console.error(
+        "Razorpay order creation failed:",
+        orderError || orderData
+    );
+
+    toast(
+        orderData?.error ||
+        "Unable to create payment order."
+    );
+
+    return;
+
+}
 /* =====================================================
    LOGIN STATE
 ===================================================== */
