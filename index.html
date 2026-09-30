@@ -5966,19 +5966,317 @@ function editProfile(){
 
 function openSettings(){
 
-    alert(
+    $("profileContent").innerHTML = `
 
-        "Settings\n\n" +
+        <div style="
+            margin-bottom:20px;
+        ">
 
-        "Notifications: ON\n" +
+            <button
+                onclick="renderProfile()"
+                style="
+                    border:none;
+                    background:none;
+                    color:#2563eb;
+                    font-weight:700;
+                    cursor:pointer;
+                    padding:0;
+                    font-size:14px;
+                "
+            >
+                ← Back to Profile
+            </button>
 
-        "Dark Mode: OFF\n" +
+        </div>
 
-        "Language: English/Telugu\n" +
 
-        "Account Security: Supabase authentication when connected."
+        <div style="
+            text-align:center;
+            margin-bottom:24px;
+        ">
 
-    );
+            <div style="
+                font-size:42px;
+                margin-bottom:6px;
+            ">
+                ⚙️
+            </div>
+
+            <h2 style="
+                margin:0;
+                color:#111827;
+            ">
+                Settings
+            </h2>
+
+            <p style="
+                color:#6b7280;
+                margin-top:6px;
+            ">
+                Manage your VK Exams preferences
+            </p>
+
+        </div>
+
+
+        <!-- NOTIFICATIONS -->
+
+        <div style="
+            background:#fff;
+            border:1px solid #e5e7eb;
+            border-radius:14px;
+            padding:18px;
+            margin-bottom:12px;
+            box-shadow:0 4px 14px rgba(0,0,0,.05);
+        ">
+
+            <div style="
+                display:flex;
+                justify-content:space-between;
+                align-items:center;
+                gap:12px;
+            ">
+
+                <div>
+
+                    <h3 style="
+                        margin:0;
+                        font-size:16px;
+                        color:#111827;
+                    ">
+                        🔔 Notifications
+                    </h3>
+
+                    <p style="
+                        margin-top:6px;
+                        color:#6b7280;
+                        font-size:13px;
+                    ">
+                        Receive important exam and account notifications.
+                    </p>
+
+                </div>
+
+                <span style="
+                    background:#dcfce7;
+                    color:#15803d;
+                    padding:7px 12px;
+                    border-radius:20px;
+                    font-size:12px;
+                    font-weight:800;
+                    white-space:nowrap;
+                ">
+                    ON
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <!-- DARK MODE -->
+
+        <div style="
+            background:#fff;
+            border:1px solid #e5e7eb;
+            border-radius:14px;
+            padding:18px;
+            margin-bottom:12px;
+            box-shadow:0 4px 14px rgba(0,0,0,.05);
+        ">
+
+            <div style="
+                display:flex;
+                justify-content:space-between;
+                align-items:center;
+                gap:12px;
+            ">
+
+                <div>
+
+                    <h3 style="
+                        margin:0;
+                        font-size:16px;
+                        color:#111827;
+                    ">
+                        🌙 Dark Mode
+                    </h3>
+
+                    <p style="
+                        margin-top:6px;
+                        color:#6b7280;
+                        font-size:13px;
+                    ">
+                        Dark mode is currently disabled.
+                    </p>
+
+                </div>
+
+                <span style="
+                    background:#f3f4f6;
+                    color:#6b7280;
+                    padding:7px 12px;
+                    border-radius:20px;
+                    font-size:12px;
+                    font-weight:800;
+                    white-space:nowrap;
+                ">
+                    OFF
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <!-- LANGUAGE -->
+
+        <div style="
+            background:#fff;
+            border:1px solid #e5e7eb;
+            border-radius:14px;
+            padding:18px;
+            margin-bottom:12px;
+            box-shadow:0 4px 14px rgba(0,0,0,.05);
+        ">
+
+            <div style="
+                display:flex;
+                justify-content:space-between;
+                align-items:center;
+                gap:12px;
+            ">
+
+                <div>
+
+                    <h3 style="
+                        margin:0;
+                        font-size:16px;
+                        color:#111827;
+                    ">
+                        🌐 Language
+                    </h3>
+
+                    <p style="
+                        margin-top:6px;
+                        color:#6b7280;
+                        font-size:13px;
+                    ">
+                        Select your preferred language.
+                    </p>
+
+                </div>
+
+                <span style="
+                    background:#eef2ff;
+                    color:#4338ca;
+                    padding:7px 12px;
+                    border-radius:20px;
+                    font-size:12px;
+                    font-weight:800;
+                    white-space:nowrap;
+                ">
+                    English / Telugu
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <!-- ACCOUNT SECURITY -->
+
+        <div style="
+            background:#fff;
+            border:1px solid #e5e7eb;
+            border-radius:14px;
+            padding:18px;
+            margin-bottom:12px;
+            box-shadow:0 4px 14px rgba(0,0,0,.05);
+        ">
+
+            <div style="
+                display:flex;
+                justify-content:space-between;
+                align-items:center;
+                gap:12px;
+            ">
+
+                <div>
+
+                    <h3 style="
+                        margin:0;
+                        font-size:16px;
+                        color:#111827;
+                    ">
+                        🔐 Account Security
+                    </h3>
+
+                    <p style="
+                        margin-top:6px;
+                        color:#6b7280;
+                        font-size:13px;
+                    ">
+                        Your account is protected using Supabase authentication.
+                    </p>
+
+                </div>
+
+                <span style="
+                    background:#eff6ff;
+                    color:#2563eb;
+                    padding:7px 12px;
+                    border-radius:20px;
+                    font-size:12px;
+                    font-weight:800;
+                    white-space:nowrap;
+                ">
+                    SECURE
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <!-- PASSWORD -->
+
+        <div style="
+            background:#fff;
+            border:1px solid #e5e7eb;
+            border-radius:14px;
+            padding:18px;
+            margin-bottom:12px;
+            box-shadow:0 4px 14px rgba(0,0,0,.05);
+        ">
+
+            <h3 style="
+                margin:0;
+                font-size:16px;
+                color:#111827;
+            ">
+                🔑 Password
+            </h3>
+
+            <p style="
+                margin-top:6px;
+                color:#6b7280;
+                font-size:13px;
+            ">
+                Change your account password securely.
+            </p>
+
+            <button
+                class="btn btn-blue"
+                style="margin-top:13px"
+                onclick="openForgot()"
+            >
+                Change Password
+            </button>
+
+        </div>
+
+    `;
 
 }
 
