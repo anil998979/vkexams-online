@@ -5973,6 +5973,10 @@ const QUESTIONS = [
 ===================================================== */
 async function startFreeMock(testNumber){
 
+    if(freeMockStarting){
+        return;
+    }
+
     if(!isLoggedIn() && !isGuest()){
 
         openLogin();
@@ -5991,58 +5995,79 @@ async function startFreeMock(testNumber){
         return;
     }
 
+    freeMockStarting = true;
+
     try{
 
-        /* -----------------------------------------
-           1. Find Course
-        ----------------------------------------- */
+        /* =========================================
+           COURSE + SERIES CACHE
+        ========================================= */
 
-        const {
-            data: courseData,
-            error: courseError
-        } = await supabaseClient
-            .from("courses")
-            .select("id")
-            .eq("name", currentCourse)
-            .single();
+        window.__freeMockCache =
+            window.__freeMockCache || {};
 
-        if(courseError || !courseData){
+        const cacheKey = currentCourse;
 
-            toast("Course not found.");
+        let cache =
+            window.__freeMockCache[cacheKey];
 
-            console.error(courseError);
+        if(!cache){
 
-            return;
+            cache = {};
+
+            const {
+                data: courseData,
+                error: courseError
+            } = await supabaseClient
+                .from("courses")
+                .select("id")
+                .eq("name", currentCourse)
+                .single();
+
+            if(courseError || !courseData){
+
+                toast("Course not found.");
+
+                console.error(courseError);
+
+                return;
+            }
+
+            const {
+                data: seriesData,
+                error: seriesError
+            } = await supabaseClient
+                .from("test_series")
+                .select("id")
+                .eq("course_id", courseData.id)
+                .eq("name", "Free Mock Tests")
+                .single();
+
+            if(seriesError || !seriesData){
+
+                toast(
+                    "Free Mock Test series not found."
+                );
+
+                console.error(seriesError);
+
+                return;
+            }
+
+            cache.courseId =
+                courseData.id;
+
+            cache.seriesId =
+                seriesData.id;
+
+            window.__freeMockCache[cacheKey] =
+                cache;
         }
 
 
-        /* -----------------------------------------
-           2. Find Free Mock Test Series
-        ----------------------------------------- */
-
-        const {
-            data: seriesData,
-            error: seriesError
-        } = await supabaseClient
-            .from("test_series")
-            .select("id")
-            .eq("course_id", courseData.id)
-            .eq("name", "Free Mock Tests")
-            .single();
-
-        if(seriesError || !seriesData){
-
-            toast("Free Mock Test series not found.");
-
-            console.error(seriesError);
-
-            return;
-        }
-
-
-        /* -----------------------------------------
-           3. Find Selected Test
-        ----------------------------------------- */
+        /* =========================================
+           FIND TEST
+        ========================================= */
 
         const {
             data: testData,
@@ -6054,7 +6079,7 @@ async function startFreeMock(testNumber){
             )
             .eq(
                 "test_series_id",
-                seriesData.id
+                cache.seriesId
             )
             .eq(
                 "test_number",
@@ -6078,10 +6103,6 @@ async function startFreeMock(testNumber){
         }
 
 
-        /* -----------------------------------------
-           4. Save Current Test
-        ----------------------------------------- */
-
         currentFreeMockTestId =
             testData.id;
 
@@ -6089,21 +6110,63 @@ async function startFreeMock(testNumber){
             testNumber;
 
 
-        /* -----------------------------------------
-           5. Start Secure Attempt
-        ----------------------------------------- */
+        /* =========================================
+           START ATTEMPT + LOAD QUESTIONS
+           AT THE SAME TIME
+        ========================================= */
 
-        const {
-            data: attemptData,
-            error: attemptError
-        } = await supabaseClient
-            .rpc(
+        const [
+            attemptResult,
+            questionResult
+        ] = await Promise.all([
+
+            supabaseClient.rpc(
                 "start_test_attempt",
                 {
                     p_test_id:
                         testData.id
                 }
-            );
+            ),
+
+            supabaseClient
+                .from("questions")
+                .select(`
+                    id,
+                    question_number,
+                    question_text,
+                    option_a,
+                    option_b,
+                    option_c,
+                    option_d,
+                    marks,
+                    negative_marks
+                `)
+                .eq(
+                    "test_id",
+                    testData.id
+                )
+                .eq(
+                    "is_active",
+                    true
+                )
+                .order(
+                    "question_number",
+                    {
+                        ascending:true
+                    }
+                )
+        ]);
+
+
+        /* =========================================
+           ATTEMPT RESULT
+        ========================================= */
+
+        const attemptData =
+            attemptResult.data;
+
+        const attemptError =
+            attemptResult.error;
 
         if(attemptError){
 
@@ -6117,47 +6180,20 @@ async function startFreeMock(testNumber){
             return;
         }
 
-
         currentAttemptId =
             attemptData?.id ||
             attemptData;
 
 
-        /* -----------------------------------------
-           6. Load Questions
-           Correct answers are NOT loaded here.
-        ----------------------------------------- */
+        /* =========================================
+           QUESTIONS
+        ========================================= */
 
-        const {
-            data: questionData,
-            error: questionError
-        } = await supabaseClient
-            .from("questions")
-            .select(`
-                id,
-                question_number,
-                question_text,
-                option_a,
-                option_b,
-                option_c,
-                option_d,
-                marks,
-                negative_marks
-            `)
-            .eq(
-                "test_id",
-                testData.id
-            )
-            .eq(
-                "is_active",
-                true
-            )
-            .order(
-                "question_number",
-                {
-                    ascending:true
-                }
-            );
+        const questionData =
+            questionResult.data;
+
+        const questionError =
+            questionResult.error;
 
         if(questionError){
 
@@ -6170,8 +6206,10 @@ async function startFreeMock(testNumber){
             return;
         }
 
-
-        if(!questionData || questionData.length === 0){
+        if(
+            !questionData ||
+            questionData.length === 0
+        ){
 
             toast(
                 "No questions are available for this test yet."
@@ -6181,9 +6219,9 @@ async function startFreeMock(testNumber){
         }
 
 
-        /* -----------------------------------------
-           7. Convert DB format to Exam Engine format
-        ----------------------------------------- */
+        /* =========================================
+           PREPARE QUESTIONS
+        ========================================= */
 
         examQuestions =
             questionData.map(function(q){
@@ -6207,21 +6245,22 @@ async function startFreeMock(testNumber){
                     ],
 
                     marks:
-                        Number(q.marks || 1),
+                        Number(
+                            q.marks || 1
+                        ),
 
                     negative:
                         Number(
                             q.negative_marks || 0
                         )
-
                 };
 
             });
 
 
-        /* -----------------------------------------
-           8. Reset Exam State
-        ----------------------------------------- */
+        /* =========================================
+           RESET EXAM
+        ========================================= */
 
         userAnswers =
             new Array(
@@ -6231,53 +6270,23 @@ async function startFreeMock(testNumber){
         currentQuestionIndex = 0;
 
 
-        /* -----------------------------------------
-           9. Timer
-        ----------------------------------------- */
+        /* =========================================
+           TIMER
+        ========================================= */
 
-    clearInterval(timerInterval);
-
-renderTimer();
-
-timerInterval = window.setInterval(function(){
-
-    if(timeLeft > 0){
-        timeLeft--;
-        renderTimer();
-    }
-
-    if(timeLeft <= 0){
         clearInterval(timerInterval);
 
-        toast(
-            "Time is over. Submitting your test..."
-        );
+        timeLeft =
+            Number(
+                testData.duration_minutes || 10
+            ) * 60;
 
-        submitExam(true);
-    }
-
-}, 1000);
-
-        /* -----------------------------------------
-           10. Exam Title
-        ----------------------------------------- */
 
         $("examTitle").textContent =
             currentCourse +
             " – Free Mock Test " +
             testNumber;
 
-
-        const totalQuestions = $("totalQuestions");
-
-if(totalQuestions){
-    totalQuestions.textContent = examQuestions.length;
-}
-
-
-        /* -----------------------------------------
-           11. Open Exam
-        ----------------------------------------- */
 
         showPage("examPage");
 
@@ -6286,16 +6295,19 @@ if(totalQuestions){
         renderTimer();
 
 
-        /* -----------------------------------------
-           12. Start Timer
-        ----------------------------------------- */
+        /* =========================================
+           START ONLY ONE TIMER
+        ========================================= */
 
         timerInterval =
-            setInterval(function(){
+            window.setInterval(function(){
 
-                timeLeft--;
+                if(timeLeft > 0){
 
-                renderTimer();
+                    timeLeft--;
+
+                    renderTimer();
+                }
 
                 if(timeLeft <= 0){
 
@@ -6307,25 +6319,31 @@ if(totalQuestions){
                         "Time is over. Submitting your test..."
                     );
 
-                    submitExam();
-
+                    submitExam(true);
                 }
 
             },1000);
 
 
     }
-   catch(error){
+    catch(error){
 
-    console.error(error);
+        console.error(
+            "Free Mock Error:",
+            error
+        );
 
-    toast(
-        "Unable to start the test."
-    );
+        toast(
+            "Unable to start the test."
+        );
 
-   }
+    }
+    finally{
+
+        freeMockStarting = false;
+
+    }
 }
-
 /* =====================================================
    TIMER
 ===================================================== */
