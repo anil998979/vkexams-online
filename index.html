@@ -7167,38 +7167,21 @@ function nextQuestion(){
         return;
     }
 
-    // Last question
-    showLastQuestionPopup();
-}
-
-
-function showLastQuestionPopup(){
-
+    // LAST QUESTION
     const popup =
         document.getElementById(
             "lastQuestionPopup"
         );
 
-    if(!popup){
+    if(popup){
 
-        console.error(
-            "lastQuestionPopup element not found."
-        );
+        popup.classList.add("active");
 
-        return;
+        popup.style.display = "flex";
+
     }
 
-    // Force the existing modal to become visible
-    popup.classList.add("active");
-
-    popup.style.setProperty(
-        "display",
-        "flex",
-        "important"
-    );
-
 }
-
 
 function closeLastQuestionPopup(){
 
@@ -7207,17 +7190,13 @@ function closeLastQuestionPopup(){
             "lastQuestionPopup"
         );
 
-    if(!popup){
-        return;
+    if(popup){
+
+        popup.classList.remove("active");
+
+        popup.style.display = "none";
+
     }
-
-    popup.classList.remove("active");
-
-    popup.style.setProperty(
-        "display",
-        "none",
-        "important"
-    );
 
 }
 /* =====================================================
