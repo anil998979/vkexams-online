@@ -4739,8 +4739,8 @@ function selectStoreCourse(course, card){
 }
 
 
-function buyPlan(
-    plan,
+async function buyPlan(
+       plan,
     amount,
     days
 ){
@@ -4767,15 +4767,22 @@ function buyPlan(
 
     }
 
-    alert(
-        selectedStoreCourse +
-        " - " +
-        plan +
-        " plan (₹" +
-        amount +
-        ") selected.\n\n" +
-        "Razorpay payment connection will be used here. No package is activated until payment is successfully verified."
+   const { data: courseData, error: courseError } =
+    await supabaseClient
+        .from("courses")
+        .select("id, name")
+        .eq("name", selectedStoreCourse)
+        .single();
+
+if(courseError || !courseData){
+
+    toast(
+        "Selected course could not be found."
     );
+
+    return;
+
+}
 
 }
 
