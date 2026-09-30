@@ -5836,7 +5836,6 @@ function showPurchaseHistory(){
 
 }
 
-
 async function showTestResults(){
 
     if(isGuest()){
@@ -5868,6 +5867,26 @@ async function showTestResults(){
     const userId =
         sessionData.session.user.id;
 
+    /* Show loading */
+    $("profileContent").innerHTML = `
+        <div style="
+            text-align:center;
+            padding:50px 20px;
+            color:#6b7280;
+        ">
+            <div style="
+                font-size:36px;
+                margin-bottom:12px;
+            ">
+                📊
+            </div>
+
+            <strong>
+                Loading Test Results...
+            </strong>
+        </div>
+    `;
+
     const {
         data,
         error
@@ -5889,7 +5908,7 @@ async function showTestResults(){
         .order(
             "completed_at",
             {
-                ascending: false
+                ascending:false
             }
         );
 
@@ -5900,71 +5919,339 @@ async function showTestResults(){
             error
         );
 
-        toast(
-            "Unable to load test results."
-        );
+        $("profileContent").innerHTML = `
+            <div style="
+                text-align:center;
+                padding:40px 20px;
+            ">
+
+                <div style="
+                    font-size:42px;
+                    margin-bottom:12px;
+                ">
+                    ⚠️
+                </div>
+
+                <h3>
+                    Unable to Load Results
+                </h3>
+
+                <p style="
+                    color:#6b7280;
+                    margin-top:8px;
+                ">
+                    Please try again.
+                </p>
+
+                <button
+                    class="btn btn-blue"
+                    style="margin-top:18px"
+                    onclick="renderProfile()"
+                >
+                    ← Back to Profile
+                </button>
+
+            </div>
+        `;
 
         return;
     }
 
     if(!data || !data.length){
 
-        toast(
-            "No test results yet."
-        );
+        $("profileContent").innerHTML = `
+
+            <div style="
+                text-align:center;
+                padding:45px 20px;
+            ">
+
+                <div style="
+                    font-size:48px;
+                    margin-bottom:12px;
+                ">
+                    📊
+                </div>
+
+                <h3>
+                    No Test Results Yet
+                </h3>
+
+                <p style="
+                    color:#6b7280;
+                    margin-top:8px;
+                ">
+                    Complete a mock test to see your
+                    results here.
+                </p>
+
+                <button
+                    class="btn btn-blue"
+                    style="margin-top:18px"
+                    onclick="renderProfile()"
+                >
+                    ← Back to Profile
+                </button>
+
+            </div>
+
+        `;
 
         return;
     }
 
-    const resultText =
-        data.map(
-            function(result,index){
+    let html = `
 
-                const testName =
-                    result.tests?.title ||
-                    "Test";
+        <div style="
+            margin-bottom:20px;
+        ">
 
-                const date =
+            <button
+                onclick="renderProfile()"
+                style="
+                    border:none;
+                    background:none;
+                    color:#2563eb;
+                    font-weight:700;
+                    cursor:pointer;
+                    padding:0;
+                    font-size:14px;
+                "
+            >
+                ← Back to Profile
+            </button>
+
+        </div>
+
+        <div style="
+            text-align:center;
+            margin-bottom:24px;
+        ">
+
+            <div style="
+                font-size:42px;
+                margin-bottom:6px;
+            ">
+                📊
+            </div>
+
+            <h2 style="
+                margin:0;
+                color:#111827;
+            ">
+                Test Results
+            </h2>
+
+            <p style="
+                color:#6b7280;
+                margin-top:6px;
+            ">
+                Your completed test history
+            </p>
+
+        </div>
+
+    `;
+
+    data.forEach(
+        function(result,index){
+
+            const testName =
+                result.tests?.title ||
+                "Test";
+
+            const score =
+                Number(result.score || 0);
+
+            const total =
+                Number(result.total_marks || 0);
+
+            const percentage =
+                Number(result.percentage || 0);
+
+            const correct =
+                Number(result.correct_answers || 0);
+
+            const wrong =
+                Number(result.wrong_answers || 0);
+
+            const unanswered =
+                Number(result.unanswered || 0);
+
+            const date =
+                result.completed_at
+                ? new Date(
                     result.completed_at
-                    ? new Date(
-                        result.completed_at
-                    ).toLocaleString()
-                    : "-";
+                ).toLocaleString()
+                : "-";
 
-                return (
-                    (index + 1) +
-                    ". " +
-                    testName +
-                    "\n" +
-                    "Score: " +
-                    result.score +
-                    " / " +
-                    result.total_marks +
-                    "\n" +
-                    "Percentage: " +
-                    result.percentage +
-                    "%\n" +
-                    "Correct: " +
-                    result.correct_answers +
-                    " | Wrong: " +
-                    result.wrong_answers +
-                    " | Unanswered: " +
-                    result.unanswered +
-                    "\n" +
-                    "Date: " +
-                    date
-                );
+            html += `
 
-            }
-        ).join(
-            "\n\n"
-        );
+                <div style="
+                    background:#ffffff;
+                    border:1px solid #e5e7eb;
+                    border-radius:14px;
+                    padding:18px;
+                    margin-bottom:15px;
+                    box-shadow:0 4px 14px rgba(0,0,0,0.06);
+                ">
 
-    alert(
-        "📊 TEST RESULTS\n\n" +
-        resultText
+                    <div style="
+                        display:flex;
+                        justify-content:space-between;
+                        align-items:flex-start;
+                        gap:12px;
+                        margin-bottom:15px;
+                    ">
+
+                        <div>
+
+                            <div style="
+                                color:#6b7280;
+                                font-size:12px;
+                                margin-bottom:5px;
+                            ">
+                                Test ${index + 1}
+                            </div>
+
+                            <h3 style="
+                                margin:0;
+                                color:#111827;
+                                font-size:17px;
+                            ">
+                                ${testName}
+                            </h3>
+
+                        </div>
+
+                        <div style="
+                            background:#eef2ff;
+                            color:#4338ca;
+                            padding:7px 11px;
+                            border-radius:20px;
+                            font-weight:800;
+                            font-size:14px;
+                            white-space:nowrap;
+                        ">
+                            ${percentage}%
+                        </div>
+
+                    </div>
+
+
+                    <div style="
+                        display:grid;
+                        grid-template-columns:
+                            repeat(2,minmax(0,1fr));
+                        gap:10px;
+                    ">
+
+                        <div style="
+                            background:#f8fafc;
+                            padding:11px;
+                            border-radius:9px;
+                        ">
+                            <div style="
+                                font-size:12px;
+                                color:#6b7280;
+                            ">
+                                Score
+                            </div>
+
+                            <strong style="
+                                font-size:17px;
+                                color:#111827;
+                            ">
+                                ${score} / ${total}
+                            </strong>
+                        </div>
+
+
+                        <div style="
+                            background:#f0fdf4;
+                            padding:11px;
+                            border-radius:9px;
+                        ">
+                            <div style="
+                                font-size:12px;
+                                color:#6b7280;
+                            ">
+                                Correct
+                            </div>
+
+                            <strong style="
+                                font-size:17px;
+                                color:#16a34a;
+                            ">
+                                ${correct}
+                            </strong>
+                        </div>
+
+
+                        <div style="
+                            background:#fef2f2;
+                            padding:11px;
+                            border-radius:9px;
+                        ">
+                            <div style="
+                                font-size:12px;
+                                color:#6b7280;
+                            ">
+                                Wrong
+                            </div>
+
+                            <strong style="
+                                font-size:17px;
+                                color:#dc2626;
+                            ">
+                                ${wrong}
+                            </strong>
+                        </div>
+
+
+                        <div style="
+                            background:#f8fafc;
+                            padding:11px;
+                            border-radius:9px;
+                        ">
+                            <div style="
+                                font-size:12px;
+                                color:#6b7280;
+                            ">
+                                Unanswered
+                            </div>
+
+                            <strong style="
+                                font-size:17px;
+                                color:#6b7280;
+                            ">
+                                ${unanswered}
+                            </strong>
+                        </div>
+
+                    </div>
+
+
+                    <div style="
+                        margin-top:14px;
+                        padding-top:12px;
+                        border-top:1px solid #e5e7eb;
+                        font-size:12px;
+                        color:#6b7280;
+                    ">
+                        🕒 Completed: ${date}
+                    </div>
+
+                </div>
+
+            `;
+
+        }
     );
+
+    $("profileContent").innerHTML = html;
 }
+
 
 
 function showActivePackage(){
