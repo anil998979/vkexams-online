@@ -6323,8 +6323,8 @@ if(!testData){
            AT THE SAME TIME
         ========================================= */
 
-       const cachedQuestions =
-    cache.questions?.[testNumber]; 
+      const attemptResult =
+    await supabaseClient.rpc(
        const attemptResult =
     await supabaseClient.rpc(
         "start_test_attempt",
@@ -6410,12 +6410,7 @@ if(!questionData){
            QUESTIONS
         ========================================= */
 
-        const questionData =
-            questionResult.data;
-
-        const questionError =
-            questionResult.error;
-
+        
         if(questionError){
 
             toast(
