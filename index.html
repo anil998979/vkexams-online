@@ -6722,7 +6722,6 @@ function previousQuestion(){
 /* =====================================================
    NEXT
 ===================================================== */
-
 function nextQuestion(){
 
     if(
@@ -6738,14 +6737,188 @@ function nextQuestion(){
 
     else{
 
-        toast(
-            "This is the last question. Click Submit."
-        );
+        showLastQuestionPopup();
 
     }
 
 }
+   function showLastQuestionPopup(){
 
+    const popup = document.createElement("div");
+
+    popup.id = "lastQuestionPopup";
+
+    popup.innerHTML = `
+
+        <div class="last-question-overlay">
+
+            <div class="last-question-modal">
+
+                <div class="last-question-icon">
+                    ⚠️
+                </div>
+
+                <h2>
+                    Last Question
+                </h2>
+
+                <p>
+                    This is the last question.
+                    Please click <strong>Submit</strong>
+                    to finish the test.
+                </p>
+
+                <button
+                    type="button"
+                    onclick="closeLastQuestionPopup()"
+                    class="last-question-ok">
+                    OK
+                </button>
+
+            </div>
+
+        </div>
+
+    `;
+
+    document.body.appendChild(popup);
+
+}
+   function closeLastQuestionPopup(){
+
+    const popup =
+        document.getElementById(
+            "lastQuestionPopup"
+        );
+
+    if(popup){
+
+        popup.remove();
+
+    }
+
+}
+   .last-question-overlay{
+
+    position: fixed;
+
+    inset: 0;
+
+    background: rgba(0,0,0,0.45);
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    z-index: 99999;
+
+}
+
+.last-question-modal{
+
+    width: min(
+        420px,
+        calc(100% - 40px)
+    );
+
+    background: #ffffff;
+
+    border-radius: 18px;
+
+    padding: 28px 25px;
+
+    text-align: center;
+
+    box-shadow:
+        0 20px 60px rgba(0,0,0,0.25);
+
+    animation:
+        lastQuestionPopupIn
+        0.2s ease-out;
+
+}
+
+.last-question-icon{
+
+    font-size: 42px;
+
+    margin-bottom: 8px;
+
+}
+
+.last-question-modal h2{
+
+    margin: 5px 0 10px;
+
+    color: #1f2937;
+
+    font-size: 23px;
+
+}
+
+.last-question-modal p{
+
+    margin: 0 0 22px;
+
+    color: #4b5563;
+
+    font-size: 15px;
+
+    line-height: 1.6;
+
+}
+
+.last-question-ok{
+
+    border: none;
+
+    border-radius: 9px;
+
+    padding: 11px 30px;
+
+    background: linear-gradient(
+        135deg,
+        #2563eb,
+        #7c3aed
+    );
+
+    color: white;
+
+    font-size: 15px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+}
+
+.last-question-ok:hover{
+
+    transform: translateY(-1px);
+
+}
+
+@keyframes lastQuestionPopupIn{
+
+    from{
+
+        opacity: 0;
+
+        transform: scale(0.92);
+
+    }
+
+    to{
+
+        opacity: 1;
+
+        transform: scale(1);
+
+    }
+
+}
 
 /* =====================================================
    SUBMIT
