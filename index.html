@@ -4343,12 +4343,12 @@ function openPaper(paper){
 
     const list = $("testList");
 
-    let html = `
-        <div class="test-item free" onclick="startFreeMock(currentCourse,1)">
-            <span>🎯 Free Mock Test</span>
-            <span class="free-label">FREE</span>
-        </div>
-    `;
+   let html = `
+    <div class="test-item free" onclick="startFreeMock(1)">
+        <span>🎯 Free Mock Test</span>
+        <span class="free-label">FREE</span>
+    </div>
+`;
 
     for(let i = 1; i <= 10; i++){
         html += `
