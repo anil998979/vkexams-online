@@ -1466,12 +1466,10 @@ header{
     margin-bottom:12px;
 }
 
-.solution-correct{
-    color:#15803d;
-
+.solution-your-answer{
+    color:#dc2626;
     font-weight:800;
 }
-
 
 /* =====================================================
    MODAL
@@ -7125,13 +7123,17 @@ async function viewSolutions(){
                                 ${question.q}
                             </h3>
 
-                            <p style="margin-top:8px">
+                            <p 
+class="solution-your-answer"
+style="margin-top:8px">
 
-                                Your Answer:
+    Your Answer:
 
-                                <strong>
-                                    ${selected}
-                                </strong>
+    <strong>
+        ${selected}
+    </strong>
+
+
 
                             </p>
 
