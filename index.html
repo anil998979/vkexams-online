@@ -5973,9 +5973,16 @@ const QUESTIONS = [
 ===================================================== */
 async function startFreeMock(testNumber){
 
-    if(freeMockStarting){
-        return;
-    }
+    if(
+    freeMockStarting ||
+    (
+        $("examPage") &&
+        $("examPage").classList.contains("active") &&
+        currentAttemptId
+    )
+){
+    return;
+}
 
     if(!isLoggedIn() && !isGuest()){
 
