@@ -5837,71 +5837,133 @@ function showPurchaseHistory(){
 }
 
 
-function showTestResults(){
+async function showTestResults(){
 
-    const results =
-        JSON.parse(
-            localStorage.getItem(
-                "testResults"
-            ) || "[]"
-        );
+    if(isGuest()){
+        toast("Please Register to view your test results.");
+        return;
+    }
 
+    if(!supabaseClient){
+        toast("Supabase is not connected.");
+        return;
+    }
+
+    const {
+        data: sessionData,
+        error: sessionError
+    } = await supabaseClient.auth.getSession();
 
     if(
-        !results.length
+        sessionError ||
+        !sessionData ||
+        !sessionData.session ||
+        !sessionData.session.user
     ){
+        toast("Please login again.");
+        openLogin();
+        return;
+    }
 
-        alert(
+    const userId =
+        sessionData.session.user.id;
+
+    const {
+        data,
+        error
+    } = await supabaseClient
+        .from("test_results")
+        .select(`
+            score,
+            total_marks,
+            percentage,
+            correct_answers,
+            wrong_answers,
+            unanswered,
+            completed_at,
+            tests (
+                title
+            )
+        `)
+        .eq("user_id", userId)
+        .order(
+            "completed_at",
+            {
+                ascending: false
+            }
+        );
+
+    if(error){
+
+        console.error(
+            "Test results error:",
+            error
+        );
+
+        toast(
+            "Unable to load test results."
+        );
+
+        return;
+    }
+
+    if(!data || !data.length){
+
+        toast(
             "No test results yet."
         );
 
         return;
-
     }
 
+    const resultText =
+        data.map(
+            function(result,index){
 
-    alert(
+                const testName =
+                    result.tests?.title ||
+                    "Test";
 
-        results
-        .map(
-            function(
-                x,
-                i
-            ){
+                const date =
+                    result.completed_at
+                    ? new Date(
+                        result.completed_at
+                    ).toLocaleString()
+                    : "-";
 
                 return (
-
-                    (i + 1) +
+                    (index + 1) +
                     ". " +
-
-                    x.course +
-
-                    " - " +
-
-                    x.paper +
-
-                    "\nScore: " +
-
-                    x.score +
-
-                    "/" +
-
-                    x.total +
-
+                    testName +
                     "\n" +
-
-                    x.date
-
+                    "Score: " +
+                    result.score +
+                    " / " +
+                    result.total_marks +
+                    "\n" +
+                    "Percentage: " +
+                    result.percentage +
+                    "%\n" +
+                    "Correct: " +
+                    result.correct_answers +
+                    " | Wrong: " +
+                    result.wrong_answers +
+                    " | Unanswered: " +
+                    result.unanswered +
+                    "\n" +
+                    "Date: " +
+                    date
                 );
 
             }
-        )
-        .join(
+        ).join(
             "\n\n"
-        )
+        );
 
+    alert(
+        "📊 TEST RESULTS\n\n" +
+        resultText
     );
-
 }
 
 
