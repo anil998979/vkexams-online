@@ -6806,109 +6806,177 @@ payload[q.id] =
 /* =====================================================
    SOLUTIONS
 ===================================================== */
+async function viewSolutions(){
 
-function viewSolutions(){
-
-    if(!lastResult)
+    if(!lastResult){
         return;
+    }
 
+    if(!supabaseClient){
+        toast("Supabase is not connected.");
+        return;
+    }
 
-    $("solutions")
-        .innerHTML =
+    try{
 
-        lastResult.questions
-        .map(
+        const questionIds =
+            lastResult.questions.map(function(q){
+                return q.id;
+            });
 
-            function(
-                question,
-                index
-            ){
+        const {
+            data: answerData,
+            error: answerError
+        } = await supabaseClient
+            .from("question_answers")
+            .select(`
+                question_id,
+                correct_option,
+                explanation
+            `)
+            .in(
+                "question_id",
+                questionIds
+            );
 
-                const correct =
-                    question.o[
-                        question.a
-                    ];
+        if(answerError){
 
+            console.error(
+                "Solutions error:",
+                answerError
+            );
 
-                const selected =
+            toast(
+                "Unable to load solutions."
+            );
 
-                    lastResult.answers[
-                        index
-                    ] == null
+            return;
+        }
 
-                    ?
+        const answerMap = {};
 
-                    "Not answered"
+        (answerData || []).forEach(
+            function(answer){
 
-                    :
-
-                    question.o[
-                        lastResult.answers[
-                            index
-                        ]
-                    ];
-
-
-                return `
-
-                    <div
-                    class="solution-card">
-
-                        <h3>
-
-                            Q${index + 1}.
-                            ${question.q}
-
-                        </h3>
-
-
-                        <p
-                        style="margin-top:8px">
-
-                            Your Answer:
-
-                            <strong>
-                                ${selected}
-                            </strong>
-
-                        </p>
-
-
-                        <p
-                        class="solution-correct"
-                        style="margin-top:6px">
-
-                            Correct Answer:
-                            ${correct}
-
-                        </p>
-
-
-                        <p
-                        style="
-                        color:#6b7280;
-                        margin-top:7px;
-                        ">
-
-                            ${question.e}
-
-                        </p>
-
-                    </div>
-
-                `;
+                answerMap[
+                    answer.question_id
+                ] = answer;
 
             }
+        );
 
-        )
-        .join("");
+        $("solutions").innerHTML =
 
+            lastResult.questions
+            .map(
+                function(question, index){
 
-    showPage(
-        "solutionsPage"
-    );
+                    const answer =
+                        answerMap[
+                            question.id
+                        ];
+
+                    const correctOption =
+                        answer?.correct_option || "";
+
+                    const correctIndex =
+                        ["A","B","C","D"]
+                        .indexOf(
+                            String(
+                                correctOption
+                            ).toUpperCase()
+                        );
+
+                    const correctText =
+                        correctIndex >= 0
+                        ? question.o[correctIndex]
+                        : "Answer not available";
+
+                    const selectedIndex =
+                        lastResult.answers[index];
+
+                    const selected =
+                        selectedIndex == null
+                        ? "Not answered"
+                        : question.o[
+                            Number(selectedIndex)
+                          ];
+
+                    const explanation =
+                        answer?.explanation ||
+                        "Explanation not available.";
+
+                    return `
+
+                        <div
+                        class="solution-card">
+
+                            <h3>
+                                Q${index + 1}.
+                                ${question.q}
+                            </h3>
+
+                            <p
+                            style="margin-top:8px">
+
+                                Your Answer:
+
+                                <strong>
+                                    ${selected}
+                                </strong>
+
+                            </p>
+
+                            <p
+                            class="solution-correct"
+                            style="margin-top:6px">
+
+                                Correct Answer:
+
+                                <strong>
+                                    ${correctText}
+                                </strong>
+
+                            </p>
+
+                            <p
+                            style="
+                            color:#6b7280;
+                            margin-top:7px;
+                            ">
+
+                                ${explanation}
+
+                            </p>
+
+                        </div>
+
+                    `;
+
+                }
+            )
+            .join("");
+
+        showPage(
+            "solutionsPage"
+        );
+
+    }
+    catch(error){
+
+        console.error(
+            "View Solutions Error:",
+            error
+        );
+
+        toast(
+            "Unable to load solutions."
+        );
+
+    }
 
 }
+
 
 
 /* =====================================================
