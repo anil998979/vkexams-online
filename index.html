@@ -3476,7 +3476,55 @@ Close
 </div>
 
 </div>
+<!-- LAST QUESTION MODAL -->
 
+<div
+id="lastQuestionPopup"
+class="modal">
+
+    <div class="modal-box">
+
+        <div
+        style="
+        font-size:42px;
+        margin-bottom:8px;
+        ">
+            ⚠️
+        </div>
+
+        <h2>
+            Last Question
+        </h2>
+
+        <p
+        style="
+        margin-top:10px;
+        color:#6b7280;
+        line-height:1.6;
+        ">
+
+            This is the last question.
+            Please click
+            <strong>Submit</strong>
+            to finish the test.
+
+        </p>
+
+        <div class="modal-buttons">
+
+            <button
+            class="btn btn-primary"
+            onclick="closeLastQuestionPopup()">
+
+                OK
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
 
 <!-- TOAST -->
 
@@ -6738,6 +6786,38 @@ function nextQuestion(){
     else{
 
         showLastQuestionPopup();
+
+    }
+
+}
+   function showLastQuestionPopup(){
+
+    const popup =
+        document.getElementById(
+            "lastQuestionPopup"
+        );
+
+    if(popup){
+
+        popup.classList.add("active");
+
+        return;
+
+    }
+
+}
+
+
+function closeLastQuestionPopup(){
+
+    const popup =
+        document.getElementById(
+            "lastQuestionPopup"
+        );
+
+    if(popup){
+
+        popup.classList.remove("active");
 
     }
 
