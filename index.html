@@ -4774,10 +4774,20 @@ async function buyPlan(
         .eq("name", selectedStoreCourse)
         .single();
 
-if(courseError || !courseData){
+const { data: packageData, error: packageError } =
+    await supabaseClient
+        .from("packages")
+        .select("id, name, duration_days, price")
+        .eq("name", plan)
+        .eq("duration_days", days)
+        .eq("price", amount)
+        .eq("is_active", true)
+        .single();
+
+if(packageError || !packageData){
 
     toast(
-        "Selected course could not be found."
+        "Selected package could not be found."
     );
 
     return;
