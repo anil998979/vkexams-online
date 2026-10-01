@@ -1544,7 +1544,28 @@ header{
 
     margin:18px 0;
 }
+/* =====================================================
+   COMMON LOADING SPINNER
+===================================================== */
 
+.loading-spinner{
+    width:42px;
+    height:42px;
+    margin:0 auto;
+    border:4px solid #e5e7eb;
+    border-top:4px solid #2563eb;
+    border-radius:50%;
+    animation:vkSpin 0.8s linear infinite;
+}
+
+@keyframes vkSpin{
+    from{
+        transform:rotate(0deg);
+    }
+    to{
+        transform:rotate(360deg);
+    }
+}
 
 /* =====================================================
    TOAST
