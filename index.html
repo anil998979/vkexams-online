@@ -1402,15 +1402,29 @@ header{
     margin-bottom:10px;
 }
 .option{
-    display:block;
-    padding:10px 13px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:12px 13px;
     border:1px solid #e5e7eb;
     border-radius:9px;
     margin-top:8px;
     cursor:pointer;
     font-size:15px;
     line-height:1.4;
-    white-space:normal;
+}
+
+.option input{
+    flex:0 0 auto;
+    width:20px;
+    height:20px;
+    margin:0;
+}
+
+.option-text{
+    flex:1;
+    display:block;
+    word-break:break-word;
 }
 
 #questionText{
