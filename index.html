@@ -6928,16 +6928,85 @@ async function showTestResults(){
 
     $("profileContent").innerHTML = html;
 }
-
-
-
 function showActivePackage(){
 
-    alert(
-        "No Active Package.\n\n" +
-        "Purchase a package from the Store after successful payment verification."
-    );
+    const profileContent =
+        document.getElementById("profileContent");
 
+    if(!profileContent) return;
+
+    profileContent.innerHTML = `
+
+        <div class="modal active"
+             style="
+                display:flex;
+                position:fixed;
+                inset:0;
+                z-index:9999;
+                background:rgba(0,0,0,0.55);
+                align-items:center;
+                justify-content:center;
+             ">
+
+            <div class="modal-box"
+                 style="
+                    width:90%;
+                    max-width:500px;
+                    background:#fff;
+                    border-radius:16px;
+                    padding:28px;
+                 ">
+
+                <h2 style="margin-bottom:20px;">
+                    📦 Active Package
+                </h2>
+
+                <div style="
+                    text-align:center;
+                    padding:25px 10px;
+                    color:#6b7280;
+                ">
+
+                    <div style="
+                        font-size:48px;
+                        margin-bottom:12px;
+                    ">
+                        📦
+                    </div>
+
+                    <h3 style="
+                        color:#374151;
+                        margin-bottom:10px;
+                    ">
+                        No Active Package
+                    </h3>
+
+                    <p style="line-height:1.6;">
+                        Purchase a package from the Store
+                        after successful payment verification.
+                    </p>
+
+                </div>
+
+                <div style="
+                    display:flex;
+                    justify-content:flex-end;
+                    gap:10px;
+                    margin-top:20px;
+                ">
+
+                    <button
+                        class="btn btn-primary"
+                        onclick="renderProfile()">
+                        Close
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+    `;
 }
 
 
