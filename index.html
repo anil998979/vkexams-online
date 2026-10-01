@@ -4655,6 +4655,7 @@ function openTopicTest(index){
 function openPaper(paper){
 
     testListParentPage = "testseries";
+
     currentPaper = paper;
 
     $("paperTitle").textContent =
@@ -4664,27 +4665,32 @@ function openPaper(paper){
 
     const list = $("testList");
 
-   let html = `
-    <div class="test-item free" onclick="startFreeMock(1)">
-        <span>🎯 Free Mock Test</span>
-        <span class="free-label">FREE</span>
-    </div>
-`;
+    let html = "";
 
-    for(let i = 1; i <= 10; i++){
+    for(let i = 1; i <= 15; i++){
+
         html += `
-            <div class="test-item locked" onclick="openLockedTest(${i})">
-                <span>Test-${i}</span>
-                <span class="locked-label">🔒</span>
+            <div
+                class="test-item locked"
+                onclick="openLockedTest(${i})">
+
+                <span>
+                    Test-${i}
+                </span>
+
+                <span class="locked-label">
+                    🔒
+                </span>
+
             </div>
         `;
+
     }
 
     list.innerHTML = html;
+
     showPage("papers");
-
 }
-
 
 /* =====================================================
    TEST LIST BACK NAVIGATION
