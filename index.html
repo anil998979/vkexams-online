@@ -4021,7 +4021,10 @@ async function openFreeMockTests(course){
 
     currentCourse = course;
 
-    toast("Loading Free Mock Tests...");
+   showLoading(
+    "Loading Free Mock Tests...",
+    "Please wait..."
+);
 
     /* Wait for all 5 tests and their questions to preload before
        displaying the test cards. This removes the delay that
@@ -4053,6 +4056,7 @@ async function openFreeMockTests(course){
 
     showPage("freeMocks");
 }
+   hideLoading();
 
    /* =====================================================
    COMMON LOADING POPUP
