@@ -1390,19 +1390,26 @@ header{
 
 .option{
     display:block;
-
-    padding:13px;
-
-    border:
-        1px solid #e5e7eb;
-
-    border-radius:8px;
-
+    padding:14px 16px;
+    border:1px solid #e5e7eb;
+    border-radius:10px;
     margin-top:10px;
-
     cursor:pointer;
+    font-size:15px;
+    line-height:1.6;
+    white-space:pre-line;
 }
 
+#questionText{
+    font-size:20px;
+    line-height:1.65;
+    font-weight:700;
+    white-space:pre-line;
+}
+
+.option:hover{
+    background:#f8fafc;
+}
 .option:hover{
     background:#f8fafc;
 }
@@ -1464,6 +1471,16 @@ header{
     padding:18px;
 
     margin-bottom:12px;
+}
+   .solution-card h3{
+    font-size:17px;
+    line-height:1.6;
+    white-space:pre-line;
+}
+
+.solution-card p{
+    line-height:1.6;
+    white-space:pre-line;
 }
 .solution-your-answer{
     color:#dc2626;
@@ -3641,6 +3658,7 @@ let currentCourse = "";
 let currentGroup = "";
 
 let currentPaper = "";
+   let currentTestNumber = 0;
 let coinAdTimer = null;
 let coinAdReady = false;
 
