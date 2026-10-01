@@ -4875,6 +4875,22 @@ const { data: orderData, error: orderError } =
             }
         }
     );
+   hideLoading();
+
+if(orderError || !orderData?.success){
+
+    console.error(
+        "Razorpay order creation failed:",
+        orderError || orderData
+    );
+
+    toast(
+        orderData?.error ||
+        "Unable to create payment order."
+    );
+
+    return;
+}
 
 if(orderError || !orderData?.success){
 
