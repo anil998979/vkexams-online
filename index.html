@@ -2604,11 +2604,11 @@ Reattempt
 
 
 <button
-class="btn"
-style="background:#e5e7eb"
-onclick="openFreeMockTests(currentCourse)">
+    class="btn"
+    style="background:#e5e7eb"
+    onclick="backToTestSeriesFromResult()">
 
-Back to Free Mock Tests
+    Back to Test Series
 
 </button>
 
@@ -4928,7 +4928,7 @@ await startPaidTest(
 ===================================================== */
 
 async function startPaidTest(testNumber){
-
+currentTestNumber = testNumber;
     if(
         !supabaseClient
     ){
@@ -9778,9 +9778,36 @@ style="margin-top:8px">
    REATTEMPT
 ===================================================== */
 function reattempt(){
+
+    if(
+        currentPaper &&
+        currentCourse &&
+        currentTestNumber
+    ){
+
+        openLockedTest(
+            currentTestNumber
+        );
+
+        return;
+
+    }
+
     startFreeMock(
         currentFreeMockNumber || 1
     );
+}
+   function backToTestSeriesFromResult(){
+
+    if(currentCourse){
+
+        openTestSeries(false);
+
+        return;
+
+    }
+
+    showHome();
 }
 /* =====================================================
    SUPABASE AUTH
