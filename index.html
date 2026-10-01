@@ -6020,37 +6020,101 @@ function renderProfile(){
 
 }
 
-
 function editProfile(){
 
     if(isGuest()){
-        alert("Please Register to edit your profile.");
+
+        toast(
+            "Please Register to edit your profile."
+        );
+
         return;
     }
 
-    const name =
-        prompt(
-            "Enter your name",
-            localStorage.getItem(
-                "studentName"
-            ) || ""
-        );
+    const currentName =
+        localStorage.getItem("studentName") || "";
 
+    const profileContent =
+        document.getElementById("profileContent");
 
-    if(name){
+    if(!profileContent) return;
 
-        localStorage.setItem(
-            "studentName",
-            name
-        );
+    profileContent.innerHTML = `
 
+        <div class="modal active"
+             style="
+                display:flex;
+                position:fixed;
+                inset:0;
+                z-index:9999;
+                background:rgba(0,0,0,0.55);
+                align-items:center;
+                justify-content:center;
+             ">
 
-        renderProfile();
+            <div class="modal-box"
+                 style="
+                    width:90%;
+                    max-width:420px;
+                    background:#fff;
+                    border-radius:16px;
+                    padding:28px;
+                 ">
 
-    }
+                <h2 style="margin-bottom:20px;">
+                    Edit Profile
+                </h2>
 
+                <label
+                    style="
+                        display:block;
+                        font-weight:700;
+                        margin-bottom:8px;
+                    ">
+                    Name
+                </label>
+
+                <input
+                    id="editProfileName"
+                    type="text"
+                    value="${currentName.replace(/"/g, '&quot;')}"
+                    placeholder="Enter your name"
+                    style="
+                        width:100%;
+                        padding:12px;
+                        border:1px solid #d1d5db;
+                        border-radius:8px;
+                        margin-bottom:20px;
+                        box-sizing:border-box;
+                    "
+                >
+
+                <div
+                    style="
+                        display:flex;
+                        gap:10px;
+                        justify-content:flex-end;
+                    ">
+
+                    <button
+                        class="btn btn-secondary"
+                        onclick="renderProfile()">
+                        Cancel
+                    </button>
+
+                    <button
+                        class="btn btn-primary"
+                        onclick="saveEditedProfile()">
+                        Save Changes
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+    `;
 }
-
 
 function openSettings(){
 
