@@ -4725,11 +4725,9 @@ function backFromTestList(){
    LOCKED TEST
 ===================================================== */
 
-function openLockedTest(){
+async function openLockedTest(testNumber){
 
-    if(
-        !isLoggedIn()
-    ){
+    if(!isLoggedIn()){
 
         openLogin();
 
@@ -4741,10 +4739,187 @@ function openLockedTest(){
 
     }
 
+    if(!supabaseClient){
 
-    $("lockModal")
-        .classList
-        .add("active");
+        toast(
+            "Supabase is not connected."
+        );
+
+        return;
+
+    }
+
+    showLoading(
+        "Checking access...",
+        "Please wait..."
+    );
+
+    try{
+
+        const {
+            data:userData,
+            error:userError
+        } =
+        await supabaseClient.auth.getUser();
+
+        if(
+            userError ||
+            !userData?.user?.id
+        ){
+
+            hideLoading();
+
+            openLogin();
+
+            return;
+
+        }
+
+        const userId =
+            userData.user.id;
+
+
+        /* COURSE */
+
+        const {
+            data:courseData,
+            error:courseError
+        } =
+        await supabaseClient
+            .from("courses")
+            .select("id,name")
+            .eq(
+                "name",
+                currentCourse
+            )
+            .single();
+
+
+        if(
+            courseError ||
+            !courseData
+        ){
+
+            hideLoading();
+
+            toast(
+                "Course not found."
+            );
+
+            return;
+
+        }
+
+
+        /* ACTIVE PACKAGE */
+
+        const {
+            data:purchaseData,
+            error:purchaseError
+        } =
+        await supabaseClient
+            .from("purchases")
+            .select(`
+                id,
+                package_id,
+                course_id,
+                payment_status,
+                starts_at,
+                expires_at,
+                packages (
+                    name,
+                    price,
+                    duration_days
+                )
+            `)
+            .eq(
+                "user_id",
+                userId
+            )
+            .eq(
+                "course_id",
+                courseData.id
+            )
+            .eq(
+                "payment_status",
+                "paid"
+            )
+            .gt(
+                "expires_at",
+                new Date().toISOString()
+            )
+            .order(
+                "expires_at",
+                {
+                    ascending:false
+                }
+            )
+            .limit(1);
+
+
+        hideLoading();
+
+
+        if(purchaseError){
+
+            console.error(
+                "Package access error:",
+                purchaseError
+            );
+
+            toast(
+                "Unable to check package access."
+            );
+
+            return;
+
+        }
+
+
+        /* NO ACTIVE PACKAGE */
+
+        if(
+            !purchaseData ||
+            purchaseData.length === 0
+        ){
+
+            $("lockModal")
+                .classList
+                .add("active");
+
+            return;
+
+        }
+
+
+        /* ACTIVE PACKAGE */
+
+        closeLockModal();
+
+        toast(
+            "Package access verified."
+        );
+
+        console.log(
+            "Active package:",
+            purchaseData[0]
+        );
+
+    }
+    catch(error){
+
+        hideLoading();
+
+        console.error(
+            "Test access error:",
+            error
+        );
+
+        toast(
+            "Unable to check test access."
+        );
+
+    }
 
 }
 
