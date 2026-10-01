@@ -9392,33 +9392,24 @@ function renderQuestion(){
             ){
 
                 return `
+    <label class="option">
 
-                    <label
-                    class="option">
+        <input
+            type="radio"
+            name="answer"
+            value="${index}"
+            ${
+                userAnswers[currentQuestionIndex] === index
+                ? "checked"
+                : ""
+            }
+            onchange="saveAnswer(${index})">
 
-                        <input
-                        type="radio"
-                        name="answer"
-                        value="${index}"
+        <span class="option-text">
+            ${formatBilingualText(option)}
+        </span>
 
-                        ${
-                            userAnswers[
-                                currentQuestionIndex
-                            ] === index
-                            ?
-                            "checked"
-                            :
-                            ""
-                        }
-
-                        onchange="
-                        saveAnswer(
-                            ${index}
-                        )">
-
-                        ${formatBilingualText(option)}
-
-                    </label>
+    </label>
 
                 `;
 
