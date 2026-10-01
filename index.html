@@ -9953,50 +9953,36 @@ async function viewSolutions(){
 
                     return `
 
-                        <div class="solution-card">
+    <div class="solution-card">
 
-                            <h3>
-                                Q${index + 1}.
-                                ${question.q}
-                            </h3>
+        <h3>
+            Q${index + 1}.
+            ${formatBilingualText(question.q)}
+        </h3>
 
-                            <p 
-class="solution-your-answer"
-style="margin-top:8px">
+        <div class="solution-line solution-your-answer">
+            Your Answer:
+            <strong>
+                ${selected === "Not answered"
+                    ? "Not answered"
+                    : formatBilingualText(selected)}
+            </strong>
+        </div>
 
-    Your Answer:
+        <div class="solution-line solution-correct-answer">
+            Correct Answer:
+            <strong>
+                ${formatBilingualText(correctText)}
+            </strong>
+        </div>
 
-    <strong>
-        ${selected}
-    </strong>
+        <div class="solution-explanation">
+            ${explanation}
+        </div>
 
+    </div>
 
-
-                            </p>
-<p
-    class="solution-correct-answer"
-    style="margin-top:6px; color:#16a34a !important; font-weight:800;"
->
-    Correct Answer:
-
-    <strong style="color:#16a34a !important;">
-        ${correctText}
-    </strong>
-</p>
-
-                            <p
-                            style="
-                            color:#6b7280;
-                            margin-top:7px;
-                            ">
-
-                                ${explanation}
-
-                            </p>
-
-                        </div>
-
-                    `;
+`;
 
                 }
             )
