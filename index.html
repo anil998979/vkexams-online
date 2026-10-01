@@ -878,6 +878,20 @@ header{
 .locked-label{
     color:#9ca3af;
 }
+   .test-item.unlocked{
+    cursor:pointer;
+    border-color:#16a34a;
+    background:#f0fdf4;
+}
+
+.test-item.unlocked:hover{
+    background:#ecfdf5;
+}
+
+.unlocked-label{
+    color:#15803d;
+    font-weight:800;
+}
 
 
 /* =====================================================
@@ -4670,7 +4684,7 @@ function openTopicTest(index){
    PAPER / TESTS
 ===================================================== */
 
-function openPaper(paper){
+async function openPaper(paper){
 
     testListParentPage = "testseries";
 
@@ -4683,33 +4697,198 @@ function openPaper(paper){
 
     const list = $("testList");
 
-    let html = "";
+    /* =========================================
+       DEFAULT: LOCKED
+    ========================================= */
 
-    for(let i = 1; i <= 15; i++){
+    let hasAccess = false;
 
-        html += `
-            <div
-                class="test-item locked"
-                onclick="openLockedTest(${i})">
+    /* =========================================
+       CHECK LOGIN
+    ========================================= */
 
-                <span>
-                    Test-${i}
-                </span>
+    if(
+        isLoggedIn() &&
+        supabaseClient
+    ){
 
-                <span class="locked-label">
-                    🔒
-                </span>
+        try{
 
-            </div>
-        `;
+            /* =====================================
+               GET USER
+            ===================================== */
+
+            const {
+                data:userData,
+                error:userError
+            } =
+            await supabaseClient.auth.getUser();
+
+
+            if(
+                !userError &&
+                userData?.user?.id
+            ){
+
+                const userId =
+                    userData.user.id;
+
+
+                /* =================================
+                   FIND COURSE
+                ================================= */
+
+                const {
+                    data:courseData,
+                    error:courseError
+                } =
+                await supabaseClient
+                    .from("courses")
+                    .select("id,name")
+                    .eq(
+                        "name",
+                        currentCourse
+                    )
+                    .single();
+
+
+                if(
+                    !courseError &&
+                    courseData
+                ){
+
+                    /* =============================
+                       CHECK ACTIVE PAID PURCHASE
+                    ============================= */
+
+                    const {
+                        data:purchaseData,
+                        error:purchaseError
+                    } =
+                    await supabaseClient
+                        .from("purchases")
+                        .select(`
+                            id,
+                            payment_status,
+                            starts_at,
+                            expires_at,
+                            course_id
+                        `)
+                        .eq(
+                            "user_id",
+                            userId
+                        )
+                        .eq(
+                            "course_id",
+                            courseData.id
+                        )
+                        .eq(
+                            "payment_status",
+                            "paid"
+                        )
+                        .gt(
+                            "expires_at",
+                            new Date().toISOString()
+                        )
+                        .order(
+                            "expires_at",
+                            {
+                                ascending:false
+                            }
+                        )
+                        .limit(1);
+
+
+                    if(
+                        !purchaseError &&
+                        purchaseData &&
+                        purchaseData.length > 0
+                    ){
+
+                        hasAccess = true;
+
+                    }
+
+                }
+
+            }
+
+        }
+        catch(error){
+
+            console.error(
+                "Access check error:",
+                error
+            );
+
+        }
 
     }
+
+
+    /* =========================================
+       BUILD TEST LIST
+    ========================================= */
+
+    let html = "";
+
+    for(
+        let i = 1;
+        i <= 15;
+        i++
+    ){
+
+        if(hasAccess){
+
+            html += `
+
+                <div
+                    class="test-item unlocked"
+                    onclick="openLockedTest(${i})">
+
+                    <span>
+                        Test-${i}
+                    </span>
+
+                    <span class="unlocked-label">
+                        ✓ Available
+                    </span>
+
+                </div>
+
+            `;
+
+        }
+        else{
+
+            html += `
+
+                <div
+                    class="test-item locked"
+                    onclick="openLockedTest(${i})">
+
+                    <span>
+                        Test-${i}
+                    </span>
+
+                    <span class="locked-label">
+                        🔒
+                    </span>
+
+                </div>
+
+            `;
+
+        }
+
+    }
+
 
     list.innerHTML = html;
 
     showPage("papers");
-}
 
+}
 /* =====================================================
    TEST LIST BACK NAVIGATION
 ===================================================== */
