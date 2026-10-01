@@ -7009,12 +7009,23 @@ function showActivePackage(){
     `;
 }
 
-   function showHelpSupport(){
+  function showHelpSupport(){
+
+    if(isGuest()){
+        toast("Please Login or Register to contact support.");
+        return;
+    }
 
     const profileContent =
         document.getElementById("profileContent");
 
     if(!profileContent) return;
+
+    const name =
+        localStorage.getItem("studentName") || "";
+
+    const email =
+        localStorage.getItem("studentEmail") || "";
 
     profileContent.innerHTML = `
 
@@ -7032,65 +7043,147 @@ function showActivePackage(){
             <div class="modal-box"
                  style="
                     width:90%;
-                    max-width:500px;
+                    max-width:520px;
+                    max-height:90vh;
+                    overflow-y:auto;
                     background:#fff;
                     border-radius:16px;
                     padding:28px;
                  ">
 
-                <h2 style="margin-bottom:20px;">
+                <h2 style="
+                    margin-bottom:8px;
+                    color:#111827;
+                ">
                     ❓ Help & Support
                 </h2>
 
-                <div style="
-                    text-align:center;
-                    padding:25px 10px;
+                <p style="
                     color:#6b7280;
+                    margin-bottom:20px;
+                    line-height:1.5;
                 ">
+                    Send us your question or issue.
+                    Our support team will review your request.
+                </p>
 
-                    <div style="
-                        font-size:48px;
-                        margin-bottom:12px;
-                    ">
-                        📧
-                    </div>
 
-                    <h3 style="
-                        color:#374151;
-                        margin-bottom:10px;
-                    ">
-                        Need Help?
-                    </h3>
+                <label style="
+                    display:block;
+                    font-weight:700;
+                    margin-bottom:7px;
+                    color:#374151;
+                ">
+                    Name
+                </label>
 
-                    <p style="
-                        line-height:1.6;
-                        margin-bottom:8px;
-                    ">
-                        For any questions or support,
-                        please contact us.
-                    </p>
+                <input
+                    id="supportName"
+                    type="text"
+                    value="${name.replace(/"/g,'&quot;')}"
+                    placeholder="Enter your name"
+                    style="
+                        width:100%;
+                        padding:12px;
+                        border:1px solid #d1d5db;
+                        border-radius:8px;
+                        margin-bottom:15px;
+                        box-sizing:border-box;
+                    "
+                >
 
-                    <p style="
-                        color:#2563eb;
-                        font-weight:800;
-                        font-size:16px;
-                    ">
-                        support@vkexams.online
-                    </p>
 
-                </div>
+                <label style="
+                    display:block;
+                    font-weight:700;
+                    margin-bottom:7px;
+                    color:#374151;
+                ">
+                    Email
+                </label>
+
+                <input
+                    id="supportEmail"
+                    type="email"
+                    value="${email.replace(/"/g,'&quot;')}"
+                    placeholder="Enter your email"
+                    style="
+                        width:100%;
+                        padding:12px;
+                        border:1px solid #d1d5db;
+                        border-radius:8px;
+                        margin-bottom:15px;
+                        box-sizing:border-box;
+                    "
+                >
+
+
+                <label style="
+                    display:block;
+                    font-weight:700;
+                    margin-bottom:7px;
+                    color:#374151;
+                ">
+                    Subject
+                </label>
+
+                <input
+                    id="supportSubject"
+                    type="text"
+                    placeholder="Example: Payment Issue"
+                    style="
+                        width:100%;
+                        padding:12px;
+                        border:1px solid #d1d5db;
+                        border-radius:8px;
+                        margin-bottom:15px;
+                        box-sizing:border-box;
+                    "
+                >
+
+
+                <label style="
+                    display:block;
+                    font-weight:700;
+                    margin-bottom:7px;
+                    color:#374151;
+                ">
+                    Message
+                </label>
+
+                <textarea
+                    id="supportMessage"
+                    rows="6"
+                    placeholder="Describe your issue..."
+                    style="
+                        width:100%;
+                        padding:12px;
+                        border:1px solid #d1d5db;
+                        border-radius:8px;
+                        margin-bottom:18px;
+                        box-sizing:border-box;
+                        resize:vertical;
+                    "
+                ></textarea>
+
 
                 <div style="
                     display:flex;
                     justify-content:flex-end;
                     gap:10px;
-                    margin-top:20px;
                 ">
 
                     <button
-                        class="btn btn-primary"
+                        class="btn btn-outline"
                         onclick="renderProfile()">
-                        Close
+                        Cancel
+                    </button>
+
+                    <button
+                        id="supportSubmitBtn"
+                        class="btn btn-primary"
+                        onclick="submitSupportRequest()">
+                        Submit Request
                     </button>
 
                 </div>
@@ -7098,7 +7191,177 @@ function showActivePackage(){
             </div>
 
         </div>
+
     `;
+}
+   async function submitSupportRequest(){
+
+    const name =
+        document.getElementById("supportName").value.trim();
+
+    const email =
+        document.getElementById("supportEmail").value.trim();
+
+    const subject =
+        document.getElementById("supportSubject").value.trim();
+
+    const message =
+        document.getElementById("supportMessage").value.trim();
+
+
+    if(!name){
+        toast("Please enter your name.");
+        return;
+    }
+
+    if(!email){
+        toast("Please enter your email.");
+        return;
+    }
+
+    if(!message){
+        toast("Please describe your issue.");
+        return;
+    }
+
+
+    if(!supabaseClient){
+        toast("Supabase is not connected.");
+        return;
+    }
+
+
+    const {
+        data: sessionData,
+        error: sessionError
+    } = await supabaseClient.auth.getSession();
+
+
+    if(
+        sessionError ||
+        !sessionData ||
+        !sessionData.session ||
+        !sessionData.session.user
+    ){
+        toast("Please login again.");
+        openLogin();
+        return;
+    }
+
+
+    const userId =
+        sessionData.session.user.id;
+
+
+    const submitButton =
+        document.getElementById("supportSubmitBtn");
+
+
+    if(submitButton){
+        submitButton.disabled = true;
+        submitButton.textContent = "Submitting...";
+    }
+
+
+    const {
+        error
+    } = await supabaseClient
+        .from("support_requests")
+        .insert({
+            user_id: userId,
+            name: name,
+            email: email,
+            subject: subject || null,
+            message: message,
+            status: "open"
+        });
+
+
+    if(submitButton){
+        submitButton.disabled = false;
+        submitButton.textContent = "Submit Request";
+    }
+
+
+    if(error){
+
+        console.error(
+            "Support request error:",
+            error
+        );
+
+        toast(
+            "Unable to submit your request. Please try again."
+        );
+
+        return;
+    }
+
+
+    const profileContent =
+        document.getElementById("profileContent");
+
+
+    if(profileContent){
+
+        profileContent.innerHTML = `
+
+            <div class="modal active"
+                 style="
+                    display:flex;
+                    position:fixed;
+                    inset:0;
+                    z-index:9999;
+                    background:rgba(0,0,0,0.55);
+                    align-items:center;
+                    justify-content:center;
+                 ">
+
+                <div class="modal-box"
+                     style="
+                        width:90%;
+                        max-width:450px;
+                        background:#fff;
+                        border-radius:16px;
+                        padding:30px;
+                        text-align:center;
+                     ">
+
+                    <div style="
+                        font-size:50px;
+                        margin-bottom:12px;
+                    ">
+                        ✅
+                    </div>
+
+                    <h2 style="
+                        color:#111827;
+                        margin-bottom:10px;
+                    ">
+                        Request Submitted
+                    </h2>
+
+                    <p style="
+                        color:#6b7280;
+                        line-height:1.6;
+                    ">
+                        Your support request has been
+                        submitted successfully.
+                    </p>
+
+                    <button
+                        class="btn btn-primary"
+                        style="margin-top:20px;"
+                        onclick="renderProfile()">
+                        Back to Profile
+                    </button>
+
+                </div>
+
+            </div>
+
+        `;
+    }
 }
 
 /* =====================================================
