@@ -6435,12 +6435,84 @@ function openSettings(){
 
 function showPurchaseHistory(){
 
-    alert(
-        "No purchase history yet."
-    );
+    const profileContent =
+        document.getElementById("profileContent");
 
+    if(!profileContent) return;
+
+    profileContent.innerHTML = `
+
+        <div class="modal active"
+             style="
+                display:flex;
+                position:fixed;
+                inset:0;
+                z-index:9999;
+                background:rgba(0,0,0,0.55);
+                align-items:center;
+                justify-content:center;
+             ">
+
+            <div class="modal-box"
+                 style="
+                    width:90%;
+                    max-width:600px;
+                    max-height:80vh;
+                    overflow-y:auto;
+                    background:#fff;
+                    border-radius:16px;
+                    padding:28px;
+                 ">
+
+                <h2 style="margin-bottom:20px;">
+                    Purchase History
+                </h2>
+
+                <div style="
+                    text-align:center;
+                    padding:30px 10px;
+                    color:#6b7280;
+                ">
+
+                    <div style="
+                        font-size:45px;
+                        margin-bottom:12px;
+                    ">
+                        🧾
+                    </div>
+
+                    <h3 style="
+                        color:#374151;
+                        margin-bottom:8px;
+                    ">
+                        No Purchase History
+                    </h3>
+
+                    <p>
+                        Your purchased packages will
+                        appear here.
+                    </p>
+
+                </div>
+
+                <div style="
+                    text-align:right;
+                    margin-top:20px;
+                ">
+
+                    <button
+                        class="btn btn-primary"
+                        onclick="renderProfile()">
+                        Close
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+    `;
 }
-
 async function showTestResults(){
 
     if(isGuest()){
