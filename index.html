@@ -4859,8 +4859,18 @@ const { data: packageData, error: packageError } =
 
 if(packageError || !packageData){
 
-    toast(
-        "Selected package could not be found."
+    console.error(
+        "PACKAGE SEARCH ERROR:",
+        packageError
+    );
+
+    alert(
+        "Package Search Failed\n\n" +
+        "Plan: " + plan + "\n" +
+        "Days: " + days + "\n" +
+        "Amount: ₹" + amount + "\n\n" +
+        "Error: " +
+        (packageError?.message || "No package returned")
     );
 
     return;
