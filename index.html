@@ -4054,6 +4054,46 @@ async function openFreeMockTests(course){
     showPage("freeMocks");
 }
 
+   /* =====================================================
+   COMMON LOADING POPUP
+===================================================== */
+
+function showLoading(
+    message = "Loading...",
+    title = "Please wait..."
+){
+    const modal = document.getElementById("loadingModal");
+
+    if(!modal) return;
+
+    const titleElement =
+        document.getElementById("loadingTitle");
+
+    const messageElement =
+        document.getElementById("loadingMessage");
+
+    if(titleElement){
+        titleElement.textContent = title;
+    }
+
+    if(messageElement){
+        messageElement.textContent = message;
+    }
+
+    modal.classList.add("active");
+    modal.style.display = "flex";
+}
+
+function hideLoading(){
+
+    const modal =
+        document.getElementById("loadingModal");
+
+    if(!modal) return;
+
+    modal.classList.remove("active");
+    modal.style.display = "none";
+}
 
 /* =====================================================
    COURSE
@@ -4106,7 +4146,46 @@ function openCourse(course){
     showPage("course");
 
 }
+/* =====================================================
+   COMMON LOADING POPUP
+===================================================== */
 
+function showLoading(
+    message = "Loading...",
+    title = "Please wait..."
+){
+    const modal = document.getElementById("loadingModal");
+
+    if(!modal) return;
+
+    const titleElement =
+        document.getElementById("loadingTitle");
+
+    const messageElement =
+        document.getElementById("loadingMessage");
+
+    if(titleElement){
+        titleElement.textContent = title;
+    }
+
+    if(messageElement){
+        messageElement.textContent = message;
+    }
+
+    modal.classList.add("active");
+    modal.style.display = "flex";
+}
+
+function hideLoading(){
+
+    const modal =
+        document.getElementById("loadingModal");
+
+    if(!modal) return;
+
+    modal.classList.remove("active");
+    modal.style.display = "none";
+}
 
 function openAPPSCGroups(addHistory = true){
 
@@ -4132,7 +4211,46 @@ function openAPPSCGroups(addHistory = true){
     showPage("appGroups", addHistory);
 
 }
+/* =====================================================
+   COMMON LOADING POPUP
+===================================================== */
 
+function showLoading(
+    message = "Loading...",
+    title = "Please wait..."
+){
+    const modal = document.getElementById("loadingModal");
+
+    if(!modal) return;
+
+    const titleElement =
+        document.getElementById("loadingTitle");
+
+    const messageElement =
+        document.getElementById("loadingMessage");
+
+    if(titleElement){
+        titleElement.textContent = title;
+    }
+
+    if(messageElement){
+        messageElement.textContent = message;
+    }
+
+    modal.classList.add("active");
+    modal.style.display = "flex";
+}
+
+function hideLoading(){
+
+    const modal =
+        document.getElementById("loadingModal");
+
+    if(!modal) return;
+
+    modal.classList.remove("active");
+    modal.style.display = "none";
+}
 
 function openAPPSCGroup(group, addHistory = true){
 
@@ -4161,7 +4279,46 @@ function openAPPSCGroup(group, addHistory = true){
     showPage("appGroupDetail", addHistory);
 
 }
+/* =====================================================
+   COMMON LOADING POPUP
+===================================================== */
 
+function showLoading(
+    message = "Loading...",
+    title = "Please wait..."
+){
+    const modal = document.getElementById("loadingModal");
+
+    if(!modal) return;
+
+    const titleElement =
+        document.getElementById("loadingTitle");
+
+    const messageElement =
+        document.getElementById("loadingMessage");
+
+    if(titleElement){
+        titleElement.textContent = title;
+    }
+
+    if(messageElement){
+        messageElement.textContent = message;
+    }
+
+    modal.classList.add("active");
+    modal.style.display = "flex";
+}
+
+function hideLoading(){
+
+    const modal =
+        document.getElementById("loadingModal");
+
+    if(!modal) return;
+
+    modal.classList.remove("active");
+    modal.style.display = "none";
+}
 
 /* =====================================================
    SYLLABUS
@@ -4412,7 +4569,46 @@ function backFromSyllabus(){
     openCourse(currentCourse);
 
 }
+/* =====================================================
+   COMMON LOADING POPUP
+===================================================== */
 
+function showLoading(
+    message = "Loading...",
+    title = "Please wait..."
+){
+    const modal = document.getElementById("loadingModal");
+
+    if(!modal) return;
+
+    const titleElement =
+        document.getElementById("loadingTitle");
+
+    const messageElement =
+        document.getElementById("loadingMessage");
+
+    if(titleElement){
+        titleElement.textContent = title;
+    }
+
+    if(messageElement){
+        messageElement.textContent = message;
+    }
+
+    modal.classList.add("active");
+    modal.style.display = "flex";
+}
+
+function hideLoading(){
+
+    const modal =
+        document.getElementById("loadingModal");
+
+    if(!modal) return;
+
+    modal.classList.remove("active");
+    modal.style.display = "none";
+}
 
 /* =====================================================
    TEST SERIES
@@ -4593,7 +4789,46 @@ function openTopicTest(index){
     toast(topic + " topic test will be connected to the question bank.");
 
 }
+/* =====================================================
+   COMMON LOADING POPUP
+===================================================== */
 
+function showLoading(
+    message = "Loading...",
+    title = "Please wait..."
+){
+    const modal = document.getElementById("loadingModal");
+
+    if(!modal) return;
+
+    const titleElement =
+        document.getElementById("loadingTitle");
+
+    const messageElement =
+        document.getElementById("loadingMessage");
+
+    if(titleElement){
+        titleElement.textContent = title;
+    }
+
+    if(messageElement){
+        messageElement.textContent = message;
+    }
+
+    modal.classList.add("active");
+    modal.style.display = "flex";
+}
+
+function hideLoading(){
+
+    const modal =
+        document.getElementById("loadingModal");
+
+    if(!modal) return;
+
+    modal.classList.remove("active");
+    modal.style.display = "none";
+}
 
 /* =====================================================
    PAPER / TESTS
@@ -4667,7 +4902,46 @@ function backFromTestList(){
     );
 
 }
+/* =====================================================
+   COMMON LOADING POPUP
+===================================================== */
 
+function showLoading(
+    message = "Loading...",
+    title = "Please wait..."
+){
+    const modal = document.getElementById("loadingModal");
+
+    if(!modal) return;
+
+    const titleElement =
+        document.getElementById("loadingTitle");
+
+    const messageElement =
+        document.getElementById("loadingMessage");
+
+    if(titleElement){
+        titleElement.textContent = title;
+    }
+
+    if(messageElement){
+        messageElement.textContent = message;
+    }
+
+    modal.classList.add("active");
+    modal.style.display = "flex";
+}
+
+function hideLoading(){
+
+    const modal =
+        document.getElementById("loadingModal");
+
+    if(!modal) return;
+
+    modal.classList.remove("active");
+    modal.style.display = "none";
+}
 
 /* =====================================================
    LOCKED TEST
@@ -4814,7 +5088,46 @@ if(packageError || !packageData){
     return;
 
 }
+/* =====================================================
+   COMMON LOADING POPUP
+===================================================== */
 
+function showLoading(
+    message = "Loading...",
+    title = "Please wait..."
+){
+    const modal = document.getElementById("loadingModal");
+
+    if(!modal) return;
+
+    const titleElement =
+        document.getElementById("loadingTitle");
+
+    const messageElement =
+        document.getElementById("loadingMessage");
+
+    if(titleElement){
+        titleElement.textContent = title;
+    }
+
+    if(messageElement){
+        messageElement.textContent = message;
+    }
+
+    modal.classList.add("active");
+    modal.style.display = "flex";
+}
+
+function hideLoading(){
+
+    const modal =
+        document.getElementById("loadingModal");
+
+    if(!modal) return;
+
+    modal.classList.remove("active");
+    modal.style.display = "none";
+}
 
    // IKKADA RAZORPAY ORDER CODE PETTALI
 
