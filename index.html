@@ -7011,10 +7011,80 @@ function showActivePackage(){
 
   function showHelpSupport(){
 
-    if(isGuest()){
-        toast("Please Login or Register to contact support.");
-        return;
+  if(isGuest()){
+
+    const oldPopup =
+        document.getElementById("loginSupportPopup");
+
+    if(oldPopup){
+        oldPopup.remove();
     }
+
+    const popup = document.createElement("div");
+
+    popup.id = "loginSupportPopup";
+
+    popup.style.cssText = `
+        position:fixed;
+        inset:0;
+        z-index:99999;
+        background:rgba(0,0,0,0.55);
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        padding:20px;
+        box-sizing:border-box;
+    `;
+
+    popup.innerHTML = `
+
+        <div style="
+            width:100%;
+            max-width:380px;
+            background:#ffffff;
+            border-radius:18px;
+            padding:28px;
+            text-align:center;
+            box-shadow:0 20px 60px rgba(0,0,0,0.25);
+        ">
+
+            <div style="
+                font-size:46px;
+                margin-bottom:10px;
+            ">
+                🔐
+            </div>
+
+            <h2 style="
+                margin:0;
+                color:#111827;
+            ">
+                Login Required
+            </h2>
+
+            <p style="
+                margin-top:10px;
+                color:#6b7280;
+                line-height:1.6;
+            ">
+                Please Login or Register to contact support.
+            </p>
+
+            <button
+                class="btn btn-primary"
+                style="margin-top:18px;"
+                onclick="document.getElementById('loginSupportPopup').remove()">
+                OK
+            </button>
+
+        </div>
+
+    `;
+
+    document.body.appendChild(popup);
+
+    return;
+}
 
     const profileContent =
         document.getElementById("profileContent");
