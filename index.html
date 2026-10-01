@@ -5841,8 +5841,7 @@ function openProfile(){
 
 }
 
-
-function renderProfile(){
+async function renderProfile(){
 
     const email =
         localStorage.getItem(
@@ -5857,12 +5856,135 @@ function renderProfile(){
     const guest =
         isGuest();
 
-    const coins =
+    let coins =
         Number(
             localStorage.getItem(
                 "studentCoins"
             ) || 0
         );
+
+    let activePackage = null;
+
+
+    /* =========================================
+       GET ACTIVE PACKAGE FROM SUPABASE
+    ========================================= */
+
+    if(
+        !guest &&
+        supabaseClient
+    ){
+
+        try{
+
+            const {
+                data: userData
+            } =
+                await supabaseClient.auth.getUser();
+
+            const userId =
+                userData?.user?.id;
+
+            if(userId){
+
+                const {
+                    data,
+                    error
+                } =
+                    await supabaseClient
+                    .from("purchases")
+                    .select(`
+                        id,
+                        amount,
+                        starts_at,
+                        expires_at,
+                        payment_status,
+                        package_id,
+                        course_id,
+                        packages (
+                            name,
+                            price,
+                            duration_days
+                        ),
+                        courses (
+                            name
+                        )
+                    `)
+                    .eq(
+                        "user_id",
+                        userId
+                    )
+                    .eq(
+                        "payment_status",
+                        "paid"
+                    )
+                    .gt(
+                        "expires_at",
+                        new Date().toISOString()
+                    )
+                    .order(
+                        "expires_at",
+                        {
+                            ascending:false
+                        }
+                    )
+                    .limit(1);
+
+                if(
+                    !error &&
+                    data &&
+                    data.length > 0
+                ){
+
+                    const p =
+                        data[0];
+
+                    activePackage = {
+
+                        packageName:
+                            p.packages?.name ||
+                            "Package",
+
+                        price:
+                            p.packages?.price ||
+                            p.amount,
+
+                        duration:
+                            p.packages?.duration_days ||
+                            "",
+
+                        courseName:
+                            p.courses?.name ||
+                            "Course",
+
+                        startsAt:
+                            p.starts_at,
+
+                        expiresAt:
+                            p.expires_at
+
+                    };
+
+                }
+
+            }
+
+        }
+        catch(error){
+
+            console.error(
+                "Active package loading error:",
+                error
+            );
+
+        }
+
+    }
+
+
+    /* =========================================
+       LOGIN CHECK
+    ========================================= */
 
     if(
         !email &&
@@ -5890,7 +6012,9 @@ function renderProfile(){
                 class="btn btn-blue"
                 style="margin-top:16px"
                 onclick="openLogin()">
+
                     Login / Register
+
                 </button>
 
             </div>
@@ -5901,24 +6025,50 @@ function renderProfile(){
 
     }
 
+
+    /* =========================================
+       PROFILE HTML
+    ========================================= */
+
     $("profileContent")
         .innerHTML = `
 
         <div class="profile-summary">
 
             <div class="avatar">
-                ${guest ? "U" : getInitials(name,email)}
+
+                ${
+                    guest
+                    ? "U"
+                    : getInitials(name,email)
+                }
+
             </div>
 
             <h2>
-                ${guest ? "User" : (name || "Student")}
+
+                ${
+                    guest
+                    ? "User"
+                    : (name || "Student")
+                }
+
             </h2>
 
             <p style="color:#6b7280;margin-top:6px">
-                ${guest ? "Please Register" : email}
+
+                ${
+                    guest
+                    ? "Please Register"
+                    : email
+                }
+
             </p>
 
         </div>
+
+
+        <!-- STUDENT COINS -->
 
         <div class="coins-box">
 
@@ -5927,92 +6077,286 @@ function renderProfile(){
             </div>
 
             <div class="coin-number">
-                ${guest ? 0 : coins}
+
+                ${
+                    guest
+                    ? 0
+                    : coins
+                }
+
             </div>
 
-            ${guest ? `
-                <p style="font-size:13px;color:#6b7280;margin-top:6px">
-                    Student Coins are available only for registered users.
-                </p>
-                <button
-                class="btn btn-outline"
-                style="margin-top:10px"
-                onclick="openRegister()">
-                    Please Register to Earn Coins
-                </button>
-            ` : `
-                <p style="font-size:13px;color:#6b7280;margin-top:6px">
-                    ${coins >= 10 ? "Eligible for the 10-coin reward mechanism." : "Complete a full rewarded ad to earn +0.5 coin."}
-                </p>
-                <button
-                class="btn btn-primary"
-                style="margin-top:10px"
-                onclick="earnCoins()">
-                    Watch Ad +0.5
-                </button>
-            `}
+
+            ${
+                guest
+                ? `
+
+                    <p
+                    style="
+                    font-size:13px;
+                    color:#6b7280;
+                    margin-top:6px
+                    ">
+
+                        Student Coins are available
+                        only for registered users.
+
+                    </p>
+
+                    <button
+                    class="btn btn-outline"
+                    style="margin-top:10px"
+                    onclick="openRegister()">
+
+                        Please Register to Earn Coins
+
+                    </button>
+
+                `
+                : `
+
+                    <p
+                    style="
+                    font-size:13px;
+                    color:#6b7280;
+                    margin-top:6px
+                    ">
+
+                        ${
+                            coins >= 10
+                            ? "Eligible for the 10-coin reward mechanism."
+                            : "Complete a full rewarded ad to earn +0.5 coin."
+                        }
+
+                    </p>
+
+                    <button
+                    class="btn btn-primary"
+                    style="margin-top:10px"
+                    onclick="earnCoins()">
+
+                        Watch Ad +0.5
+
+                    </button>
+
+                `
+            }
 
         </div>
 
-        <div class="profile-info-card">
 
-            <strong>
-                Active Package
-            </strong>
+        <!-- ACTIVE PACKAGE -->
 
-            <p style="margin-top:7px;color:#6b7280">
-                No Active Package
-            </p>
+        ${
+            activePackage
 
-            <button
-            class="btn btn-blue"
-            style="margin-top:10px"
-            onclick="openStore()">
-                View Packages
-            </button>
+            ? `
 
-        </div>
+                <div class="profile-info-card">
+
+                    <strong>
+                        Active Package
+                    </strong>
+
+                    <p
+                    style="
+                    margin-top:8px;
+                    font-weight:700;
+                    color:#111827;
+                    ">
+
+                        ${activePackage.packageName}
+
+                    </p>
+
+
+                    <p
+                    style="
+                    margin-top:5px;
+                    color:#6b7280;
+                    ">
+
+                        Course:
+                        ${activePackage.courseName}
+
+                    </p>
+
+
+                    <p
+                    style="
+                    margin-top:5px;
+                    color:#6b7280;
+                    ">
+
+                        Price:
+                        ₹${activePackage.price}
+
+                    </p>
+
+
+                    <p
+                    style="
+                    margin-top:5px;
+                    color:#6b7280;
+                    ">
+
+                        Start:
+                        ${
+                            activePackage.startsAt
+                            ? new Date(
+                                activePackage.startsAt
+                            ).toLocaleString()
+                            : "-"
+                        }
+
+                    </p>
+
+
+                    <p
+                    style="
+                    margin-top:5px;
+                    color:#6b7280;
+                    ">
+
+                        Expiry:
+                        ${
+                            activePackage.expiresAt
+                            ? new Date(
+                                activePackage.expiresAt
+                            ).toLocaleString()
+                            : "-"
+                        }
+
+                    </p>
+
+
+                    <p
+                    style="
+                    margin-top:8px;
+                    color:#15803d;
+                    font-weight:700;
+                    ">
+
+                        ✓ Package Active
+
+                    </p>
+
+                </div>
+
+            `
+
+            : `
+
+                <div class="profile-info-card">
+
+                    <strong>
+                        Active Package
+                    </strong>
+
+                    <p
+                    style="
+                    margin-top:7px;
+                    color:#6b7280
+                    ">
+
+                        No Active Package
+
+                    </p>
+
+                    <button
+                    class="btn btn-blue"
+                    style="margin-top:10px"
+                    onclick="openStore()">
+
+                        View Packages
+
+                    </button>
+
+                </div>
+
+            `
+        }
+
+
+        <!-- PROFILE MENU -->
 
         <div class="profile-menu">
 
-            <button class="profile-menu-btn" onclick="editProfile()">
+            <button
+            class="profile-menu-btn"
+            onclick="editProfile()">
+
                 👤 Edit Profile
+
                 <span>›</span>
+
             </button>
 
-            <button class="profile-menu-btn" onclick="openSettings()">
-                ⚙️ Settings
-                <span>›</span>
-            </button>
-
-            <button class="profile-menu-btn" onclick="showPurchaseHistory()">
-                🧾 Purchase History
-                <span>›</span>
-            </button>
-
-            <button class="profile-menu-btn" onclick="showTestResults()">
-                📊 Test Results
-                <span>›</span>
-            </button>
-
-            <button class="profile-menu-btn" onclick="showActivePackage()">
-                🎫 Active Package
-                <span>›</span>
-            </button>
 
             <button
-class="profile-menu-btn"
-onclick="showHelpSupport()">
-    ❓ Help & Support
-    <span>›</span>
-</button>
+            class="profile-menu-btn"
+            onclick="openSettings()">
+
+                ⚙️ Settings
+
+                <span>›</span>
+
+            </button>
+
+
+            <button
+            class="profile-menu-btn"
+            onclick="showPurchaseHistory()">
+
+                🧾 Purchase History
+
+                <span>›</span>
+
+            </button>
+
+
+            <button
+            class="profile-menu-btn"
+            onclick="showTestResults()">
+
+                📊 Test Results
+
+                <span>›</span>
+
+            </button>
+
+
+            <button
+            class="profile-menu-btn"
+            onclick="showActivePackage()">
+
+                🎫 Active Package
+
+                <span>›</span>
+
+            </button>
+
+
+            <button
+            class="profile-menu-btn"
+            onclick="showHelpSupport()">
+
+                ❓ Help & Support
+
+                <span>›</span>
+
+            </button>
+
 
             <button
             class="profile-menu-btn"
             style="color:#dc2626"
             onclick="logout()">
+
                 🚪 Logout
+
                 <span>›</span>
+
             </button>
 
         </div>
