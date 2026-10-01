@@ -9377,9 +9377,8 @@ function renderQuestion(){
         examQuestions.length;
 
 
-    $("questionText")
-        .textContent =
-        q.q;
+    $("questionText").textContent =
+    formatBilingualText(q.q);
 
 
     $("options")
@@ -9434,6 +9433,34 @@ function renderQuestion(){
 
 }
 
+   function formatBilingualText(text){
+
+    if(!text){
+        return "";
+    }
+
+    const value = String(text).trim();
+
+    /*
+       English / Telugu already separated by newline
+       → convert newline to " / "
+    */
+
+    const parts = value
+        .split(/\r?\n/)
+        .map(function(part){
+            return part.trim();
+        })
+        .filter(Boolean);
+
+    if(parts.length >= 2){
+
+        return parts.join(" / ");
+
+    }
+
+    return value;
+   }
 
 /* =====================================================
    SAVE ANSWER
