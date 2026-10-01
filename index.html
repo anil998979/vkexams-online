@@ -4857,46 +4857,7 @@ if(packageError || !packageData){
     return;
 
 }
-/* =====================================================
-   COMMON LOADING POPUP
-===================================================== */
 
-function showLoading(
-    message = "Loading...",
-    title = "Please wait..."
-){
-    const modal = document.getElementById("loadingModal");
-
-    if(!modal) return;
-
-    const titleElement =
-        document.getElementById("loadingTitle");
-
-    const messageElement =
-        document.getElementById("loadingMessage");
-
-    if(titleElement){
-        titleElement.textContent = title;
-    }
-
-    if(messageElement){
-        messageElement.textContent = message;
-    }
-
-    modal.classList.add("active");
-    modal.style.display = "flex";
-}
-
-function hideLoading(){
-
-    const modal =
-        document.getElementById("loadingModal");
-
-    if(!modal) return;
-
-    modal.classList.remove("active");
-    modal.style.display = "none";
-}
 
    // IKKADA RAZORPAY ORDER CODE PETTALI
 
