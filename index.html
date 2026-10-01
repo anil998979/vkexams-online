@@ -4719,8 +4719,16 @@ function openTopicTest(index){
 
 async function openPaper(paper){
 
-    testListParentPage = "testseries";
+    showLoading(
+        "Loading " + paper + "...",
+        "Please wait..."
+    );
 
+    await new Promise(function(resolve){
+        requestAnimationFrame(resolve);
+    });
+
+    testListParentPage = "testseries";
     currentPaper = paper;
 
     $("paperTitle").textContent =
@@ -4919,7 +4927,9 @@ async function openPaper(paper){
 
     list.innerHTML = html;
 
-    showPage("papers");
+showPage("papers");
+
+hideLoading();
 
 }
 /* =====================================================
