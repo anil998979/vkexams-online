@@ -4892,18 +4892,13 @@ async function openLockedTest(testNumber){
         }
 
 
-        /* ACTIVE PACKAGE */
+      /* ACTIVE PACKAGE */
 
-        closeLockModal();
+closeLockModal();
 
-        toast(
-            "Package access verified."
-        );
-
-        console.log(
-            "Active package:",
-            purchaseData[0]
-        );
+await startPaidTest(
+    testNumber
+);
 
     }
     catch(error){
@@ -4922,7 +4917,442 @@ async function openLockedTest(testNumber){
     }
 
 }
+/* =====================================================
+   START PAID TEST
+===================================================== */
 
+async function startPaidTest(testNumber){
+
+    if(
+        !supabaseClient
+    ){
+
+        toast(
+            "Supabase is not connected."
+        );
+
+        return;
+
+    }
+
+
+    showLoading(
+        "Loading questions...",
+        "Please wait..."
+    );
+
+
+    try{
+
+        /* =========================================
+           FIND COURSE
+        ========================================= */
+
+        const {
+            data:courseData,
+            error:courseError
+        } =
+        await supabaseClient
+            .from("courses")
+            .select("id,name")
+            .eq(
+                "name",
+                currentCourse
+            )
+            .single();
+
+
+        if(
+            courseError ||
+            !courseData
+        ){
+
+            hideLoading();
+
+            console.error(
+                courseError
+            );
+
+            toast(
+                "Course not found."
+            );
+
+            return;
+
+        }
+
+
+        /* =========================================
+           FIND TEST SERIES
+           Example:
+           Paper 1
+           Paper 2
+           Prelims
+           Mains
+           Test Series
+        ========================================= */
+
+        const {
+            data:seriesData,
+            error:seriesError
+        } =
+        await supabaseClient
+            .from("test_series")
+            .select("id,name")
+            .eq(
+                "course_id",
+                courseData.id
+            )
+            .eq(
+                "name",
+                currentPaper
+            )
+            .single();
+
+
+        if(
+            seriesError ||
+            !seriesData
+        ){
+
+            hideLoading();
+
+            console.error(
+                "Test series error:",
+                seriesError
+            );
+
+            toast(
+                "Test series not found."
+            );
+
+            return;
+
+        }
+
+
+        /* =========================================
+           FIND PAID TEST
+        ========================================= */
+
+        const {
+            data:testData,
+            error:testError
+        } =
+        await supabaseClient
+            .from("tests")
+            .select(`
+                id,
+                title,
+                test_number,
+                duration_minutes,
+                total_marks,
+                is_free
+            `)
+            .eq(
+                "test_series_id",
+                seriesData.id
+            )
+            .eq(
+                "test_number",
+                testNumber
+            )
+            .eq(
+                "is_free",
+                false
+            )
+            .single();
+
+
+        if(
+            testError ||
+            !testData
+        ){
+
+            hideLoading();
+
+            console.error(
+                "Paid test error:",
+                testError
+            );
+
+            toast(
+                "This paid test is not available yet."
+            );
+
+            return;
+
+        }
+
+
+        /* =========================================
+           START ATTEMPT
+        ========================================= */
+
+        const {
+            data:attemptData,
+            error:attemptError
+        } =
+        await supabaseClient.rpc(
+            "start_test_attempt",
+            {
+                p_test_id:
+                    testData.id
+            }
+        );
+
+
+        if(
+            attemptError
+        ){
+
+            hideLoading();
+
+            console.error(
+                "Attempt error:",
+                attemptError
+            );
+
+            toast(
+                attemptError.message ||
+                "Unable to start test."
+            );
+
+            return;
+
+        }
+
+
+        currentAttemptId =
+            attemptData?.id ||
+            attemptData;
+
+
+        /* =========================================
+           LOAD QUESTIONS
+        ========================================= */
+
+        const {
+            data:questionData,
+            error:questionError
+        } =
+        await supabaseClient
+            .from("questions")
+            .select(`
+                id,
+                question_number,
+                question_text,
+                option_a,
+                option_b,
+                option_c,
+                option_d,
+                marks,
+                negative_marks
+            `)
+            .eq(
+                "test_id",
+                testData.id
+            )
+            .eq(
+                "is_active",
+                true
+            )
+            .order(
+                "question_number",
+                {
+                    ascending:true
+                }
+            );
+
+
+        if(
+            questionError
+        ){
+
+            hideLoading();
+
+            console.error(
+                "Question loading error:",
+                questionError
+            );
+
+            toast(
+                "Unable to load questions."
+            );
+
+            return;
+
+        }
+
+
+        if(
+            !questionData ||
+            questionData.length === 0
+        ){
+
+            hideLoading();
+
+            toast(
+                "No questions are available for this test yet."
+            );
+
+            return;
+
+        }
+
+
+        /* =========================================
+           PREPARE QUESTIONS
+        ========================================= */
+
+        examQuestions =
+            questionData.map(
+                function(q){
+
+                    return {
+
+                        id:
+                            q.id,
+
+                        number:
+                            q.question_number,
+
+                        q:
+                            q.question_text,
+
+                        o:[
+                            q.option_a,
+                            q.option_b,
+                            q.option_c,
+                            q.option_d
+                        ],
+
+                        marks:
+                            Number(
+                                q.marks || 1
+                            ),
+
+                        negative:
+                            Number(
+                                q.negative_marks || 0
+                            )
+
+                    };
+
+                }
+            );
+
+
+        /* =========================================
+           RESET EXAM
+        ========================================= */
+
+        userAnswers =
+            new Array(
+                examQuestions.length
+            ).fill(null);
+
+        currentQuestionIndex = 0;
+
+
+        /* =========================================
+           TIMER
+        ========================================= */
+
+        clearInterval(
+            timerInterval
+        );
+
+        timeLeft =
+            Number(
+                testData.duration_minutes || 120
+            ) * 60;
+
+
+        /* =========================================
+           EXAM TITLE
+        ========================================= */
+
+        $( "examTitle" ).textContent =
+            currentCourse +
+            " – " +
+            currentPaper +
+            " – " +
+            testData.title;
+
+
+        /* =========================================
+           OPEN EXAM
+        ========================================= */
+
+        hideLoading();
+
+        showPage(
+            "examPage"
+        );
+
+        renderQuestion();
+
+        renderTimer();
+
+
+        /* =========================================
+           START TIMER
+        ========================================= */
+
+        timerInterval =
+            window.setInterval(
+                function(){
+
+                    if(
+                        timeLeft > 0
+                    ){
+
+                        timeLeft--;
+
+                        renderTimer();
+
+                    }
+
+
+                    if(
+                        timeLeft <= 0
+                    ){
+
+                        clearInterval(
+                            timerInterval
+                        );
+
+                        toast(
+                            "Time is over. Submitting your test..."
+                        );
+
+                        submitExam(true);
+
+                    }
+
+                },
+                1000
+            );
+
+
+    }
+    catch(error){
+
+        hideLoading();
+
+        console.error(
+            "Paid Test Error:",
+            error
+        );
+
+        toast(
+            "Unable to start the paid test."
+        );
+
+    }
+
+}
 
 function closeLockModal(){
 
