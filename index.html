@@ -6000,11 +6000,11 @@ function renderProfile(){
             </button>
 
             <button
-            class="profile-menu-btn"
-            onclick="alert('Help & Support: support@vkexams.online')">
-                ❓ Help & Support
-                <span>›</span>
-            </button>
+class="profile-menu-btn"
+onclick="showHelpSupport()">
+    ❓ Help & Support
+    <span>›</span>
+</button>
 
             <button
             class="profile-menu-btn"
@@ -7009,6 +7009,97 @@ function showActivePackage(){
     `;
 }
 
+   function showHelpSupport(){
+
+    const profileContent =
+        document.getElementById("profileContent");
+
+    if(!profileContent) return;
+
+    profileContent.innerHTML = `
+
+        <div class="modal active"
+             style="
+                display:flex;
+                position:fixed;
+                inset:0;
+                z-index:9999;
+                background:rgba(0,0,0,0.55);
+                align-items:center;
+                justify-content:center;
+             ">
+
+            <div class="modal-box"
+                 style="
+                    width:90%;
+                    max-width:500px;
+                    background:#fff;
+                    border-radius:16px;
+                    padding:28px;
+                 ">
+
+                <h2 style="margin-bottom:20px;">
+                    ❓ Help & Support
+                </h2>
+
+                <div style="
+                    text-align:center;
+                    padding:25px 10px;
+                    color:#6b7280;
+                ">
+
+                    <div style="
+                        font-size:48px;
+                        margin-bottom:12px;
+                    ">
+                        📧
+                    </div>
+
+                    <h3 style="
+                        color:#374151;
+                        margin-bottom:10px;
+                    ">
+                        Need Help?
+                    </h3>
+
+                    <p style="
+                        line-height:1.6;
+                        margin-bottom:8px;
+                    ">
+                        For any questions or support,
+                        please contact us.
+                    </p>
+
+                    <p style="
+                        color:#2563eb;
+                        font-weight:800;
+                        font-size:16px;
+                    ">
+                        support@vkexams.online
+                    </p>
+
+                </div>
+
+                <div style="
+                    display:flex;
+                    justify-content:flex-end;
+                    gap:10px;
+                    margin-top:20px;
+                ">
+
+                    <button
+                        class="btn btn-primary"
+                        onclick="renderProfile()">
+                        Close
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+    `;
+}
 
 /* =====================================================
    COINS
