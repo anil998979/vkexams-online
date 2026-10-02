@@ -8112,87 +8112,399 @@ async function showTestResults(){
 
     $("profileContent").innerHTML = html;
 }
-function showActivePackage(){
+async function showActivePackage(){
 
     const profileContent =
         document.getElementById("profileContent");
 
     if(!profileContent) return;
 
-    profileContent.innerHTML = `
+    showLoading(
+        "Loading package...",
+        "Please wait..."
+    );
 
-        <div class="modal active"
-             style="
-                display:flex;
-                position:fixed;
-                inset:0;
-                z-index:9999;
-                background:rgba(0,0,0,0.55);
-                align-items:center;
-                justify-content:center;
-             ">
+    try{
 
-            <div class="modal-box"
-                 style="
-                    width:90%;
-                    max-width:500px;
-                    background:#fff;
-                    border-radius:16px;
-                    padding:28px;
-                 ">
+        /* ================================
+           GET CURRENT USER
+        ================================= */
 
-                <h2 style="margin-bottom:20px;">
-                    📦 Active Package
-                </h2>
+        const {
+            data: userData,
+            error: userError
+        } =
+        await supabaseClient.auth.getUser();
 
-                <div style="
-                    text-align:center;
-                    padding:25px 10px;
-                    color:#6b7280;
-                ">
+        if(
+            userError ||
+            !userData?.user?.id
+        ){
 
-                    <div style="
-                        font-size:48px;
-                        margin-bottom:12px;
-                    ">
-                        📦
+            hideLoading();
+
+            toast(
+                "Please login to view your package."
+            );
+
+            return;
+        }
+
+        const userId =
+            userData.user.id;
+
+
+        /* ================================
+           FIND ACTIVE PACKAGE
+        ================================= */
+
+        const {
+            data,
+            error
+        } =
+        await supabaseClient
+            .from("purchases")
+            .select(`
+                id,
+                amount,
+                starts_at,
+                expires_at,
+                payment_status,
+                package_id,
+                course_id,
+                packages (
+                    name,
+                    price,
+                    duration_days
+                ),
+                courses (
+                    name
+                )
+            `)
+            .eq(
+                "user_id",
+                userId
+            )
+            .eq(
+                "payment_status",
+                "paid"
+            )
+            .gt(
+                "expires_at",
+                new Date().toISOString()
+            )
+            .order(
+                "expires_at",
+                {
+                    ascending:false
+                }
+            )
+            .limit(1);
+
+        hideLoading();
+
+
+        /* ================================
+           DATABASE ERROR
+        ================================= */
+
+        if(error){
+
+            console.error(
+                "Active package error:",
+                error
+            );
+
+            toast(
+                "Unable to load active package."
+            );
+
+            return;
+        }
+
+
+        /* ================================
+           NO ACTIVE PACKAGE
+        ================================= */
+
+        if(
+            !data ||
+            data.length === 0
+        ){
+
+            profileContent.innerHTML = `
+
+                <div class="modal active"
+                     style="
+                        display:flex;
+                        position:fixed;
+                        inset:0;
+                        z-index:9999;
+                        background:rgba(0,0,0,0.55);
+                        align-items:center;
+                        justify-content:center;
+                     ">
+
+                    <div class="modal-box"
+                         style="
+                            width:90%;
+                            max-width:500px;
+                            background:#fff;
+                            border-radius:16px;
+                            padding:28px;
+                         ">
+
+                        <h2 style="margin-bottom:20px;">
+                            📦 Active Package
+                        </h2>
+
+                        <div style="
+                            text-align:center;
+                            padding:25px 10px;
+                            color:#6b7280;
+                        ">
+
+                            <div style="
+                                font-size:48px;
+                                margin-bottom:12px;
+                            ">
+                                📦
+                            </div>
+
+                            <h3 style="
+                                color:#374151;
+                                margin-bottom:10px;
+                            ">
+                                No Active Package
+                            </h3>
+
+                            <p style="line-height:1.6;">
+                                Purchase a package from the Store
+                                after successful payment verification.
+                            </p>
+
+                        </div>
+
+                        <div style="
+                            display:flex;
+                            justify-content:flex-end;
+                            gap:10px;
+                            margin-top:20px;
+                        ">
+
+                            <button
+                                class="btn btn-primary"
+                                onclick="renderProfile()">
+                                Close
+                            </button>
+
+                        </div>
+
                     </div>
-
-                    <h3 style="
-                        color:#374151;
-                        margin-bottom:10px;
-                    ">
-                        No Active Package
-                    </h3>
-
-                    <p style="line-height:1.6;">
-                        Purchase a package from the Store
-                        after successful payment verification.
-                    </p>
 
                 </div>
 
-                <div style="
-                    display:flex;
-                    justify-content:flex-end;
-                    gap:10px;
-                    margin-top:20px;
-                ">
+            `;
 
-                    <button
-                        class="btn btn-primary"
-                        onclick="renderProfile()">
-                        Close
-                    </button>
+            return;
+        }
+
+
+        /* ================================
+           ACTIVE PACKAGE FOUND
+        ================================= */
+
+        const p = data[0];
+
+        const packageName =
+            p.packages?.name ||
+            "Package";
+
+        const price =
+            p.packages?.price ||
+            p.amount;
+
+        const duration =
+            p.packages?.duration_days ||
+            "";
+
+        const courseName =
+            p.courses?.name ||
+            "Course";
+
+        const startsAt =
+            p.starts_at
+            ? new Date(
+                p.starts_at
+            ).toLocaleString()
+            : "-";
+
+        const expiresAt =
+            p.expires_at
+            ? new Date(
+                p.expires_at
+            ).toLocaleString()
+            : "-";
+
+
+        /* ================================
+           SHOW ACTIVE PACKAGE
+        ================================= */
+
+        profileContent.innerHTML = `
+
+            <div class="modal active"
+                 style="
+                    display:flex;
+                    position:fixed;
+                    inset:0;
+                    z-index:9999;
+                    background:rgba(0,0,0,0.55);
+                    align-items:center;
+                    justify-content:center;
+                 ">
+
+                <div class="modal-box"
+                     style="
+                        width:90%;
+                        max-width:500px;
+                        background:#fff;
+                        border-radius:16px;
+                        padding:28px;
+                     ">
+
+                    <h2 style="margin-bottom:20px;">
+                        📦 Active Package
+                    </h2>
+
+
+                    <div style="
+                        text-align:center;
+                        padding:20px 10px;
+                    ">
+
+                        <div style="
+                            font-size:52px;
+                            margin-bottom:12px;
+                        ">
+                            📦
+                        </div>
+
+                        <h3 style="
+                            color:#15803d;
+                            margin-bottom:14px;
+                        ">
+                            ✓ Package Active
+                        </h3>
+
+
+                        <div style="
+                            background:#f8fafc;
+                            border-radius:12px;
+                            padding:18px;
+                            text-align:left;
+                        ">
+
+                            <p style="
+                                font-weight:800;
+                                font-size:18px;
+                                color:#111827;
+                            ">
+                                ${packageName}
+                            </p>
+
+                            <p style="
+                                margin-top:10px;
+                                color:#4b5563;
+                            ">
+                                Course:
+                                <strong>
+                                    ${courseName}
+                                </strong>
+                            </p>
+
+                            <p style="
+                                margin-top:8px;
+                                color:#4b5563;
+                            ">
+                                Price:
+                                <strong>
+                                    ₹${price}
+                                </strong>
+                            </p>
+
+                            <p style="
+                                margin-top:8px;
+                                color:#4b5563;
+                            ">
+                                Duration:
+                                <strong>
+                                    ${duration} Days
+                                </strong>
+                            </p>
+
+                            <p style="
+                                margin-top:8px;
+                                color:#4b5563;
+                            ">
+                                Start:
+                                <strong>
+                                    ${startsAt}
+                                </strong>
+                            </p>
+
+                            <p style="
+                                margin-top:8px;
+                                color:#4b5563;
+                            ">
+                                Expiry:
+                                <strong>
+                                    ${expiresAt}
+                                </strong>
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div style="
+                        display:flex;
+                        justify-content:flex-end;
+                        gap:10px;
+                        margin-top:20px;
+                    ">
+
+                        <button
+                            class="btn btn-primary"
+                            onclick="renderProfile()">
+                            Close
+                        </button>
+
+                    </div>
 
                 </div>
 
             </div>
 
-        </div>
-    `;
-}
+        `;
 
+    }
+    catch(error){
+
+        hideLoading();
+
+        console.error(
+            "Active package loading error:",
+            error
+        );
+
+        toast(
+            "Unable to load active package."
+        );
+    }
+}
+   
   function showHelpSupport(){
 
   if(isGuest()){
