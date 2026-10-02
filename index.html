@@ -7799,27 +7799,28 @@ async function showTestResults(){
 
 data.forEach(
     function(result,index){
+const courseName =
+    result.tests?.test_series?.courses?.name ||
+    "Course";
 
-        const courseName =
-            result.tests?.test_series?.courses?.name ||
-            "Course";
-
-        const paperName =
-            result.tests?.test_series?.name ||
-            "Paper";
-            const testName =
+const testName =
     result.tests?.title ||
     "Test";
 
-        const testSeriesName =
+const testSeriesName =
     result.tests?.test_series?.name ||
     "";
 
-const displayTestName =
-    testSeriesName
-        ? `${testSeriesName} – ${testName}`
-        : testName;
+let displayTestName = testName;
 
+if(testSeriesName === "Free Mock Tests"){
+    displayTestName =
+        `${courseName} – Free Mock ${testName}`;
+}
+else{
+    displayTestName =
+        `${courseName} – ${displayTestName}`;
+}
         const score =
             Number(result.score || 0);
 
