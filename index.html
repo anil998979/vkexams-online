@@ -10493,7 +10493,19 @@ localStorage.removeItem("selectedPackage");
 const initialPage =
     location.hash.replace("#","");
 
-if(initialPage === "settings"){
+
+
+    if(initialPage === "settings"){
+
+    showPage(
+        "profile",
+        false
+    );
+
+    openSettings(false);
+
+}
+else if(initialPage === "profile"){
 
     renderProfile();
 
@@ -10502,7 +10514,21 @@ if(initialPage === "settings"){
         false
     );
 
-    openSettings(false);
+}
+else if($(initialPage)){
+
+    showPage(
+        initialPage,
+        false
+    );
+
+}
+else{
+
+    showPage(
+        "home",
+        false
+    );
 
 }
 else if(initialPage === "profile"){
