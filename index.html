@@ -1,5 +1,5 @@
-<!DOCTYPE html> 
-<html lang="en">  
+<!DOCTYPE html>
+<html lang="en">
 
 <head>
    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9830148964688603"
@@ -1251,8 +1251,7 @@ header{
 }
 
 .login-main-btn,
-.google-login-btn,
-.guest-login-btn{
+.google-login-btn{
     width:100%;
 
     margin-top:13px;
@@ -1271,15 +1270,6 @@ header{
     background:#f8fbff;
 
     color:#1d4ed8;
-}
-
-.guest-login-btn{
-    border:
-        1px solid #2563eb;
-
-    background:#fff;
-
-    color:#2563eb;
 }
 
 .login-divider{
@@ -3125,24 +3115,15 @@ class="google-login-btn"
 onclick="googleLogin()">
 
 <span
-style="font-weight:900">
+class="google-icon"
+aria-hidden="true"
+style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;margin-right:8px;vertical-align:middle;font-weight:900;font-size:20px;font-family:Arial,sans-serif;color:#4285F4;line-height:1;">
 
 G
 
 </span>
 
-&nbsp;
-
 Continue with Google
-
-</button>
-
-
-<button
-class="guest-login-btn"
-onclick="continueAsGuest()">
-
-Continue as Guest
 
 </button>
 
@@ -3179,13 +3160,9 @@ Forgot Password?
 
 
 <p class="login-note">
-
-You can browse VK Exams without login.
-
+You can attempt Free Mock Tests without login.
 <br>
-
-Login / Register is required to attempt tests.
-
+Login / Register is required for paid tests, saved results and account features.
 </p>
 
 </div>
@@ -3873,15 +3850,7 @@ function toast(message){
 ===================================================== */
 
 function openFreeMocks(){
-
-    if(!isLoggedIn() && !isGuest()){
-        window.__pendingFreeMocks = true;
-        openLogin();
-        toast("Please login or continue as Guest to access Free Mock Tests.");
-        return;
-    }
-
-    const courses = [
+const courses = [
         ["APPSC","📚"],["Endowment Officer","🛕"],["High Court","⚖️"],
         ["Police","👮"],["DSC","🎓"],["Banks","🏦"]
     ];
@@ -5871,61 +5840,17 @@ razorpay.open();
 /* =====================================================
    LOGIN STATE
 ===================================================== */
-/* =====================================================
-   LOGIN STATE
-===================================================== */
 function isLoggedIn(){
 
-    return (
-        localStorage.getItem("studentEmail") &&
-        localStorage.getItem("guestMode") !== "true"
-    );
+    return !!localStorage.getItem("studentEmail");
 
 }
-
-function isGuest(){
-
-    return (
-        localStorage.getItem(
-            "guestMode"
-        ) === "true"
-    );
-
-}
-
 
 function applyUser(
     email,
     name,
-    provider,
-    isAnonymous = false
+    provider
 ){
-
-    if(isAnonymous){
-
-        localStorage.removeItem(
-            "studentEmail"
-        );
-
-        localStorage.removeItem(
-            "studentName"
-        );
-
-        localStorage.setItem(
-            "authProvider",
-            "anonymous"
-        );
-
-        localStorage.setItem(
-            "guestMode",
-            "true"
-        );
-
-        updateLoginButton();
-
-        return;
-
-    }
 
     localStorage.setItem(
         "studentEmail",
@@ -5944,10 +5869,8 @@ function applyUser(
         provider || "email"
     );
 
-    localStorage.setItem(
-        "guestMode",
-        "false"
-    );
+    /* Remove any legacy Guest state from older sessions. */
+    localStorage.removeItem("guestMode");
 
     updateLoginButton();
 
@@ -5969,16 +5892,13 @@ function clearUser(){
         "authProvider"
     );
 
-    localStorage.setItem(
-        "guestMode",
-        "false"
+    localStorage.removeItem(
+        "guestMode"
     );
-
 
     updateLoginButton();
 
 }
-
 
 function updateLoginButton(){
 
@@ -5988,10 +5908,7 @@ function updateLoginButton(){
     if(!b)
         return;
 
-    if(
-        isLoggedIn() ||
-        isGuest()
-    ){
+    if(isLoggedIn()){
 
         b.textContent =
             "Logout";
@@ -6372,71 +6289,6 @@ async function googleLogin(){
 
 
 /* =====================================================
-   GUEST
-===================================================== */
-
-async function continueAsGuest(){
-
-    if(!supabaseClient){
-
-        alert("Supabase is not connected.");
-        return;
-
-    }
-
-    const {
-        data,
-        error
-    } =
-    await supabaseClient
-        .auth
-        .signInAnonymously();
-
-    if(error){
-
-        alert(
-            "Guest login failed: " +
-            error.message
-        );
-
-        return;
-
-    }
-
-    localStorage.setItem(
-        "guestMode",
-        "true"
-    );
-
-    localStorage.removeItem(
-        "studentEmail"
-    );
-
-    localStorage.removeItem(
-        "studentName"
-    );
-
-    localStorage.setItem(
-        "authProvider",
-        "anonymous"
-    );
-
-    updateLoginButton();
-
-    if(window.__pendingFreeMocks){
-        window.__pendingFreeMocks = false;
-        openFreeMocks();
-    }
-    else{
-        showHome();
-    }
-
-    toast(
-        "Welcome to VK Exams!"
-    );
-
-}
-/* =====================================================
    LOGOUT
 ===================================================== */
 
@@ -6445,7 +6297,7 @@ async function logout(){
     localStorage.removeItem("studentEmail");
     localStorage.removeItem("studentName");
     localStorage.removeItem("authProvider");
-    localStorage.setItem("guestMode","false");
+    localStorage.removeItem("guestMode");
 
     updateLoginButton();
 
@@ -6680,9 +6532,6 @@ async function renderProfile(){
             "studentName"
         ) || "";
 
-    const guest =
-        isGuest();
-
     let coins =
         Number(
             localStorage.getItem(
@@ -6697,10 +6546,7 @@ async function renderProfile(){
        GET ACTIVE PACKAGE FROM SUPABASE
     ========================================= */
 
-    if(
-        !guest &&
-        supabaseClient
-    ){
+    if(supabaseClient){
 
         try{
 
@@ -6813,10 +6659,7 @@ async function renderProfile(){
        LOGIN CHECK
     ========================================= */
 
-    if(
-        !email &&
-        !guest
-    ){
+    if(!email){
 
         $("profileContent")
             .innerHTML = `
@@ -6863,33 +6706,15 @@ async function renderProfile(){
         <div class="profile-summary">
 
             <div class="avatar">
-
-                ${
-                    guest
-                    ? "U"
-                    : getInitials(name,email)
-                }
-
+                ${getInitials(name,email)}
             </div>
 
             <h2>
-
-                ${
-                    guest
-                    ? "User"
-                    : (name || "Student")
-                }
-
+                ${name || "Student"}
             </h2>
 
             <p style="color:#6b7280;margin-top:6px">
-
-                ${
-                    guest
-                    ? "Please Register"
-                    : email
-                }
-
+                ${email}
             </p>
 
         </div>
@@ -6905,44 +6730,12 @@ async function renderProfile(){
 
             <div class="coin-number">
 
-                ${
-                    guest
-                    ? 0
-                    : coins
-                }
+                ${coins}
 
             </div>
 
 
-            ${
-                guest
-                ? `
-
-                    <p
-                    style="
-                    font-size:13px;
-                    color:#6b7280;
-                    margin-top:6px
-                    ">
-
-                        Student Coins are available
-                        only for registered users.
-
-                    </p>
-
-                    <button
-                    class="btn btn-outline"
-                    style="margin-top:10px"
-                    onclick="openRegister()">
-
-                        Please Register to Earn Coins
-
-                    </button>
-
-                `
-                : `
-
-                    <p
+            ` <p
                     style="
                     font-size:13px;
                     color:#6b7280;
@@ -6964,10 +6757,7 @@ async function renderProfile(){
 
                         Watch Ad +0.5
 
-                    </button>
-
-                `
-            }
+                    </button> `
 
         </div>
 
@@ -7060,17 +6850,7 @@ async function renderProfile(){
 }
 
 function editProfile(){
-
-    if(isGuest()){
-
-        toast(
-            "Please Register to edit your profile."
-        );
-
-        return;
-    }
-
-    const currentName =
+const currentName =
         localStorage.getItem("studentName") || "";
 
     const profileContent =
@@ -7719,13 +7499,7 @@ function showPurchaseHistory(){
     `;
 }
 async function showTestResults(){
-
-    if(isGuest()){
-        toast("Please Register to view your test results.");
-        return;
-    }
-
-    if(!supabaseClient){
+if(!supabaseClient){
         toast("Supabase is not connected.");
         return;
     }
@@ -8634,81 +8408,6 @@ async function showActivePackage(){
    
   function showHelpSupport(){
 
-  if(isGuest()){
-
-    const oldPopup =
-        document.getElementById("loginSupportPopup");
-
-    if(oldPopup){
-        oldPopup.remove();
-    }
-
-    const popup = document.createElement("div");
-
-    popup.id = "loginSupportPopup";
-
-    popup.style.cssText = `
-        position:fixed;
-        inset:0;
-        z-index:99999;
-        background:rgba(0,0,0,0.55);
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        padding:20px;
-        box-sizing:border-box;
-    `;
-
-    popup.innerHTML = `
-
-        <div style="
-            width:100%;
-            max-width:380px;
-            background:#ffffff;
-            border-radius:18px;
-            padding:28px;
-            text-align:center;
-            box-shadow:0 20px 60px rgba(0,0,0,0.25);
-        ">
-
-            <div style="
-                font-size:46px;
-                margin-bottom:10px;
-            ">
-                🔐
-            </div>
-
-            <h2 style="
-                margin:0;
-                color:#111827;
-            ">
-                Login Required
-            </h2>
-
-            <p style="
-                margin-top:10px;
-                color:#6b7280;
-                line-height:1.6;
-            ">
-                Please Login or Register to contact support.
-            </p>
-
-            <button
-                class="btn btn-primary"
-                style="margin-top:18px;"
-                onclick="document.getElementById('loginSupportPopup').remove()">
-                OK
-            </button>
-
-        </div>
-
-    `;
-
-    document.body.appendChild(popup);
-
-    return;
-}
-
     const profileContent =
         document.getElementById("profileContent");
 
@@ -9062,14 +8761,7 @@ async function showActivePackage(){
 ===================================================== */
 
 function earnCoins(){
-
-    /* Guest users are NOT eligible for Student Coins. */
-    if(isGuest()){
-        toast("Student Coins are available only for registered users. Please Register.");
-        return;
-    }
-
-    if(!isLoggedIn()){
+if(!isLoggedIn()){
         openLogin();
         toast("Please login/register to earn Student Coins.");
         return;
@@ -9131,17 +8823,15 @@ function earnCoins(){
 
 
 function completeCoinAd(){
-
-    /* Never award coins to Guest/anonymous users. */
-    if(!isLoggedIn() || isGuest()){
+    if(!isLoggedIn()){
         clearInterval(coinAdTimer);
         coinAdReady = false;
         closeModal("coinModal");
-        toast("Student Coins are available only for registered users.");
+        openLogin();
+        toast("Please login/register to earn Student Coins.");
         return;
     }
-
-    if(!coinAdReady){
+if(!coinAdReady){
         toast("Please complete the full advertisement first.");
         return;
     }
@@ -9379,19 +9069,7 @@ async function startFreeMock(testNumber){
 ){
     return;
 }
-
-    if(!isLoggedIn() && !isGuest()){
-
-        openLogin();
-
-        toast(
-            "Please login or continue as Guest to attempt free mocks."
-        );
-
-        return;
-    }
-
-    if(!supabaseClient){
+if(!supabaseClient){
 
         toast("Supabase is not connected.");
 
@@ -10499,6 +10177,9 @@ function reattempt(){
 
 async function initializeAuth(){
 
+    /* Remove legacy Guest state from previous versions. */
+    localStorage.removeItem("guestMode");
+
     if(!supabaseClient){
 
         updateLoginButton();
@@ -10516,12 +10197,13 @@ async function initializeAuth(){
 
         if(user.is_anonymous){
 
-            applyUser(
-                "",
-                "User",
-                "anonymous",
-                true
-            );
+            /* Permanently disable the old Guest flow in this website. */
+            try{
+                await supabaseClient.auth.signOut();
+            }
+            catch(e){}
+
+            clearUser();
 
         }
         else{
@@ -10545,7 +10227,7 @@ async function initializeAuth(){
 
     supabaseClient.auth.onAuthStateChange(
 
-        function(event, session){
+        async function(event, session){
 
             if(session){
 
@@ -10554,12 +10236,12 @@ async function initializeAuth(){
 
                 if(user.is_anonymous){
 
-                    applyUser(
-                        "",
-                        "User",
-                        "anonymous",
-                        true
-                    );
+                    try{
+                        await supabaseClient.auth.signOut();
+                    }
+                    catch(e){}
+
+                    clearUser();
 
                 }
                 else{
@@ -10586,7 +10268,6 @@ async function initializeAuth(){
     );
 
 }
-
 
 /* =====================================================
    BROWSER BACK BUTTON
