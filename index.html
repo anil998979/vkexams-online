@@ -10487,13 +10487,10 @@ localStorage.removeItem("selectedPackage");
 /* =====================================================
    INITIALIZATION
 ===================================================== */
-
 const initialPage =
     location.hash.replace("#","");
 
-
-
-    if(initialPage === "settings"){
+if(initialPage === "settings"){
 
     showPage(
         "profile",
@@ -10528,33 +10525,8 @@ else{
         false
     );
 
-}
-else if(initialPage === "profile"){
+               }
 
-    renderProfile();
-
-    showPage(
-        "profile",
-        false
-    );
-
-}
-else if($(initialPage)){
-
-    showPage(
-        initialPage,
-        false
-    );
-
-}
-else{
-
-    showPage(
-        "home",
-        false
-    );
-
-}
 
 /* =====================================================
    BASIC CONTEXT MENU DETERRENT
