@@ -10457,7 +10457,27 @@ window.addEventListener(
 
         const page =
             location.hash.replace("#","");
+       
+if(
+    page === "examPage" &&
+    testSubmitted &&
+    currentCourse
+){
 
+    history.replaceState(
+        {
+            vkPage:"freeMocks"
+        },
+        "",
+        "#freeMocks"
+    );
+
+    openFreeMockTests(
+        currentCourse
+    );
+
+    return;
+}
         if(page === "settings"){
 
               showPage(
