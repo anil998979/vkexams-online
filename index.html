@@ -6983,138 +6983,15 @@ async function renderProfile(){
 
         </div>
 
+<button
+    class="profile-menu-btn"
+    onclick="showActivePackage()">
 
-        <!-- ACTIVE PACKAGE -->
+    🎫 Active Package
 
-        ${
-            activePackage
+    <span>›</span>
 
-            ? `
-
-                <div class="profile-info-card">
-
-                    <strong>
-                        Active Package
-                    </strong>
-
-                    <p
-                    style="
-                    margin-top:8px;
-                    font-weight:700;
-                    color:#111827;
-                    ">
-
-                        ${activePackage.packageName}
-
-                    </p>
-
-
-                    <p
-                    style="
-                    margin-top:5px;
-                    color:#6b7280;
-                    ">
-
-                        Course:
-                        ${activePackage.courseName}
-
-                    </p>
-
-
-                    <p
-                    style="
-                    margin-top:5px;
-                    color:#6b7280;
-                    ">
-
-                        Price:
-                        ₹${activePackage.price}
-
-                    </p>
-
-
-                    <p
-                    style="
-                    margin-top:5px;
-                    color:#6b7280;
-                    ">
-
-                        Start:
-                        ${
-                            activePackage.startsAt
-                            ? new Date(
-                                activePackage.startsAt
-                            ).toLocaleString()
-                            : "-"
-                        }
-
-                    </p>
-
-
-                    <p
-                    style="
-                    margin-top:5px;
-                    color:#6b7280;
-                    ">
-
-                        Expiry:
-                        ${
-                            activePackage.expiresAt
-                            ? new Date(
-                                activePackage.expiresAt
-                            ).toLocaleString()
-                            : "-"
-                        }
-
-                    </p>
-
-
-                    <p
-                    style="
-                    margin-top:8px;
-                    color:#15803d;
-                    font-weight:700;
-                    ">
-
-                        ✓ Package Active
-
-                    </p>
-
-                </div>
-
-            `
-
-            : `
-
-                <div class="profile-info-card">
-
-                    <strong>
-                        Active Package
-                    </strong>
-
-                    <p
-                    style="
-                    margin-top:7px;
-                    color:#6b7280
-                    ">
-
-                        No Active Package
-
-                    </p>
-
-                    <button
-                    class="btn btn-blue"
-                    style="margin-top:10px"
-                    onclick="openStore()">
-
-                        View Packages
-
-                    </button>
-
-                </div>
-
-            `
-        }
+</button>
 
 
         <!-- PROFILE MENU -->
