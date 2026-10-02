@@ -7631,18 +7631,25 @@ async function showTestResults(){
         error
     } = await supabaseClient
         .from("test_results")
-        .select(`
-            score,
-            total_marks,
-            percentage,
-            correct_answers,
-            wrong_answers,
-            unanswered,
-            completed_at,
-            tests (
-                title
+       .select(`
+    score,
+    total_marks,
+    percentage,
+    correct_answers,
+    wrong_answers,
+    unanswered,
+    completed_at,
+    tests (
+        title,
+        test_number,
+        test_series (
+            name,
+            courses (
+                name
             )
-        `)
+        )
+    )
+`)
         .eq("user_id", userId)
         .order(
             "completed_at",
@@ -7792,15 +7799,25 @@ async function showTestResults(){
 
     `;
 
-    data.forEach(
-        function(result,index){
+  `;
 
-            const testName =
-                result.tests?.title ||
-                "Test";
+data.forEach(
+    function(result,index){
 
-            const score =
-                Number(result.score || 0);
+        const courseName =
+            result.tests?.test_series?.courses?.name ||
+            "Course";
+
+        const paperName =
+            result.tests?.test_series?.name ||
+            "Paper";
+
+        const testName =
+            result.tests?.title ||
+            "Test";
+
+        const score =
+            Number(result.score || 0);
 
             const total =
                 Number(result.total_marks || 0);
