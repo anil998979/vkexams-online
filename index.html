@@ -7503,7 +7503,30 @@ function openSettings(addHistory = true){
 
 }
 
-function toggleNotifications(){
+
+        function toggleNotifications(){
+
+    const current =
+        localStorage.getItem("vkNotifications") === "true";
+
+    /* TURN OFF */
+    if(current){
+
+        localStorage.setItem(
+            "vkNotifications",
+            "false"
+        );
+
+        updateNotificationStatus();
+
+        toast(
+            "Notifications disabled."
+        );
+
+        return;
+    }
+
+    /* TURN ON */
 
     if(!("Notification" in window)){
 
@@ -7514,6 +7537,7 @@ function toggleNotifications(){
         return;
     }
 
+    /* Browser permission already granted */
     if(Notification.permission === "granted"){
 
         localStorage.setItem(
@@ -7524,23 +7548,23 @@ function toggleNotifications(){
         updateNotificationStatus();
 
         toast(
-            "Notifications are already enabled."
+            "Notifications enabled."
         );
 
         return;
     }
 
+    /* Browser permission denied */
     if(Notification.permission === "denied"){
 
         toast(
             "Notifications are blocked in browser settings."
         );
 
-        updateNotificationStatus();
-
         return;
     }
 
+    /* Ask browser permission */
     Notification.requestPermission()
         .then(function(permission){
 
@@ -7575,7 +7599,7 @@ function toggleNotifications(){
 
         });
 
-                   }
+                   }   
 
    function updateNotificationStatus(){
 
@@ -7586,10 +7610,12 @@ function toggleNotifications(){
         return;
     }
 
-    if(
-        "Notification" in window &&
-        Notification.permission === "granted"
-    ){
+    const enabled =
+        localStorage.getItem(
+            "vkNotifications"
+        ) === "true";
+
+    if(enabled){
 
         status.textContent = "ON";
 
@@ -7599,16 +7625,18 @@ function toggleNotifications(){
         status.style.color =
             "#15803d";
 
-        return;
     }
+    else{
 
-    status.textContent = "OFF";
+        status.textContent = "OFF";
 
-    status.style.background =
-        "#f3f4f6";
+        status.style.background =
+            "#f3f4f6";
 
-    status.style.color =
-        "#6b7280";
+        status.style.color =
+            "#6b7280";
+
+    }
 
    }
 
