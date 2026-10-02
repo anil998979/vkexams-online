@@ -10413,38 +10413,51 @@ async function initializeAuth(){
 ===================================================== */
 
 window.addEventListener(
-
     "popstate",
-
     function(){
 
         const page =
-            location.hash
-            .replace(
-                "#",
-                ""
+            location.hash.replace("#","");
+
+        if(page === "settings"){
+
+            renderProfile();
+
+            showPage(
+                "profile",
+                false
             );
 
+            openSettings(false);
 
-        if(
-            $(page)
-        ){
+            return;
+        }
+
+        if(page === "profile"){
+
+            renderProfile();
+
+            showPage(
+                "profile",
+                false
+            );
+
+            return;
+        }
+
+        if($(page)){
 
             showPage(
                 page,
                 false
             );
 
+            return;
         }
 
-        else{
-
-            showHome();
-
-        }
+        showHome();
 
     }
-
 );
 
 
@@ -10455,22 +10468,47 @@ localStorage.removeItem("selectedPackage");
    INITIALIZATION
 ===================================================== */
 
-updateLoginButton();
+const initialPage =
+    location.hash.replace("#","");
 
-initializeAuth();
+if(initialPage === "settings"){
 
+    renderProfile();
 
-/*
-   IMPORTANT:
-   Website opens HOME directly.
-   Login is required only when attempting a test.
-*/
+    showPage(
+        "profile",
+        false
+    );
 
-showPage(
-    "home",
-    false
-);
+    openSettings(false);
 
+}
+else if(initialPage === "profile"){
+
+    renderProfile();
+
+    showPage(
+        "profile",
+        false
+    );
+
+}
+else if($(initialPage)){
+
+    showPage(
+        initialPage,
+        false
+    );
+
+}
+else{
+
+    showPage(
+        "home",
+        false
+    );
+
+}
 
 /* =====================================================
    BASIC CONTEXT MENU DETERRENT
