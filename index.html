@@ -7814,15 +7814,15 @@ const testSeriesName =
     "";
 
 let displayTestName = testName;
-
 if(testSeriesName === "Free Mock Tests"){
     displayTestName =
-        `${courseName} – Free Mock ${testName}`;
+        `${courseName} – ${testName}`;
 }
 else{
     displayTestName =
-        `${courseName} – ${displayTestName}`;
+        `${courseName} – ${testName}`;
 }
+
         const score =
             Number(result.score || 0);
 
