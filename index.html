@@ -1272,6 +1272,7 @@ header{
     color:#1d4ed8;
 }
 
+
 .login-divider{
     display:flex;
 
@@ -3126,8 +3127,6 @@ G
 Continue with Google
 
 </button>
-
-
 <div class="login-divider">
 
 <span>
@@ -3160,9 +3159,13 @@ Forgot Password?
 
 
 <p class="login-note">
+
 You can attempt Free Mock Tests without login.
+
 <br>
+
 Login / Register is required for paid tests, saved results and account features.
+
 </p>
 
 </div>
@@ -5841,93 +5844,34 @@ razorpay.open();
    LOGIN STATE
 ===================================================== */
 function isLoggedIn(){
-
     return !!localStorage.getItem("studentEmail");
-
 }
 
-function applyUser(
-    email,
-    name,
-    provider
-){
-
-    localStorage.setItem(
-        "studentEmail",
-        email || ""
-    );
-
-    localStorage.setItem(
-        "studentName",
-        name ||
-        email?.split("@")[0] ||
-        "Student"
-    );
-
-    localStorage.setItem(
-        "authProvider",
-        provider || "email"
-    );
-
-    /* Remove any legacy Guest state from older sessions. */
-    localStorage.removeItem("guestMode");
-
+function applyUser(email,name,provider){
+    localStorage.setItem("studentEmail", email || "");
+    localStorage.setItem("studentName", name || email?.split("@")[0] || "Student");
+    localStorage.setItem("authProvider", provider || "email");
     updateLoginButton();
-
 }
 
 function clearUser(){
-
     localStorage.removeItem("selectedPackage");
-
-    localStorage.removeItem(
-        "studentEmail"
-    );
-
-    localStorage.removeItem(
-        "studentName"
-    );
-
-    localStorage.removeItem(
-        "authProvider"
-    );
-
-    localStorage.removeItem(
-        "guestMode"
-    );
-
+    localStorage.removeItem("studentEmail");
+    localStorage.removeItem("studentName");
+    localStorage.removeItem("authProvider");
     updateLoginButton();
-
 }
 
 function updateLoginButton(){
-
-    const b =
-        $("loginNav");
-
-    if(!b)
-        return;
-
+    const b=$("loginNav");
+    if(!b) return;
     if(isLoggedIn()){
-
-        b.textContent =
-            "Logout";
-
-        b.onclick =
-            logout;
-
+        b.textContent="Logout";
+        b.onclick=logout;
+    }else{
+        b.textContent="Login";
+        b.onclick=openLogin;
     }
-
-    else{
-
-        b.textContent =
-            "Login";
-
-        b.onclick =
-            openLogin;
-
-    }
-
 }
 
 /* =====================================================
@@ -6284,37 +6228,6 @@ async function googleLogin(){
         );
 
     }
-
-}
-
-
-/* =====================================================
-   LOGOUT
-===================================================== */
-
-async function logout(){
-
-    localStorage.removeItem("studentEmail");
-    localStorage.removeItem("studentName");
-    localStorage.removeItem("authProvider");
-    localStorage.removeItem("guestMode");
-
-    updateLoginButton();
-
-    if(supabaseClient){
-
-        try{
-            await supabaseClient.auth.signOut();
-        }
-        catch(e){}
-
-    }
-
-    showHome();
-
-    toast(
-        "Logged out successfully."
-    );
 
 }
 
@@ -6706,15 +6619,21 @@ async function renderProfile(){
         <div class="profile-summary">
 
             <div class="avatar">
+
                 ${getInitials(name,email)}
+
             </div>
 
             <h2>
+
                 ${name || "Student"}
+
             </h2>
 
             <p style="color:#6b7280;margin-top:6px">
+
                 ${email}
+
             </p>
 
         </div>
@@ -6735,7 +6654,7 @@ async function renderProfile(){
             </div>
 
 
-            ` <p
+            <p
                     style="
                     font-size:13px;
                     color:#6b7280;
@@ -6757,7 +6676,7 @@ async function renderProfile(){
 
                         Watch Ad +0.5
 
-                    </button> `
+                    </button>
 
         </div>
 
@@ -8408,11 +8327,6 @@ async function showActivePackage(){
    
   function showHelpSupport(){
 
-    const profileContent =
-        document.getElementById("profileContent");
-
-    if(!profileContent) return;
-
     const name =
         localStorage.getItem("studentName") || "";
 
@@ -8761,7 +8675,7 @@ async function showActivePackage(){
 ===================================================== */
 
 function earnCoins(){
-if(!isLoggedIn()){
+    if(!isLoggedIn()){
         openLogin();
         toast("Please login/register to earn Student Coins.");
         return;
@@ -8823,15 +8737,16 @@ if(!isLoggedIn()){
 
 
 function completeCoinAd(){
-    if(!isLoggedIn()){
+
+        if(!isLoggedIn()){
         clearInterval(coinAdTimer);
         coinAdReady = false;
         closeModal("coinModal");
-        openLogin();
-        toast("Please login/register to earn Student Coins.");
+        toast("Please login/register to use Student Coins.");
         return;
     }
-if(!coinAdReady){
+
+    if(!coinAdReady){
         toast("Please complete the full advertisement first.");
         return;
     }
@@ -10177,96 +10092,48 @@ function reattempt(){
 
 async function initializeAuth(){
 
-    /* Remove legacy Guest state from previous versions. */
-    localStorage.removeItem("guestMode");
 
     if(!supabaseClient){
-
         updateLoginButton();
         return;
-
     }
 
-    const { data } =
-        await supabaseClient.auth.getSession();
+    const { data } = await supabaseClient.auth.getSession();
 
     if(data.session){
-
-        const user =
-            data.session.user;
+        const user=data.session.user;
 
         if(user.is_anonymous){
-
-            /* Permanently disable the old Guest flow in this website. */
-            try{
-                await supabaseClient.auth.signOut();
-            }
-            catch(e){}
-
+            try{ await supabaseClient.auth.signOut(); }catch(e){}
             clearUser();
-
-        }
-        else{
-
+        }else{
             applyUser(
                 user.email,
-                user.user_metadata?.full_name ||
-                user.email?.split("@")[0] ||
-                "Student",
+                user.user_metadata?.full_name || user.email?.split("@")[0] || "Student",
                 "supabase"
             );
-
         }
-
-    }
-    else{
-
+    }else{
         updateLoginButton();
-
     }
 
-    supabaseClient.auth.onAuthStateChange(
-
-        async function(event, session){
-
-            if(session){
-
-                const user =
-                    session.user;
-
-                if(user.is_anonymous){
-
-                    try{
-                        await supabaseClient.auth.signOut();
-                    }
-                    catch(e){}
-
-                    clearUser();
-
-                }
-                else{
-
-                    applyUser(
-                        user.email,
-                        user.user_metadata?.full_name ||
-                        user.email?.split("@")[0] ||
-                        "Student",
-                        "supabase"
-                    );
-
-                }
-
+    supabaseClient.auth.onAuthStateChange(function(event,session){
+        if(session){
+            const user=session.user;
+            if(user.is_anonymous){
+                try{ supabaseClient.auth.signOut(); }catch(e){}
+                clearUser();
+            }else{
+                applyUser(
+                    user.email,
+                    user.user_metadata?.full_name || user.email?.split("@")[0] || "Student",
+                    "supabase"
+                );
             }
-            else{
-
-                updateLoginButton();
-
-            }
-
+        }else{
+            updateLoginButton();
         }
-
-    );
-
+    });
 }
 
 /* =====================================================
