@@ -5860,60 +5860,6 @@ if(orderError || !orderData?.success){
     }
 };
 
-    if(error || !data?.success){
-
-        console.error(
-            "Payment verification failed:",
-            error || data
-        );
-
-        toast(
-            data?.error ||
-            "Payment verification failed."
-        );
-
-        return;
-
-    }
-
-    toast(
-        "Payment successful! Package activated."
-    );
-
-    alert(
-        "Payment successful!\n\n" +
-        data.package_name +
-        " activated successfully."
-    );
-
-},
-
-    prefill: {
-
-        email:
-            localStorage.getItem("userEmail") || ""
-
-    },
-
-    theme: {
-
-        color: "#2563eb"
-
-    },
-
-    modal: {
-
-        ondismiss: function(){
-
-            toast(
-                "Payment cancelled."
-            );
-
-        }
-
-    }
-
-};
 const razorpay = new Razorpay(options);
 
 razorpay.open();
