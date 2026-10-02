@@ -7226,58 +7226,72 @@ function openSettings(addHistory = true){
 
         <!-- NOTIFICATIONS -->
 
-        <div style="
-            background:#fff;
-            border:1px solid #e5e7eb;
-            border-radius:14px;
-            padding:18px;
-            margin-bottom:12px;
-            box-shadow:0 4px 14px rgba(0,0,0,.05);
-        ">
+       
 
-            <div style="
-                display:flex;
-                justify-content:space-between;
-                align-items:center;
-                gap:12px;
-            ">
+<div
+    onclick="toggleNotifications()"
+    style="
+        background:#fff;
+        border:1px solid #e5e7eb;
+        border-radius:14px;
+        padding:18px;
+        margin-bottom:12px;
+        box-shadow:0 4px 14px rgba(0,0,0,.05);
+        cursor:pointer;
+    "
+>
 
-                <div>
+    <div
+        style="
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            gap:12px;
+        "
+    >
 
-                    <h3 style="
-                        margin:0;
-                        font-size:16px;
-                        color:#111827;
-                    ">
-                        🔔 Notifications
-                    </h3>
+        <div>
 
-                    <p style="
-                        margin-top:6px;
-                        color:#6b7280;
-                        font-size:13px;
-                    ">
-                        Receive important exam and account notifications.
-                    </p>
+            <h3
+                style="
+                    margin:0;
+                    font-size:16px;
+                    color:#111827;
+                "
+            >
+                🔔 Notifications
+            </h3>
 
-                </div>
-
-                <span style="
-                    background:#dcfce7;
-                    color:#15803d;
-                    padding:7px 12px;
-                    border-radius:20px;
-                    font-size:12px;
-                    font-weight:800;
-                    white-space:nowrap;
-                ">
-                    ON
-                </span>
-
-            </div>
+            <p
+                style="
+                    margin-top:6px;
+                    color:#6b7280;
+                    font-size:13px;
+                "
+            >
+                Receive important exam and account notifications.
+            </p>
 
         </div>
 
+        <span
+            id="notificationStatus"
+            style="
+                background:#f3f4f6;
+                color:#6b7280;
+                padding:7px 12px;
+                border-radius:20px;
+                font-size:12px;
+                font-weight:800;
+                white-space:nowrap;
+            "
+        >
+            OFF
+        </span>
+
+    </div>
+
+</div>
 
         <!-- DARK MODE -->
 
@@ -7483,9 +7497,122 @@ function openSettings(addHistory = true){
 
     `;
 
+
+    updateNotificationStatus();
+
+
 }
 
+function toggleNotifications(){
 
+    if(!("Notification" in window)){
+
+        toast(
+            "Notifications are not supported on this browser."
+        );
+
+        return;
+    }
+
+    if(Notification.permission === "granted"){
+
+        localStorage.setItem(
+            "vkNotifications",
+            "true"
+        );
+
+        updateNotificationStatus();
+
+        toast(
+            "Notifications are already enabled."
+        );
+
+        return;
+    }
+
+    if(Notification.permission === "denied"){
+
+        toast(
+            "Notifications are blocked in browser settings."
+        );
+
+        updateNotificationStatus();
+
+        return;
+    }
+
+    Notification.requestPermission()
+        .then(function(permission){
+
+            if(permission === "granted"){
+
+                localStorage.setItem(
+                    "vkNotifications",
+                    "true"
+                );
+
+                updateNotificationStatus();
+
+                toast(
+                    "Notifications enabled successfully."
+                );
+
+            }
+            else{
+
+                localStorage.setItem(
+                    "vkNotifications",
+                    "false"
+                );
+
+                updateNotificationStatus();
+
+                toast(
+                    "Notifications were not enabled."
+                );
+
+            }
+
+        });
+
+                   }
+
+   function updateNotificationStatus(){
+
+    const status =
+        $("notificationStatus");
+
+    if(!status){
+        return;
+    }
+
+    if(
+        "Notification" in window &&
+        Notification.permission === "granted"
+    ){
+
+        status.textContent = "ON";
+
+        status.style.background =
+            "#dcfce7";
+
+        status.style.color =
+            "#15803d";
+
+        return;
+    }
+
+    status.textContent = "OFF";
+
+    status.style.background =
+        "#f3f4f6";
+
+    status.style.color =
+        "#6b7280";
+
+   }
+
+   
 function showPurchaseHistory(){
 
     const profileContent =
