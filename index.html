@@ -5169,7 +5169,8 @@ await startPaidTest(
 ===================================================== */
 
 async function startPaidTest(testNumber){
-currentTestNumber = testNumber;
+    testSubmitted = false;
+   currentTestNumber = testNumber;
     if(
         !supabaseClient
     ){
