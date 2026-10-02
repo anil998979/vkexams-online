@@ -7167,8 +7167,19 @@ function editProfile(){
     `;
 }
 
-function openSettings(){
+function openSettings(addHistory = true){
 
+    if(addHistory){
+
+        history.pushState(
+            {
+                vkPage: "settings"
+            },
+            "",
+            "#settings"
+        );
+
+    }
     $("profileContent").innerHTML = `
 
         <div style="
