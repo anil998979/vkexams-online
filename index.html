@@ -10327,16 +10327,28 @@ function reattempt(){
 }
    function backToTestSeriesFromResult(){
 
+    /* Free Mock Test result */
+    if(
+        currentFreeMockTestId &&
+        currentFreeMockNumber &&
+        currentCourse
+    ){
+
+        openFreeMockTests(currentCourse);
+
+        return;
+    }
+
+    /* Paid Test result */
     if(currentCourse){
 
         openTestSeries(false);
 
         return;
-
     }
 
     showHome();
-}
+           }
 /* =====================================================
    SUPABASE AUTH
 ===================================================== */
