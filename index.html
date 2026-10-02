@@ -7639,14 +7639,15 @@ async function showTestResults(){
     wrong_answers,
     unanswered,
     completed_at,
-    tests (
+       tests (
     title,
     test_series (
-        name
+        name,
+        courses (
+            name
+        )
     )
 )
-`)
-       
         .eq("user_id", userId)
         .order(
             "completed_at",
