@@ -8119,10 +8119,12 @@ async function showActivePackage(){
 
     if(!profileContent) return;
 
+
     showLoading(
-        "Loading package...",
+        "Loading packages...",
         "Please wait..."
     );
+
 
     try{
 
@@ -8136,6 +8138,7 @@ async function showActivePackage(){
         } =
         await supabaseClient.auth.getUser();
 
+
         if(
             userError ||
             !userData?.user?.id
@@ -8144,18 +8147,19 @@ async function showActivePackage(){
             hideLoading();
 
             toast(
-                "Please login to view your package."
+                "Please login to view your packages."
             );
 
             return;
         }
+
 
         const userId =
             userData.user.id;
 
 
         /* ================================
-           FIND ACTIVE PACKAGE
+           GET ALL ACTIVE PACKAGES
         ================================= */
 
         const {
@@ -8196,10 +8200,10 @@ async function showActivePackage(){
             .order(
                 "expires_at",
                 {
-                    ascending:false
+                    ascending:true
                 }
-            )
-            .limit(1);
+            );
+
 
         hideLoading();
 
@@ -8216,10 +8220,55 @@ async function showActivePackage(){
             );
 
             toast(
-                "Unable to load active package."
+                "Unable to load active packages."
             );
 
             return;
+        }
+
+
+        /* ================================
+           DATE FORMAT
+           DD/MM/YYYY
+        ================================= */
+
+        function formatDateDDMMYYYY(dateValue){
+
+            if(!dateValue){
+                return "-";
+            }
+
+            const date =
+                new Date(dateValue);
+
+            if(
+                isNaN(
+                    date.getTime()
+                )
+            ){
+                return "-";
+            }
+
+            const day =
+                String(
+                    date.getDate()
+                ).padStart(2,"0");
+
+            const month =
+                String(
+                    date.getMonth() + 1
+                ).padStart(2,"0");
+
+            const year =
+                date.getFullYear();
+
+            return (
+                day +
+                "/" +
+                month +
+                "/" +
+                year
+            );
         }
 
 
@@ -8255,7 +8304,7 @@ async function showActivePackage(){
                          ">
 
                         <h2 style="margin-bottom:20px;">
-                            📦 Active Package
+                            📦 Active Packages
                         </h2>
 
                         <div style="
@@ -8288,7 +8337,6 @@ async function showActivePackage(){
                         <div style="
                             display:flex;
                             justify-content:flex-end;
-                            gap:10px;
                             margin-top:20px;
                         ">
 
@@ -8311,44 +8359,140 @@ async function showActivePackage(){
 
 
         /* ================================
-           ACTIVE PACKAGE FOUND
+           BUILD ALL ACTIVE PACKAGE CARDS
         ================================= */
 
-        const p = data[0];
+        let packageCards = "";
 
-        const packageName =
-            p.packages?.name ||
-            "Package";
 
-        const price =
-            p.packages?.price ||
-            p.amount;
+        data.forEach(function(p){
 
-        const duration =
-            p.packages?.duration_days ||
-            "";
+            const packageName =
+                p.packages?.name ||
+                "Package";
 
-        const courseName =
-            p.courses?.name ||
-            "Course";
+            const price =
+                p.packages?.price ||
+                p.amount;
 
-        const startsAt =
-            p.starts_at
-            ? new Date(
-                p.starts_at
-            ).toLocaleString()
-            : "-";
+            const duration =
+                p.packages?.duration_days ||
+                "";
 
-        const expiresAt =
-            p.expires_at
-            ? new Date(
-                p.expires_at
-            ).toLocaleString()
-            : "-";
+            const courseName =
+                p.courses?.name ||
+                "Course";
+
+            const startsAt =
+                formatDateDDMMYYYY(
+                    p.starts_at
+                );
+
+            const expiresAt =
+                formatDateDDMMYYYY(
+                    p.expires_at
+                );
+
+
+            packageCards += `
+
+                <div style="
+                    background:#f8fafc;
+                    border:1px solid #e5e7eb;
+                    border-radius:14px;
+                    padding:18px;
+                    margin-bottom:14px;
+                    text-align:left;
+                ">
+
+                    <div style="
+                        display:flex;
+                        justify-content:space-between;
+                        align-items:center;
+                        gap:10px;
+                        margin-bottom:12px;
+                    ">
+
+                        <strong style="
+                            font-size:18px;
+                            color:#111827;
+                        ">
+                            ${packageName}
+                        </strong>
+
+                        <span style="
+                            color:#15803d;
+                            font-weight:800;
+                            font-size:13px;
+                        ">
+                            ✓ Active
+                        </span>
+
+                    </div>
+
+
+                    <p style="
+                        margin-top:7px;
+                        color:#4b5563;
+                    ">
+                        Course:
+                        <strong>
+                            ${courseName}
+                        </strong>
+                    </p>
+
+
+                    <p style="
+                        margin-top:7px;
+                        color:#4b5563;
+                    ">
+                        Price:
+                        <strong>
+                            ₹${price}
+                        </strong>
+                    </p>
+
+
+                    <p style="
+                        margin-top:7px;
+                        color:#4b5563;
+                    ">
+                        Duration:
+                        <strong>
+                            ${duration} Days
+                        </strong>
+                    </p>
+
+
+                    <p style="
+                        margin-top:7px;
+                        color:#4b5563;
+                    ">
+                        Start:
+                        <strong>
+                            ${startsAt}
+                        </strong>
+                    </p>
+
+
+                    <p style="
+                        margin-top:7px;
+                        color:#4b5563;
+                    ">
+                        Expiry:
+                        <strong>
+                            ${expiresAt}
+                        </strong>
+                    </p>
+
+                </div>
+
+            `;
+        });
 
 
         /* ================================
-           SHOW ACTIVE PACKAGE
+           SHOW ALL ACTIVE PACKAGES
         ================================= */
 
         profileContent.innerHTML = `
@@ -8367,111 +8511,49 @@ async function showActivePackage(){
                 <div class="modal-box"
                      style="
                         width:90%;
-                        max-width:500px;
+                        max-width:550px;
+                        max-height:85vh;
+                        overflow-y:auto;
                         background:#fff;
                         border-radius:16px;
                         padding:28px;
                      ">
 
-                    <h2 style="margin-bottom:20px;">
-                        📦 Active Package
+                    <h2 style="
+                        margin-bottom:20px;
+                        text-align:center;
+                    ">
+                        📦 Active Packages
                     </h2>
 
 
                     <div style="
                         text-align:center;
-                        padding:20px 10px;
+                        margin-bottom:18px;
                     ">
 
                         <div style="
-                            font-size:52px;
-                            margin-bottom:12px;
+                            font-size:48px;
+                            margin-bottom:8px;
                         ">
                             📦
                         </div>
 
                         <h3 style="
                             color:#15803d;
-                            margin-bottom:14px;
                         ">
-                            ✓ Package Active
+                            ✓ All Active Packages
                         </h3>
 
-
-                        <div style="
-                            background:#f8fafc;
-                            border-radius:12px;
-                            padding:18px;
-                            text-align:left;
-                        ">
-
-                            <p style="
-                                font-weight:800;
-                                font-size:18px;
-                                color:#111827;
-                            ">
-                                ${packageName}
-                            </p>
-
-                            <p style="
-                                margin-top:10px;
-                                color:#4b5563;
-                            ">
-                                Course:
-                                <strong>
-                                    ${courseName}
-                                </strong>
-                            </p>
-
-                            <p style="
-                                margin-top:8px;
-                                color:#4b5563;
-                            ">
-                                Price:
-                                <strong>
-                                    ₹${price}
-                                </strong>
-                            </p>
-
-                            <p style="
-                                margin-top:8px;
-                                color:#4b5563;
-                            ">
-                                Duration:
-                                <strong>
-                                    ${duration} Days
-                                </strong>
-                            </p>
-
-                            <p style="
-                                margin-top:8px;
-                                color:#4b5563;
-                            ">
-                                Start:
-                                <strong>
-                                    ${startsAt}
-                                </strong>
-                            </p>
-
-                            <p style="
-                                margin-top:8px;
-                                color:#4b5563;
-                            ">
-                                Expiry:
-                                <strong>
-                                    ${expiresAt}
-                                </strong>
-                            </p>
-
-                        </div>
-
                     </div>
+
+
+                    ${packageCards}
 
 
                     <div style="
                         display:flex;
                         justify-content:flex-end;
-                        gap:10px;
                         margin-top:20px;
                     ">
 
@@ -8500,7 +8582,7 @@ async function showActivePackage(){
         );
 
         toast(
-            "Unable to load active package."
+            "Unable to load active packages."
         );
     }
 }
