@@ -5878,21 +5878,15 @@ razorpay.open();
 function isLoggedIn(){
 
     return (
-
-        localStorage.getItem(
-            "studentEmail"
-        )
-
-        &&
-
-        localStorage.getItem(
-            "guestMode"
-        ) !== "true"
-
+        localStorage.getItem("studentEmail") &&
+        localStorage.getItem("guestMode") !== "true"
+    ) || (
+        supabaseClient &&
+        supabaseClient.auth &&
+        supabaseClient.auth.getSession
     );
 
 }
-
 
 function isGuest(){
 
