@@ -5775,7 +5775,7 @@ if(orderError || !orderData?.success){
 
     return;
 }
-   const options = {
+  const options = {
 
     key: orderData.key_id,
 
@@ -5790,35 +5790,75 @@ if(orderError || !orderData?.success){
 
     order_id: orderData.order_id,
 
-callback_url: "https://vkexams.online/",
+    handler: async function(response){
 
-handler: async function(response){
-
-    console.log(
-        "Razorpay payment response:",
-        response
-    );
-
-    toast(
-        "Payment received. Verifying payment..."
-    );
-
-    const { data, error } =
-        await supabaseClient.functions.invoke(
-            "verify-razorpay-payment",
-            {
-                body: {
-                    razorpay_payment_id:
-                        response.razorpay_payment_id,
-
-                    razorpay_order_id:
-                        response.razorpay_order_id,
-
-                    razorpay_signature:
-                        response.razorpay_signature
-                }
-            }
+        console.log(
+            "Razorpay payment response:",
+            response
         );
+
+        toast(
+            "Payment received. Verifying payment..."
+        );
+
+        const { data, error } =
+            await supabaseClient.functions.invoke(
+                "verify-razorpay-payment",
+                {
+                    body: {
+                        razorpay_payment_id:
+                            response.razorpay_payment_id,
+
+                        razorpay_order_id:
+                            response.razorpay_order_id,
+
+                        razorpay_signature:
+                            response.razorpay_signature
+                    }
+                }
+            );
+
+        if(error || !data?.success){
+
+            console.error(
+                "Payment verification failed:",
+                error || data
+            );
+
+            toast(
+                data?.error ||
+                "Payment verification failed."
+            );
+
+            return;
+        }
+
+        toast(
+            "Payment successful! Package activated."
+        );
+
+        alert(
+            "Payment successful!\n\n" +
+            data.package_name +
+            " activated successfully."
+        );
+    },
+
+    prefill: {
+        email:
+            localStorage.getItem("userEmail") || ""
+    },
+
+    theme: {
+        color: "#2563eb"
+    },
+
+    modal: {
+        ondismiss: function(){
+            toast("Payment cancelled.");
+        }
+    }
+};
 
     if(error || !data?.success){
 
