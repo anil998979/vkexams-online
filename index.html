@@ -5874,16 +5874,11 @@ razorpay.open();
 /* =====================================================
    LOGIN STATE
 ===================================================== */
-
 function isLoggedIn(){
 
     return (
         localStorage.getItem("studentEmail") &&
         localStorage.getItem("guestMode") !== "true"
-    ) || (
-        supabaseClient &&
-        supabaseClient.auth &&
-        supabaseClient.auth.getSession
     );
 
 }
