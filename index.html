@@ -4108,7 +4108,18 @@ async function openFreeMockTests(course, addHistory = true){
 
     $("freeMockCourses").innerHTML = html;
    hideLoading();
-    showPage("freeMocks", addHistory);
+
+showPage("freeMocks", false);
+
+history.pushState(
+    {
+        vkPage: "freeMockTests",
+        course: course
+    },
+    "",
+    "#freeMocks"
+);
+}
 }
    
 
