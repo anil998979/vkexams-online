@@ -3954,9 +3954,9 @@ const courses = [
                 "is_free",
                 true
             )
-            .in(
-                "test_number",
-                [1,2,3,4,5]
+            .eq(
+                "is_active",
+                true
             )
             .order(
                 "test_number",
@@ -4071,7 +4071,7 @@ const courses = [
 }
    
 
-async function openFreeMockTests(course){
+async function openFreeMockTests(course, addHistory = true){
 
     currentCourse = course;
 
@@ -4108,7 +4108,7 @@ async function openFreeMockTests(course){
 
     $("freeMockCourses").innerHTML = html;
    hideLoading();
-    showPage("freeMocks");
+    showPage("freeMocks", addHistory);
 }
    
 
@@ -8985,6 +8985,7 @@ const QUESTIONS = [
 ===================================================== */
 async function startFreeMock(testNumber){
    testSubmitted = false;
+   currentAttemptId = null;
     if(
     freeMockStarting ||
     (
@@ -9167,31 +9168,23 @@ if (!testData) {
 
 
         /* =========================================
-           START ATTEMPT + LOAD QUESTIONS IN PARALLEL
-           This removes the unnecessary wait where the
-           attempt RPC finished before questions were read.
+           LOAD QUESTIONS
+           Free Mock Tests must work without login.
+           A signed-in user may get a server attempt for
+           saved results; otherwise the test runs locally.
         ========================================= */
-
-        const attemptPromise =
-            supabaseClient.rpc(
-                "start_test_attempt",
-                {
-                    p_test_id:
-                        testData.id
-                }
-            );
 
         let questionData =
             cache.questions?.[
                 String(normalizedTestNumber)
             ];
 
-        let questionPromise = null;
+        let questionError = null;
 
         if(!questionData){
 
-            questionPromise =
-                supabaseClient
+            const questionResult =
+                await supabaseClient
                     .from("questions")
                     .select(`
                         id,
@@ -9202,7 +9195,8 @@ if (!testData) {
                         option_c,
                         option_d,
                         marks,
-                        negative_marks
+                        negative_marks,
+                        correct_option
                     `)
                     .eq(
                         "test_id",
@@ -9218,67 +9212,60 @@ if (!testData) {
                             ascending:true
                         }
                     );
-        }
-
-        let attemptResult;
-        let questionResult = null;
-
-        if(questionPromise){
-
-            [attemptResult, questionResult] =
-                await Promise.all([
-                    attemptPromise,
-                    questionPromise
-                ]);
 
             questionData =
                 questionResult.data;
 
-            var questionError =
+            questionError =
                 questionResult.error;
-
-        }else{
-
-            attemptResult =
-                await attemptPromise;
-
         }
 
+        /* Try to create a server attempt only for a real
+           authenticated user. Guest/anonymous users must be
+           able to take Free Mock Tests without an account. */
+        currentAttemptId = null;
 
- 
+        let sessionUser = null;
 
-        /* =========================================
-           ATTEMPT RESULT
-        ========================================= */
+        try{
+            const { data:sessionData } =
+                await supabaseClient.auth.getSession();
 
-        const attemptData =
-            attemptResult.data;
+            sessionUser =
+                sessionData?.session?.user || null;
+        }catch(sessionError){
+            console.warn("Session check failed:", sessionError);
+        }
 
-        const attemptError =
-            attemptResult.error;
+        const canCreateServerAttempt =
+            !!sessionUser &&
+            !sessionUser.is_anonymous;
 
-        if(attemptError){
+        if(canCreateServerAttempt){
 
-            toast(
-                attemptError.message ||
-                "Unable to start test."
+            const {
+                data:attemptData,
+                error:attemptError
+            } = await supabaseClient.rpc(
+                "start_test_attempt",
+                {
+                    p_test_id:testData.id
+                }
             );
 
-            console.error(attemptError);
-
-            return;
+            if(attemptError){
+                console.warn(
+                    "Server attempt unavailable; continuing as local Free Mock:",
+                    attemptError
+                );
+            }else{
+                currentAttemptId =
+                    attemptData?.id ||
+                    attemptData ||
+                    null;
+            }
         }
 
-        currentAttemptId =
-            attemptData?.id ||
-            attemptData;
-
-
-        /* =========================================
-           QUESTIONS
-        ========================================= */
-
-        
         if(questionError){
 
             toast(
@@ -9301,7 +9288,6 @@ if (!testData) {
 
             return;
         }
-
 
         /* =========================================
            PREPARE QUESTIONS
@@ -9336,7 +9322,12 @@ if (!testData) {
                     negative:
                         Number(
                             q.negative_marks || 0
-                        )
+                        ),
+
+                    correctOption:
+                        String(
+                            q.correct_option || ""
+                        ).trim().toUpperCase()
                 };
 
             });
@@ -9916,12 +9907,89 @@ lastResult = {
 
 
     /* -----------------------------------------
-       Safety fallback
+       LOCAL GRADING FOR FREE MOCK TESTS
+       Used when the student is not logged in or a
+       server attempt is unavailable.
     ----------------------------------------- */
 
-    toast(
-        "Test session is not connected to Supabase."
-    );
+    let score = 0;
+    let correct = 0;
+    let wrong = 0;
+    let unanswered = 0;
+    let total = 0;
+
+    examQuestions.forEach(function(q,index){
+
+        const marks = Number(q.marks || 1);
+        const negative = Number(q.negative || 0);
+        total += marks;
+
+        const selectedIndex = userAnswers[index];
+        const selectedLetter =
+            selectedIndex === null ||
+            selectedIndex === undefined
+                ? ""
+                : ["A","B","C","D"][Number(selectedIndex)];
+
+        const correctLetter =
+            String(q.correctOption || "").trim().toUpperCase();
+
+        if(!selectedLetter){
+            unanswered++;
+        }else if(
+            correctLetter &&
+            selectedLetter === correctLetter
+        ){
+            correct++;
+            score += marks;
+        }else{
+            wrong++;
+            score -= negative;
+        }
+    });
+
+    const percentage =
+        total > 0 ? (score / total) * 100 : 0;
+
+    testSubmitted = true;
+
+    lastResult = {
+        attemptId:null,
+        questions:examQuestions,
+        answers:[...userAnswers],
+        score:score,
+        total:total,
+        percentage:percentage,
+        correct:correct,
+        wrong:wrong,
+        unanswered:unanswered,
+        title:$("examTitle").textContent,
+        timeout:timeout
+    };
+
+    $("scoreText").textContent =
+        score + " / " + total;
+
+    $("resultMessage").textContent =
+        "You scored " +
+        Math.round(percentage) +
+        "%." +
+        (timeout
+            ? " Time expired and the test was auto-submitted."
+            : "");
+
+    const resultStats = $("resultStats");
+
+    if(resultStats){
+        resultStats.innerHTML = `
+            <div class="stat"><b>${correct}</b> Correct</div>
+            <div class="stat"><b>${wrong}</b> Wrong</div>
+            <div class="stat"><b>${unanswered}</b> Unanswered</div>
+            <div class="stat"><b>${Math.round(percentage)}%</b> Percentage</div>
+        `;
+    }
+
+    showPage("resultPage");
 
 }
 
@@ -9935,13 +10003,57 @@ async function viewSolutions(){
         return;
     }
 
-    if(!supabaseClient){
-        toast("Supabase is not connected.");
+    /* Free Mock Test without login: show the answers stored
+       with the question data. */
+    if(!currentAttemptId){
+
+        $("solutions").innerHTML =
+            lastResult.questions
+            .map(function(question,index){
+
+                const correctIndex =
+                    ["A","B","C","D"].indexOf(
+                        String(question.correctOption || "")
+                            .trim()
+                            .toUpperCase()
+                    );
+
+                const correctText =
+                    correctIndex >= 0
+                        ? question.o[correctIndex]
+                        : "Answer not available";
+
+                const selectedIndex =
+                    lastResult.answers[index];
+
+                const selected =
+                    selectedIndex == null
+                        ? "Not answered"
+                        : question.o[Number(selectedIndex)];
+
+                return `
+                    <div class="solution-card">
+                        <h3>Q${index + 1}. ${formatBilingualText(question.q)}</h3>
+                        <div class="solution-line solution-your-answer">
+                            Your Answer: <strong>${formatBilingualText(selected)}</strong>
+                        </div>
+                        <div class="solution-line solution-correct-answer">
+                            Correct Answer: <strong>${formatBilingualText(correctText)}</strong>
+                        </div>
+                        <div class="solution-explanation">
+                            Explanation not available.
+                        </div>
+                    </div>
+                `;
+            })
+            .join("");
+
+        showPage("solutionsPage");
         return;
     }
 
-    if(!currentAttemptId){
-        toast("Test attempt information is missing.");
+    if(!supabaseClient){
+        toast("Supabase is not connected.");
         return;
     }
 
@@ -10198,19 +10310,13 @@ window.addEventListener(
 if(
     page === "examPage" &&
     testSubmitted &&
-    currentCourse
+    currentCourse &&
+    currentFreeMockNumber
 ){
 
-    history.replaceState(
-        {
-            vkPage:"freeMocks"
-        },
-        "",
-        "#freeMocks"
-    );
-
     openFreeMockTests(
-        currentCourse
+        currentCourse,
+        false
     );
 
     return;
