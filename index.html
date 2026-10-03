@@ -1677,18 +1677,33 @@ header{
 /* =====================================================
    FOOTER
 ===================================================== */
-
 footer{
-    background:#111827;
+    background:#111827 !important;
+    color:#fff !important;
 
-    color:#fff;
-
-    padding:
-        32px 20px;
-
-    text-align:center;
+    width:100vw;
+    box-sizing:border-box;
 
     margin-top:35px;
+    margin-left:calc(50% - 50vw);
+    margin-right:0;
+
+    padding:32px 20px;
+
+    text-align:center;
+}
+
+footer h3{
+    margin:0;
+    color:#fff;
+    text-align:center;
+}
+
+footer p{
+    color:#9ca3af;
+    margin:7px 0 0;
+    font-size:13px;
+    text-align:center;
 }
 
 footer p{
