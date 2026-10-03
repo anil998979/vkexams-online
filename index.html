@@ -9111,21 +9111,7 @@ if (!testData) {
     );
   }
 }
-                    .order(
-                        "test_number",
-                        {
-                            ascending:true
-                        }
-                    )
-                    .limit(1);
-
-            testData =
-                result.data?.[0] || null;
-
-            testError =
-                result.error;
-        }
-       
+           
 
         /* Fallback: resolve directly by the published Free Mock Test title.
            This keeps the Free Mock Test working even if the series lookup/cache
