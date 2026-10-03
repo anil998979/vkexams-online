@@ -9131,13 +9131,41 @@ if(!supabaseClient){
         }
        
 
+        /* Fallback: resolve directly by the published Free Mock Test title.
+           This keeps the Free Mock Test working even if the series lookup/cache
+           is stale or test_number is returned with a different type. */
+        if(!testData){
+
+            const fallbackTitle =
+                String(currentCourse || "").trim() +
+                " – Free Mock Test " +
+                normalizedTestNumber;
+
+            const fallbackResult =
+                await supabaseClient
+                    .from("tests")
+                    .select(
+                        "id,title,test_number,duration_minutes,total_marks,is_free"
+                    )
+                    .eq("is_free", true)
+                    .eq("title", fallbackTitle)
+                    .limit(1);
+
+            if(!fallbackResult.error && fallbackResult.data?.length){
+                testData = fallbackResult.data[0];
+                testError = null;
+            }else{
+                testError = fallbackResult.error || testError;
+            }
+        }
+
         if(testError || !testData){
 
             toast(
                 "This Free Mock Test is not available yet."
             );
 
-            console.error(testError);
+            console.error("Free Mock Test lookup failed:", testError);
 
             return;
         }
