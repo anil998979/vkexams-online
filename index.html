@@ -3852,7 +3852,7 @@ function toast(message){
    FREE MOCK TESTS
 ===================================================== */
 
-function openFreeMocks(){
+function openFreeMocks(addHistory = true){
 const courses = [
         ["APPSC","📚"],["Endowment Officer","🛕"],["High Court","⚖️"],
         ["Police","👮"],["DSC","🎓"],["Banks","🏦"]
@@ -3867,7 +3867,7 @@ const courses = [
         </div>`;
     }).join("");
 
-    showPage("freeMocks");
+    showPage("freeMocks", addHistory);
 }
 
    async function preloadFreeMockData(course){
