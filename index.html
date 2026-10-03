@@ -10420,6 +10420,16 @@ if(
             return;
         }
 
+       if(
+    page === "freeMocks" &&
+    event.state?.vkPage === "freeMocks"
+){
+
+    openFreeMocks(false);
+
+    return;
+       }
+       
         if($(page)){
 
             showPage(
