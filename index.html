@@ -3978,9 +3978,18 @@ const courses = [
         (tests || []).forEach(
             function(test){
 
-                cache.tests[
-                    test.test_number
-                ] = test;
+                const normalizedNumber =
+                    Number(test.test_number);
+
+                if(
+                    Number.isFinite(normalizedNumber) &&
+                    normalizedNumber >= 1 &&
+                    normalizedNumber <= 5
+                ){
+                    cache.tests[
+                        String(normalizedNumber)
+                    ] = test;
+                }
 
             }
         );
@@ -4024,7 +4033,9 @@ const courses = [
 
                     if(!error){
                         cache.questions[
-                            test.test_number
+                            String(
+                                Number(test.test_number)
+                            )
                         ] = questions || [];
                     }
 
@@ -9066,39 +9077,58 @@ if(!supabaseClient){
         ========================================= */
 
 
-       let testData =
-    cache.tests?.[testNumber];
+        /* Always resolve the selected test from the current
+           Free Mock Tests series. Use normalized numeric keys
+           so Test 1–5 cannot fail because of string/number
+           differences in test_number. */
 
-let testError = null;
+        const normalizedTestNumber =
+            Number(testNumber);
 
-if(!testData){
+        let testData = null;
+        let testError = null;
 
-    const result =
-        await supabaseClient
-            .from("tests")
-            .select(
-                "id,title,test_number,duration_minutes,total_marks,is_free"
-            )
-            .eq(
-                "test_series_id",
-                cache.seriesId
-            )
-            .eq(
-                "test_number",
-                testNumber
-            )
-            .eq(
-                "is_free",
-                true
-            )
-            .single();
+        const cachedTest =
+            cache.tests?.[
+                String(normalizedTestNumber)
+            ];
 
-    testData =
-        result.data;
+        if(cachedTest){
+            testData = cachedTest;
+        }else{
 
-    testError =
-        result.error;
-}
+            const result =
+                await supabaseClient
+                    .from("tests")
+                    .select(
+                        "id,title,test_number,duration_minutes,total_marks,is_free"
+                    )
+                    .eq(
+                        "test_series_id",
+                        cache.seriesId
+                    )
+                    .eq(
+                        "test_number",
+                        normalizedTestNumber
+                    )
+                    .eq(
+                        "is_free",
+                        true
+                    )
+                    .order(
+                        "test_number",
+                        {
+                            ascending:true
+                        }
+                    )
+                    .limit(1);
+
+            testData =
+                result.data?.[0] || null;
+
+            testError =
+                result.error;
+        }
        
 
         if(testError || !testData){
@@ -9117,7 +9147,7 @@ if(!testData){
             testData.id;
 
         currentFreeMockNumber =
-            testNumber;
+            normalizedTestNumber;
 
 
         /* =========================================
@@ -9136,7 +9166,9 @@ if(!testData){
             );
 
         let questionData =
-            cache.questions?.[testNumber];
+            cache.questions?.[
+                String(normalizedTestNumber)
+            ];
 
         let questionPromise = null;
 
