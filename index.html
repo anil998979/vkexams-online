@@ -4111,19 +4111,20 @@ async function openFreeMockTests(course, addHistory = true){
 
 showPage("freeMocks", false);
 
-history.pushState(
-    {
-        vkPage: "freeMockTests",
-        course: course
-    },
-    "",
-    "#freeMocks"
-);
+if(addHistory){
+    history.pushState(
+        {
+            vkPage: "freeMockTests",
+            course: course
+        },
+        "",
+        "#freeMocks"
+    );
 }
 }
    
 
-   /* =====================================================
+/* =====================================================
    COMMON LOADING POPUP
 ===================================================== */
 
