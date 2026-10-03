@@ -9085,7 +9085,7 @@ if(!supabaseClient){
            
 const normalizedTestNumber = Number(testNumber);
 
-let testData = cache.tests[String(normalizedTestNumber)];
+let testData = cache.tests?.[String(normalizedTestNumber)] || null;
 let testError = null;
 
 if (!testData) {
@@ -9409,7 +9409,9 @@ if (!testData) {
         );
 
         toast(
-            "Unable to start the test."
+            error?.message
+                ? "Unable to start: " + error.message
+                : "Unable to start the test."
         );
 
     }
