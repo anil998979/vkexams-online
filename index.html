@@ -9081,38 +9081,44 @@ if(!supabaseClient){
            Free Mock Tests series. Use normalized numeric keys
            so Test 1–5 cannot fail because of string/number
            differences in test_number. */
-
-                const normalizedTestNumber = Number(testNumber);
+           
+const normalizedTestNumber = Number(testNumber);
 
 let testData = cache.tests[String(normalizedTestNumber)];
+let testError = null;
 
 if (!testData) {
-  const { data, error } = await supabase
-    .from("tests")
-    .select("id,title,test_number,duration_minutes,total_marks,is_free,is_active")
-    .eq("test_series_id", cache.seriesId)
-    .eq("is_free", true)
-    .eq("is_active", true);
+    const { data, error } = await supabaseClient
+        .from("tests")
+        .select("id,title,test_number,duration_minutes,total_marks,is_free,is_active")
+        .eq("test_series_id", cache.seriesId)
+        .eq("is_free", true)
+        .eq("is_active", true);
 
-  console.log("FREE MOCK TEST QUERY:", {
-    seriesId: cache.seriesId,
-    requestedTest: normalizedTestNumber,
-    data,
-    error
-  });
+    console.log("FREE MOCK TEST QUERY:", {
+        seriesId: cache.seriesId,
+        requestedTest: normalizedTestNumber,
+        data,
+        error
+    });
 
-  if (error) {
-    console.error("Free Mock Test query error:", error);
-  }
+    if (error) {
+        console.error("Free Mock Test query error:", error);
+        testError = error;
+    }
 
-  if (data && data.length) {
-    testData = data.find(
-      t => Number(t.test_number) === normalizedTestNumber
-    );
-  }
+    if (data && data.length) {
+        testData = data.find(
+            t => Number(t.test_number) === normalizedTestNumber
+        );
+    }
 }
-           
 
+
+
+
+
+       
         /* Fallback: resolve directly by the published Free Mock Test title.
            This keeps the Free Mock Test working even if the series lookup/cache
            is stale or test_number is returned with a different type. */
