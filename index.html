@@ -1874,6 +1874,51 @@ footer p{
     min-height:50px;
 }
    
+
+
+/* =====================================================
+   DAILY TEST POPUP - FIXED
+===================================================== */
+.daily-test-modal-box{
+    max-width:480px;
+}
+.daily-test-badge{
+    display:inline-block;
+    padding:7px 12px;
+    border-radius:999px;
+    background:#eff6ff;
+    color:#2563eb;
+    font-weight:900;
+    font-size:12px;
+    letter-spacing:.3px;
+}
+.daily-test-title{
+    margin:14px 0 7px;
+    color:#1d4ed8;
+}
+.daily-test-info{
+    color:#6b7280;
+    line-height:1.5;
+}
+.daily-test-ad{
+    margin:16px 0 12px;
+    padding:10px;
+    background:#f8fafc;
+    border:1px dashed #cbd5e1;
+    border-radius:10px;
+}
+.daily-test-ad-label{
+    font-size:10px;
+    color:#9ca3af;
+    text-transform:uppercase;
+    letter-spacing:.5px;
+    margin-bottom:5px;
+}
+.daily-test-ad .adsbygoogle{
+    display:block;
+    min-height:50px;
+}
+
 </style>
 
 </head>
@@ -10432,7 +10477,331 @@ document.addEventListener(
 
 );
 
+
+
+/* =====================================================
+   DAILY TEST POPUP - FIXED FUNCTIONALITY
+===================================================== */
+let currentDailyTestMode = false;
+let currentDailyTestExplanations = {};
+
+function getDailyToday(){
+    try{
+        return new Intl.DateTimeFormat('en-CA', {
+            timeZone:'Asia/Kolkata',
+            year:'numeric', month:'2-digit', day:'2-digit'
+        }).format(new Date());
+    }catch(e){
+        return getLocalDateString();
+    }
+}
+
+function closeDailyTestPopup(){
+    const modal = document.getElementById('dailyTestModal');
+    if(modal){
+        modal.classList.remove('active');
+        modal.style.display = 'none';
+    }
+    localStorage.setItem('vkDailyTestPopupDismissed_v2', getDailyToday());
+}
+
+async function maybeShowDailyTestPopup(){
+    if(location.hash && location.hash !== '#home') return;
+
+    const today = getDailyToday();
+    if(localStorage.getItem('vkDailyTestPopupDismissed_v2') === today) return;
+    if(!supabaseClient) return;
+
+    try{
+        const {data,error} = await supabaseClient
+            .from('daily_tests')
+            .select('id,title,duration_minutes,total_marks')
+            .eq('test_date',today)
+            .eq('is_active',true)
+            .maybeSingle();
+
+        if(error || !data) return;
+
+        const modal = document.getElementById('dailyTestModal');
+        if(!modal) return;
+
+        modal.classList.add('active');
+        modal.style.display = 'flex';
+
+        setTimeout(function(){
+            try{
+                if(window.adsbygoogle){
+                    (window.adsbygoogle = window.adsbygoogle || []).push({});
+                }
+            }catch(e){
+                console.warn('Daily Test ad load warning:',e);
+            }
+        },200);
+    }catch(error){
+        console.error('Daily popup lookup error:',error);
+    }
+}
+
+async function startDailyTest(){
+    if(!supabaseClient){
+        toast('Unable to connect to the test service.');
+        return;
+    }
+
+    const today = getDailyToday();
+    const modal = document.getElementById('dailyTestModal');
+    if(modal){
+        modal.classList.remove('active');
+        modal.style.display = 'none';
+    }
+
+    localStorage.setItem('vkDailyTestPopupDismissed_v2', today);
+    showLoading('Please wait while today’s questions are loaded.','Loading Daily Test...');
+
+    try{
+        const {data:dailyTest,error:dailyError} = await supabaseClient
+            .from('daily_tests')
+            .select('id,title,duration_minutes,total_marks')
+            .eq('test_date',today)
+            .eq('is_active',true)
+            .maybeSingle();
+
+        if(dailyError || !dailyTest){
+            hideLoading();
+            toast('Today’s Daily Test is not available yet.');
+            return;
+        }
+
+        const {data:assignments,error:assignmentError} = await supabaseClient
+            .from('daily_test_questions')
+            .select('question_id,question_number')
+            .eq('daily_test_id',dailyTest.id)
+            .order('question_number',{ascending:true});
+
+        if(assignmentError || !assignments || assignments.length === 0){
+            hideLoading();
+            toast('No questions are available for today’s Daily Test.');
+            return;
+        }
+
+        const ids = assignments.map(x=>x.question_id);
+
+        const {data:questions,error:questionError} = await supabaseClient
+            .from('questions')
+            .select('id,question_text,option_a,option_b,option_c,option_d,marks,negative_marks')
+            .in('id',ids);
+
+        if(questionError || !questions){
+            hideLoading();
+            toast('Unable to load Daily Test questions.');
+            return;
+        }
+
+        const {data:answers,error:answerError} = await supabaseClient
+            .from('question_answers')
+            .select('question_id,correct_option,explanation')
+            .in('question_id',ids);
+
+        if(answerError){
+            console.error('Daily answer lookup error:',answerError);
+            hideLoading();
+            toast('Unable to load Daily Test answers.');
+            return;
+        }
+
+        const qMap={};
+        const aMap={};
+        (questions||[]).forEach(q=>qMap[q.id]=q);
+        (answers||[]).forEach(a=>aMap[a.question_id]=a);
+
+        examQuestions = assignments.map(function(item){
+            const q=qMap[item.question_id];
+            const a=aMap[item.question_id]||{};
+            if(!q) return null;
+            return {
+                id:q.id,
+                number:item.question_number,
+                q:cleanDailyQuestionText(q.question_text),
+                o:[q.option_a,q.option_b,q.option_c,q.option_d],
+                marks:Number(q.marks||1),
+                negative:Number(q.negative_marks||0),
+                correctOption:String(a.correct_option||'').trim().toUpperCase(),
+                explanation:a.explanation||''
+            };
+        }).filter(Boolean);
+
+        if(!examQuestions.length){
+            hideLoading();
+            toast('No valid questions are available.');
+            return;
+        }
+
+        currentDailyTestMode=true;
+        currentDailyTestId=dailyTest.id;
+        currentDailyTestDate=today;
+        currentAttemptId=null;
+        currentQuestionIndex=0;
+        userAnswers=new Array(examQuestions.length).fill(null);
+        testSubmitted=false;
+        currentDailyTestExplanations=aMap;
+        timeLeft=Number(dailyTest.duration_minutes||10)*60;
+        $('examTitle').textContent=dailyTest.title||'Endowment Officer – Daily Test';
+
+        clearInterval(timerInterval);
+        hideLoading();
+        showPage('examPage');
+        renderQuestion();
+        renderTimer();
+
+        timerInterval=window.setInterval(function(){
+            if(timeLeft>0){
+                timeLeft--;
+                renderTimer();
+            }
+            if(timeLeft<=0){
+                clearInterval(timerInterval);
+                toast('Time is over. Submitting your Daily Test...');
+                submitExam(true);
+            }
+        },1000);
+
+    }catch(error){
+        console.error('Daily Test start error:',error);
+        hideLoading();
+        toast('Unable to start today’s Daily Test.');
+    }
+}
+
+function cleanDailyQuestionText(text){
+    if(!text) return '';
+    let value=String(text).trim();
+    const pairs=[
+        ['Select the most appropriate answer:','అత్యంత సముచితమైన సమాధానాన్ని ఎంచుకోండి:'],
+        ['Choose the best answer based on the question below:','క్రింది ప్రశ్నకు సరైన సమాధానాన్ని ఎంచుకోండి:'],
+        ['Identify the correct answer from the following options:','క్రింది ఎంపికలలో సరైన సమాధానాన్ని గుర్తించండి:'],
+        ['Which option correctly answers the following?','క్రింది ప్రశ్నకు సరైన సమాధానం ఏది?']
+    ];
+    pairs.forEach(function(pair){
+        value=value.replace(pair[0],'').replace(pair[1],'');
+    });
+    return value.replace(/^\s*[\-:]+\s*/,'').trim();
+}
+
+/* Keep the existing exam engine unchanged for normal tests,
+   but route Daily Test submission/solutions to its own logic. */
+const vkOriginalSubmitExam = submitExam;
+submitExam = async function(timeout=false){
+    if(!currentDailyTestMode){
+        return vkOriginalSubmitExam(timeout);
+    }
+
+    if(!examQuestions.length) return;
+    clearInterval(timerInterval);
+
+    let score=0,correct=0,wrong=0,unanswered=0,total=0;
+    examQuestions.forEach(function(q,index){
+        const marks=Number(q.marks||1);
+        const negative=Number(q.negative||0);
+        total+=marks;
+        const selected=userAnswers[index];
+        if(selected===null || selected===undefined){
+            unanswered++;
+            return;
+        }
+        const letter=['A','B','C','D'][Number(selected)];
+        if(letter===String(q.correctOption||'').toUpperCase()){
+            correct++;
+            score+=marks;
+        }else{
+            wrong++;
+            score-=negative;
+        }
+    });
+
+    const percentage=total>0?(score/total)*100:0;
+    testSubmitted=true;
+    lastResult={
+        attemptId:null,
+        dailyTest:true,
+        questions:examQuestions,
+        answers:[...userAnswers],
+        score,total,percentage,correct,wrong,unanswered,
+        title:$('examTitle').textContent,
+        timeout
+    };
+
+    $('scoreText').textContent=score+' / '+total;
+    $('resultMessage').textContent='You scored '+Math.round(percentage)+'%.'+(timeout?' Time expired and the test was auto-submitted.':'');
+    const stats=$('resultStats');
+    if(stats){
+        stats.innerHTML=`<div class="stat"><b>${correct}</b> Correct</div><div class="stat"><b>${wrong}</b> Wrong</div><div class="stat"><b>${unanswered}</b> Unanswered</div><div class="stat"><b>${Math.round(percentage)}%</b> Percentage</div>`;
+    }
+    showPage('resultPage');
+};
+
+const vkOriginalViewSolutions = viewSolutions;
+viewSolutions = async function(){
+    if(!currentDailyTestMode){
+        return vkOriginalViewSolutions();
+    }
+
+    if(!lastResult) return;
+
+    $('solutions').innerHTML=lastResult.questions.map(function(question,index){
+        const correctIndex=['A','B','C','D'].indexOf(String(question.correctOption||'').toUpperCase());
+        const correctText=correctIndex>=0?question.o[correctIndex]:'Answer not available';
+        const selectedIndex=lastResult.answers[index];
+        const selected=selectedIndex==null?'Not answered':question.o[Number(selectedIndex)];
+        const explanation=question.explanation||'Explanation not available.';
+        return `<div class="solution-card"><h3>Q${index+1}. ${formatBilingualText(question.q)}</h3><div class="solution-line solution-your-answer">Your Answer: <strong>${formatBilingualText(selected)}</strong></div><div class="solution-line solution-correct-answer">Correct Answer: <strong>${formatBilingualText(correctText)}</strong></div><div class="solution-explanation">${formatBilingualText(explanation)}</div></div>`;
+    }).join('');
+    showPage('solutionsPage');
+};
+
+/* After the page has initialized, show the popup only on Home and
+   only when today's Daily Test exists. */
+setTimeout(function(){
+    maybeShowDailyTestPopup();
+},1200);
+
 </script>
+
+
+
+<!-- =====================================================
+     DAILY TEST POPUP - FIXED
+===================================================== -->
+<div id="dailyTestModal" class="modal">
+    <div class="modal-box daily-test-modal-box">
+        <div class="daily-test-badge">🎯 TODAY'S DAILY TEST</div>
+        <h2 class="daily-test-title">Endowment Officer</h2>
+        <p class="daily-test-info">
+            Practice every day and improve your exam score.
+        </p>
+
+        <div class="daily-test-ad">
+            <div class="daily-test-ad-label">Advertisement</div>
+            <ins class="adsbygoogle"
+                 data-ad-client="ca-pub-9830148964688603"
+                 data-ad-slot="7177891598"
+                 data-ad-format="horizontal"
+                 data-full-width-responsive="true"></ins>
+        </div>
+
+        <p style="font-weight:800;margin-top:8px;">
+            10 Questions &nbsp;•&nbsp; 10 Minutes &nbsp;•&nbsp; 10 Marks
+        </p>
+
+        <div class="modal-buttons">
+            <button class="btn btn-blue" onclick="startDailyTest()">
+                🚀 Start Daily Test
+            </button>
+            <button class="btn btn-outline" onclick="closeDailyTestPopup()">
+                Maybe Later
+            </button>
+        </div>
+    </div>
+</div>
 
 <!-- COMMON LOADING POPUP -->
 <div id="loadingModal" class="modal">
