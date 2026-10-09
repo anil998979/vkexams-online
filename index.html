@@ -6552,7 +6552,7 @@ async function loadJobs(){
         const {data,error} = await supabaseClient
             .from('jobs')
             .select('id,title,organization,category,posts,qualification,age_limit,salary,notification_date,last_date,apply_mode,apply_link,description,status')
-            .eq('status','Active')
+            .ilike('status','active')
             .order('notification_date',{ascending:false});
         if(error) throw error;
         vkJobsCache = data || [];
