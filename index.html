@@ -1930,6 +1930,25 @@ footer p{
     min-height:50px;
 }
 
+
+/* =====================================================
+   JOBS PAGE
+===================================================== */
+.jobs-toolbar{display:grid;grid-template-columns:2fr 1fr;gap:12px;margin:20px 0}
+.jobs-input,.jobs-select{width:100%;padding:13px 14px;border:1px solid #d1d5db;border-radius:9px;background:#fff;color:#172033}
+.jobs-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.job-card{background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:20px;box-shadow:0 7px 20px rgba(37,99,235,.06)}
+.job-card h3{color:#1d4ed8;margin:8px 0}
+.job-org{color:#6b7280;font-size:14px;margin-bottom:12px}
+.job-meta{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0;font-size:13px}
+.job-meta div{background:#f8fafc;border-radius:8px;padding:10px}
+.job-meta strong{display:block;color:#475569;margin-bottom:4px}
+.job-tag{display:inline-block;background:#eff6ff;color:#1d4ed8;border-radius:999px;padding:5px 9px;font-size:11px;font-weight:800}
+.job-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:14px}
+.job-description{display:none;margin-top:12px;padding:12px;background:#f8fafc;border-radius:8px;white-space:pre-line;line-height:1.55;color:#475569;font-size:14px}
+.job-empty{grid-column:1/-1;text-align:center;padding:30px;background:#fff;border:1px solid #e5e7eb;border-radius:12px;color:#64748b}
+@media(max-width:650px){.jobs-toolbar,.jobs-list{grid-template-columns:1fr}.job-meta{grid-template-columns:1fr 1fr}}
+
 </style>
 
 </head>
@@ -3075,6 +3094,34 @@ Select
 
 </div>
 
+
+
+<!-- =====================================================
+     JOBS PAGE
+===================================================== -->
+<div id="jobs" class="page">
+  <div class="container">
+    <span class="back" onclick="showHome()">← Back to Home</span>
+    <div class="exam-header">
+      <h1>💼 Government Jobs</h1>
+      <p>Latest recruitment notifications, eligibility details and official application links.</p>
+    </div>
+    <div class="jobs-toolbar">
+      <input id="jobsSearch" class="jobs-input" type="search" placeholder="Search job title, department or qualification..." oninput="filterJobs()" aria-label="Search jobs">
+      <select id="jobsCategory" class="jobs-select" onchange="filterJobs()" aria-label="Filter jobs by category">
+        <option value="">All Categories</option>
+        <option value="APPSC">APPSC</option>
+        <option value="High Court">High Court</option>
+        <option value="Police">Police</option>
+        <option value="DSC">DSC</option>
+        <option value="Banks">Banks</option>
+        <option value="Other">Other</option>
+      </select>
+    </div>
+    <p id="jobsStatus" style="color:#64748b;margin:0 0 14px">Loading jobs...</p>
+    <div id="jobsList" class="jobs-list"></div>
+  </div>
+</div>
 
 <!-- =====================================================
      PROFILE
@@ -6475,6 +6522,83 @@ function getInitials(
 
 }
 
+
+/* =====================================================
+   JOBS PAGE - Supabase public.jobs
+===================================================== */
+let vkJobsCache = [];
+function vkJobsEscape(value){
+    return String(value == null ? '' : value).replace(/[&<>"']/g, function(ch){
+        return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch];
+    });
+}
+function vkJobsDate(value){
+    if(!value) return 'Not specified';
+    const d = new Date(value + (String(value).length === 10 ? 'T00:00:00' : ''));
+    return Number.isNaN(d.getTime()) ? vkJobsEscape(value) : d.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+}
+function openJobs(){
+    showPage('jobs');
+    if(vkJobsCache.length){ filterJobs(); }
+    else { loadJobs(); }
+}
+async function loadJobs(){
+    const list = $('jobsList');
+    const status = $('jobsStatus');
+    if(!supabaseClient){ status.textContent='Unable to connect to the jobs service.'; return; }
+    status.textContent='Loading jobs...';
+    list.innerHTML='';
+    try{
+        const {data,error} = await supabaseClient
+            .from('jobs')
+            .select('id,title,organization,category,posts,qualification,age_limit,salary,notification_date,last_date,apply_mode,apply_link,description,status')
+            .eq('status','Active')
+            .order('notification_date',{ascending:false});
+        if(error) throw error;
+        vkJobsCache = data || [];
+        filterJobs();
+    }catch(err){
+        console.error('Jobs load error:',err);
+        status.textContent='Jobs could not be loaded. Please check the Supabase jobs table and its SELECT policy.';
+        list.innerHTML='<div class="job-empty">Unable to load job notifications right now.</div>';
+    }
+}
+function filterJobs(){
+    const search = (($('jobsSearch')||{}).value || '').trim().toLowerCase();
+    const category = (($('jobsCategory')||{}).value || '').trim().toLowerCase();
+    const filtered = vkJobsCache.filter(j=>{
+        const text=[j.title,j.organization,j.category,j.posts,j.qualification,j.description].join(' ').toLowerCase();
+        return (!search || text.includes(search)) && (!category || String(j.category||'').toLowerCase()===category);
+    });
+    $('jobsStatus').textContent = filtered.length + (filtered.length===1?' job found':' jobs found');
+    if(!filtered.length){ $('jobsList').innerHTML='<div class="job-empty">No active jobs found. Please check again later.</div>'; return; }
+    $('jobsList').innerHTML=filtered.map((j,i)=>{
+        const applyUrl=String(j.apply_link||'').trim();
+        const safeApply=/^https:\/\//i.test(applyUrl) ? applyUrl : '';
+        return `<article class="job-card">
+          <span class="job-tag">${vkJobsEscape(j.category||'Government Job')}</span>
+          <h3>${vkJobsEscape(j.title||'Untitled Recruitment')}</h3>
+          <p class="job-org">${vkJobsEscape(j.organization||'Department not specified')}</p>
+          <div class="job-meta">
+            <div><strong>Posts</strong>${vkJobsEscape(j.posts||'See notification')}</div>
+            <div><strong>Qualification</strong>${vkJobsEscape(j.qualification||'See notification')}</div>
+            <div><strong>Age Limit</strong>${vkJobsEscape(j.age_limit||'See notification')}</div>
+            <div><strong>Salary</strong>${vkJobsEscape(j.salary||'As per notification')}</div>
+            <div><strong>Notification</strong>${vkJobsDate(j.notification_date)}</div>
+            <div><strong>Last Date</strong>${vkJobsDate(j.last_date)}</div>
+          </div>
+          <div class="job-actions">
+            <button class="btn btn-outline" type="button" onclick="toggleJobDescription('${vkJobsEscape(j.id)}')">View Details</button>
+            ${safeApply ? `<a class="btn btn-blue" href="${vkJobsEscape(safeApply)}" target="_blank" rel="noopener noreferrer">Official Apply Link ↗</a>` : ''}
+          </div>
+          <div class="job-description" id="jobDescription-${vkJobsEscape(j.id)}">${vkJobsEscape(j.description||'Please read the official notification for complete details.')}</div>
+        </article>`;
+    }).join('');
+}
+function toggleJobDescription(id){
+    const el=document.getElementById('jobDescription-'+id);
+    if(el) el.style.display=el.style.display==='block'?'none':'block';
+}
 
 function openProfile(){
 
