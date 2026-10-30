@@ -2172,6 +2172,90 @@ footer p{
 .job-empty{grid-column:1/-1;text-align:center;padding:30px;background:#fff;border:1px solid #e5e7eb;border-radius:12px;color:#64748b}
 @media(max-width:650px){.jobs-toolbar,.jobs-list{grid-template-columns:1fr}.job-meta{grid-template-columns:1fr 1fr}}
 
+
+/* =====================================================
+   EXAM HALL INTERFACE
+===================================================== */
+.exam-hall-page{padding:0!important;background:#eef3f8!important;min-height:100vh}
+.exam-hall-page.active{display:block!important}
+.exam-hall-shell{min-height:100vh;background:#eef3f8;color:#17243a;display:flex;flex-direction:column}
+.exam-hall-topbar{height:76px;flex:0 0 76px;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:8px 24px;background:#fff;border-bottom:1px solid #dce5ef;box-shadow:0 2px 8px rgba(15,23,42,.05);position:sticky;top:0;z-index:50}
+.exam-hall-titlebox{width:340px;max-width:25%;padding:8px 13px;border:1px solid #dce5ef;border-radius:15px;background:#f8fafc;overflow:hidden}
+.exam-hall-course{font-size:11px;font-weight:750;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px}
+.exam-hall-titlebox strong{font-size:14px;color:#101828}
+.exam-hall-progress{display:flex;align-items:center;justify-content:center;gap:10px;padding:10px 16px;border:1px solid #dce5ef;border-radius:30px;background:#fbfdff;font-size:11px;color:#475569;white-space:nowrap}
+.exam-hall-progress b{color:#008577;font-size:13px}
+.progress-dot{width:8px;height:8px;border-radius:50%;background:#10b981}
+.progress-percent{padding:3px 7px;border-radius:5px;background:#e9fbf4;color:#008577;font-weight:800}
+.progress-divider{height:19px;width:1px;background:#dce5ef}
+.saved-indicator{color:#008577;font-weight:800}
+.exam-hall-actions{display:flex;align-items:center;gap:7px}
+.hall-tool,.hall-timer{height:42px;padding:0 12px;border:1px solid #dce5ef;border-radius:13px;background:#fff;color:#26364f;font-size:11px;font-weight:750;white-space:nowrap;box-shadow:0 1px 2px rgba(15,23,42,.05)}
+.hall-tool{cursor:pointer}
+.hall-tool:hover{background:#f5f8fc}
+.hall-timer{display:flex;flex-direction:column;justify-content:center;align-items:center;min-width:82px;gap:1px}
+.hall-timer small{font-size:8px;color:#64748b;letter-spacing:.8px}
+.hall-timer strong{font-size:15px;letter-spacing:1.5px;color:#111827}
+.hall-submit,.navigator-submit{border:0;border-radius:13px;background:#078477;color:white;font-size:12px;font-weight:850;padding:13px 18px;cursor:pointer}
+.exam-hall-body{display:grid;grid-template-columns:minmax(0,1fr) 365px;flex:1;min-height:calc(100vh - 132px)}
+.exam-hall-main{padding:22px clamp(18px,5vw,76px) 30px;min-width:0}
+.exam-hall-notice{max-width:1100px;margin:0 auto 13px;padding:13px 16px;display:flex;align-items:center;gap:8px;background:#effbf9;border:1px solid #d2eeea;border-radius:13px;color:#0c3650;font-size:11px}
+.exam-hall-notice>span:first-child{color:#078477;font-size:17px}
+.exam-hall-notice button{margin-left:auto;border:0;border-radius:9px;background:#078477;color:#fff;padding:11px 14px;font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap}
+.notice-secondary{color:#58769a;white-space:nowrap}
+.exam-question-panel{max-width:1100px;margin:0 auto;background:#fff;border:1px solid #dce5ef;border-radius:23px;padding:22px 24px 18px;box-shadow:0 2px 3px rgba(15,23,42,.08);position:relative}
+.question-meta{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
+.question-meta>div:first-child{display:flex;flex-direction:column;gap:3px}
+.question-meta strong{font-size:10px;color:#00877d;letter-spacing:.6px}
+.question-meta span{font-size:11px;color:#536b89}
+.language-switch{display:flex;border:1px solid #dce5ef;border-radius:9px;overflow:hidden}
+.language-switch button{border:0;padding:9px 12px;background:#f3f6fa;color:#34445c;font-size:11px;font-weight:750}
+.language-switch button+button{background:#fff}
+.exam-question-panel h2{font-size:19px;line-height:1.7;font-weight:650;color:#18253a;margin:10px 0 18px;white-space:pre-wrap}
+.exam-answer-options{display:flex;flex-direction:column;gap:9px}
+.exam-answer-options .option{display:flex;align-items:flex-start;gap:12px;padding:12px 13px;border:1px solid #dce5ef;border-radius:13px;background:#fff;cursor:pointer;transition:.15s}
+.exam-answer-options .option:hover{border-color:#9edbd3;background:#f8fdfc}
+.exam-answer-options .option:has(input:checked){border-color:#14b8a6;background:#effcf9;box-shadow:0 0 0 1px rgba(20,184,166,.1)}
+.exam-answer-options .option input{position:absolute;opacity:0;pointer-events:none}
+.exam-answer-options .option:before{content:attr(data-letter);width:30px;height:30px;flex:0 0 30px;display:grid;place-items:center;border-radius:8px;background:#f0f4f8;color:#40536d;font-size:13px;font-weight:850}
+.exam-answer-options .option:has(input:checked):before{background:#078477;color:#fff}
+.exam-answer-options .option-text{font-size:14px;line-height:1.65;color:#334b6c;padding-top:3px}
+.question-utility-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:18px;padding-top:15px;border-top:1px solid #e0e8f0}
+.question-utility-actions{display:flex;gap:8px;flex-wrap:wrap}
+.question-utility-actions button,.clear-answer{border:1px solid #dce5ef;border-radius:11px;background:#fff;color:#334b6c;padding:10px 13px;font-size:11px;font-weight:750;cursor:pointer}
+.clear-answer{border:0;color:#6480a3;padding-left:0}
+.question-utility-actions button:hover{background:#f5f8fc}
+.question-utility-actions button.active-review{border-color:#f5d88b;background:#fff8e6;color:#946200}
+.exam-question-navigator{background:#fff;border-left:1px solid #dce5ef;padding:17px 15px 16px;display:flex;flex-direction:column;min-width:0}
+.navigator-heading{display:flex;justify-content:space-between;gap:8px;align-items:center;color:#526985;font-size:10px;letter-spacing:.8px}
+.navigator-heading b{font-size:11px;letter-spacing:0;color:#334155}
+.navigator-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:13px 0}
+.navigator-stats>div{display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 4px;background:#f6f8fb;border-radius:12px}
+.navigator-stats strong{font-size:16px;color:#008477}
+.navigator-stats span{font-size:9px;color:#64748b}
+.question-palette{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:7px;align-content:start}
+.question-palette button{height:43px;border:1px solid #dce5ef;border-radius:11px;background:#f0f4f8;color:#344b68;font-size:12px;font-weight:800;cursor:pointer}
+.question-palette button.current{background:#101827;color:#fff;border-color:#101827;box-shadow:0 0 0 3px #baf3e8}
+.question-palette button.answered{background:#d9f8ed;border-color:#b7ead8;color:#087b65}
+.question-palette button.review{background:#fff1c9;border-color:#f5d98a;color:#936300}
+.question-palette button.current.answered,.question-palette button.current.review{background:#101827;color:#fff}
+.navigator-legend{margin-top:auto;padding:16px 0 13px;display:flex;justify-content:center;gap:12px;flex-wrap:wrap;border-top:1px solid #edf1f5;color:#60738d;font-size:10px}
+.navigator-legend span{display:flex;align-items:center;gap:5px}
+.navigator-legend i{width:9px;height:9px;border-radius:3px;display:inline-block}
+.legend-answered{background:#baf3dc}.legend-review{background:#ffe8a3}.legend-empty{background:#e8edf3}
+.navigator-submit{width:100%;border-radius:12px;padding:13px}
+.exam-hall-footer{height:56px;flex:0 0 56px;display:flex;align-items:center;justify-content:space-between;padding:6px 24px;background:#fff;border-top:1px solid #dce5ef}
+.exam-hall-footer button{border:1px solid #e0e8f0;border-radius:11px;background:#fff;color:#526985;padding:10px 14px;font-size:11px;font-weight:800;cursor:pointer}
+.exam-hall-footer .footer-next{background:#101827;color:#fff;border-color:#101827;padding:11px 18px}
+.exam-hall-footer .footer-hide-nav{margin-left:auto;margin-right:auto}
+.footer-hide-nav span{margin-left:8px;padding:3px 6px;border-radius:5px;background:#e8fbf5;color:#078477;font-size:9px}
+.exam-question-navigator.hidden{display:none}
+.exam-hall-body.palette-hidden{grid-template-columns:minmax(0,1fr)}
+.exam-hall-body.palette-hidden .exam-hall-main{padding-left:clamp(18px,8vw,130px);padding-right:clamp(18px,8vw,130px)}
+.exam-hall-shell.paused .exam-question-panel:after{content:"TEST PAUSED";position:absolute;inset:0;display:grid;place-items:center;background:rgba(241,245,249,.88);border-radius:23px;color:#10213a;font-size:25px;font-weight:900;letter-spacing:2px;z-index:5}
+@media(max-width:1150px){.exam-hall-topbar{height:auto;min-height:76px;flex-wrap:wrap}.exam-hall-titlebox{max-width:35%}.exam-hall-progress{order:3;width:100%;max-width:max-content;margin:0 auto}.exam-hall-body{grid-template-columns:minmax(0,1fr) 300px}.exam-hall-main{padding:18px}}
+@media(max-width:800px){.exam-hall-topbar{position:relative;padding:10px;gap:8px}.exam-hall-titlebox{width:100%;max-width:none}.exam-hall-progress{order:0;width:100%;max-width:none;overflow:auto;justify-content:flex-start}.exam-hall-actions{width:100%;justify-content:space-between;flex-wrap:wrap}.hall-tool{padding:0 8px}.exam-hall-body{display:flex;flex-direction:column}.exam-question-navigator{border-left:0;border-top:1px solid #dce5ef;min-height:300px}.question-palette{grid-template-columns:repeat(6,minmax(0,1fr))}.exam-hall-main{padding:12px}.exam-hall-notice{flex-wrap:wrap}.notice-secondary{display:none}.exam-question-panel{padding:16px;border-radius:16px}.exam-question-panel h2{font-size:16px}.question-utility-row{align-items:flex-start;flex-direction:column}.question-utility-actions{width:100%}.question-utility-actions button{flex:1;padding:9px 6px}.exam-hall-footer{padding:6px 9px}.exam-hall-footer .footer-hide-nav{display:none}}
+@media(max-width:440px){.hall-tool{font-size:9px;height:38px}.hall-timer{height:38px;min-width:65px}.hall-submit{padding:11px}.exam-hall-progress{font-size:9px;gap:7px;padding:8px}.question-meta{align-items:flex-start}.language-switch button{padding:7px;font-size:10px}.question-palette{grid-template-columns:repeat(5,minmax(0,1fr))}.exam-hall-notice{font-size:10px}.exam-hall-notice button{margin-left:0}}
 </style>
 
 </head>
@@ -2752,104 +2836,92 @@ class="test-list">
      EXAM PAGE
 ===================================================== -->
 
-<div
-id="examPage"
-class="page">
+<div id="examPage" class="page exam-hall-page">
+  <div class="exam-hall-shell">
+    <header class="exam-hall-topbar">
+      <div class="exam-hall-titlebox">
+        <div id="examTitle" class="exam-hall-course">Mock Test</div>
+        <strong id="questionNumber">Question 1 of 30</strong>
+      </div>
 
-<div class="container">
+      <div class="exam-hall-progress">
+        <span class="progress-dot"></span>
+        <span>Attempted: <b id="attemptedCount">0</b> / <span id="totalCount">0</span></span>
+        <span class="progress-percent" id="attemptedPercent">0%</span>
+        <span class="progress-divider"></span>
+        <span>Review: <b id="reviewCount">0</b></span>
+        <span class="progress-divider"></span>
+        <span>Left: <b id="remainingCount">0</b></span>
+        <span class="saved-indicator">Saved ✓</span>
+      </div>
 
+      <div class="exam-hall-actions">
+        <button type="button" class="hall-tool" onclick="toggleQuestionPalette()">▤ <span id="paletteToggleText">Hide Palette</span></button>
+        <button type="button" class="hall-tool" onclick="toggleExamFullscreen()">⛶ Full screen</button>
+        <button type="button" class="hall-tool" onclick="toggleExamPause()" id="pauseExamButton">Ⅱ Pause</button>
+        <div class="hall-timer"><small>TIME LEFT</small><strong id="timer">15:00</strong></div>
+        <button type="button" class="hall-submit" onclick="submitExam()">Submit</button>
+      </div>
+    </header>
 
-<div class="exam-topbar">
+    <div class="exam-hall-body">
+      <main class="exam-hall-main">
+        <div class="exam-hall-notice">
+          <span>▣</span>
+          <strong>Exam Hall Mode:</strong> Switch to full screen for a focused test, or keep using normal / split screen.
+          <button type="button" onclick="toggleExamFullscreen()">Enter Full Screen</button>
+          <span class="notice-secondary">Normal / Split screen</span>
+        </div>
 
-<strong
-id="examTitle">
+        <section class="exam-question-panel">
+          <div class="question-meta">
+            <div>
+              <strong>MULTIPLE CHOICE QUESTION</strong>
+              <span id="questionMarks">1 mark · −0.33 for a wrong answer</span>
+            </div>
+            <div class="language-switch">
+              <button type="button" class="active">English</button>
+              <button type="button">తెలుగు</button>
+            </div>
+          </div>
 
-Mock Test
+          <h2 id="questionText">Question</h2>
+          <div id="options" class="exam-answer-options"></div>
 
-</strong>
+          <div class="question-utility-row">
+            <button type="button" class="clear-answer" onclick="clearCurrentAnswer()">Clear answer</button>
+            <div class="question-utility-actions">
+              <button type="button" onclick="reportQuestionIssue()">⚑ Report issue</button>
+              <button type="button" onclick="bookmarkCurrentQuestion()">☆ Bookmark</button>
+              <button type="button" id="reviewQuestionButton" onclick="toggleQuestionReview()">Mark for review</button>
+            </div>
+          </div>
+        </section>
+      </main>
 
+      <aside class="exam-question-navigator" id="examQuestionNavigator">
+        <div class="navigator-heading"><strong>QUESTION NAVIGATOR</strong><b><span id="navigatorTotal">0</span> total</b></div>
+        <div class="navigator-stats">
+          <div><strong id="navigatorAnswered">0</strong><span>Answered</span></div>
+          <div><strong id="navigatorReview">0</strong><span>Review</span></div>
+          <div><strong id="navigatorRemaining">0</strong><span>Remaining</span></div>
+        </div>
+        <div class="question-palette" id="questionPalette"></div>
+        <div class="navigator-legend">
+          <span><i class="legend-answered"></i> Answered</span>
+          <span><i class="legend-review"></i> Marked for review</span>
+          <span><i class="legend-empty"></i> Not answered</span>
+        </div>
+        <button type="button" class="navigator-submit" onclick="submitExam()">Submit / Finish test</button>
+      </aside>
+    </div>
 
-<div class="timer">
-
-Time:
-
-<span id="timer">
-15:00
-</span>
-
-</div>
-
-</div>
-
-
-<div class="question-card">
-
-
-<div
-class="question-number"
-id="questionNumber">
-
-Question 1
-
-</div>
-
-
-<h2
-id="questionText">
-
-Question
-
-</h2>
-
-
-<div
-id="options">
-
-</div>
-
-
-<div
-style="
-display:flex;
-justify-content:space-between;
-gap:8px;
-flex-wrap:wrap;
-margin-top:20px;
-">
-
-
-<button
-class="btn btn-outline"
-onclick="previousQuestion()">
-
-Previous
-
-</button>
-
-
-<button
-class="btn btn-blue"
-onclick="nextQuestion()">
-
-Next
-
-</button>
-
-
-<button
-class="btn btn-primary"
-onclick="submitExam()">
-
-Submit
-
-</button>
-
-</div>
-
-</div>
-
-</div>
-
+    <footer class="exam-hall-footer">
+      <button type="button" class="footer-previous" onclick="previousQuestion()">← Previous</button>
+      <button type="button" class="footer-hide-nav" onclick="toggleQuestionPalette()">▣ Hide Navigator <span id="footerQuestionPosition">1/30</span></button>
+      <button type="button" class="footer-next" onclick="nextQuestion()">Save &amp; next →</button>
+    </footer>
+  </div>
 </div>
 
 
@@ -5682,6 +5754,20 @@ async function startPaidTest(testNumber){
             ).fill(null);
 
         currentQuestionIndex = 0;
+        examReviewFlags = new Array(examQuestions.length).fill(false);
+        examBookmarkedQuestions = new Set();
+        examPaletteHidden = false;
+        examPaused = false;
+        const examNav = $("examQuestionNavigator");
+        const examBody = document.querySelector(".exam-hall-body");
+        if(examNav) examNav.classList.remove("hidden");
+        if(examBody) examBody.classList.remove("palette-hidden");
+        const examShell = document.querySelector(".exam-hall-shell");
+        if(examShell) examShell.classList.remove("paused");
+        const paletteLabel = $("paletteToggleText");
+        if(paletteLabel) paletteLabel.textContent = "Hide Palette";
+        const pauseLabel = $("pauseExamButton");
+        if(pauseLabel) pauseLabel.textContent = "Ⅱ Pause";
 
 
         /* =========================================
@@ -9321,6 +9407,10 @@ const QUESTIONS = [
    START FREE MOCK
 ===================================================== */
 async function startFreeMock(testNumber){
+   examReviewFlags = [];
+   examBookmarkedQuestions = new Set();
+   examPaletteHidden = false;
+   examPaused = false;
    testSubmitted = false;
    currentAttemptId = null;
     if(
@@ -9714,7 +9804,7 @@ if (!testData) {
         timerInterval =
             window.setInterval(function(){
 
-                if(timeLeft > 0){
+                if(timeLeft > 0 && !examPaused){
 
                     timeLeft--;
 
@@ -9787,85 +9877,113 @@ function renderTimer(){
    QUESTION
 ===================================================== */
 
-function renderQuestion(){
 
-    const q =
-        examQuestions[
-            currentQuestionIndex
-        ];
+let examReviewFlags = [];
+let examBookmarkedQuestions = new Set();
+let examPaletteHidden = false;
+let examPaused = false;
 
-
-    if(!q)
-        return;
-
-
-    $("questionNumber")
-        .textContent =
-
-        "Question " +
-
-        (
-            currentQuestionIndex +
-            1
-        )
-
-        +
-
-        " of "
-
-        +
-
-        examQuestions.length;
-
-
-    $("questionText").textContent =
-    formatBilingualText(q.q);
-
-
-    $("options")
-        .innerHTML =
-
-        q.o
-        .map(
-
-            function(
-                option,
-                index
-            ){
-
-                return `
-    <label class="option">
-
-        <input
-            type="radio"
-            name="answer"
-            value="${index}"
-            ${
-                userAnswers[currentQuestionIndex] === index
-                ? "checked"
-                : ""
-            }
-            onchange="saveAnswer(${index})">
-
-        <span class="option-text">
-            ${formatBilingualText(option)}
-        </span>
-
-    </label>
-
-                `;
-
-            }
-
-        )
-        .join("");
-
-
-    renderTimer();
-
+function updateExamHallStats(){
+    const total = examQuestions.length;
+    const answered = userAnswers.filter(v => v !== null && v !== undefined).length;
+    const review = examReviewFlags.filter(Boolean).length;
+    const remaining = Math.max(0,total-answered);
+    const percent = total ? Math.round(answered/total*100) : 0;
+    const set = (id,value) => { const el=$(id); if(el) el.textContent=value; };
+    set("attemptedCount",answered); set("totalCount",total);
+    set("attemptedPercent",percent+"%"); set("reviewCount",review);
+    set("remainingCount",remaining); set("navigatorTotal",total);
+    set("navigatorAnswered",answered); set("navigatorReview",review);
+    set("navigatorRemaining",remaining);
+    set("footerQuestionPosition",(currentQuestionIndex+1)+"/"+total);
+    const palette=$("questionPalette");
+    if(palette){
+        palette.innerHTML=examQuestions.map((q,i)=>{
+            const cls=[i===currentQuestionIndex?"current":"",userAnswers[i]!==null&&userAnswers[i]!==undefined?"answered":"",examReviewFlags[i]?"review":""].filter(Boolean).join(" ");
+            return `<button type="button" class="${cls}" onclick="jumpToQuestion(${i})" aria-label="Go to question ${i+1}">${i+1}</button>`;
+        }).join("");
+    }
+    const reviewButton=$("reviewQuestionButton");
+    if(reviewButton){
+        reviewButton.classList.toggle("active-review",!!examReviewFlags[currentQuestionIndex]);
+        reviewButton.textContent=examReviewFlags[currentQuestionIndex]?"Marked for review":"Mark for review";
+    }
+}
+function jumpToQuestion(index){
+    if(index<0 || index>=examQuestions.length) return;
+    currentQuestionIndex=index;
+    renderQuestion();
+}
+function toggleQuestionReview(){
+    examReviewFlags[currentQuestionIndex]=!examReviewFlags[currentQuestionIndex];
+    updateExamHallStats();
+}
+function clearCurrentAnswer(){
+    userAnswers[currentQuestionIndex]=null;
+    renderQuestion();
+}
+function bookmarkCurrentQuestion(){
+    examBookmarkedQuestions.add(currentQuestionIndex);
+    toast("Question bookmarked.");
+}
+function reportQuestionIssue(){
+    toast("Please contact support to report an issue with this question.");
+}
+function toggleQuestionPalette(){
+    examPaletteHidden=!examPaletteHidden;
+    const nav=$("examQuestionNavigator");
+    const body=document.querySelector(".exam-hall-body");
+    if(nav) nav.classList.toggle("hidden",examPaletteHidden);
+    if(body) body.classList.toggle("palette-hidden",examPaletteHidden);
+    const label=$("paletteToggleText");
+    if(label) label.textContent=examPaletteHidden?"Show Palette":"Hide Palette";
+}
+function toggleExamFullscreen(){
+    const target=$("examPage");
+    if(!document.fullscreenElement && target?.requestFullscreen){
+        target.requestFullscreen().catch(()=>toast("Full screen is not available in this browser."));
+    }else if(document.exitFullscreen){
+        document.exitFullscreen();
+    }
+}
+function toggleExamPause(){
+    examPaused=!examPaused;
+    const shell=document.querySelector(".exam-hall-shell");
+    if(shell) shell.classList.toggle("paused",examPaused);
+    const button=$("pauseExamButton");
+    if(button) button.textContent=examPaused?"▶ Resume":"Ⅱ Pause";
+    /* The active timer interval remains alive; its tick checks examPaused. */
 }
 
-   function formatBilingualText(text){
+function renderQuestion(){
+    const q=examQuestions[currentQuestionIndex];
+    if(!q) return;
+
+    const title=$("examTitle");
+    if(title && !title.dataset.fullTitle) title.dataset.fullTitle=title.textContent;
+    const total=examQuestions.length;
+    $("questionNumber").textContent="Question "+(currentQuestionIndex+1)+" of "+total;
+    $("questionText").textContent=formatBilingualText(q.q);
+
+    const marks=Number(q.marks)||1;
+    const markLine=$("questionMarks");
+    if(markLine) markLine.textContent=marks+" mark"+(marks===1?"":"s")+" · −0.33 for a wrong answer";
+
+    $("options").innerHTML=q.o.map(function(option,index){
+        return `
+        <label class="option" data-letter="${["A","B","C","D"][index]||String(index+1)}">
+            <input type="radio" name="answer" value="${index}"
+                ${userAnswers[currentQuestionIndex]===index?"checked":""}
+                onchange="saveAnswer(${index})">
+            <span class="option-text">${formatBilingualText(option)}</span>
+        </label>`;
+    }).join("");
+
+    renderTimer();
+    updateExamHallStats();
+}
+
+function formatBilingualText(text){
 
     if(!text){
         return "";
