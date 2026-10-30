@@ -4024,6 +4024,7 @@ let coinAdReady = false;
 /* Immediate parent page for the current test list.
    Every course uses the same rule: Test List -> its Test Series page. */
 let testListParentPage = "testseries";
+let testSeriesReturnPage = "course";
 
 let selectedStoreCourse = "";
 
@@ -4354,7 +4355,8 @@ const courses = [
                             option_c,
                             option_d,
                             marks,
-                            negative_marks
+                            negative_marks,
+                            correct_option
                         `)
                         .eq(
                             "test_id",
@@ -4569,14 +4571,14 @@ function hideLoading(){
    COURSE
 ===================================================== */
 
-function openCourse(course){
+function openCourse(course, addHistory = true){
 
     currentCourse = course;
     currentGroup = "";
 
     if(course === "APPSC"){
 
-        openAPPSCGroups();
+        openAPPSCGroups(addHistory);
         return;
 
     }
@@ -4923,6 +4925,11 @@ function backFromSyllabus(){
 
 function openTestSeries(addHistory = true){
 
+    const activePage = document.querySelector(".page.active")?.id;
+    if(activePage && activePage !== "testseries" && activePage !== "loading"){
+        testSeriesReturnPage = activePage;
+    }
+
     $("seriesTitle").textContent =
         currentCourse === "APPSC" && currentGroup
         ? "APPSC " + currentGroup + " – Test Series"
@@ -5002,13 +5009,27 @@ function openTestSeries(addHistory = true){
 
 function backFromTestSeries(){
 
-    if(currentCourse === "APPSC" && currentGroup){
+    if(testSeriesReturnPage === "appGroupDetail" && currentCourse === "APPSC" && currentGroup){
         openAPPSCGroup(currentGroup, false);
         return;
     }
 
-    openCourse(currentCourse);
+    if(testSeriesReturnPage === "appGroups" || (currentCourse === "APPSC" && !currentGroup)){
+        openAPPSCGroups(false);
+        return;
+    }
 
+    if(testSeriesReturnPage === "course"){
+        openCourse(currentCourse, false);
+        return;
+    }
+
+    if($(testSeriesReturnPage)){
+        showPage(testSeriesReturnPage, false);
+        return;
+    }
+
+    openCourse(currentCourse, false);
 }
 
 
@@ -10473,6 +10494,8 @@ lastResult = {
             score -= negative;
         }
     });
+
+    score = Math.round((score + Number.EPSILON) * 100) / 100;
 
     const percentage =
         total > 0 ? (score / total) * 100 : 0;
