@@ -4483,14 +4483,41 @@ async function openFreeMockTests(course, addHistory = true){
 
     currentCourse = course;
 
-   showLoading(
-    "Loading Free Mock Tests...",
-    "Please wait..."
-);
+    /* Show the requested route immediately. On a browser refresh the
+       data preload is asynchronous; activating the page before awaiting
+       it prevents the blank-screen flash while the route is restored. */
+    $("freeMocks").classList.add("mock-list-mode");
+    const freeHeader = document.querySelector("#freeMocks .exam-header");
+    if(freeHeader){
+        freeHeader.innerHTML = `
+            <h1>Latest Uploaded Mock Tests</h1>
+            <p>Choose a test and start your practice.</p>`;
+    }
+    $("freeMockCourses").className = "free-mock-grid";
+    $("freeMockCourses").innerHTML = `
+        <div class="free-mock-empty">
+            <strong>Loading mock tests...</strong>
+            <p style="margin:7px 0 0;">Please wait.</p>
+        </div>`;
+    showPage("freeMocks", false);
 
-    /* Wait for all 5 tests and their questions to preload before
-       displaying the test cards. This removes the delay that
-       otherwise occurs when a test card is clicked immediately. */
+    if(addHistory){
+        history.pushState(
+            {
+                vkPage: "freeMockTests",
+                course: course
+            },
+            "",
+            "#freeMocks?course=" + encodeURIComponent(course)
+        );
+    }
+
+    showLoading(
+        "Loading Free Mock Tests...",
+        "Please wait..."
+    );
+
+    /* Preload asynchronously after the route is already visible. */
     try{
         await preloadFreeMockData(course);
     }catch(preloadError){
@@ -4498,14 +4525,6 @@ async function openFreeMockTests(course, addHistory = true){
         toast("Unable to load Free Mock Tests. Please try again.");
     }finally{
         hideLoading();
-    }
-
-    $("freeMocks").classList.add("mock-list-mode");
-    const freeHeader = document.querySelector("#freeMocks .exam-header");
-    if(freeHeader){
-        freeHeader.innerHTML = `
-            <h1>Latest Uploaded Mock Tests</h1>
-            <p>Choose a test and start your practice.</p>`;
     }
 
     const cache =
@@ -4582,21 +4601,7 @@ async function openFreeMockTests(course, addHistory = true){
     }
 
     $("freeMockCourses").innerHTML = html;
-   hideLoading();
-
-showPage("freeMocks", false);
-
-if(addHistory){
-    /* Keep the selected course in the URL so refresh restores this list. */
-    history.pushState(
-        {
-            vkPage: "freeMockTests",
-            course: course
-        },
-        "",
-        "#freeMocks?course=" + encodeURIComponent(course)
-    );
-}
+    hideLoading();
 }
    
 
