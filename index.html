@@ -4512,13 +4512,14 @@ async function openFreeMockTests(course, addHistory = true){
 showPage("freeMocks", false);
 
 if(addHistory){
+    /* Keep the selected course in the URL so refresh restores this list. */
     history.pushState(
         {
             vkPage: "freeMockTests",
             course: course
         },
         "",
-        "#freeMocks"
+        "#freeMocks?course=" + encodeURIComponent(course)
     );
 }
 }
@@ -10851,8 +10852,12 @@ window.addEventListener(
     "popstate",
     function(event){
 
-        const page =
-            location.hash.replace("#","");
+        const hashValue = location.hash.replace(/^#/, "");
+        const hashParts = hashValue.split("?");
+        const page = hashParts[0] || "home";
+        const hashParams = new URLSearchParams(hashParts[1] || "");
+        const selectedFreeMockCourse =
+            event.state?.course || hashParams.get("course");
        
 if(
     page === "examPage" &&
@@ -10892,14 +10897,13 @@ if(
             return;
         }
 
-       if(
-    page === "freeMocks" &&
-    event.state?.vkPage === "freeMocks"
-){
-
-    openFreeMocks(false);
-
-    return;
+       if(page === "freeMocks"){
+            if(selectedFreeMockCourse){
+                openFreeMockTests(selectedFreeMockCourse, false);
+            }else{
+                openFreeMocks(false);
+            }
+            return;
        }
        
         if($(page)){
@@ -10924,10 +10928,20 @@ localStorage.removeItem("selectedPackage");
 /* =====================================================
    INITIALIZATION
 ===================================================== */
-const initialPage =
-    location.hash.replace("#","");
+const initialHash = location.hash.replace(/^#/, "");
+const initialHashParts = initialHash.split("?");
+const initialPage = initialHashParts[0] || "";
+const initialHashParams = new URLSearchParams(initialHashParts[1] || "");
+const initialFreeMockCourse = initialHashParams.get("course");
 
-if(initialPage === "settings"){
+if(initialPage === "freeMocks"){
+    if(initialFreeMockCourse){
+        openFreeMockTests(initialFreeMockCourse, false);
+    }else{
+        openFreeMocks(false);
+    }
+}
+else if(initialPage === "settings"){
 
     showPage(
         "profile",
