@@ -2256,6 +2256,46 @@ footer p{
 @media(max-width:1150px){.exam-hall-topbar{height:auto;min-height:76px;flex-wrap:wrap}.exam-hall-titlebox{max-width:35%}.exam-hall-progress{order:3;width:100%;max-width:max-content;margin:0 auto}.exam-hall-body{grid-template-columns:minmax(0,1fr) 300px}.exam-hall-main{padding:18px}}
 @media(max-width:800px){.exam-hall-topbar{position:relative;padding:10px;gap:8px}.exam-hall-titlebox{width:100%;max-width:none}.exam-hall-progress{order:0;width:100%;max-width:none;overflow:auto;justify-content:flex-start}.exam-hall-actions{width:100%;justify-content:space-between;flex-wrap:wrap}.hall-tool{padding:0 8px}.exam-hall-body{display:flex;flex-direction:column}.exam-question-navigator{border-left:0;border-top:1px solid #dce5ef;min-height:300px}.question-palette{grid-template-columns:repeat(6,minmax(0,1fr))}.exam-hall-main{padding:12px}.exam-hall-notice{flex-wrap:wrap}.notice-secondary{display:none}.exam-question-panel{padding:16px;border-radius:16px}.exam-question-panel h2{font-size:16px}.question-utility-row{align-items:flex-start;flex-direction:column}.question-utility-actions{width:100%}.question-utility-actions button{flex:1;padding:9px 6px}.exam-hall-footer{padding:6px 9px}.exam-hall-footer .footer-hide-nav{display:none}}
 @media(max-width:440px){.hall-tool{font-size:9px;height:38px}.hall-timer{height:38px;min-width:65px}.hall-submit{padding:11px}.exam-hall-progress{font-size:9px;gap:7px;padding:8px}.question-meta{align-items:flex-start}.language-switch button{padding:7px;font-size:10px}.question-palette{grid-template-columns:repeat(5,minmax(0,1fr))}.exam-hall-notice{font-size:10px}.exam-hall-notice button{margin-left:0}}
+
+/* Question navigation controls inside the question card */
+.question-step-controls{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+    margin-top:18px;
+}
+.question-step-controls button{
+    min-width:135px;
+    border:1px solid #d8e2ee;
+    border-radius:11px;
+    padding:12px 18px;
+    background:#fff;
+    color:#334b68;
+    font-size:12px;
+    font-weight:850;
+    cursor:pointer;
+}
+.question-step-controls button:last-child{
+    background:#101827;
+    border-color:#101827;
+    color:#fff;
+}
+.question-step-controls button:disabled{
+    opacity:.4;
+    cursor:not-allowed;
+}
+.language-switch button{
+    cursor:pointer;
+    background:#fff;
+}
+.language-switch button.active{
+    background:#078477;
+    color:#fff;
+}
+@media(max-width:560px){
+    .question-step-controls button{min-width:0;flex:1;padding:12px 10px}
+}
 </style>
 
 </head>
@@ -2879,14 +2919,19 @@ class="test-list">
               <strong>MULTIPLE CHOICE QUESTION</strong>
               <span id="questionMarks">1 mark · −0.33 for a wrong answer</span>
             </div>
-            <div class="language-switch">
-              <button type="button" class="active">English</button>
-              <button type="button">తెలుగు</button>
+            <div class="language-switch" aria-label="Question language">
+              <button type="button" id="languageEnglishButton" onclick="setExamLanguage('en')">English</button>
+              <button type="button" id="languageTeluguButton" onclick="setExamLanguage('te')">తెలుగు</button>
             </div>
           </div>
 
           <h2 id="questionText">Question</h2>
           <div id="options" class="exam-answer-options"></div>
+
+          <div class="question-step-controls">
+            <button type="button" id="questionPreviousButton" onclick="previousQuestion()">← Previous</button>
+            <button type="button" id="questionNextButton" onclick="nextQuestion()">Save &amp; Next →</button>
+          </div>
 
           <div class="question-utility-row">
             <button type="button" class="clear-answer" onclick="clearCurrentAnswer()">Clear answer</button>
@@ -9981,36 +10026,60 @@ function renderQuestion(){
 
     renderTimer();
     updateExamHallStats();
+
+    const previousButton=$("questionPreviousButton");
+    const nextButton=$("questionNextButton");
+    if(previousButton) previousButton.disabled=currentQuestionIndex===0;
+    if(nextButton) nextButton.textContent=currentQuestionIndex===total-1?"Finish Test →":"Save & Next →";
+    const englishButton=$("languageEnglishButton");
+    const teluguButton=$("languageTeluguButton");
+    if(englishButton) englishButton.classList.toggle("active",examLanguage==="en");
+    if(teluguButton) teluguButton.classList.toggle("active",examLanguage==="te");
 }
 
-function formatBilingualText(text){
+let examLanguage = "te";
 
-    if(!text){
-        return "";
+function splitBilingualText(value){
+    const text=String(value ?? "").trim();
+    if(!text) return {en:"",te:""};
+
+    let parts=text.split(/\r?\n/).map(part=>part.trim()).filter(Boolean);
+
+    // Some uploaded questions store both languages on one line, separated by " / ".
+    if(parts.length<2 && /\s\/\s/.test(text)){
+        const slashParts=text.split(/\s\/\s/).map(part=>part.trim()).filter(Boolean);
+        if(slashParts.length>=2) parts=slashParts;
     }
 
-    const value = String(text).trim();
-
-    /*
-       English / Telugu already separated by newline
-       → convert newline to " / "
-    */
-
-    const parts = value
-        .split(/\r?\n/)
-        .map(function(part){
-            return part.trim();
-        })
-        .filter(Boolean);
-
-    if(parts.length >= 2){
-
-        return parts.join(" / ");
-
+    if(parts.length>=2){
+        const english=parts.find(part=>/[A-Za-z]/.test(part)) || "";
+        const telugu=parts.find(part=>/[\u0C00-\u0C7F]/.test(part)) || "";
+        if(english || telugu){
+            return {en:english || text, te:telugu || text};
+        }
+        return {en:parts[0],te:parts[1]};
     }
 
-    return value;
-   }
+    const hasTelugu=/[\u0C00-\u0C7F]/.test(text);
+    const hasEnglish=/[A-Za-z]/.test(text);
+    if(hasTelugu && !hasEnglish) return {en:"",te:text};
+    if(hasEnglish && !hasTelugu) return {en:text,te:""};
+    return {en:text,te:text};
+}
+
+function formatBilingualText(value){
+    const pair=splitBilingualText(value);
+    return examLanguage==="en" ? (pair.en || pair.te) : (pair.te || pair.en);
+}
+
+function setExamLanguage(language){
+    examLanguage=language==="en"?"en":"te";
+    const englishButton=$("languageEnglishButton");
+    const teluguButton=$("languageTeluguButton");
+    if(englishButton) englishButton.classList.toggle("active",examLanguage==="en");
+    if(teluguButton) teluguButton.classList.toggle("active",examLanguage==="te");
+    renderQuestion();
+}
 
 /* =====================================================
    SAVE ANSWER
