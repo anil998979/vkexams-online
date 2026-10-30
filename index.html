@@ -3500,11 +3500,11 @@ Forgot Password?
 
 <p class="login-note">
 
-You can attempt Free Mock Tests without login.
+Login / Register is required to access Free Mock Tests, attempt tests and save your results.
 
 <br>
 
-Login / Register is required for paid tests, saved results and account features.
+Please login or create an account to continue.
 
 </p>
 
@@ -4226,6 +4226,15 @@ function backToFreeMockCourses(){
 }
 
 function openFreeMocks(addHistory = true){
+
+    /* Free Mock Tests are available only to authenticated students. */
+    if(!isLoggedIn()){
+        window.__vkAfterLogin = "freeMocks";
+        openLogin();
+        toast("Free Mock Tests చూడటానికి ముందుగా Login / Register చేయండి.");
+        return;
+    }
+
 const courses = [
         ["APPSC","📚"],["Endowment Officer","🛕"],["High Court","⚖️"]
     ];
@@ -9552,6 +9561,26 @@ const QUESTIONS = [
    START FREE MOCK
 ===================================================== */
 async function startFreeMock(testNumber, options = {}){
+
+   /* Enforce login again when a test is launched, so direct calls cannot bypass the page gate. */
+   if(!isLoggedIn() || !supabaseClient){
+       window.__vkAfterLogin = "freeMocks";
+       openLogin();
+       toast("ఈ Free Mock Test ప్రారంభించడానికి Login / Register తప్పనిసరి.");
+       return;
+   }
+
+   const { data: gateSessionData, error: gateSessionError } =
+       await supabaseClient.auth.getSession();
+
+   if(gateSessionError || !gateSessionData?.session?.user || gateSessionData.session.user.is_anonymous){
+       clearUser();
+       window.__vkAfterLogin = "freeMocks";
+       openLogin();
+       toast("మీ Login session లేదు. ముందుగా Login చేయండి.");
+       return;
+   }
+
    const restoreState = options.restore ? (options.state || readFreeMockExamState()) : null;
    examReviewFlags = [];
    examBookmarkedQuestions = new Set();
@@ -9741,9 +9770,9 @@ if (!testData) {
 
         /* =========================================
            LOAD QUESTIONS
-           Free Mock Tests must work without login.
-           A signed-in user may get a server attempt for
-           saved results; otherwise the test runs locally.
+           Free Mock Tests require an authenticated student.
+           Authenticated users can receive a server attempt
+           so their results can be saved.
         ========================================= */
 
         let questionData =
@@ -9791,9 +9820,7 @@ if (!testData) {
                 questionResult.error;
         }
 
-        /* Try to create a server attempt only for a real
-           authenticated user. Guest/anonymous users must be
-           able to take Free Mock Tests without an account. */
+        /* Create a server attempt for the authenticated student. */
         currentAttemptId = restoreState?.attemptId || null;
 
         let sessionUser = null;
