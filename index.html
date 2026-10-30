@@ -2582,7 +2582,7 @@ Prepare from mobile, tablet or computer.
 
 <div class="container">
 <span class="back"
-      onclick="showPage('home')">
+      onclick="backToFreeMockCourses()">
     ← Back
 </span>
 
@@ -4214,6 +4214,16 @@ function toast(message){
 /* =====================================================
    FREE MOCK TESTS
 ===================================================== */
+
+function backToFreeMockCourses(){
+    /* Return from the uploaded-test list to the Free Mock course selector. */
+    openFreeMocks(false);
+    history.replaceState(
+        { vkPage: "freeMocks" },
+        "",
+        "#freeMocks"
+    );
+}
 
 function openFreeMocks(addHistory = true){
 const courses = [
