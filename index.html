@@ -2361,7 +2361,7 @@ Login
 
 <div
 id="home"
-class="page active">
+class="page">
 
 
 <section class="hero">
@@ -4180,6 +4180,11 @@ function toast(message){
     const t =
         $("toast");
 
+    if(!t){
+        console.warn("Toast element not found:", message);
+        return;
+    }
+
     t.textContent =
         message;
 
@@ -4349,8 +4354,7 @@ const courses = [
 
                 if(
                     Number.isFinite(normalizedNumber) &&
-                    normalizedNumber >= 1 &&
-                    normalizedNumber <= 5
+                    normalizedNumber >= 1
                 ){
                     cache.tests[
                         String(normalizedNumber)
@@ -4380,8 +4384,7 @@ const courses = [
                             option_c,
                             option_d,
                             marks,
-                            negative_marks,
-                            correct_option
+                            negative_marks
                         `)
                         .eq(
                             "test_id",
@@ -4398,14 +4401,42 @@ const courses = [
                             }
                         );
 
-                    if(!error){
-                        cache.questions[
-                            String(
-                                Number(test.test_number)
-                            )
-                        ] = questions || [];
+                    if(error){
+                        console.error("Preload questions error:", error);
+                        throw error;
                     }
 
+                    const loadedQuestions = questions || [];
+                    if(loadedQuestions.length){
+                        const questionIds = loadedQuestions.map(q => q.id);
+                        const {
+                            data: answerRows,
+                            error: answerError
+                        } = await supabaseClient
+                            .from("question_answers")
+                            .select("question_id,correct_option,explanation")
+                            .in("question_id", questionIds);
+
+                        if(answerError){
+                            console.error("Preload answer-key error:", answerError);
+                            throw answerError;
+                        }
+
+                        const answerMap = {};
+                        (answerRows || []).forEach(row => {
+                            answerMap[row.question_id] = row;
+                        });
+
+                        loadedQuestions.forEach(q => {
+                            const answer = answerMap[q.id] || {};
+                            q.correct_option = String(answer.correct_option || "").trim().toUpperCase();
+                            q.explanation = answer.explanation || "";
+                        });
+                    }
+
+                    cache.questions[
+                        String(Number(test.test_number))
+                    ] = loadedQuestions;
                 }
             )
         );
@@ -4450,7 +4481,14 @@ async function openFreeMockTests(course, addHistory = true){
     /* Wait for all 5 tests and their questions to preload before
        displaying the test cards. This removes the delay that
        otherwise occurs when a test card is clicked immediately. */
-    await preloadFreeMockData(course);
+    try{
+        await preloadFreeMockData(course);
+    }catch(preloadError){
+        console.error("Free Mock list preload failed:", preloadError);
+        toast("Unable to load Free Mock Tests. Please try again.");
+    }finally{
+        hideLoading();
+    }
 
     $("freeMocks").classList.add("mock-list-mode");
     const freeHeader = document.querySelector("#freeMocks .exam-header");
@@ -9714,8 +9752,7 @@ if (!testData) {
                         option_c,
                         option_d,
                         marks,
-                        negative_marks,
-                        correct_option
+                        negative_marks
                     `)
                     .eq(
                         "test_id",
@@ -9742,7 +9779,7 @@ if (!testData) {
         /* Try to create a server attempt only for a real
            authenticated user. Guest/anonymous users must be
            able to take Free Mock Tests without an account. */
-        currentAttemptId = null;
+        currentAttemptId = restoreState?.attemptId || null;
 
         let sessionUser = null;
 
@@ -9808,6 +9845,46 @@ if (!testData) {
             return;
         }
 
+        /* Correct answers and explanations are stored separately
+           in question_answers, not in the questions table. */
+        const questionIds = questionData.map(q => q.id);
+        const {
+            data: answerRows,
+            error: answerKeyError
+        } = await supabaseClient
+            .from("question_answers")
+            .select("question_id,correct_option,explanation")
+            .in("question_id", questionIds);
+
+        if(answerKeyError){
+            console.error("Answer key loading error:", answerKeyError);
+            toast("Unable to load the answer key. Please contact support.");
+            return;
+        }
+
+        const answerMap = {};
+        (answerRows || []).forEach(answer => {
+            answerMap[answer.question_id] = answer;
+        });
+
+        questionData = questionData.map(q => {
+            const answer = answerMap[q.id] || {};
+            return {
+                ...q,
+                correct_option: String(answer.correct_option || "").trim().toUpperCase(),
+                explanation: answer.explanation || ""
+            };
+        });
+
+        const invalidAnswerKey = questionData.filter(q =>
+            !["A","B","C","D"].includes(q.correct_option)
+        );
+        if(invalidAnswerKey.length){
+            console.error("Missing/invalid correct answers:", invalidAnswerKey);
+            toast("Answer key is missing for " + invalidAnswerKey.length + " question(s). Test cannot start.");
+            return;
+        }
+
         /* =========================================
            PREPARE QUESTIONS
         ========================================= */
@@ -9844,9 +9921,10 @@ if (!testData) {
                         ),
 
                     correctOption:
-                        String(
-                            q.correct_option || ""
-                        ).trim().toUpperCase()
+                        String(q.correct_option || "").trim().toUpperCase(),
+
+                    explanation:
+                        q.explanation || ""
                 };
 
             });
@@ -10541,6 +10619,7 @@ lastResult = {
         total > 0 ? (score / total) * 100 : 0;
 
     testSubmitted = true;
+    clearFreeMockExamState();
 
     lastResult = {
         attemptId:null,
@@ -10630,7 +10709,7 @@ async function viewSolutions(){
                             Correct Answer: <strong>${formatBilingualText(correctText)}</strong>
                         </div>
                         <div class="solution-explanation">
-                            Explanation not available.
+                            ${formatBilingualText(question.explanation || "Explanation not available.")}
                         </div>
                     </div>
                 `;
