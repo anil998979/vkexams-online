@@ -4043,6 +4043,33 @@ let currentAttemptId = null;
    let freeMockStarting = false;
    let testSubmitted = false;
 
+const FREE_MOCK_STATE_KEY = "vk_free_mock_exam_state_v1";
+function readFreeMockExamState(){
+    try{ return JSON.parse(sessionStorage.getItem(FREE_MOCK_STATE_KEY) || "null"); }
+    catch(error){ console.warn("Could not read saved exam state:", error); return null; }
+}
+function saveFreeMockExamState(){
+    if(!currentFreeMockTestId || !examQuestions.length || testSubmitted) return;
+    const state = {
+        testId: currentFreeMockTestId,
+        testNumber: currentFreeMockNumber,
+        course: currentCourse,
+        answers: userAnswers,
+        questionIndex: currentQuestionIndex,
+        timeLeft: timeLeft,
+        reviewFlags: examReviewFlags,
+        bookmarkedQuestions: Array.from(examBookmarkedQuestions || []),
+        language: examLanguage || "te",
+        attemptId: currentAttemptId,
+        savedAt: Date.now()
+    };
+    try{ sessionStorage.setItem(FREE_MOCK_STATE_KEY, JSON.stringify(state)); }
+    catch(error){ console.warn("Could not save exam state:", error); }
+}
+function clearFreeMockExamState(){
+    try{ sessionStorage.removeItem(FREE_MOCK_STATE_KEY); }catch(error){}
+}
+
 
 const $ = id =>
     document.getElementById(id);
@@ -9471,20 +9498,20 @@ const QUESTIONS = [
 /* =====================================================
    START FREE MOCK
 ===================================================== */
-async function startFreeMock(testNumber){
+async function startFreeMock(testNumber, options = {}){
+   const restoreState = options.restore ? (options.state || readFreeMockExamState()) : null;
    examReviewFlags = [];
    examBookmarkedQuestions = new Set();
    examPaletteHidden = false;
    examPaused = false;
    testSubmitted = false;
-   currentAttemptId = null;
+   currentAttemptId = restoreState?.attemptId || null;
     if(
     freeMockStarting ||
-    (
-        $("examPage") &&
-        $("examPage").classList.contains("active") &&
-        currentAttemptId
-    )
+    (!options.restore &&
+      $("examPage") &&
+      $("examPage").classList.contains("active") &&
+      currentAttemptId)
 ){
     return;
 }
@@ -9733,7 +9760,7 @@ if (!testData) {
             !!sessionUser &&
             !sessionUser.is_anonymous;
 
-        if(canCreateServerAttempt){
+        if(canCreateServerAttempt && !restoreState){
 
             const {
                 data:attemptData,
@@ -9829,24 +9856,28 @@ if (!testData) {
            RESET EXAM
         ========================================= */
 
-        userAnswers =
-            new Array(
-                examQuestions.length
-            ).fill(null);
+        const defaultAnswers = new Array(examQuestions.length).fill(null);
+        userAnswers = restoreState && Array.isArray(restoreState.answers)
+            ? examQuestions.map((q, i) => {
+                const value = restoreState.answers[i];
+                return Number.isInteger(value) && value >= 0 && value <= 3 ? value : null;
+              })
+            : defaultAnswers;
+        currentQuestionIndex = restoreState
+            ? Math.min(Math.max(Number(restoreState.questionIndex) || 0, 0), examQuestions.length - 1)
+            : 0;
+        examReviewFlags = restoreState && Array.isArray(restoreState.reviewFlags)
+            ? examQuestions.map((q, i) => !!restoreState.reviewFlags[i])
+            : new Array(examQuestions.length).fill(false);
+        examBookmarkedQuestions = new Set(restoreState?.bookmarkedQuestions || []);
+        examLanguage = restoreState?.language === "en" ? "en" : "te";
 
-        currentQuestionIndex = 0;
-
-
-        /* =========================================
-           TIMER
-        ========================================= */
-
+        /* Restore remaining time and answers after a browser refresh. */
         clearInterval(timerInterval);
-
-        timeLeft =
-            Number(
-                testData.duration_minutes || 10
-            ) * 60;
+        const defaultDuration = Number(testData.duration_minutes || 10) * 60;
+        timeLeft = restoreState && Number.isFinite(Number(restoreState.timeLeft))
+            ? Math.max(0, Number(restoreState.timeLeft))
+            : defaultDuration;
 
 
         $("examTitle").textContent =
@@ -9855,11 +9886,17 @@ if (!testData) {
             testNumber;
 
 
-        showPage("examPage");
+        showPage("examPage", false);
+        const examUrl = "#examPage?course=" + encodeURIComponent(currentCourse) + "&test=" + encodeURIComponent(normalizedTestNumber);
+        if(!restoreState){
+            history.pushState({vkPage:"examPage", course:currentCourse, testNumber:normalizedTestNumber}, "", examUrl);
+        }else{
+            history.replaceState({vkPage:"examPage", course:currentCourse, testNumber:normalizedTestNumber}, "", examUrl);
+        }
 
         renderQuestion();
-
         renderTimer();
+        saveFreeMockExamState();
 
 
         /* =========================================
@@ -9874,6 +9911,7 @@ if (!testData) {
                     timeLeft--;
 
                     renderTimer();
+                    saveFreeMockExamState();
                 }
 
                 if(timeLeft <= 0){
@@ -10055,6 +10093,7 @@ function renderQuestion(){
     const teluguButton=$("languageTeluguButton");
     if(englishButton) englishButton.classList.toggle("active",examLanguage==="en");
     if(teluguButton) teluguButton.classList.toggle("active",examLanguage==="te");
+    saveFreeMockExamState();
 }
 
 let examLanguage = "te";
@@ -10111,6 +10150,7 @@ function saveAnswer(index){
         currentQuestionIndex
     ] =
         Number(index);
+    saveFreeMockExamState();
 
 }
 
@@ -10199,6 +10239,7 @@ async function submitExam(timeout = false){
     }
 
     clearInterval(timerInterval);
+    clearFreeMockExamState();
 
     /* -----------------------------------------
        Build answers for Supabase
@@ -10873,6 +10914,20 @@ if(
 
     return;
 }
+        if(page === "examPage"){
+            const examCourse = hashParams.get("course") || event.state?.course;
+            const examNumber = Number(hashParams.get("test") || event.state?.testNumber);
+            const savedExam = readFreeMockExamState();
+            if(examCourse && examNumber && savedExam && savedExam.course === examCourse && Number(savedExam.testNumber) === examNumber){
+                currentCourse = examCourse;
+                startFreeMock(examNumber, {restore:true, state:savedExam});
+            }else if(examCourse && examNumber){
+                currentCourse = examCourse;
+                startFreeMock(examNumber);
+            }
+            return;
+        }
+
         if(page === "settings"){
 
               showPage(
@@ -10934,7 +10989,23 @@ const initialPage = initialHashParts[0] || "";
 const initialHashParams = new URLSearchParams(initialHashParts[1] || "");
 const initialFreeMockCourse = initialHashParams.get("course");
 
-if(initialPage === "freeMocks"){
+if(initialPage === "examPage"){
+    const initialExamCourse = initialHashParams.get("course");
+    const initialExamNumber = Number(initialHashParams.get("test"));
+    const savedExam = readFreeMockExamState();
+    if(initialExamCourse && initialExamNumber){
+        currentCourse = initialExamCourse;
+        if(savedExam && savedExam.course === initialExamCourse && Number(savedExam.testNumber) === initialExamNumber){
+            startFreeMock(initialExamNumber, {restore:true, state:savedExam});
+        }else{
+            startFreeMock(initialExamNumber);
+        }
+    }else{
+        showPage("freeMocks", false);
+        openFreeMocks(false);
+    }
+}
+else if(initialPage === "freeMocks"){
     if(initialFreeMockCourse){
         openFreeMockTests(initialFreeMockCourse, false);
     }else{
@@ -10985,6 +11056,10 @@ else{
 
 initializeAuth();
 
+
+window.addEventListener("beforeunload", function(){
+    saveFreeMockExamState();
+});
 
 /* =====================================================
    BASIC CONTEXT MENU DETERRENT
