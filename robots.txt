@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
-Disallow: /super-admin.html
+
 Sitemap: https://vkexams.online/sitemap.xml
