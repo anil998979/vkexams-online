@@ -4235,12 +4235,44 @@ function toast(message){
 ===================================================== */
 
 function backToFreeMockCourses(){
-    /* Return from the uploaded-test list to the Free Mock course selector. */
-    openFreeMocks(false);
+    const freeMocksPage = $("freeMocks");
+
+    /*
+       Free Mock Tests has two levels:
+       1. Course selector
+       2. Uploaded test list for the selected course
+
+       From the uploaded test list, return to the course selector.
+       From the course selector, return to the page that opened it.
+    */
+    if(freeMocksPage && freeMocksPage.classList.contains("mock-list-mode")){
+        openFreeMocks(false);
+        history.replaceState(
+            { vkPage: "freeMocks" },
+            "",
+            "#freeMocks"
+        );
+        return;
+    }
+
+    const originPage = window.__vkFreeMockOriginPage;
+    if(originPage && $(originPage)){
+        showPage(originPage, false);
+        history.replaceState(
+            { vkPage: originPage },
+            "",
+            "#" + originPage
+        );
+        window.__vkFreeMockOriginPage = null;
+        return;
+    }
+
+    /* Fallback when the course selector was opened directly by URL. */
+    showHome();
     history.replaceState(
-        { vkPage: "freeMocks" },
+        { vkPage: "home" },
         "",
-        "#freeMocks"
+        "#home"
     );
 }
 
@@ -4254,7 +4286,15 @@ function openFreeMocks(addHistory = true){
         return;
     }
 
-const courses = [
+/* Remember which page opened the Free Mock course selector. */
+    if(addHistory){
+        const activePage = document.querySelector(".page.active");
+        if(activePage && activePage.id !== "freeMocks"){
+            window.__vkFreeMockOriginPage = activePage.id;
+        }
+    }
+
+    const courses = [
         ["APPSC","📚"],["Endowment Officer","🛕"],["High Court","⚖️"]
     ];
 
