@@ -38,7 +38,7 @@
 <div class="panel"><div class="label">Ad Analytics</div><div class="metric" style="font-size:18px">Not connected</div><div class="small muted">AdSense reporting API required</div></div>
 </div>
 <div class="layout"><aside class="panel nav">
-<button class="active" onclick="showTab('overview',this)">Overview</button><button onclick="showTab('studentsTab',this)">Students</button><button onclick="showTab('purchasesTab',this)">Purchases</button><button onclick="showTab('attemptsTab',this)">Test Attempts</button><button onclick="showTab('reportsTab',this)">Daily / Monthly Reports</button><button onclick="showTab('adsTab',this)">Ad Analytics</button>
+<button class="active" onclick="showTab('overview',this)">Overview</button><button onclick="showTab('studentsTab',this)">Students</button><button onclick="showTab('purchasesTab',this)">Purchases</button><button onclick="showTab('attemptsTab',this)">Test Attempts</button><button onclick="showTab('reportsTab',this)">Daily / Monthly Reports</button><button onclick="showTab('adsTab',this)">Ad Analytics</button><button onclick="showTab('cleanupTab',this)">Test Data Cleanup</button>
 </aside><div>
 <section id="overview" class="panel section"><h2>Activity overview</h2><p class="muted small">Daily new students, test attempts and paid revenue for the selected period (daily series capped to recent 30 days).</p><div id="dailyChart" class="chart"></div><div class="tablewrap"><table id="dailyTable"><thead><tr><th>Date</th><th>New students</th><th>Attempts</th><th>Paid revenue</th></tr></thead><tbody></tbody></table></div></section>
 <section id="studentsTab" class="panel section hidden"><h2>Recent students</h2><p class="muted small">Latest 100 Auth accounts. Passwords and OTPs are never displayed.</p><div class="tablewrap"><table><thead><tr><th>Name</th><th>Email</th><th>Registered</th><th>Last login</th></tr></thead><tbody id="studentRows"></tbody></table></div></section>
@@ -46,6 +46,26 @@
 <section id="attemptsTab" class="panel section hidden"><h2>Test attempts</h2><div class="tablewrap"><table><thead><tr><th>Completed</th><th>Student</th><th>Test</th><th>Type</th><th>Score</th><th>%</th></tr></thead><tbody id="attemptRows"></tbody></table></div></section>
 <section id="reportsTab" class="panel section hidden"><h2>Daily / Monthly Reports</h2><p class="muted small">Choose Today, Last 7 days, Last 30 days, This month or All time above. Export the visible table to CSV.</p><div class="tablewrap"><table><thead><tr><th>Date</th><th>New students</th><th>Attempts</th><th>Revenue</th></tr></thead><tbody id="reportRows"></tbody></table></div></section>
 <section id="adsTab" class="panel section hidden"><h2>Advertisement analytics</h2><div class="status">Not connected</div><p style="margin-top:12px">Your website currently includes Google AdSense code and Google Analytics tag. This dashboard does not yet have permission to read AdSense earnings, impressions or clicks. Those metrics require a separate Google OAuth / AdSense reporting API connection. We will not estimate or fabricate them.</p></section>
+<section id="cleanupTab" class="panel section hidden">
+<h2>Test Data Cleanup</h2>
+<p class="muted small">Find a student account and preview its test and purchase records before deletion. The Supabase Auth account is preserved.</p>
+<div class="toolbar">
+  <input id="cleanupEmail" type="email" placeholder="Student email address" style="min-width:260px;flex:1">
+  <button class="btn primary" onclick="previewCleanup()">Preview records</button>
+</div>
+<div id="cleanupMessage" class="small muted" aria-live="polite">No account selected.</div>
+<div id="cleanupPreview" class="hidden">
+  <div class="grid" style="grid-template-columns:repeat(3,1fr)">
+    <div class="panel"><div class="label">Test attempts</div><div class="metric" id="cleanupAttempts">—</div></div>
+    <div class="panel"><div class="label">Test results</div><div class="metric" id="cleanupResults">—</div></div>
+    <div class="panel"><div class="label">Purchases</div><div class="metric" id="cleanupPurchases">—</div></div>
+  </div>
+  <p class="small muted">Only these three record groups will be deleted. Student Auth account, profile, coins and support requests will remain. This action cannot be undone.</p>
+  <label for="cleanupConfirm"><b>To confirm, type the exact email shown above:</b></label>
+  <input id="cleanupConfirm" type="email" placeholder="Type the same email to confirm" style="width:100%;margin:8px 0">
+  <button class="btn danger" style="border-color:#dc2626" onclick="deleteCleanup()">Delete previewed test and purchase data</button>
+</div>
+</section>
 </div></div>
 </section>
 </main>
@@ -76,6 +96,37 @@ const rows=d.daily||[];$('dailyTable').querySelector('tbody').innerHTML=rows.map
 const max=Math.max(1,...rows.map(x=>Number(x.attempts||0)));$('dailyChart').innerHTML=rows.slice(-14).map(x=>`<div class="bar" title="${esc(x.day)}: ${x.attempts} attempts" style="height:${Math.max(3,Number(x.attempts||0)/max*100)}%"><span>${String(x.day).slice(5)}</span></div>`).join('')}
 function esc(v){return String(v??'—').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function showTab(id,btn){document.querySelectorAll('#app .section').forEach(x=>x.classList.add('hidden'));$(id).classList.remove('hidden');document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));btn.classList.add('active');currentTab=id}
+let cleanupPreviewData=null;
+async function previewCleanup(){
+  const email=$('cleanupEmail').value.trim().toLowerCase();
+  $('cleanupPreview').classList.add('hidden');
+  $('cleanupMessage').textContent='Checking account and records…';
+  if(!email || !email.includes('@')){$('cleanupMessage').textContent='Enter a valid email address.';return}
+  const {data,error}=await sb.rpc('vk_super_admin_cleanup_preview',{p_email:email});
+  if(error){$('cleanupMessage').textContent='Preview failed: '+error.message;return}
+  cleanupPreviewData=data;
+  $('cleanupMessage').textContent='Account: '+data.email+' · User ID: '+data.user_id;
+  $('cleanupAttempts').textContent=Number(data.test_attempts||0).toLocaleString('en-IN');
+  $('cleanupResults').textContent=Number(data.test_results||0).toLocaleString('en-IN');
+  $('cleanupPurchases').textContent=Number(data.purchases||0).toLocaleString('en-IN');
+  $('cleanupConfirm').value='';
+  $('cleanupPreview').classList.remove('hidden');
+}
+async function deleteCleanup(){
+  if(!cleanupPreviewData){$('cleanupMessage').textContent='Run Preview first.';return}
+  const email=$('cleanupEmail').value.trim().toLowerCase();
+  const confirmEmail=$('cleanupConfirm').value.trim().toLowerCase();
+  if(confirmEmail!==email){$('cleanupMessage').textContent='Confirmation email does not match. Nothing was deleted.';return}
+  if(!confirm('Permanently delete test attempts, test results and purchases for '+email+'? The Auth account will remain.'))return;
+  $('cleanupMessage').textContent='Deleting selected records…';
+  const {data,error}=await sb.rpc('vk_super_admin_cleanup_delete',{p_email:email,p_confirm_email:confirmEmail});
+  if(error){$('cleanupMessage').textContent='Delete failed: '+error.message;return}
+  $('cleanupMessage').textContent='Cleanup completed for '+data.email+'. Deleted: '+data.test_attempts+' test attempts, '+data.test_results+' test results and '+data.purchases+' purchases. Auth account preserved.';
+  $('cleanupPreview').classList.add('hidden');
+  cleanupPreviewData=null;
+  $('cleanupConfirm').value='';
+  await loadDashboard();
+}
 function exportCurrent(){let table=$(currentTab).querySelector('table');if(!table){alert('No table to export');return}let rows=[...table.querySelectorAll('tr')].map(r=>[...r.children].map(c=>'"'+c.innerText.replace(/"/g,'""')+'"').join(',')).join('\n');let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([rows],{type:'text/csv;charset=utf-8'}));a.download='vk-exams-'+currentTab+'.csv';a.click();URL.revokeObjectURL(a.href)}
 sb.auth.onAuthStateChange((event,session)=>{if(event==='PASSWORD_RECOVERY'){showRecovery();return}if(session && event==='SIGNED_IN')gate()});
 (async()=>{const params=new URLSearchParams(location.search);if(params.get('mode')==='recovery'){const {data}=await sb.auth.getSession();if(data.session){showRecovery();return}}await gate()})();
