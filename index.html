@@ -3399,17 +3399,32 @@ Select
     <span class="back" onclick="showHome()">← Back to Home</span>
     <div class="exam-header" style="margin-top:18px">
       <h1>Mock Test Builder</h1>
-      <p>Create and publish Free Mock Tests. Topic-wise test numbering is assigned automatically.</p>
+      <p>Manage Free Mock Tests and Paid Test Series from one dashboard. Bulk upload, validate and publish.</p>
     </div>
 
     <div class="vk-admin-panel">
       <h2 style="margin-bottom:16px">Test Details</h2>
       <div class="vk-admin-grid">
         <div class="vk-admin-field">
+          <label for="vkAdminTestType">Test Type</label>
+          <select id="vkAdminTestType" onchange="vkAdminOnTestTypeChange()">
+            <option value="free">Free Mock Test</option>
+            <option value="paid">Paid Test Series</option>
+          </select>
+        </div>
+        <div class="vk-admin-field">
           <label for="vkAdminCourse">Course</label>
           <select id="vkAdminCourse"><option value="">Loading courses...</option></select>
         </div>
-        <div class="vk-admin-field">
+        <div class="vk-admin-field" id="vkAdminPaperWrap" style="display:none">
+          <label for="vkAdminPaper">Paid Paper</label>
+          <select id="vkAdminPaper">
+            <option value="Paper 1">Paper 1</option>
+            <option value="Paper 2">Paper 2</option>
+          </select>
+          <p class="vk-admin-hint">Test number is assigned automatically within the selected paper.</p>
+        </div>
+        <div class="vk-admin-field" id="vkAdminTopicWrap">
           <label for="vkAdminTopic">Topic Name</label>
           <input id="vkAdminTopic" type="text" maxlength="120" placeholder="e.g. Ramayanam">
         </div>
@@ -3422,14 +3437,14 @@ Select
           <input id="vkAdminNegative" type="number" min="0" max="5" step="0.000001" value="0.333333">
         </div>
       </div>
-      <p class="vk-admin-hint" style="margin-top:12px">Test title and topic test number are generated automatically, for example: Ramayanam - Test 2.</p>
+      <p id="vkAdminNamingHint" class="vk-admin-hint" style="margin-top:12px">Free tests receive automatic topic-wise titles, for example: Ramayanam - Test 2. Paid tests are numbered separately under Paper 1 and Paper 2.</p>
     </div>
 
 
     <div class="vk-admin-panel" id="vkAdminBulkImportPanel">
       <div class="vk-admin-qtop">
         <div>
-          <h2>Bulk Question Upload</h2>
+          <h2>Bulk Question Upload – Free & Paid</h2>
           <p class="vk-admin-hint">Upload an Excel (.xlsx), CSV file, or paste JSON to import many questions at once.</p>
         </div>
         <span class="badge">Bulk Import</span>
@@ -3479,7 +3494,7 @@ Select
 
     <div class="vk-admin-panel">
       <div class="vk-admin-actions">
-        <button type="button" id="vkAdminPublishBtn" class="vk-admin-btn vk-admin-btn-primary" onclick="vkAdminPublishTest()">Publish Mock Test</button>
+        <button type="button" id="vkAdminPublishBtn" class="vk-admin-btn vk-admin-btn-primary" onclick="vkAdminPublishTest()">Publish Test</button>
         <button type="button" class="vk-admin-btn vk-admin-btn-secondary" onclick="vkAdminResetBuilder()">Clear Form</button>
       </div>
       <div id="vkAdminStatus" class="vk-admin-status" role="status" aria-live="polite"></div>
@@ -7195,6 +7210,7 @@ async function openAdminMockBuilder(){
     }
     showPage("vkAdminMockBuilder");
     await vkAdminLoadCourses();
+    vkAdminOnTestTypeChange();
     if(!document.getElementById("vkAdminQuestions").children.length){
         vkAdminAddQuestion();
     }
@@ -7216,6 +7232,23 @@ async function vkAdminLoadCourses(){
         select.innerHTML = '<option value="">Unable to load courses</option>';
         vkAdminShowStatus("Could not load courses: " + (error.message || error),true);
     }
+}
+
+function vkAdminOnTestTypeChange(){
+    const type=document.getElementById("vkAdminTestType")?.value || "free";
+    const paid=type==="paid";
+    const topicWrap=document.getElementById("vkAdminTopicWrap");
+    const paperWrap=document.getElementById("vkAdminPaperWrap");
+    const hint=document.getElementById("vkAdminNamingHint");
+    const bulkTitle=document.querySelector("#vkAdminBulkImportPanel h2");
+    if(topicWrap) topicWrap.style.display=paid?"none":"block";
+    if(paperWrap) paperWrap.style.display=paid?"block":"none";
+    if(hint) hint.textContent=paid
+      ? "Paid tests are created under the selected Paper 1 or Paper 2 series. Each paid test must contain exactly 150 questions."
+      : "Free tests receive automatic topic-wise titles, for example: Ramayanam - Test 2.";
+    if(bulkTitle) bulkTitle.textContent=paid?"Bulk Question Upload – Paid Test":"Bulk Question Upload – Free Test";
+    const publish=document.getElementById("vkAdminPublishBtn");
+    if(publish) publish.textContent=paid?"Publish Paid Test":"Publish Free Test";
 }
 
 function vkAdminAddQuestion(){
@@ -7298,14 +7331,20 @@ async function vkAdminPublishTest(){
         vkAdminShowStatus("Admin permission is required to publish tests.",true);
         return;
     }
+    const testType = document.getElementById("vkAdminTestType")?.value || "free";
+    const isPaid = testType === "paid";
     const courseName = (document.getElementById("vkAdminCourse")?.value || "").trim();
     const topicName = (document.getElementById("vkAdminTopic")?.value || "").trim();
+    const paperName = (document.getElementById("vkAdminPaper")?.value || "Paper 1").trim();
     const duration = Number(document.getElementById("vkAdminDuration")?.value);
     const negativeMarks = Number(document.getElementById("vkAdminNegative")?.value);
     const cards = Array.from(document.querySelectorAll("#vkAdminQuestions .vk-admin-question"));
 
-    if(!courseName || !topicName){
-        vkAdminShowStatus("Select a course and enter a topic name.",true); return;
+    if(!courseName || (!isPaid && !topicName)){
+        vkAdminShowStatus(isPaid?"Select a course.":"Select a course and enter a topic name.",true); return;
+    }
+    if(isPaid && !["Paper 1","Paper 2"].includes(paperName)){
+        vkAdminShowStatus("Select Paper 1 or Paper 2.",true); return;
     }
     if(!Number.isInteger(duration) || duration < 1 || duration > 300){
         vkAdminShowStatus("Duration must be between 1 and 300 minutes.",true); return;
@@ -7314,7 +7353,10 @@ async function vkAdminPublishTest(){
         vkAdminShowStatus("Negative marks must be between 0 and 5.",true); return;
     }
     if(!cards.length){
-        vkAdminShowStatus("Add at least one question.",true); return;
+        vkAdminShowStatus("Add questions before publishing.",true); return;
+    }
+    if(isPaid && cards.length !== 150){
+        vkAdminShowStatus(`Paid tests require exactly 150 questions. Current count: ${cards.length}.`,true); return;
     }
 
     const questions = [];
@@ -7334,6 +7376,9 @@ async function vkAdminPublishTest(){
         if(!item.question_text || !item.option_a || !item.option_b || !item.option_c || !item.option_d){
             vkAdminShowStatus(`Question ${index+1}: enter the question and all four options.`,true); return;
         }
+        if(!["A","B","C","D"].includes(item.correct_option)){
+            vkAdminShowStatus(`Question ${index+1}: select the correct answer.`,true); return;
+        }
         if(!Number.isFinite(item.marks) || item.marks <= 0){
             vkAdminShowStatus(`Question ${index+1}: marks must be greater than zero.`,true); return;
         }
@@ -7346,30 +7391,38 @@ async function vkAdminPublishTest(){
     if(button){button.disabled=true;button.textContent="Publishing...";}
     vkAdminShowStatus("Publishing test and saving questions...",false);
     try{
-        const {data,error} = await supabaseClient.rpc("vk_admin_create_free_mock_test",{
+        const rpcName = isPaid ? "vk_admin_create_paid_mock_test" : "vk_admin_create_free_mock_test";
+        const rpcArgs = isPaid ? {
+            p_course_name:courseName,
+            p_paper_name:paperName,
+            p_duration_minutes:duration,
+            p_negative_marks:negativeMarks,
+            p_questions:questions
+        } : {
             p_course_name:courseName,
             p_topic_name:topicName,
             p_duration_minutes:duration,
             p_negative_marks:negativeMarks,
             p_questions:questions
-        });
+        };
+        const {data,error} = await supabaseClient.rpc(rpcName,rpcArgs);
         if(error) throw error;
         const result = Array.isArray(data) ? data[0] : data;
-        const title = result?.title || (topicName + " - Test");
-        const number = result?.topic_test_number;
-        vkAdminShowStatus(`Published successfully: ${title}${number ? " (Topic Test " + number + ")" : ""}. Questions: ${questions.length}.`,false);
+        const title = result?.title || (isPaid ? paperName + " - Test" : topicName + " - Test");
+        const number = isPaid ? result?.website_test_number : result?.topic_test_number;
+        vkAdminShowStatus(`Published successfully: ${title}${number ? " (Test " + number + ")" : ""}. Questions: ${questions.length}.`,false);
         const courseSelect = document.getElementById("vkAdminCourse");
         const publishedCourse = courseSelect?.value;
         vkAdminResetBuilder();
         if(courseSelect && publishedCourse) courseSelect.value = publishedCourse;
+        vkAdminOnTestTypeChange();
     }catch(error){
         console.error("Mock test publish failed:",error);
-        vkAdminShowStatus("Publish failed: " + (error.message || "Please check Supabase SQL setup and admin permissions."),true);
+        vkAdminShowStatus("Publish failed: " + (error.message || "Please check the Unified Admin SQL setup and admin permissions."),true);
     }finally{
-        if(button){button.disabled=false;button.textContent="Publish Mock Test";}
+        if(button){button.disabled=false;button.textContent=(document.getElementById("vkAdminTestType")?.value==="paid"?"Publish Paid Test":"Publish Free Test");}
     }
 }
-
 
 
 /* =====================================================
