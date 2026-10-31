@@ -2304,8 +2304,25 @@ footer p{
 .vk-admin-status.error{display:block;background:#fef2f2;color:#991b1b}
 @media(max-width:700px){.vk-admin-grid,.vk-admin-options{grid-template-columns:1fr}.vk-admin-panel{padding:16px}.vk-admin-wrap{padding:16px 10px 40px}}
 
+
+/* Bulk import UI */
+.vk-bulk-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.vk-bulk-tab{border:1px solid #cbd5e1;background:#fff;color:#334155;border-radius:9px;padding:9px 14px;font-weight:800;cursor:pointer}
+.vk-bulk-tab.active{background:#0f766e;color:#fff;border-color:#0f766e}
+.vk-bulk-pane{display:none;margin-top:14px}
+.vk-bulk-pane.active{display:block}
+.vk-bulk-preview{overflow:auto;margin-top:14px;border:1px solid #dbe4f0;border-radius:10px}
+.vk-bulk-preview table{width:100%;border-collapse:collapse;min-width:720px;font-size:12px}
+.vk-bulk-preview th,.vk-bulk-preview td{padding:9px;border-bottom:1px solid #e2e8f0;text-align:left;vertical-align:top}
+.vk-bulk-preview th{background:#f1f5f9;color:#334155;position:sticky;top:0}
+.vk-bulk-valid{color:#047857;font-weight:800}.vk-bulk-invalid{color:#b91c1c;font-weight:800}
+.vk-bulk-error{margin:10px 0;padding:10px 12px;border-radius:9px;background:#fff1f2;color:#9f1239;white-space:pre-wrap;font-size:13px}
+.vk-bulk-success{margin:10px 0;padding:10px 12px;border-radius:9px;background:#ecfdf5;color:#065f46;font-size:13px}
+
 </style>
 
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 
 
@@ -3401,11 +3418,52 @@ Select
           <input id="vkAdminDuration" type="number" min="1" max="300" value="30">
         </div>
         <div class="vk-admin-field">
-          <label for="vkAdminNegative">Negative marks per wrong answer</label>
-          <input id="vkAdminNegative" type="number" min="0" max="5" step="0.01" value="0.33">
+          <label for="vkAdminNegative">Negative marks per wrong answer (1/3)</label>
+          <input id="vkAdminNegative" type="number" min="0" max="5" step="0.000001" value="0.333333">
         </div>
       </div>
       <p class="vk-admin-hint" style="margin-top:12px">Test title and topic test number are generated automatically, for example: Ramayanam - Test 2.</p>
+    </div>
+
+
+    <div class="vk-admin-panel" id="vkAdminBulkImportPanel">
+      <div class="vk-admin-qtop">
+        <div>
+          <h2>Bulk Question Upload</h2>
+          <p class="vk-admin-hint">Upload an Excel (.xlsx), CSV file, or paste JSON to import many questions at once.</p>
+        </div>
+        <span class="badge">Bulk Import</span>
+      </div>
+      <div class="vk-bulk-tabs">
+        <button type="button" class="vk-bulk-tab active" data-pane="file" onclick="vkAdminSelectBulkPane('file',this)">Excel / CSV Upload</button>
+        <button type="button" class="vk-bulk-tab" data-pane="json" onclick="vkAdminSelectBulkPane('json',this)">JSON Paste</button>
+      </div>
+      <div id="vkBulkPaneFile" class="vk-bulk-pane active">
+        <div class="vk-admin-field">
+          <label for="vkAdminBulkFile">Choose .xlsx or .csv file</label>
+          <input id="vkAdminBulkFile" type="file" accept=".xlsx,.xls,.csv">
+        </div>
+        <div class="vk-admin-actions">
+          <button type="button" class="vk-admin-btn vk-admin-btn-secondary" onclick="vkAdminDownloadCsvTemplate()">Download CSV Template</button>
+          <button type="button" class="vk-admin-btn vk-admin-btn-primary" onclick="vkAdminParseBulkFile()">Read File & Preview</button>
+        </div>
+        <p class="vk-admin-hint">Excel columns: question_text, option_a, option_b, option_c, option_d, correct_option, explanation, marks. Header row is required.</p>
+      </div>
+      <div id="vkBulkPaneJson" class="vk-bulk-pane">
+        <div class="vk-admin-field">
+          <label for="vkAdminBulkJson">Paste JSON question array</label>
+          <textarea id="vkAdminBulkJson" rows="9" placeholder='[{"question_text":"...","option_a":"...","option_b":"...","option_c":"...","option_d":"...","correct_option":"A","explanation":"...","marks":1}]'></textarea>
+        </div>
+        <div class="vk-admin-actions">
+          <button type="button" class="vk-admin-btn vk-admin-btn-primary" onclick="vkAdminParseBulkJson()">Validate JSON & Preview</button>
+        </div>
+      </div>
+      <div id="vkAdminBulkFeedback" aria-live="polite"></div>
+      <div id="vkAdminBulkPreview" class="vk-bulk-preview" style="display:none"></div>
+      <div id="vkAdminBulkApplyWrap" class="vk-admin-actions" style="display:none">
+        <button type="button" class="vk-admin-btn vk-admin-btn-primary" onclick="vkAdminApplyBulkQuestions()">Use These Questions in Test</button>
+        <span class="vk-admin-hint">This fills the question editor. Nothing is published until you click Publish Mock Test.</span>
+      </div>
     </div>
 
     <div class="vk-admin-panel">
@@ -7226,7 +7284,7 @@ function vkAdminResetBuilder(){
     const negative = document.getElementById("vkAdminNegative");
     if(topic) topic.value = "";
     if(duration) duration.value = "30";
-    if(negative) negative.value = "0.33";
+    if(negative) negative.value = "0.333333";
     const host = document.getElementById("vkAdminQuestions");
     if(host) host.innerHTML = "";
     vkAdminAddQuestion();
@@ -7310,6 +7368,175 @@ async function vkAdminPublishTest(){
     }finally{
         if(button){button.disabled=false;button.textContent="Publish Mock Test";}
     }
+}
+
+
+
+/* =====================================================
+   BULK QUESTION IMPORT: XLSX / CSV / JSON
+   Import is previewed and validated before populating
+   the existing question editor and secure publish RPC.
+===================================================== */
+let vkAdminBulkParsedQuestions = [];
+
+function vkAdminSelectBulkPane(which,button){
+    document.querySelectorAll(".vk-bulk-tab").forEach(x=>x.classList.toggle("active",x===button));
+    document.getElementById("vkBulkPaneFile").classList.toggle("active",which==="file");
+    document.getElementById("vkBulkPaneJson").classList.toggle("active",which==="json");
+    document.getElementById("vkAdminBulkFeedback").innerHTML="";
+}
+
+function vkAdminNormalizeHeader(value){
+    return String(value||"").trim().toLowerCase().replace(/[\s\-]+/g,"_");
+}
+
+function vkAdminMapBulkRow(row,index){
+    const normalized = {};
+    Object.keys(row||{}).forEach(key=>normalized[vkAdminNormalizeHeader(key)]=row[key]);
+    const pick = (...keys)=>{
+        for(const key of keys){
+            const value=normalized[key];
+            if(value!==undefined && value!==null && String(value).trim()!=="") return String(value).trim();
+        }
+        return "";
+    };
+    let correct=pick("correct_option","correct_answer","answer","key").toUpperCase();
+    const answerMap={"OPTION A":"A","OPTION B":"B","OPTION C":"C","OPTION D":"D","1":"A","2":"B","3":"C","4":"D"};
+    correct=answerMap[correct]||correct;
+    return {
+        question_text:pick("question_text","question","question_telugu","ప్రశ్న"),
+        option_a:pick("option_a","optiona","a","option_1","ప్రత్యామ్నాయం_a"),
+        option_b:pick("option_b","optionb","b","option_2","ప్రత్యామ్నాయం_b"),
+        option_c:pick("option_c","optionc","c","option_3","ప్రత్యామ్నాయం_c"),
+        option_d:pick("option_d","optiond","d","option_4","ప్రత్యామ్నాయం_d"),
+        correct_option:correct,
+        explanation:pick("explanation","answer_explanation","solution","వివరణ"),
+        marks:Number(pick("marks","mark")||1),
+        _row:index+1
+    };
+}
+
+function vkAdminValidateBulkRows(rows){
+    const questions=(rows||[]).map((row,index)=>vkAdminMapBulkRow(row,index));
+    const errors=[];
+    if(!questions.length) errors.push("No question rows found.");
+    if(questions.length>500) errors.push("Maximum 500 questions can be imported at once.");
+    questions.forEach((q,i)=>{
+        const n=i+1;
+        ["question_text","option_a","option_b","option_c","option_d","explanation"].forEach(field=>{
+            if(!q[field]) errors.push(`Row ${n}: ${field.replaceAll("_"," ")} is missing.`);
+        });
+        if(!["A","B","C","D"].includes(q.correct_option)) errors.push(`Row ${n}: correct_option must be A, B, C, or D.`);
+        if(!Number.isFinite(q.marks)||q.marks<=0) errors.push(`Row ${n}: marks must be greater than zero.`);
+    });
+    return {questions,errors};
+}
+
+function vkAdminRenderBulkPreview(result){
+    const feedback=document.getElementById("vkAdminBulkFeedback");
+    const preview=document.getElementById("vkAdminBulkPreview");
+    const apply=document.getElementById("vkAdminBulkApplyWrap");
+    vkAdminBulkParsedQuestions=[];
+    apply.style.display="none";
+    preview.style.display="none";
+    if(result.errors.length){
+        feedback.innerHTML='<div class="vk-bulk-error"><strong>Import validation failed</strong>\n'+result.errors.slice(0,30).map(vkAdminEscape).join("\n")+(result.errors.length>30?`\n...and ${result.errors.length-30} more errors`:"")+'</div>';
+        return;
+    }
+    vkAdminBulkParsedQuestions=result.questions.map(({_row,...q})=>q);
+    const rows=vkAdminBulkParsedQuestions.map((q,i)=>`<tr>
+      <td>${i+1}</td><td>${vkAdminEscape(q.question_text)}</td>
+      <td>${vkAdminEscape(q.option_a)}</td><td>${vkAdminEscape(q.option_b)}</td>
+      <td>${vkAdminEscape(q.option_c)}</td><td>${vkAdminEscape(q.option_d)}</td>
+      <td><strong>${q.correct_option}</strong></td><td>${vkAdminEscape(q.marks)}</td>
+    </tr>`).join("");
+    preview.innerHTML=`<table><thead><tr><th>#</th><th>Question</th><th>Option A</th><th>Option B</th><th>Option C</th><th>Option D</th><th>Answer</th><th>Marks</th></tr></thead><tbody>${rows}</tbody></table>`;
+    preview.style.display="block";
+    feedback.innerHTML=`<div class="vk-bulk-success"><strong>${vkAdminBulkParsedQuestions.length} questions validated successfully.</strong> Review the preview, then select “Use These Questions in Test”.</div>`;
+    apply.style.display="flex";
+}
+
+function vkAdminParseBulkJson(){
+    const raw=(document.getElementById("vkAdminBulkJson").value||"").trim();
+    try{
+        const parsed=JSON.parse(raw);
+        const rows=Array.isArray(parsed)?parsed:(Array.isArray(parsed.questions)?parsed.questions:null);
+        if(!rows) throw new Error("JSON must be an array of question objects, or an object containing a questions array.");
+        vkAdminRenderBulkPreview(vkAdminValidateBulkRows(rows));
+    }catch(error){
+        document.getElementById("vkAdminBulkFeedback").innerHTML='<div class="vk-bulk-error">'+vkAdminEscape(error.message)+'</div>';
+    }
+}
+
+function vkAdminParseCsvText(text){
+    const rows=[];let row=[],cell="",quoted=false;
+    for(let i=0;i<text.length;i++){
+        const ch=text[i],next=text[i+1];
+        if(ch==='"' && quoted && next==='"'){cell+='"';i++;}
+        else if(ch==='"'){quoted=!quoted;}
+        else if(ch===","&&!quoted){row.push(cell);cell="";}
+        else if((ch==="\n"||ch==="\r")&&!quoted){
+            if(ch==="\r"&&next==="\n")i++;
+            row.push(cell);if(row.some(v=>String(v).trim()!==""))rows.push(row);
+            row=[];cell="";
+        }else cell+=ch;
+    }
+    if(cell.length||row.length){row.push(cell);if(row.some(v=>String(v).trim()!==""))rows.push(row);}
+    if(rows.length<2) throw new Error("CSV needs a header row and at least one question row.");
+    const headers=rows.shift().map(v=>String(v).replace(/^\uFEFF/,"").trim());
+    return rows.map(values=>Object.fromEntries(headers.map((h,i)=>[h,values[i]??""])));
+}
+
+async function vkAdminParseBulkFile(){
+    const input=document.getElementById("vkAdminBulkFile");
+    const file=input?.files?.[0];
+    if(!file){document.getElementById("vkAdminBulkFeedback").innerHTML='<div class="vk-bulk-error">Choose an Excel or CSV file first.</div>';return;}
+    try{
+        const ext=file.name.split(".").pop().toLowerCase();
+        let rows;
+        if(ext==="csv"){
+            rows=vkAdminParseCsvText(await file.text());
+        }else if(ext==="xlsx"||ext==="xls"){
+            if(!window.XLSX) throw new Error("Excel reader could not load. Please use the CSV template or try again after refreshing.");
+            const buffer=await file.arrayBuffer();
+            const workbook=XLSX.read(buffer,{type:"array"});
+            const sheet=workbook.Sheets[workbook.SheetNames[0]];
+            rows=XLSX.utils.sheet_to_json(sheet,{defval:""});
+        }else{
+            throw new Error("Unsupported file type. Upload .xlsx, .xls, or .csv.");
+        }
+        vkAdminRenderBulkPreview(vkAdminValidateBulkRows(rows));
+    }catch(error){
+        document.getElementById("vkAdminBulkFeedback").innerHTML='<div class="vk-bulk-error">'+vkAdminEscape(error.message)+'</div>';
+    }
+}
+
+function vkAdminApplyBulkQuestions(){
+    if(!vkAdminBulkParsedQuestions.length)return;
+    const host=document.getElementById("vkAdminQuestions");
+    host.innerHTML="";
+    vkAdminBulkParsedQuestions.forEach(q=>{
+        vkAdminAddQuestion();
+        const card=host.lastElementChild;
+        Object.entries(q).forEach(([field,value])=>{
+            const input=card.querySelector(`[data-field="${field}"]`);
+            if(input) input.value=String(value);
+        });
+    });
+    vkAdminUpdateQuestionLabels();
+    vkAdminShowStatus(`${vkAdminBulkParsedQuestions.length} questions imported into the editor. Review them and click Publish Mock Test when ready.`,false);
+    document.getElementById("vkAdminBulkFeedback").innerHTML='<div class="vk-bulk-success">Questions copied to the editor. Publishing has not happened yet.</div>';
+    document.getElementById("vkAdminBulkApplyWrap").style.display="none";
+}
+
+function vkAdminDownloadCsvTemplate(){
+    const header=["question_text","option_a","option_b","option_c","option_d","correct_option","explanation","marks"];
+    const sample=["ప్రశ్నను ఇక్కడ నమోదు చేయండి","ఎంపిక A","ఎంపిక B","ఎంపిక C","ఎంపిక D","A","సరైన సమాధానానికి వివరణ ఇవ్వండి","1"];
+    const csv=[header,sample].map(row=>row.map(value=>'"'+String(value).replace(/"/g,'""')+'"').join(",")).join("\r\n");
+    const blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8"});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement("a");a.href=url;a.download="VK_Exams_Question_Template.csv";a.click();
+    URL.revokeObjectURL(url);
 }
 
 
