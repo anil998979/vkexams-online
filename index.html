@@ -16,8 +16,6 @@
 
     <meta charset="UTF-8">
 
-<meta charset="UTF-8">
-
 <meta
 name="viewport"
 content="width=device-width, initial-scale=1.0">
@@ -28,9 +26,18 @@ content="#2563eb">
 
 <meta
 name="description"
-content="VK Exams Online - APPSC, Endowment Officer, High Court, Police, DSC and Banking Exam Preparation">
+content="VK Exams Online provides Endowment Officer exam preparation, free mock tests, paid test series, government job updates and online practice tests.">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<link rel="canonical" href="https://vkexams.online/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="VK Exams Online | Endowment Officer Exam Preparation">
+<meta property="og:description" content="Prepare for competitive examinations with mock tests, test series and government job updates on VK Exams Online.">
+<meta property="og:url" content="https://vkexams.online/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="VK Exams Online">
+<meta name="twitter:description" content="Endowment Officer preparation, mock tests and government job updates.">
 
-<title>VK Exams Online</title>
+<title>VK Exams Online | Endowment Officer Exam Preparation</title>
 
 
 <style>
@@ -451,6 +458,21 @@ header{
         1px solid #2563eb;
 }
 
+
+/* Coming-soon labels used for courses that are not launched yet. */
+.coming-soon-badge{
+    display:inline-block;
+    margin-top:9px;
+    padding:5px 10px;
+    border-radius:999px;
+    background:#fff7ed;
+    border:1px solid #fed7aa;
+    color:#c2410c;
+    font-size:11px;
+    font-weight:900;
+    letter-spacing:.2px;
+}
+.category-card.is-coming-soon{cursor:pointer;opacity:.88}
 
 /* =====================================================
    CATEGORY CARDS
@@ -3162,20 +3184,13 @@ Select one course and choose your package.
 
 
 <div
-class="category-card"
-onclick="selectStoreCourse('APPSC',this)">
+class="category-card is-coming-soon"
+onclick="showComingSoon('APPSC')">
 
-<div class="icon">
-📚
-</div>
-
-<h3>
-APPSC
-</h3>
-
-<p>
-APPSC Package
-</p>
+<div class="icon">📚</div>
+<h3>APPSC</h3>
+<p>APPSC Package</p>
+<span class="coming-soon-badge">Coming Soon</span>
 
 </div>
 
@@ -3200,20 +3215,13 @@ Endowment Package
 
 
 <div
-class="category-card"
-onclick="selectStoreCourse('High Court',this)">
+class="category-card is-coming-soon"
+onclick="showComingSoon('High Court')">
 
-<div class="icon">
-⚖️
-</div>
-
-<h3>
-High Court
-</h3>
-
-<p>
-High Court Package
-</p>
+<div class="icon">⚖️</div>
+<h3>High Court</h3>
+<p>High Court Package</p>
+<span class="coming-soon-badge">Coming Soon</span>
 
 </div>
 
@@ -4405,6 +4413,10 @@ function toast(message){
 }
 
 
+function showComingSoon(course){
+    toast((course || "This course") + " preparation is coming soon. Please check back later.");
+}
+
 /* =====================================================
    FREE MOCK TESTS
 ===================================================== */
@@ -4470,7 +4482,7 @@ function openFreeMocks(addHistory = true){
     }
 
     const courses = [
-        ["APPSC","📚"],["Endowment Officer","🛕"],["High Court","⚖️"]
+        ["Endowment Officer","🛕"]
     ];
 
     $("freeMocks").classList.remove("mock-list-mode");
@@ -6308,6 +6320,11 @@ function resetStoreCourses(){
 
 
 function selectStoreCourse(course, card){
+
+    if(course !== "Endowment Officer"){
+        showComingSoon(course);
+        return;
+    }
 
     selectedStoreCourse = course;
 
