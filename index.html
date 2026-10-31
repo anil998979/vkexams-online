@@ -4393,7 +4393,7 @@ function openFreeMocks(addHistory = true){
         } = await supabaseClient
             .from("tests")
             .select(
-                "id,title,test_number,duration_minutes,total_marks,is_free"
+                "id,title,test_number,topic_name,topic_test_number,duration_minutes,total_marks,is_free"
             )
             .eq(
                 "test_series_id",
@@ -4634,7 +4634,14 @@ async function openFreeMockTests(course, addHistory = true){
             const duration = Number(test.duration_minutes) || 0;
             const marks = Number(test.total_marks) ||
                 questions.reduce((sum,q) => sum + (Number(q.marks) || 1),0);
-            const title = escapeText(test.title || `Mock Test ${String(number).padStart(2,"0")}`);
+            // Student-facing title uses the topic-specific sequence.
+            // Keep test_number unchanged as the internal unique test key.
+            const topicName = String(test.topic_name || "").trim();
+            const topicTestNumber = Number(test.topic_test_number);
+            const displayTitle = topicName && Number.isFinite(topicTestNumber) && topicTestNumber > 0
+                ? `${topicName} - Test ${topicTestNumber}`
+                : (test.title || `Mock Test ${String(number).padStart(2,"0")}`);
+            const title = escapeText(displayTitle);
             const displayNumber = String(number).padStart(2,"0");
 
             html += `
@@ -4648,7 +4655,7 @@ async function openFreeMockTests(course, addHistory = true){
                     <div class="free-mock-number">${displayNumber}</div>
                     <div class="free-mock-heading">
                         <h3>${title}</h3>
-                        <p>${escapeText(course.toUpperCase())} · FREE PRACTICE</p>
+                        <p>FREE MOCK TEST</p>
                     </div>
                     <span class="free-mock-badge">Free</span>
                 </div>
@@ -9751,7 +9758,7 @@ let testError = null;
 if (!testData) {
     const { data, error } = await supabaseClient
         .from("tests")
-        .select("id,title,test_number,duration_minutes,total_marks,is_free,is_active")
+        .select("id,title,test_number,topic_name,topic_test_number,duration_minutes,total_marks,is_free,is_active")
         .eq("test_series_id", cache.seriesId)
         .eq("is_free", true)
         .eq("is_active", true);
@@ -9794,7 +9801,7 @@ if (!testData) {
                 await supabaseClient
                     .from("tests")
                     .select(
-                        "id,title,test_number,duration_minutes,total_marks,is_free"
+                        "id,title,test_number,topic_name,topic_test_number,duration_minutes,total_marks,is_free"
                     )
                     .eq("is_free", true)
                     .eq("title", fallbackTitle)
