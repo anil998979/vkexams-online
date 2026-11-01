@@ -2345,6 +2345,7 @@ footer p{
 
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" defer></script>
 </head>
 
 
@@ -3408,6 +3409,7 @@ Select
     <div class="exam-header" style="margin-top:18px">
       <h1>Mock Test Builder</h1>
       <p>Manage Free Mock Tests and Paid Test Series from one dashboard. Bulk upload, validate and publish.</p>
+      <div class="vk-admin-actions"><button type="button" class="vk-admin-btn vk-admin-btn-secondary" onclick="openAdminStudyMaterials()">📚 Manage Study Materials</button></div>
     </div>
 
     <div class="vk-admin-panel">
@@ -3523,6 +3525,74 @@ Select
       </div>
       <div id="vkAdminStatus" class="vk-admin-status" role="status" aria-live="polite"></div>
     </div>
+  </div>
+</div>
+
+<!-- =====================================================
+     STUDY MATERIAL LIST + READER
+===================================================== -->
+<div id="studyMaterials" class="page">
+  <div class="container">
+    <span class="back" onclick="openCourse(currentCourse)">← Back to Course</span>
+    <div class="exam-header" style="margin-top:18px">
+      <h1 id="studyMaterialsHeading">Study Material</h1>
+      <p>Read free study materials here on VK Exams. Downloads are not provided.</p>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin:12px 0">
+      <input id="studyMaterialSearch" type="search" placeholder="Search topic or material..." oninput="filterStudyMaterials()" style="flex:1;min-width:220px;padding:12px;border:1px solid #cbd5e1;border-radius:10px">
+      <button type="button" class="vk-admin-btn vk-admin-btn-secondary" onclick="openFreeMockTests(currentCourse)">Free Mock Tests</button>
+      <button type="button" class="vk-admin-btn vk-admin-btn-secondary" onclick="openTestSeries()">Test Series</button>
+    </div>
+    <div id="studyMaterialsList" class="free-mock-grid"><div class="free-mock-empty">Loading study materials...</div></div>
+  </div>
+</div>
+
+<div id="studyMaterialReader" class="page">
+  <div class="container">
+    <span class="back" onclick="backToStudyMaterials()">← Back to Study Materials</span>
+    <div class="exam-header" style="margin-top:16px">
+      <h1 id="studyReaderTitle">Study Material</h1>
+      <p id="studyReaderDescription">Read the material below.</p>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;margin:12px 0">
+      <button class="vk-admin-btn vk-admin-btn-secondary" onclick="studyPdfPrev()">← Previous</button>
+      <span id="studyPdfPageLabel" style="font-weight:700">Page 0 / 0</span>
+      <button class="vk-admin-btn vk-admin-btn-secondary" onclick="studyPdfNext()">Next →</button>
+      <button class="vk-admin-btn vk-admin-btn-secondary" onclick="studyPdfZoom(-0.1)">A−</button>
+      <button class="vk-admin-btn vk-admin-btn-secondary" onclick="studyPdfZoom(0.1)">A+</button>
+    </div>
+    <div id="studyPdfStatus" role="status" style="text-align:center;padding:10px;color:#64748b">Loading document...</div>
+    <div id="studyPdfViewport" style="background:#e2e8f0;border-radius:12px;padding:10px;overflow:auto;text-align:center;min-height:300px">
+      <canvas id="studyPdfCanvas" style="max-width:100%;height:auto;background:#fff;box-shadow:0 2px 12px #0002"></canvas>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:18px 0 28px">
+      <button class="vk-admin-btn vk-admin-btn-secondary" onclick="backToStudyMaterials()">All Materials</button>
+      <button class="vk-admin-btn vk-admin-btn-primary" onclick="openFreeMockTests(currentCourse)">Attempt Free Mock Test</button>
+      <button class="vk-admin-btn vk-admin-btn-secondary" onclick="openTestSeries()">View Test Series</button>
+    </div>
+  </div>
+</div>
+
+<!-- =====================================================
+     ADMIN: STUDY MATERIAL MANAGER
+===================================================== -->
+<div id="vkAdminStudyMaterials" class="page">
+  <div class="vk-admin-wrap">
+    <span class="back" onclick="openAdminMockBuilder()">← Back to Admin</span>
+    <div class="exam-header" style="margin-top:18px"><h1>Study Material Manager</h1><p>Upload free PDF materials. Students can read them on VK Exams; no download button is provided.</p></div>
+    <div class="vk-admin-panel">
+      <h2>Upload Study Material</h2>
+      <div class="vk-admin-grid">
+        <div class="vk-admin-field"><label for="vkStudyCourse">Course</label><select id="vkStudyCourse"><option value="Endowment Officer">Endowment Officer</option></select></div>
+        <div class="vk-admin-field"><label for="vkStudyTopic">Topic / Chapter</label><input id="vkStudyTopic" maxlength="150" placeholder="e.g. Temple Architecture"></div>
+        <div class="vk-admin-field"><label for="vkStudyTitle">Material Title</label><input id="vkStudyTitle" maxlength="180" placeholder="e.g. Temple System & Architecture – Complete Notes"></div>
+        <div class="vk-admin-field"><label for="vkStudyDescription">Description</label><input id="vkStudyDescription" maxlength="500" placeholder="Short description for students"></div>
+        <div class="vk-admin-field" style="grid-column:1/-1"><label for="vkStudyPdfFile">Select PDF (maximum 25 MB)</label><input id="vkStudyPdfFile" type="file" accept="application/pdf,.pdf"></div>
+      </div>
+      <div class="vk-admin-actions"><button type="button" class="vk-admin-btn vk-admin-btn-primary" onclick="uploadStudyMaterial()">Upload & Publish</button></div>
+      <div id="vkStudyAdminStatus" class="vk-admin-status" role="status" aria-live="polite"></div>
+    </div>
+    <div class="vk-admin-panel"><h2>Uploaded Materials</h2><div id="vkStudyAdminList">Loading...</div></div>
   </div>
 </div>
 
@@ -4465,15 +4535,10 @@ function backToFreeMockCourses(){
 
 function openFreeMocks(addHistory = true){
 
-    /* Free Mock Tests are available only to authenticated students. */
-    if(!isLoggedIn()){
-        window.__vkAfterLogin = "freeMocks";
-        openLogin();
-        toast("Free Mock Tests చూడటానికి ముందుగా Login / Register చేయండి.");
-        return;
-    }
+    /* Browsing Free Mock courses and test lists is public.
+       Authentication is enforced only when the student starts a test. */
 
-/* Remember which page opened the Free Mock course selector. */
+    /* Remember which page opened the Free Mock course selector. */
     if(addHistory){
         const activePage = document.querySelector(".page.active");
         if(activePage && activePage.id !== "freeMocks"){
@@ -4940,6 +5005,18 @@ function openCourse(course, addHistory = true){
             <div class="big-icon">🎯</div>
             <h2>Test Series</h2>
             <p>Practice examination tests</p>
+        </div>
+
+        <div class="choice-card" onclick="openStudyMaterials('${course}')">
+            <div class="big-icon">📚</div>
+            <h2>Study Material</h2>
+            <p>Read free study materials online</p>
+        </div>
+
+        <div class="choice-card" onclick="openFreeMockTests('${course}')">
+            <div class="big-icon">📝</div>
+            <h2>Free Mock Tests</h2>
+            <p>View available free practice tests</p>
         </div>
 
     `;
@@ -10371,7 +10448,7 @@ const QUESTIONS = [
 ===================================================== */
 async function startFreeMock(testNumber, options = {}){
 
-   /* Enforce login again when a test is launched, so direct calls cannot bypass the page gate. */
+   /* Require login only when a student starts a test. Browsing the list is public. */
    if(!isLoggedIn() || !supabaseClient){
        window.__vkAfterLogin = "freeMocks";
        openLogin();
@@ -11884,6 +11961,16 @@ if(
             return;
         }
 
+        if(page === "studyMaterials"){
+            openStudyMaterials(hashParams.get("course") || event.state?.course || currentCourse, false);
+            return;
+        }
+        if(page === "studyMaterial" || page === "studyMaterialReader"){
+            const materialId=hashParams.get("id") || event.state?.materialId;
+            if(materialId) openStudyMaterial(materialId,false);
+            return;
+        }
+
        if(page === "freeMocks"){
             if(selectedFreeMockCourse){
                 openFreeMockTests(selectedFreeMockCourse, false);
@@ -11915,6 +12002,136 @@ localStorage.removeItem("selectedPackage");
 /* =====================================================
    INITIALIZATION
 ===================================================== */
+/* =====================================================
+   VK EXAMS STUDY MATERIALS
+   Private bucket + signed read URLs + PDF.js canvas reader.
+===================================================== */
+const VK_STUDY_BUCKET = "study-materials";
+let vkStudyMaterialsCache = [];
+let vkStudyPdfDoc = null;
+let vkStudyPdfPage = 1;
+let vkStudyPdfScale = 1.15;
+let vkStudyCurrentMaterial = null;
+
+function vkStudyEscape(value){
+  return String(value ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+
+async function openStudyMaterials(course, addHistory=true){
+  currentCourse = course || currentCourse || "Endowment Officer";
+  showPage("studyMaterials", false);
+  const heading = document.getElementById("studyMaterialsHeading");
+  if(heading) heading.textContent = currentCourse + " – Study Material";
+  const list = document.getElementById("studyMaterialsList");
+  if(list) list.innerHTML = '<div class="free-mock-empty">Loading materials...</div>';
+  if(addHistory) history.pushState({vkPage:"studyMaterials",course:currentCourse},"", "#studyMaterials?course="+encodeURIComponent(currentCourse));
+  if(!supabaseClient){ if(list) list.innerHTML='<div class="free-mock-empty">Unable to connect. Please try again.</div>'; return; }
+  try{
+    const {data,error}=await supabaseClient.from("study_materials").select("id,course_name,topic_name,title,description,created_at").eq("course_name",currentCourse).eq("is_published",true).order("created_at",{ascending:false});
+    if(error) throw error;
+    vkStudyMaterialsCache=data||[]; renderStudyMaterials(vkStudyMaterialsCache);
+  }catch(e){ console.error("Study material load error",e); if(list) list.innerHTML='<div class="free-mock-empty">Study materials could not be loaded. Please try again later.</div>'; }
+}
+
+function renderStudyMaterials(items){
+  const list=document.getElementById("studyMaterialsList"); if(!list) return;
+  if(!items.length){list.innerHTML='<div class="free-mock-empty"><strong>No materials published yet.</strong><p>New study materials will appear here.</p></div>';return;}
+  list.innerHTML=items.map(m=>`<article class="free-mock-card" style="cursor:pointer" onclick="openStudyMaterial('${m.id}')"><div class="free-mock-card-top"><div class="free-mock-number">📘</div><div class="free-mock-heading"><h3>${vkStudyEscape(m.title)}</h3><p>${vkStudyEscape(m.topic_name||"Study Material")}</p></div><span class="free-mock-badge">Free</span></div><p style="color:#64748b;margin:8px 0">${vkStudyEscape(m.description||"")}</p><div class="free-mock-footer"><span class="free-mock-info">Read online · No download</span><button class="free-mock-start" type="button" onclick="event.stopPropagation();openStudyMaterial('${m.id}')">Read Material →</button><button class="vk-admin-btn vk-admin-btn-secondary" type="button" onclick="event.stopPropagation();copyStudyMaterialLink('${m.id}')">Share</button></div></article>`).join("");
+}
+
+async function copyStudyMaterialLink(id){
+  const url=location.origin+location.pathname+"#studyMaterial?id="+encodeURIComponent(id);
+  try{await navigator.clipboard.writeText(url);toast("Study Material link copied.");}
+  catch(e){window.prompt("Copy this Study Material link:",url);}
+}
+
+function filterStudyMaterials(){
+  const q=(document.getElementById("studyMaterialSearch")?.value||"").trim().toLowerCase();
+  renderStudyMaterials(vkStudyMaterialsCache.filter(m=>[m.title,m.topic_name,m.description].some(v=>String(v||"").toLowerCase().includes(q))));
+}
+
+async function openStudyMaterial(id, addHistory=true){
+  if(!supabaseClient) return;
+  try{
+    const {data:m,error}=await supabaseClient.from("study_materials").select("id,course_name,topic_name,title,description,storage_path").eq("id",id).eq("is_published",true).single();
+    if(error) throw error;
+    const {data: signed,error:signedError}=await supabaseClient.storage.from(VK_STUDY_BUCKET).createSignedUrl(m.storage_path,900);
+    if(signedError) throw signedError;
+    vkStudyCurrentMaterial=m; currentCourse=m.course_name;
+    document.getElementById("studyReaderTitle").textContent=m.title||"Study Material";
+    document.getElementById("studyReaderDescription").textContent=(m.topic_name?m.topic_name+" · ":"")+(m.description||"Read this material on VK Exams.");
+    showPage("studyMaterialReader",false);
+    if(addHistory) history.pushState({vkPage:"studyMaterialReader",course:currentCourse,materialId:id},"", "#studyMaterial?id="+encodeURIComponent(id));
+    await loadStudyPdf(signed.signedUrl);
+  }catch(e){console.error("Study material open error",e);toast("ఈ మెటీరియల్ ప్రస్తుతం తెరవలేకపోయాము.");}
+}
+
+async function loadStudyPdf(url){
+  const status=document.getElementById("studyPdfStatus"); if(status) status.textContent="Loading PDF...";
+  if(!window.pdfjsLib){ if(status) status.textContent="PDF Reader load కాలేదు. పేజీని refresh చేయండి."; return; }
+  try{
+    window.pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+    vkStudyPdfDoc=await window.pdfjsLib.getDocument({url}).promise; vkStudyPdfPage=1; vkStudyPdfScale=1.15; await renderStudyPdfPage();
+  }catch(e){console.error("PDF render error",e); if(status) status.textContent="PDF తెరవడంలో సమస్య. ఫైల్ సరైన PDF కాదేమో పరిశీలించండి.";}
+}
+
+async function renderStudyPdfPage(){
+  if(!vkStudyPdfDoc)return;
+  const page=await vkStudyPdfDoc.getPage(vkStudyPdfPage); const viewport=page.getViewport({scale:vkStudyPdfScale});
+  const canvas=document.getElementById("studyPdfCanvas"); const context=canvas.getContext("2d");
+  canvas.width=viewport.width; canvas.height=viewport.height;
+  await page.render({canvasContext:context,viewport}).promise;
+  const label=document.getElementById("studyPdfPageLabel"); if(label) label.textContent=`Page ${vkStudyPdfPage} / ${vkStudyPdfDoc.numPages}`;
+  const status=document.getElementById("studyPdfStatus"); if(status) status.textContent="Read comfortably here. Use Previous / Next to navigate.";
+}
+function studyPdfPrev(){if(vkStudyPdfDoc&&vkStudyPdfPage>1){vkStudyPdfPage--;renderStudyPdfPage();}}
+function studyPdfNext(){if(vkStudyPdfDoc&&vkStudyPdfPage<vkStudyPdfDoc.numPages){vkStudyPdfPage++;renderStudyPdfPage();}}
+function studyPdfZoom(delta){if(vkStudyPdfDoc){vkStudyPdfScale=Math.max(.65,Math.min(2.2,vkStudyPdfScale+delta));renderStudyPdfPage();}}
+function backToStudyMaterials(){openStudyMaterials(currentCourse);}
+
+async function openAdminStudyMaterials(){
+  const allowed=await refreshVkAdminAccess(); if(!allowed){toast("Admin access is required.");return;}
+  showPage("vkAdminStudyMaterials");
+  const sel=document.getElementById("vkStudyCourse");
+  try{const {data,error}=await supabaseClient.from("courses").select("name").order("name");if(error)throw error;sel.innerHTML=(data||[]).map(c=>`<option value="${vkStudyEscape(c.name)}">${vkStudyEscape(c.name)}</option>`).join("");if(currentCourse&&Array.from(sel.options).some(o=>o.value===currentCourse))sel.value=currentCourse;}catch(e){console.warn(e);}
+  await loadAdminStudyMaterials();
+}
+
+function setStudyAdminStatus(message,isError=false){const el=document.getElementById("vkStudyAdminStatus");if(el){el.textContent=message;el.style.color=isError?"#b91c1c":"#166534";}}
+
+async function uploadStudyMaterial(){
+  const allowed=await refreshVkAdminAccess();if(!allowed){setStudyAdminStatus("Admin access required.",true);return;}
+  const file=document.getElementById("vkStudyPdfFile")?.files?.[0];
+  const course=document.getElementById("vkStudyCourse")?.value;
+  const topic=(document.getElementById("vkStudyTopic")?.value||"").trim();
+  const title=(document.getElementById("vkStudyTitle")?.value||"").trim();
+  const description=(document.getElementById("vkStudyDescription")?.value||"").trim();
+  if(!course||!topic||!title||!file){setStudyAdminStatus("Course, topic, title and PDF file are required.",true);return;}
+  if(file.type!=="application/pdf"&&!file.name.toLowerCase().endsWith(".pdf")){setStudyAdminStatus("Please select a PDF file.",true);return;}
+  if(file.size>25*1024*1024){setStudyAdminStatus("PDF must be 25 MB or smaller.",true);return;}
+  setStudyAdminStatus("Uploading PDF...");
+  const safeName=file.name.replace(/[^a-zA-Z0-9._-]/g,"_");
+  const path=`${crypto.randomUUID()}-${safeName}`;
+  try{
+    const {error:upError}=await supabaseClient.storage.from(VK_STUDY_BUCKET).upload(path,file,{contentType:"application/pdf",upsert:false});if(upError)throw upError;
+    const {data:sessionData}=await supabaseClient.auth.getSession();
+    const {error:dbError}=await supabaseClient.from("study_materials").insert({course_name:course,topic_name:topic,title,description,storage_path:path,original_file_name:file.name,is_published:true,created_by:sessionData?.session?.user?.id||null});
+    if(dbError){await supabaseClient.storage.from(VK_STUDY_BUCKET).remove([path]);throw dbError;}
+    document.getElementById("vkStudyTopic").value="";document.getElementById("vkStudyTitle").value="";document.getElementById("vkStudyDescription").value="";document.getElementById("vkStudyPdfFile").value="";
+    setStudyAdminStatus("Material uploaded and published successfully.");await loadAdminStudyMaterials();
+  }catch(e){console.error(e);setStudyAdminStatus("Upload failed: "+(e.message||e),true);}
+}
+
+async function loadAdminStudyMaterials(){
+  const box=document.getElementById("vkStudyAdminList");if(!box||!supabaseClient)return;box.textContent="Loading...";
+  try{const {data,error}=await supabaseClient.from("study_materials").select("id,course_name,topic_name,title,is_published,created_at").order("created_at",{ascending:false});if(error)throw error;
+    box.innerHTML=(data||[]).map(m=>`<div style="display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:12px 0;border-bottom:1px solid #e2e8f0"><div><strong>${vkStudyEscape(m.title)}</strong><div style="font-size:13px;color:#64748b">${vkStudyEscape(m.course_name)} · ${vkStudyEscape(m.topic_name)} · ${m.is_published?"Published":"Hidden"}</div></div><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="vk-admin-btn vk-admin-btn-secondary" onclick="toggleStudyMaterial('${m.id}',${!m.is_published})">${m.is_published?"Unpublish":"Publish"}</button><button class="vk-admin-btn vk-admin-btn-danger" onclick="deleteStudyMaterial('${m.id}')">Delete</button></div></div>`).join("")||"No materials uploaded yet.";
+  }catch(e){box.textContent="Could not load materials: "+(e.message||e);}
+}
+async function toggleStudyMaterial(id,published){const allowed=await refreshVkAdminAccess();if(!allowed)return;const {error}=await supabaseClient.from("study_materials").update({is_published:published}).eq("id",id);if(error){toast(error.message);return;}await loadAdminStudyMaterials();}
+async function deleteStudyMaterial(id){const allowed=await refreshVkAdminAccess();if(!allowed)return;if(!confirm("Delete this study material permanently?"))return;try{const {data:m,error}=await supabaseClient.from("study_materials").select("storage_path").eq("id",id).single();if(error)throw error;const {error:dbError}=await supabaseClient.from("study_materials").delete().eq("id",id);if(dbError)throw dbError;await supabaseClient.storage.from(VK_STUDY_BUCKET).remove([m.storage_path]);await loadAdminStudyMaterials();}catch(e){toast("Delete failed: "+(e.message||e));}}
+
+
 const initialHash = location.hash.replace(/^#/, "");
 const initialHashParts = initialHash.split("?");
 const initialPage = initialHashParts[0] || "";
@@ -11936,6 +12153,13 @@ if(initialPage === "examPage"){
         showPage("freeMocks", false);
         openFreeMocks(false);
     }
+}
+else if(initialPage === "studyMaterials"){
+    openStudyMaterials(initialFreeMockCourse || "Endowment Officer", false);
+}
+else if(initialPage === "studyMaterial"){
+    const materialId=initialHashParams.get("id");
+    if(materialId) openStudyMaterial(materialId,false); else showHome();
 }
 else if(initialPage === "freeMocks"){
     if(initialFreeMockCourse){
@@ -11980,6 +12204,7 @@ else{
     );
 
                }
+
 
 
 /* =====================================================
