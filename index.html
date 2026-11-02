@@ -1917,34 +1917,50 @@ header{
 }
 
 /* =====================================================
-   TOAST
+   GLOBAL TOAST NOTIFICATIONS
 ===================================================== */
-
 .toast{
-    position:fixed;
-
-    right:18px;
-
-    bottom:18px;
-
+    position:fixed !important;
+    left:50% !important;
+    right:auto !important;
+    bottom:28px !important;
+    top:auto !important;
+    transform:translate(-50%, 14px);
+    opacity:0;
+    visibility:hidden;
+    display:block !important;
+    width:max-content;
+    max-width:min(92vw, 520px);
+    box-sizing:border-box;
     background:#111827;
-
     color:#fff;
-
-    padding:
-        12px 16px;
-
-    border-radius:9px;
-
-    z-index:5000;
-
-    display:none;
-
-    max-width:330px;
-
-    box-shadow:
-        0 10px 25px
-        rgba(0,0,0,.2);
+    padding:13px 18px;
+    border-radius:12px;
+    z-index:99999 !important;
+    box-shadow:0 12px 32px rgba(0,0,0,.24);
+    font-size:14px;
+    line-height:1.5;
+    font-weight:600;
+    text-align:left;
+    white-space:pre-line;
+    pointer-events:none;
+    transition:opacity .22s ease, transform .22s ease, visibility .22s ease;
+}
+.toast.show{
+    opacity:1;
+    visibility:visible;
+    transform:translate(-50%, 0);
+}
+.toast.toast-success{background:#087f5b;}
+.toast.toast-error{background:#b42318;}
+.toast.toast-info{background:#111827;}
+@media(max-width:600px){
+    .toast{
+        bottom:18px !important;
+        max-width:calc(100vw - 28px);
+        width:max-content;
+        font-size:13px;
+    }
 }
 
 /* =====================================================
@@ -4178,7 +4194,9 @@ class="modal">
 
 <div
 id="toast"
-class="toast">
+class="toast"
+role="status"
+aria-live="polite">
 </div>
 
 
@@ -4447,39 +4465,42 @@ function closeModal(id){
 }
 
 
-function toast(message){
+function toast(message, type){
 
-    const t =
-        $("toast");
-
+    const t = $("toast");
     if(!t){
         console.warn("Toast element not found:", message);
         return;
     }
 
-    t.textContent =
-        message;
+    const text = String(message ?? "");
+    const lower = text.toLowerCase();
 
-    t.style.display =
-        "block";
+    if(!type){
+        if(/success|successful|copied|activated|updated|sent successfully|నమోదు|కాపీ అయింది|విజయవంతం/i.test(lower)){
+            type = "success";
+        }else if(/error|failed|invalid|unable|cannot|not found|తప్పు|విఫల|సాధ్యం కాదు/i.test(lower)){
+            type = "error";
+        }else{
+            type = "info";
+        }
+    }
 
+    t.textContent = text;
+    t.className = "toast show toast-" + type;
+    t.setAttribute("role", type === "error" ? "alert" : "status");
+    t.setAttribute("aria-live", type === "error" ? "assertive" : "polite");
 
-    clearTimeout(
-        window.__toast
-    );
+    clearTimeout(window.__toast);
+    clearTimeout(window.__toastHide);
 
-
-    window.__toast =
-        setTimeout(
-            function(){
-
-                t.style.display =
-                    "none";
-
-            },
-            3000
-        );
-
+    /* Keep every notification visible for 3 seconds, then fade it out. */
+    window.__toast = setTimeout(function(){
+        t.classList.remove("show");
+        window.__toastHide = setTimeout(function(){
+            t.className = "toast";
+        }, 250);
+    }, 3000);
 }
 
 
@@ -6509,7 +6530,7 @@ if(packageError || !packageData){
         packageError
     );
 
-    alert(
+    toast(
         "Package Search Failed\n\n" +
         "Plan: " + plan + "\n" +
         "Days: " + days + "\n" +
@@ -6631,7 +6652,7 @@ if(orderError || !orderData?.success){
             "Payment successful! Package activated."
         );
 
-        alert(
+        toast(
             "Payment successful!\n\n" +
             data.package_name +
             " activated successfully."
@@ -6814,7 +6835,7 @@ async function emailPasswordLogin(){
 
         if(error){
 
-            alert(
+            toast(
                 error.message
             );
 
@@ -6864,7 +6885,7 @@ async function emailPasswordLogin(){
         password
     ){
 
-        alert(
+        toast(
             "Demo login failed.\n\n" +
             "For real login, connect Supabase in the code."
         );
@@ -6958,7 +6979,7 @@ async function registerAccount(){
 
         if(error){
 
-            alert(
+            toast(
                 error.message
             );
 
@@ -6983,7 +7004,7 @@ async function registerAccount(){
 
         else{
 
-            alert(
+            toast(
                 "Registration successful.\n\n" +
                 "Please check your email to confirm your account."
             );
@@ -7051,7 +7072,7 @@ async function registerAccount(){
     );
 
 
-    alert(
+    toast(
         "Demo account created successfully."
     );
 
@@ -7071,7 +7092,7 @@ async function googleLogin(){
         !supabaseClient
     ){
 
-        alert(
+        toast(
 
             "Google Login is ready in the UI,\n\n" +
 
@@ -7105,7 +7126,7 @@ async function googleLogin(){
 
     if(error){
 
-        alert(
+        toast(
             error.message
         );
 
@@ -7141,7 +7162,7 @@ async function sendResetEmail(){
         !supabaseClient
     ){
 
-        alert(
+        toast(
 
             "Password reset requires Supabase connection.\n\n" +
 
@@ -7178,7 +7199,7 @@ async function sendResetEmail(){
 
     if(error){
 
-        alert(
+        toast(
             error.message
         );
 
@@ -7186,7 +7207,7 @@ async function sendResetEmail(){
 
     else{
 
-        alert(
+        toast(
             "Password reset link sent.\n\nPlease check your email."
         );
 
@@ -7223,7 +7244,7 @@ async function updatePassword(){
         !supabaseClient
     ){
 
-        alert(
+        toast(
             "Supabase is not connected."
         );
 
@@ -7247,7 +7268,7 @@ async function updatePassword(){
 
     if(error){
 
-        alert(
+        toast(
             error.message
         );
 
@@ -7255,7 +7276,7 @@ async function updatePassword(){
 
     else{
 
-        alert(
+        toast(
             "Password updated successfully."
         );
 
