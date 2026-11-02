@@ -4799,9 +4799,13 @@ function openFreeMocks(addHistory = true){
 }
    
 
-async function openFreeMockTests(course, addHistory = true){
+async function openFreeMockTests(course, addHistory = true, selectedTestNumber = undefined){
 
     currentCourse = course;
+    const routeTestNumber = new URLSearchParams((location.hash.split("?")[1] || "")).get("test");
+    const requestedTestNumber = selectedTestNumber === undefined
+        ? (Number(routeTestNumber) || null)
+        : (Number(selectedTestNumber) || null);
 
     /* Show the requested route immediately. On a browser refresh the
        data preload is asynchronous; activating the page before awaiting
@@ -4809,9 +4813,9 @@ async function openFreeMockTests(course, addHistory = true){
     $("freeMocks").classList.add("mock-list-mode");
     const freeHeader = document.querySelector("#freeMocks .exam-header");
     if(freeHeader){
-        freeHeader.innerHTML = `
-            <h1>Latest Uploaded Mock Tests</h1>
-            <p>Choose a test and start your practice.</p>`;
+        freeHeader.innerHTML = requestedTestNumber
+            ? `<h1>Shared Free Mock Test</h1><p>This link opens only the selected test. Login is required only when Start Test is clicked.</p><button type="button" class="vk-admin-btn vk-admin-btn-secondary" onclick="openFreeMockTests('${String(course).replace("'", "\'")}',true,null)">← All Free Mock Tests</button>`
+            : `<h1>Latest Uploaded Mock Tests</h1><p>Choose a test and start your practice.</p>`;
     }
     $("freeMockCourses").className = "free-mock-grid";
     $("freeMockCourses").innerHTML = `
@@ -4828,7 +4832,7 @@ async function openFreeMockTests(course, addHistory = true){
                 course: course
             },
             "",
-            "#freeMocks?course=" + encodeURIComponent(course)
+            "#freeMocks?course=" + encodeURIComponent(course) + (requestedTestNumber ? "&test=" + encodeURIComponent(requestedTestNumber) : "")
         );
     }
 
@@ -4850,10 +4854,14 @@ async function openFreeMockTests(course, addHistory = true){
     const cache =
         window.__freeMockCache?.[course] || {};
 
-    const tests =
+    let tests =
         Object.values(cache.tests || {})
             .filter(test => test && test.id)
             .sort((a,b) => Number(a.test_number) - Number(b.test_number));
+
+    if(requestedTestNumber){
+        tests = tests.filter(test => Number(test.test_number) === requestedTestNumber);
+    }
 
     const escapeText = function(value){
         return String(value ?? "").replace(/[&<>"']/g, function(char){
@@ -4918,10 +4926,17 @@ async function openFreeMockTests(course, addHistory = true){
                 </div>
                 <div class="free-mock-footer">
                     <div class="free-mock-info"><span>◷</span> Timer &amp; solution</div>
-                    <button class="free-mock-start" type="button"
-                        onclick="event.stopPropagation();startFreeMock(${number})">
-                        Start test →
-                    </button>
+                    <div style="display:flex;gap:8px;align-items:center;">
+                        <button type="button" class="free-mock-start" style="background:#0f766e;"
+                            aria-label="Share ${title}" title="Share this test"
+                            onclick="event.stopPropagation();shareFreeMockTest('${String(course).replace("'", "\'")}',${number})">
+                            Share ↗
+                        </button>
+                        <button class="free-mock-start" type="button"
+                            onclick="event.stopPropagation();startFreeMock(${number})">
+                            Start test →
+                        </button>
+                    </div>
                 </div>
             </article>`;
         });
@@ -4931,6 +4946,27 @@ async function openFreeMockTests(course, addHistory = true){
     hideLoading();
 }
    
+
+/* Share one Free Mock Test without opening or starting it. The recipient sees only this test card. */
+async function shareFreeMockTest(course, testNumber){
+    const shareUrl = window.location.origin + window.location.pathname +
+        "#freeMocks?course=" + encodeURIComponent(course) +
+        "&test=" + encodeURIComponent(testNumber);
+    try{
+        if(navigator.clipboard && window.isSecureContext){
+            await navigator.clipboard.writeText(shareUrl);
+        }else{
+            const temp=document.createElement("textarea");
+            temp.value=shareUrl;temp.style.position="fixed";temp.style.opacity="0";
+            document.body.appendChild(temp);temp.select();
+            const copied=document.execCommand("copy");temp.remove();
+            if(!copied) throw new Error("Copy not supported by this browser");
+        }
+        toast("ఈ Free Mock Test Share Link Copy అయింది. WhatsApp / Telegramలో Share చేయండి.");
+    }catch(error){
+        window.prompt("ఈ Test Share Linkను Copy చేయండి:",shareUrl);
+    }
+}
 
 /* =====================================================
    COMMON LOADING POPUP
@@ -11973,7 +12009,7 @@ if(
 
        if(page === "freeMocks"){
             if(selectedFreeMockCourse){
-                openFreeMockTests(selectedFreeMockCourse, false);
+                openFreeMockTests(selectedFreeMockCourse, false, hashParams.get("test"));
             }else{
                 openFreeMocks(false);
             }
@@ -12163,7 +12199,7 @@ else if(initialPage === "studyMaterial"){
 }
 else if(initialPage === "freeMocks"){
     if(initialFreeMockCourse){
-        openFreeMockTests(initialFreeMockCourse, false);
+        openFreeMockTests(initialFreeMockCourse, false, initialHashParams.get("test"));
     }else{
         openFreeMocks(false);
     }
