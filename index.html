@@ -2441,6 +2441,30 @@ footer p{
 @media(max-width:600px){#home .home-exam-grid{grid-template-columns:1fr;gap:15px}#home .home-exam-card,#home .home-exam-featured{min-height:0;padding:20px;border-radius:19px}#home .home-card-icon{width:58px;height:58px;margin:16px 0 11px;font-size:31px}#home .home-exam-card h3{font-size:21px}#home .home-card-features{margin:14px 0 16px}#home .home-card-cta{padding:13px 14px;font-size:13px}}
 @media(prefers-reduced-motion:reduce){#home .home-exam-card{transition:none}#home .home-exam-card:hover{transform:none}}
 
+/* HERO – REAL-TIME CBT PROMOTION AND TWO PRIMARY ACTIONS */
+#home .hero{padding:48px 20px 52px;background:radial-gradient(circle at 12% 15%,rgba(255,255,255,.18),transparent 25%),linear-gradient(115deg,#092b72 0%,#174bd0 48%,#6d28d9 100%);border-radius:0 0 28px 28px;box-shadow:0 16px 38px rgba(37,66,180,.24)}
+#home .hero-content{max-width:1120px}
+#home .hero-kicker{display:inline-flex;align-items:center;gap:9px;margin-bottom:13px;padding:7px 14px;border:1px solid rgba(255,255,255,.32);border-radius:999px;background:rgba(255,255,255,.12);font-size:11px;font-weight:900;letter-spacing:1.15px;color:#eaf2ff}
+#home .hero-live-dot{width:9px;height:9px;border-radius:50%;background:#4ade80;box-shadow:0 0 0 5px rgba(74,222,128,.17)}
+#home .hero h1{margin:0 0 10px;font-size:clamp(32px,5vw,54px);font-weight:950;letter-spacing:-1.2px;color:#fff}
+#home .hero h1 span{color:#ffd84d}
+#home .hero-promise{display:inline-block;margin:0 auto 12px;padding:9px 22px;border-radius:8px;background:linear-gradient(100deg,#ef233c,#c8102e);box-shadow:0 7px 18px rgba(130,10,35,.28);font-size:clamp(16px,2.3vw,25px);font-weight:900;color:#fff;transform:skew(-3deg)}
+#home .hero-promise strong{color:#fff}
+#home .hero p{max-width:800px;margin:5px auto 0;font-size:15px;color:#eef4ff}
+#home .hero-buttons{max-width:900px;margin:27px auto 0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}
+#home .hero-buttons .hero-action{position:relative;display:flex;align-items:center;justify-content:space-between;gap:12px;min-width:0;min-height:86px;padding:13px 20px;border:3px solid rgba(255,255,255,.95);border-radius:999px;color:#fff;text-align:left;box-shadow:0 9px 0 rgba(15,23,42,.12),0 13px 26px rgba(15,23,42,.22),inset 0 1px 0 rgba(255,255,255,.5);transition:transform .2s ease,filter .2s ease,box-shadow .2s ease}
+#home .hero-buttons .hero-action:hover{transform:translateY(-5px) scale(1.015);filter:brightness(1.06);box-shadow:0 12px 0 rgba(15,23,42,.1),0 18px 32px rgba(15,23,42,.25)}
+#home .hero-buttons .hero-packages{background:linear-gradient(105deg,#ff9f0a 0%,#ff5b19 52%,#e90042 100%);color:#fff}
+#home .hero-buttons .hero-free{background:linear-gradient(105deg,#00c853 0%,#00a83b 52%,#08752e 100%);color:#fff;border-color:#eaffef}
+#home .hero-action-icon{display:grid;place-items:center;flex:0 0 54px;width:54px;height:54px;border-radius:50%;background:rgba(255,255,255,.2);font-size:35px;font-weight:900;color:#fff;text-shadow:0 2px 5px rgba(0,0,0,.18)}
+#home .hero-action-copy{display:flex;flex:1;flex-direction:column;align-items:center;gap:1px;line-height:1.1;text-align:center}
+#home .hero-action-copy small{font-size:clamp(10px,1.4vw,14px);font-weight:900;letter-spacing:.7px;color:#fff}
+#home .hero-action-copy strong{font-size:clamp(17px,2.2vw,26px);font-weight:950;color:#fff}
+#home .hero-action-arrow{display:grid;place-items:center;flex:0 0 43px;width:43px;height:43px;border-radius:50%;background:#fff;color:#c51d31;font-size:28px;font-weight:950;box-shadow:0 3px 10px rgba(0,0,0,.16)}
+#home .hero-free .hero-action-arrow{color:#078536}
+@media(max-width:650px){#home .hero{padding:34px 15px 38px}#home .hero-kicker{font-size:9px;letter-spacing:.7px}#home .hero h1{font-size:clamp(29px,8vw,40px)}#home .hero-promise{padding:8px 13px;font-size:16px}#home .hero p{font-size:13px;line-height:1.55}#home .hero-buttons{grid-template-columns:1fr;gap:14px;margin-top:21px;max-width:420px}#home .hero-buttons .hero-action{min-height:72px;padding:10px 15px}#home .hero-action-icon{flex-basis:46px;width:46px;height:46px;font-size:29px}#home .hero-action-copy strong{font-size:20px}#home .hero-action-copy small{font-size:11px}}
+@media(prefers-reduced-motion:reduce){#home .hero-buttons .hero-action{transition:none}#home .hero-buttons .hero-action:hover{transform:none}}
+
 </style>
 
 
@@ -2517,51 +2541,20 @@ class="page">
 
 
 <section class="hero">
-
-<div class="hero-content">
-
-<h1>
-
-Prepare Smart.
-<span>
-Score Higher.
-</span>
-
-</h1>
-
-
-<p>
-
-VK Exams Online is your exam preparation
-platform for competitive examinations,
-government jobs and professional entrance tests.
-
-</p>
-
-
-<div class="hero-buttons">
-
-<button
-class="btn btn-primary"
-onclick="openStore()">
-
-💎 View Packages
-
-</button>
-
-
-<button
-class="btn btn-light"
-onclick="openFreeMocks()">
-
-🎯 Free Mock Test
-
-</button>
-
-</div>
-
-</div>
-
+  <div class="hero-content">
+    <div class="hero-kicker"><span class="hero-live-dot"></span> VK EXAMS ONLINE · COMPETITIVE EXAM PREPARATION</div>
+    <h1>REAL-TIME <span>EXAM PRACTICE</span></h1>
+    <div class="hero-promise">Experience the <strong>Actual CBT Exam Environment</strong></div>
+    <p>Prepare with full-length mock tests, timed exam simulation and performance-focused practice for competitive examinations.</p>
+    <div class="hero-buttons">
+      <button type="button" class="btn btn-primary hero-action hero-packages" onclick="openStore()">
+        <span class="hero-action-icon">♛</span><span class="hero-action-copy"><small>CLICK HERE FOR</small><strong>VIEW PACKAGES</strong></span><span class="hero-action-arrow">➜</span>
+      </button>
+      <button type="button" class="btn btn-light hero-action hero-free" onclick="openFreeMocks()">
+        <span class="hero-action-icon">◎</span><span class="hero-action-copy"><small>CLICK HERE FOR</small><strong>FREE MOCK TEST</strong></span><span class="hero-action-arrow">➜</span>
+      </button>
+    </div>
+  </div>
 </section>
 
 <div class="container">
