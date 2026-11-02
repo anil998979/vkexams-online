@@ -7728,6 +7728,8 @@ async function vkAdminPublishTest(){
     const paperName = (document.getElementById("vkAdminPaper")?.value || "Paper 1").trim();
     const duration = Number(document.getElementById("vkAdminDuration")?.value);
     const negativeMarks = Number(document.getElementById("vkAdminNegative")?.value);
+    const freeMode = document.getElementById("vkAdminFreeMode")?.value || "create";
+    const paidMode = document.getElementById("vkAdminPaidMode")?.value || "create";
     const cards = Array.from(document.querySelectorAll("#vkAdminQuestions .vk-admin-question"));
 
     if(!courseName || (!isPaid && freeMode!=="edit" && !topicName)){
@@ -7748,8 +7750,6 @@ async function vkAdminPublishTest(){
     if(isPaid && cards.length !== 150){
         vkAdminShowStatus(`Paid tests require exactly 150 questions. Current count: ${cards.length}.`,true); return;
     }
-    const paidMode=document.getElementById("vkAdminPaidMode")?.value||"create";
-    const freeMode=document.getElementById("vkAdminFreeMode")?.value||"create";
     if(isPaid && paidMode==="edit" && !vkAdminEditingPaidTestId){
         vkAdminShowStatus("Select an existing Paid Test and load its questions before saving.",true); return;
     }
