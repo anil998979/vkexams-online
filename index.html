@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
 
@@ -2412,6 +2412,35 @@ footer p{
 .vk-bulk-error{margin:10px 0;padding:10px 12px;border-radius:9px;background:#fff1f2;color:#9f1239;white-space:pre-wrap;font-size:13px}
 .vk-bulk-success{margin:10px 0;padding:10px 12px;border-radius:9px;background:#ecfdf5;color:#065f46;font-size:13px}
 
+
+/* HOME EXAM CARDS – student-focused paid CBT promotion */
+#home .home-exam-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:22px;align-items:stretch}
+#home .home-exam-card{position:relative;isolation:isolate;display:flex;flex-direction:column;align-items:flex-start;min-height:345px;padding:23px 22px 20px;border:1px solid rgba(255,255,255,.75);border-radius:22px;text-align:left;color:#fff;background:linear-gradient(145deg,#1d4ed8 0%,#4338ca 58%,#6d28d9 100%);box-shadow:0 14px 30px rgba(37,99,235,.18);transition:transform .22s ease,box-shadow .22s ease;cursor:pointer}
+#home .home-exam-card:before{content:"";position:absolute;inset:0;z-index:-1;border-radius:inherit;background:linear-gradient(135deg,rgba(255,255,255,.17),transparent 48%)}
+#home .home-exam-card:hover,#home .home-exam-card:focus-visible{transform:translateY(-7px);box-shadow:0 22px 42px rgba(30,41,59,.22);outline:3px solid rgba(59,130,246,.2);outline-offset:3px}
+#home .home-exam-card:after{content:"";position:absolute;z-index:-1;width:190px;height:190px;right:-75px;top:95px;border-radius:50%;background:rgba(255,255,255,.10)}
+#home .home-exam-appsc{background:linear-gradient(145deg,#1e40af,#2563eb 58%,#0891b2)}
+#home .home-exam-endowment{background:linear-gradient(145deg,#9a3412 0%,#ea580c 48%,#f59e0b 100%)}
+#home .home-exam-highcourt{background:linear-gradient(145deg,#4c1d95 0%,#7c3aed 55%,#c026d3 100%)}
+#home .home-exam-featured{min-height:365px;border:2px solid rgba(255,255,255,.82);box-shadow:0 18px 38px rgba(234,88,12,.25),inset 0 0 0 1px rgba(255,255,255,.12);transform:translateY(-5px)}
+#home .home-card-topline{display:flex;justify-content:space-between;align-items:center;width:100%;gap:8px}
+#home .home-card-kicker{font-size:10px;font-weight:900;letter-spacing:1.05px;color:rgba(255,255,255,.82)}
+#home .home-card-status{display:inline-flex;align-items:center;gap:5px;padding:6px 9px;border:1px solid rgba(255,255,255,.3);border-radius:999px;background:rgba(15,23,42,.18);color:#fff;font-size:9px;font-weight:900;letter-spacing:.45px;white-space:nowrap}
+#home .home-card-live{background:rgba(5,46,22,.24);border-color:rgba(187,247,208,.55)}
+#home .home-card-live i{width:7px;height:7px;border-radius:50%;background:#86efac;box-shadow:0 0 0 4px rgba(134,239,172,.17)}
+#home .home-card-icon{display:grid;place-items:center;width:66px;height:66px;margin:20px 0 13px;border:1px solid rgba(255,255,255,.35);border-radius:19px;background:rgba(255,255,255,.17);box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 8px 18px rgba(15,23,42,.12);font-size:35px}
+#home .home-exam-card h3{margin:0 0 9px;color:#fff;font-size:23px;font-weight:950;letter-spacing:-.35px}
+#home .home-exam-card p{margin:0;max-width:390px;color:rgba(255,255,255,.9);font-size:13px;line-height:1.6}
+#home .home-card-features{display:flex;flex-direction:column;gap:7px;margin:17px 0 19px;color:#fff;font-size:11px;font-weight:750}
+#home .home-card-cta{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;margin-top:auto;padding:12px 14px;border:1px solid rgba(255,255,255,.65);border-radius:12px;background:#fff;color:#7c2d12;font-size:13px;font-weight:950;box-shadow:0 7px 15px rgba(15,23,42,.12)}
+#home .home-exam-appsc .home-card-cta{color:#1d4ed8}
+#home .home-exam-highcourt .home-card-cta{color:#6d28d9}
+#home .home-card-cta span{font-size:20px;line-height:1}
+#home .home-card-ribbon{position:absolute;top:54px;right:-32px;width:128px;padding:6px 0;transform:rotate(38deg);background:#fff7ed;color:#c2410c;text-align:center;font-size:9px;font-weight:950;letter-spacing:.7px;box-shadow:0 3px 10px rgba(15,23,42,.12)}
+@media(max-width:900px){#home .home-exam-grid{grid-template-columns:repeat(2,minmax(0,1fr))}#home .home-exam-featured{transform:none}}
+@media(max-width:600px){#home .home-exam-grid{grid-template-columns:1fr;gap:15px}#home .home-exam-card,#home .home-exam-featured{min-height:0;padding:20px;border-radius:19px}#home .home-card-icon{width:58px;height:58px;margin:16px 0 11px;font-size:31px}#home .home-exam-card h3{font-size:21px}#home .home-card-features{margin:14px 0 16px}#home .home-card-cta{padding:13px 14px;font-size:13px}}
+@media(prefers-reduced-motion:reduce){#home .home-exam-card{transition:none}#home .home-exam-card:hover{transform:none}}
+
 </style>
 
 
@@ -2552,73 +2581,35 @@ Select an examination and start your preparation.
 </div>
 
 
-<div class="category-grid">
+<div class="category-grid home-exam-grid">
+  <div class="category-card home-exam-card home-exam-appsc is-coming-soon" onclick="showComingSoon('APPSC')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showComingSoon('APPSC')}">
+    <div class="home-card-topline"><span class="home-card-kicker">COMPETITIVE EXAMS</span><span class="home-card-status">COMING SOON</span></div>
+    <div class="home-card-icon">📚</div>
+    <h3>APPSC</h3>
+    <p>Prepare for Andhra Pradesh Public Service Commission examinations with structured practice.</p>
+    <div class="home-card-features"><span>✓ Syllabus-based tests</span><span>✓ Real-exam practice</span></div>
+    <div class="home-card-cta">Explore APPSC <span>→</span></div>
+  </div>
 
+  <div class="category-card home-exam-card home-exam-endowment home-exam-featured" onclick="openCourse('Endowment Officer')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openCourse('Endowment Officer')}">
+    <div class="home-card-topline"><span class="home-card-kicker">POPULAR TEST SERIES</span><span class="home-card-status home-card-live"><i></i> AVAILABLE NOW</span></div>
+    <div class="home-card-icon">🛕</div>
+    <h3>Endowment Officer</h3>
+    <p>Prepare with exam-focused paid test series and full-length CBT-style practice.</p>
+    <div class="home-card-features"><span>✓ Full-length test series</span><span>✓ Timed exam simulation</span><span>✓ Instant score &amp; review</span></div>
+    <div class="home-card-cta">Start Exam Preparation <span>→</span></div>
+    <div class="home-card-ribbon">RECOMMENDED</div>
+  </div>
 
-<!-- APPSC -->
-
-<div
-class="category-card"
-onclick="showComingSoon('APPSC')">
-
-<div class="icon">
-📚
+  <div class="category-card home-exam-card home-exam-highcourt is-coming-soon" onclick="showComingSoon('High Court')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showComingSoon('High Court')}">
+    <div class="home-card-topline"><span class="home-card-kicker">JUDICIARY RECRUITMENT</span><span class="home-card-status">COMING SOON</span></div>
+    <div class="home-card-icon">⚖️</div>
+    <h3>High Court</h3>
+    <p>Get ready for High Court recruitment examinations with focused preparation.</p>
+    <div class="home-card-features"><span>✓ Exam-oriented practice</span><span>✓ Recruitment updates</span></div>
+    <div class="home-card-cta">Explore High Court <span>→</span></div>
+  </div>
 </div>
-
-<h3>
-APPSC
-</h3>
-
-<span class="coming-soon-badge">Coming Soon</span>
-
-</div>
-
-<!-- ENDOWMENT -->
-
-<div
-class="category-card"
-onclick="openCourse('Endowment Officer')">
-
-<div class="icon">
-🛕
-</div>
-
-<h3>
-Endowment Officer
-</h3>
-
-<p>
-Hindu Philosophy, Temple System and Endowments
-</p>
-
-</div>
-
-
-<!-- HIGH COURT -->
-
-<div
-class="category-card"
-   
-
-   
-onclick="showComingSoon('High Court')">
-<div class="icon">
-⚖️
-</div>
-
-<h3>
-High Court
-</h3>
-
-
-  <span class="coming-soon-badge">Coming Soon</span> 
-
-</div>
-
-
-</div>
-
-
 
 <!-- VK Exams horizontal AdSense banner: placed above Why VK Exams -->
 <div class="home-ad-container">
