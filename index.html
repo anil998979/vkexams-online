@@ -3450,6 +3450,22 @@ Select
           </select>
           <p class="vk-admin-hint">Test number is assigned automatically within the selected paper.</p>
         </div>
+        <div class="vk-admin-field" id="vkAdminFreeModeWrap">
+          <label for="vkAdminFreeMode">Free Test Action</label>
+          <select id="vkAdminFreeMode" onchange="vkAdminFreeModeChanged()">
+            <option value="create">Create New Free Test</option>
+            <option value="edit">Edit Existing Free Test</option>
+          </select>
+        </div>
+        <div class="vk-admin-field" id="vkAdminExistingFreeTestWrap" style="display:none">
+          <label for="vkAdminExistingFreeTest">Select Existing Free Test</label>
+          <select id="vkAdminExistingFreeTest" onchange="vkAdminLoadFreeTestForEdit()">
+            <option value="">Select a free test</option>
+          </select>
+        </div>
+        <div class="vk-admin-field" id="vkAdminFreeEditWarning" style="display:none;grid-column:1/-1">
+          <div class="vk-bulk-error">You are editing a published Free Mock Test. Saving updates its existing questions and keeps the same Test ID and Share Link. Take a database backup before editing.</div>
+        </div>
         <div class="vk-admin-field" id="vkAdminPaidModeWrap" style="display:none">
           <label for="vkAdminPaidMode">Paid Test Action</label>
           <select id="vkAdminPaidMode" onchange="vkAdminPaidModeChanged()">
@@ -7412,19 +7428,122 @@ function vkAdminOnTestTypeChange(){
     if(paperWrap) paperWrap.style.display=paid?"block":"none";
     const paidModeWrap=document.getElementById("vkAdminPaidModeWrap");
     if(paidModeWrap) paidModeWrap.style.display=paid?"block":"none";
+    const freeModeWrap=document.getElementById("vkAdminFreeModeWrap");
+    if(freeModeWrap) freeModeWrap.style.display=paid?"none":"block";
     if(hint) hint.textContent=paid
       ? "Paid tests are created under the selected Paper 1 or Paper 2 series. Each paid test must contain exactly 150 questions."
       : "Free tests receive automatic topic-wise titles, for example: Ramayanam - Test 2.";
     if(bulkTitle) bulkTitle.textContent=paid?"Bulk Question Upload – Paid Test":"Bulk Question Upload – Free Test";
     const publish=document.getElementById("vkAdminPublishBtn");
     if(publish) publish.textContent=paid?"Publish Paid Test":"Publish Free Test";
-    if(paid) vkAdminPaidModeChanged();
-    else {
+    if(paid) {
+        const freeWrap=document.getElementById("vkAdminExistingFreeTestWrap");
+        const freeWarning=document.getElementById("vkAdminFreeEditWarning");
+        if(freeWrap) freeWrap.style.display="none";
+        if(freeWarning) freeWarning.style.display="none";
+        vkAdminPaidModeChanged();
+    } else {
         const existingWrap=document.getElementById("vkAdminExistingTestWrap");
         if(existingWrap) existingWrap.style.display="none";
+        vkAdminFreeModeChanged();
     }
 }
 
+
+
+let vkAdminEditingFreeTestId = null;
+let vkAdminFreeTestsCache = [];
+
+async function vkAdminFreeModeChanged(){
+    const editMode=document.getElementById("vkAdminFreeMode")?.value==="edit";
+    const existingWrap=document.getElementById("vkAdminExistingFreeTestWrap");
+    const warning=document.getElementById("vkAdminFreeEditWarning");
+    const topicWrap=document.getElementById("vkAdminTopicWrap");
+    const publish=document.getElementById("vkAdminPublishBtn");
+    if(existingWrap) existingWrap.style.display=editMode?"block":"none";
+    if(warning) warning.style.display=editMode?"block":"none";
+    if(topicWrap) topicWrap.style.display=editMode?"none":"block";
+    vkAdminEditingFreeTestId=null;
+    if(publish) publish.textContent=editMode?"Save Existing Free Test":"Publish Free Test";
+    const host=document.getElementById("vkAdminQuestions");
+    if(host) host.innerHTML="";
+    if(editMode) await vkAdminLoadFreeTests();
+    else {
+        const select=document.getElementById("vkAdminExistingFreeTest");
+        if(select) select.innerHTML='<option value="">Select a free test</option>';
+        document.getElementById("vkAdminDuration").value="30";
+        document.getElementById("vkAdminNegative").value="0.333333";
+        vkAdminAddQuestion();
+    }
+}
+
+async function vkAdminLoadFreeTests(){
+    const courseName=document.getElementById("vkAdminCourse")?.value;
+    const testSelect=document.getElementById("vkAdminExistingFreeTest");
+    if(!courseName||!testSelect)return;
+    testSelect.innerHTML='<option value="">Loading free tests...</option>';
+    try{
+        const {data:course,error:ce}=await supabaseClient.from("courses").select("id").eq("name",courseName).maybeSingle();
+        if(ce)throw ce;
+        if(!course)throw new Error("Selected course was not found.");
+        const {data:series,error:se}=await supabaseClient.from("test_series").select("id").eq("course_id",course.id).eq("name","Free Mock Tests").maybeSingle();
+        if(se)throw se;
+        if(!series)throw new Error("Free Mock Tests series was not found for this course.");
+        const {data:tests,error:te}=await supabaseClient.from("tests")
+            .select("id,title,test_number,topic_name,topic_test_number,duration_minutes,total_marks,is_active")
+            .eq("test_series_id",series.id).eq("is_free",true).order("test_number",{ascending:true});
+        if(te)throw te;
+        vkAdminFreeTestsCache=tests||[];
+        testSelect.innerHTML='<option value="">Select a free test</option>'+
+            vkAdminFreeTestsCache.map(t=>{
+                const title=t.title||((t.topic_name||"Free Mock")+" - Test "+(t.topic_test_number||t.test_number));
+                return `<option value="${t.id}">${vkAdminEscape(title)} · ${t.is_active?"Published":"Draft"}</option>`;
+            }).join("");
+        if(!vkAdminFreeTestsCache.length)testSelect.innerHTML='<option value="">No existing free tests found</option>';
+    }catch(e){
+        console.error("Free test list load failed",e);
+        testSelect.innerHTML='<option value="">Unable to load free tests</option>';
+        vkAdminShowStatus("Could not load Free Tests: "+(e.message||e),true);
+    }
+}
+
+async function vkAdminLoadFreeTestForEdit(){
+    const id=document.getElementById("vkAdminExistingFreeTest")?.value;
+    if(!id)return;
+    try{
+        vkAdminShowStatus("Loading existing Free Mock Test...",false);
+        const {data,error}=await supabaseClient.rpc("vk_admin_get_free_test_for_edit",{p_test_id:id});
+        if(error)throw error;
+        const result=Array.isArray(data)?data[0]:data;
+        if(!result||!Array.isArray(result.questions))throw new Error("Test data was not returned by vk_admin_get_free_test_for_edit.");
+        vkAdminEditingFreeTestId=id;
+        document.getElementById("vkAdminDuration").value=result.duration_minutes||30;
+        document.getElementById("vkAdminNegative").value=result.negative_marks??0.333333;
+        const topic=document.getElementById("vkAdminTopic");
+        if(topic)topic.value=result.topic_name||"";
+        const host=document.getElementById("vkAdminQuestions");
+        host.innerHTML="";
+        result.questions.forEach(q=>{
+            vkAdminAddQuestion();
+            const card=host.lastElementChild;
+            Object.entries({
+                question_text:q.question_text,option_a:q.option_a,option_b:q.option_b,
+                option_c:q.option_c,option_d:q.option_d,correct_option:q.correct_option,
+                explanation:q.explanation,marks:q.marks
+            }).forEach(([field,value])=>{
+                const el=card.querySelector(`[data-field="${field}"]`);
+                if(el)el.value=value??"";
+            });
+        });
+        if(!result.questions.length)vkAdminAddQuestion();
+        vkAdminUpdateQuestionLabels();
+        vkAdminShowStatus(`Loaded ${result.questions.length} questions from ${result.title}. Edit and save the existing test.`,false);
+        document.getElementById("vkAdminPublishBtn").textContent="Save Existing Free Test";
+    }catch(e){
+        console.error("Free test edit load failed",e);
+        vkAdminShowStatus("Could not load existing Free Test: "+(e.message||e),true);
+    }
+}
 
 let vkAdminPaidSeriesId = null;
 let vkAdminEditingPaidTestId = null;
@@ -7433,6 +7552,8 @@ let vkAdminPaidTestsCache = [];
 async function vkAdminOnCourseChanged(){
     if(document.getElementById("vkAdminTestType")?.value==="paid"){
         await vkAdminLoadPaidSeriesAndTests();
+    } else if(document.getElementById("vkAdminFreeMode")?.value==="edit"){
+        await vkAdminLoadFreeTests();
     }
 }
 
@@ -7609,7 +7730,7 @@ async function vkAdminPublishTest(){
     const negativeMarks = Number(document.getElementById("vkAdminNegative")?.value);
     const cards = Array.from(document.querySelectorAll("#vkAdminQuestions .vk-admin-question"));
 
-    if(!courseName || (!isPaid && !topicName)){
+    if(!courseName || (!isPaid && freeMode!=="edit" && !topicName)){
         vkAdminShowStatus(isPaid?"Select a course.":"Select a course and enter a topic name.",true); return;
     }
     if(isPaid && !["Paper 1","Paper 2"].includes(paperName)){
@@ -7628,8 +7749,12 @@ async function vkAdminPublishTest(){
         vkAdminShowStatus(`Paid tests require exactly 150 questions. Current count: ${cards.length}.`,true); return;
     }
     const paidMode=document.getElementById("vkAdminPaidMode")?.value||"create";
+    const freeMode=document.getElementById("vkAdminFreeMode")?.value||"create";
     if(isPaid && paidMode==="edit" && !vkAdminEditingPaidTestId){
         vkAdminShowStatus("Select an existing Paid Test and load its questions before saving.",true); return;
+    }
+    if(!isPaid && freeMode==="edit" && !vkAdminEditingFreeTestId){
+        vkAdminShowStatus("Select an existing Free Test and load its questions before saving.",true); return;
     }
 
     const questions = [];
@@ -7666,7 +7791,7 @@ async function vkAdminPublishTest(){
     try{
         const rpcName = isPaid
             ? (paidMode==="edit" ? "vk_admin_update_paid_mock_test" : "vk_admin_create_paid_mock_test")
-            : "vk_admin_create_free_mock_test";
+            : (freeMode==="edit" ? "vk_admin_update_free_mock_test" : "vk_admin_create_free_mock_test");
         const rpcArgs = isPaid ? (paidMode==="edit" ? {
             p_test_id:vkAdminEditingPaidTestId,
             p_duration_minutes:duration,
@@ -7678,13 +7803,18 @@ async function vkAdminPublishTest(){
             p_duration_minutes:duration,
             p_negative_marks:negativeMarks,
             p_questions:questions
-        }) : {
+        }) : (freeMode==="edit" ? {
+            p_test_id:vkAdminEditingFreeTestId,
+            p_duration_minutes:duration,
+            p_negative_marks:negativeMarks,
+            p_questions:questions
+        } : {
             p_course_name:courseName,
             p_topic_name:topicName,
             p_duration_minutes:duration,
             p_negative_marks:negativeMarks,
             p_questions:questions
-        };
+        });
         const {data,error} = await supabaseClient.rpc(rpcName,rpcArgs);
         if(error) throw error;
         const result = Array.isArray(data) ? data[0] : data;
@@ -7692,6 +7822,10 @@ async function vkAdminPublishTest(){
         const number = isPaid ? result?.website_test_number : result?.topic_test_number;
         if(isPaid && paidMode==="edit"){
             vkAdminShowStatus(`Existing Paid Test updated: ${title}. ${questions.length} questions saved. Test ID and purchase links preserved.`,false);
+        }else if(!isPaid && freeMode==="edit"){
+            vkAdminShowStatus(`Existing Free Test updated: ${title}. ${questions.length} questions saved. Test ID and Share Link preserved.`,false);
+            window.__freeMockCache = window.__freeMockCache || {};
+            delete window.__freeMockCache[courseName];
         }else{
             vkAdminShowStatus(`Published successfully: ${title}${number ? " (Test " + number + ")" : ""}. Questions: ${questions.length}.`,false);
             const courseSelect = document.getElementById("vkAdminCourse");
@@ -7704,7 +7838,7 @@ async function vkAdminPublishTest(){
         console.error("Mock test publish failed:",error);
         vkAdminShowStatus("Publish failed: " + (error.message || "Please check the Unified Admin SQL setup and admin permissions."),true);
     }finally{
-        if(button){button.disabled=false;const paidNow=document.getElementById("vkAdminTestType")?.value==="paid";const editNow=document.getElementById("vkAdminPaidMode")?.value==="edit";button.textContent=paidNow?(editNow?"Save Existing Paid Test":"Publish Paid Test"):"Publish Free Test";}
+        if(button){button.disabled=false;const paidNow=document.getElementById("vkAdminTestType")?.value==="paid";const editNow=paidNow?(document.getElementById("vkAdminPaidMode")?.value==="edit"):(document.getElementById("vkAdminFreeMode")?.value==="edit");button.textContent=paidNow?(editNow?"Save Existing Paid Test":"Publish Paid Test"):(editNow?"Save Existing Free Test":"Publish Free Test");}
     }
 }
 
