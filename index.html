@@ -2413,58 +2413,76 @@ footer p{
 .vk-bulk-success{margin:10px 0;padding:10px 12px;border-radius:9px;background:#ecfdf5;color:#065f46;font-size:13px}
 
 
-/* HOME EXAM CARDS – student-focused paid CBT promotion */
-#home .home-exam-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:22px;align-items:stretch}
-#home .home-exam-card{position:relative;isolation:isolate;display:flex;flex-direction:column;align-items:flex-start;min-height:345px;padding:23px 22px 20px;border:1px solid rgba(255,255,255,.75);border-radius:22px;text-align:left;color:#fff;background:linear-gradient(145deg,#1d4ed8 0%,#4338ca 58%,#6d28d9 100%);box-shadow:0 14px 30px rgba(37,99,235,.18);transition:transform .22s ease,box-shadow .22s ease;cursor:pointer}
-#home .home-exam-card:before{content:"";position:absolute;inset:0;z-index:-1;border-radius:inherit;background:linear-gradient(135deg,rgba(255,255,255,.17),transparent 48%)}
-#home .home-exam-card:hover,#home .home-exam-card:focus-visible{transform:translateY(-7px);box-shadow:0 22px 42px rgba(30,41,59,.22);outline:3px solid rgba(59,130,246,.2);outline-offset:3px}
-#home .home-exam-card:after{content:"";position:absolute;z-index:-1;width:190px;height:190px;right:-75px;top:95px;border-radius:50%;background:rgba(255,255,255,.10)}
-#home .home-exam-appsc{background:linear-gradient(145deg,#1e40af,#2563eb 58%,#0891b2)}
-#home .home-exam-endowment{background:linear-gradient(145deg,#9a3412 0%,#ea580c 48%,#f59e0b 100%)}
-#home .home-exam-highcourt{background:linear-gradient(145deg,#4c1d95 0%,#7c3aed 55%,#c026d3 100%)}
-#home .home-exam-featured{min-height:365px;border:2px solid rgba(255,255,255,.82);box-shadow:0 18px 38px rgba(234,88,12,.25),inset 0 0 0 1px rgba(255,255,255,.12);transform:translateY(-5px)}
-#home .home-card-topline{display:flex;justify-content:space-between;align-items:center;width:100%;gap:8px}
-#home .home-card-kicker{font-size:10px;font-weight:900;letter-spacing:1.05px;color:rgba(255,255,255,.82)}
-#home .home-card-status{display:inline-flex;align-items:center;gap:5px;padding:6px 9px;border:1px solid rgba(255,255,255,.3);border-radius:999px;background:rgba(15,23,42,.18);color:#fff;font-size:9px;font-weight:900;letter-spacing:.45px;white-space:nowrap}
-#home .home-card-live{background:rgba(5,46,22,.24);border-color:rgba(187,247,208,.55)}
-#home .home-card-live i{width:7px;height:7px;border-radius:50%;background:#86efac;box-shadow:0 0 0 4px rgba(134,239,172,.17)}
-#home .home-card-icon{display:grid;place-items:center;width:66px;height:66px;margin:20px 0 13px;border:1px solid rgba(255,255,255,.35);border-radius:19px;background:rgba(255,255,255,.17);box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 8px 18px rgba(15,23,42,.12);font-size:35px}
-#home .home-exam-card h3{margin:0 0 9px;color:#fff;font-size:23px;font-weight:950;letter-spacing:-.35px}
-#home .home-exam-card p{margin:0;max-width:390px;color:rgba(255,255,255,.9);font-size:13px;line-height:1.6}
-#home .home-card-features{display:flex;flex-direction:column;gap:7px;margin:17px 0 19px;color:#fff;font-size:11px;font-weight:750}
-#home .home-card-cta{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;margin-top:auto;padding:12px 14px;border:1px solid rgba(255,255,255,.65);border-radius:12px;background:#fff;color:#7c2d12;font-size:13px;font-weight:950;box-shadow:0 7px 15px rgba(15,23,42,.12)}
-#home .home-exam-appsc .home-card-cta{color:#1d4ed8}
-#home .home-exam-highcourt .home-card-cta{color:#6d28d9}
-#home .home-card-cta span{font-size:20px;line-height:1}
-#home .home-card-ribbon{position:absolute;top:54px;right:-32px;width:128px;padding:6px 0;transform:rotate(38deg);background:#fff7ed;color:#c2410c;text-align:center;font-size:9px;font-weight:950;letter-spacing:.7px;box-shadow:0 3px 10px rgba(15,23,42,.12)}
-@media(max-width:900px){#home .home-exam-grid{grid-template-columns:repeat(2,minmax(0,1fr))}#home .home-exam-featured{transform:none}}
-@media(max-width:600px){#home .home-exam-grid{grid-template-columns:1fr;gap:15px}#home .home-exam-card,#home .home-exam-featured{min-height:0;padding:20px;border-radius:19px}#home .home-card-icon{width:58px;height:58px;margin:16px 0 11px;font-size:31px}#home .home-exam-card h3{font-size:21px}#home .home-card-features{margin:14px 0 16px}#home .home-card-cta{padding:13px 14px;font-size:13px}}
-@media(prefers-reduced-motion:reduce){#home .home-exam-card{transition:none}#home .home-exam-card:hover{transform:none}}
-
-/* HERO – REAL-TIME CBT PROMOTION AND TWO PRIMARY ACTIONS */
-#home .hero{padding:48px 20px 52px;background:radial-gradient(circle at 12% 15%,rgba(255,255,255,.18),transparent 25%),linear-gradient(115deg,#092b72 0%,#174bd0 48%,#6d28d9 100%);border-radius:0 0 28px 28px;box-shadow:0 16px 38px rgba(37,66,180,.24)}
-#home .hero-content{max-width:1120px}
-#home .hero-kicker{display:inline-flex;align-items:center;gap:9px;margin-bottom:13px;padding:7px 14px;border:1px solid rgba(255,255,255,.32);border-radius:999px;background:rgba(255,255,255,.12);font-size:11px;font-weight:900;letter-spacing:1.15px;color:#eaf2ff}
-#home .hero-live-dot{width:9px;height:9px;border-radius:50%;background:#4ade80;box-shadow:0 0 0 5px rgba(74,222,128,.17)}
-#home .hero h1{margin:0 0 10px;font-size:clamp(32px,5vw,54px);font-weight:950;letter-spacing:-1.2px;color:#fff}
-#home .hero h1 span{color:#ffd84d}
-#home .hero-promise{display:inline-block;margin:0 auto 12px;padding:9px 22px;border-radius:8px;background:linear-gradient(100deg,#ef233c,#c8102e);box-shadow:0 7px 18px rgba(130,10,35,.28);font-size:clamp(16px,2.3vw,25px);font-weight:900;color:#fff;transform:skew(-3deg)}
+/* VK EXAMS – REAL CBT LANDING PAGE DESIGN */
+#home .hero{position:relative;overflow:hidden;padding:36px 20px 34px;background:radial-gradient(circle at 8% 8%,rgba(0,160,255,.42),transparent 28%),radial-gradient(circle at 92% 15%,rgba(125,0,255,.48),transparent 32%),linear-gradient(112deg,#052b82 0%,#062d9d 48%,#3900a9 100%);border-radius:0 0 25px 25px;box-shadow:0 15px 35px rgba(28,52,160,.25)}
+#home .hero:before{content:"";position:absolute;width:390px;height:390px;left:-210px;top:-250px;border-radius:50%;border:1px solid rgba(255,255,255,.12);box-shadow:0 0 0 38px rgba(255,255,255,.025),0 0 0 78px rgba(255,255,255,.02);pointer-events:none}
+#home .hero:after{content:"";position:absolute;width:300px;height:300px;right:-180px;bottom:-230px;border-radius:50%;background:rgba(255,255,255,.07);pointer-events:none}
+#home .hero-content{position:relative;z-index:1;max-width:1120px}
+#home .hero-kicker{display:inline-flex;align-items:center;gap:9px;margin-bottom:13px;padding:7px 15px;border:1px solid rgba(255,255,255,.42);border-radius:999px;background:rgba(255,255,255,.10);font-size:11px;font-weight:900;letter-spacing:1.15px;color:#fff}
+#home .hero-live-dot{width:10px;height:10px;border-radius:50%;background:#20e58a;box-shadow:0 0 0 5px rgba(32,229,138,.16)}
+#home .hero h1{margin:0 0 8px;font-size:clamp(32px,5vw,57px);font-weight:1000;letter-spacing:-1.4px;line-height:1.08;color:#fff}
+#home .hero h1 span{color:#ffd51e}
+#home .hero-promise{display:inline-block;margin:0 auto 13px;padding:9px 25px;border-radius:7px;background:linear-gradient(100deg,#ff183c,#df0037);box-shadow:0 7px 18px rgba(130,10,35,.32);font-size:clamp(16px,2.3vw,25px);font-weight:950;color:#fff;transform:skew(-3deg)}
 #home .hero-promise strong{color:#fff}
-#home .hero p{max-width:800px;margin:5px auto 0;font-size:15px;color:#eef4ff}
-#home .hero-buttons{max-width:900px;margin:27px auto 0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}
-#home .hero-buttons .hero-action{position:relative;display:flex;align-items:center;justify-content:space-between;gap:12px;min-width:0;min-height:86px;padding:13px 20px;border:3px solid rgba(255,255,255,.95);border-radius:999px;color:#fff;text-align:left;box-shadow:0 9px 0 rgba(15,23,42,.12),0 13px 26px rgba(15,23,42,.22),inset 0 1px 0 rgba(255,255,255,.5);transition:transform .2s ease,filter .2s ease,box-shadow .2s ease}
-#home .hero-buttons .hero-action:hover{transform:translateY(-5px) scale(1.015);filter:brightness(1.06);box-shadow:0 12px 0 rgba(15,23,42,.1),0 18px 32px rgba(15,23,42,.25)}
-#home .hero-buttons .hero-packages{background:linear-gradient(105deg,#ff9f0a 0%,#ff5b19 52%,#e90042 100%);color:#fff}
-#home .hero-buttons .hero-free{background:linear-gradient(105deg,#00c853 0%,#00a83b 52%,#08752e 100%);color:#fff;border-color:#eaffef}
-#home .hero-action-icon{display:grid;place-items:center;flex:0 0 54px;width:54px;height:54px;border-radius:50%;background:rgba(255,255,255,.2);font-size:35px;font-weight:900;color:#fff;text-shadow:0 2px 5px rgba(0,0,0,.18)}
-#home .hero-action-copy{display:flex;flex:1;flex-direction:column;align-items:center;gap:1px;line-height:1.1;text-align:center}
-#home .hero-action-copy small{font-size:clamp(10px,1.4vw,14px);font-weight:900;letter-spacing:.7px;color:#fff}
-#home .hero-action-copy strong{font-size:clamp(17px,2.2vw,26px);font-weight:950;color:#fff}
-#home .hero-action-arrow{display:grid;place-items:center;flex:0 0 43px;width:43px;height:43px;border-radius:50%;background:#fff;color:#c51d31;font-size:28px;font-weight:950;box-shadow:0 3px 10px rgba(0,0,0,.16)}
-#home .hero-free .hero-action-arrow{color:#078536}
-@media(max-width:650px){#home .hero{padding:34px 15px 38px}#home .hero-kicker{font-size:9px;letter-spacing:.7px}#home .hero h1{font-size:clamp(29px,8vw,40px)}#home .hero-promise{padding:8px 13px;font-size:16px}#home .hero p{font-size:13px;line-height:1.55}#home .hero-buttons{grid-template-columns:1fr;gap:14px;margin-top:21px;max-width:420px}#home .hero-buttons .hero-action{min-height:72px;padding:10px 15px}#home .hero-action-icon{flex-basis:46px;width:46px;height:46px;font-size:29px}#home .hero-action-copy strong{font-size:20px}#home .hero-action-copy small{font-size:11px}}
-@media(prefers-reduced-motion:reduce){#home .hero-buttons .hero-action{transition:none}#home .hero-buttons .hero-action:hover{transform:none}}
-
+#home .hero p{max-width:850px;margin:5px auto 0;font-size:14px;line-height:1.55;color:#f2f6ff}
+#home .hero-benefits{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));max-width:950px;margin:24px auto 22px;color:#fff}
+#home .hero-benefit{display:flex;align-items:center;justify-content:center;gap:11px;padding:3px 12px;border-right:1px solid rgba(255,255,255,.32);font-size:15px;font-weight:900;line-height:1.2;text-align:left}
+#home .hero-benefit:last-child{border-right:0}
+#home .hero-benefit-icon{font-size:31px;line-height:1;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.2)}
+#home .hero-buttons{max-width:980px;margin:20px auto 0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+#home .hero-buttons .hero-action{position:relative;display:flex;align-items:center;justify-content:space-between;gap:12px;min-width:0;min-height:88px;padding:12px 19px;border:3px solid #fff;border-radius:999px;color:#102b75;text-align:left;box-shadow:0 0 0 2px rgba(255,255,255,.18),0 9px 22px rgba(0,0,0,.22),inset 0 2px 0 rgba(255,255,255,.65);transition:transform .2s ease,filter .2s ease,box-shadow .2s ease}
+#home .hero-buttons .hero-action:hover{transform:translateY(-4px);filter:brightness(1.04);box-shadow:0 0 0 3px rgba(255,255,255,.24),0 15px 28px rgba(0,0,0,.25)}
+#home .hero-buttons .hero-packages{background:linear-gradient(105deg,#ffed16 0%,#ffb000 48%,#ff8a00 100%);color:#092c83;border-color:#fff8c9}
+#home .hero-buttons .hero-free{background:linear-gradient(105deg,#00df5a 0%,#00b941 55%,#008c38 100%);color:#fff;border-color:#eaffef}
+#home .hero-action-icon{display:grid;place-items:center;flex:0 0 60px;width:60px;height:60px;border-radius:50%;background:linear-gradient(145deg,#ff8b00,#e94a00);font-size:35px;font-weight:900;color:#fff;text-shadow:0 2px 5px rgba(0,0,0,.2);box-shadow:inset 0 0 0 2px rgba(255,255,255,.45)}
+#home .hero-free .hero-action-icon{background:linear-gradient(145deg,#007d39,#00a84b)}
+#home .hero-action-copy{display:flex;flex:1;flex-direction:column;align-items:center;gap:2px;line-height:1.12;text-align:center}
+#home .hero-action-copy small{font-size:clamp(10px,1.35vw,13px);font-weight:950;letter-spacing:.55px;color:#17336f}
+#home .hero-action-copy strong{font-size:clamp(18px,2.25vw,27px);font-weight:1000;color:#092b78;text-shadow:none}
+#home .hero-free .hero-action-copy small{color:#fff}
+#home .hero-free .hero-action-copy strong{color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.16)}
+#home .hero-action-arrow{display:grid;place-items:center;flex:0 0 44px;width:44px;height:44px;border-radius:50%;background:#fff;color:#c52222;font-size:29px;font-weight:1000;box-shadow:0 3px 10px rgba(0,0,0,.18)}
+#home .hero-free .hero-action-arrow{color:#087d38}
+#home .section-title{margin-top:28px}
+#home .section-title h2{font-weight:950;color:#132c78}
+#home .home-exam-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;align-items:stretch;margin-top:24px}
+#home .home-exam-card{position:relative;isolation:isolate;overflow:hidden;display:flex;flex-direction:column;align-items:flex-start;min-height:370px;padding:22px 20px 19px;border:2px solid rgba(255,255,255,.9);border-radius:25px;text-align:left;color:#fff;background:linear-gradient(145deg,#0756d7 0%,#0878ed 56%,#003b9d 100%);box-shadow:0 14px 30px rgba(20,76,180,.24);transition:transform .22s ease,box-shadow .22s ease;cursor:pointer}
+#home .home-exam-card:before{content:"";position:absolute;inset:0;z-index:-1;background:radial-gradient(circle at 90% 55%,rgba(255,255,255,.28),transparent 32%),linear-gradient(135deg,rgba(255,255,255,.13),transparent 45%)}
+#home .home-exam-card:after{position:absolute;z-index:-1;right:-22px;bottom:55px;font-size:125px;line-height:1;opacity:.19;filter:drop-shadow(0 4px 8px rgba(0,0,0,.2));pointer-events:none}
+#home .home-exam-appsc:after{content:"🏛️"}
+#home .home-exam-endowment:after{content:"🛕";font-size:145px;right:-8px;bottom:68px;opacity:.25}
+#home .home-exam-highcourt:after{content:"⚖️";font-size:145px;right:-12px;bottom:65px;opacity:.23}
+#home .home-exam-card:hover,#home .home-exam-card:focus-visible{transform:translateY(-6px);box-shadow:0 22px 42px rgba(30,41,59,.25);outline:3px solid rgba(59,130,246,.22);outline-offset:3px}
+#home .home-exam-appsc{background:linear-gradient(145deg,#0757d5,#087df1 55%,#0345a8)}
+#home .home-exam-endowment{background:linear-gradient(145deg,#fff9e9 0%,#ffedb9 55%,#ffcf48 100%);color:#54140d;border:3px solid #ffbf00;box-shadow:0 0 0 3px rgba(255,205,0,.16),0 15px 34px rgba(219,153,0,.28),inset 0 0 0 2px #fff}
+#home .home-exam-highcourt{background:linear-gradient(145deg,#6e10dc,#8b20f4 55%,#4a00a8)}
+#home .home-exam-featured{min-height:390px;transform:translateY(-7px)}
+#home .home-card-topline{display:flex;justify-content:space-between;align-items:center;width:100%;gap:8px;position:relative;z-index:1}
+#home .home-card-kicker{font-size:10px;font-weight:950;letter-spacing:.85px;color:rgba(255,255,255,.95)}
+#home .home-exam-endowment .home-card-kicker{padding:7px 12px;border-radius:999px;background:#d71920;color:#fff;font-size:11px}
+#home .home-card-status{display:inline-flex;align-items:center;gap:5px;padding:6px 10px;border:1px solid rgba(255,255,255,.45);border-radius:999px;background:rgba(255,255,255,.94);color:#14234a;font-size:10px;font-weight:950;white-space:nowrap}
+#home .home-card-live{background:#087a32;border-color:#d9ffe4;color:#fff}
+#home .home-card-live i{width:7px;height:7px;border-radius:50%;background:#8dffad;box-shadow:0 0 0 4px rgba(134,239,172,.17)}
+#home .home-card-icon{display:grid;place-items:center;width:66px;height:66px;margin:17px 0 11px;border:1px solid rgba(255,255,255,.45);border-radius:18px;background:rgba(255,255,255,.17);box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 8px 18px rgba(15,23,42,.13);font-size:37px;position:relative;z-index:1}
+#home .home-exam-endowment .home-card-icon{background:rgba(255,255,255,.55);border-color:#f6d16a}
+#home .home-exam-card h3{position:relative;z-index:1;margin:0 0 8px;color:#fff;font-size:27px;font-weight:1000;letter-spacing:-.5px}
+#home .home-exam-endowment h3{color:#74160f;font-size:29px}
+#home .home-exam-card p{position:relative;z-index:1;margin:0;max-width:390px;color:rgba(255,255,255,.96);font-size:13px;line-height:1.5;font-weight:650}
+#home .home-exam-endowment p{color:#321d16}
+#home .home-card-features{position:relative;z-index:1;display:flex;flex-wrap:wrap;gap:8px 13px;margin:18px 0 19px;color:#fff;font-size:11px;font-weight:850}
+#home .home-exam-endowment .home-card-features{color:#291b10}
+#home .home-card-cta{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;gap:10px;width:100%;margin-top:auto;padding:14px 13px;border:1px solid rgba(255,255,255,.85);border-radius:999px;background:#fff;color:#0647b8;font-size:15px;font-weight:1000;box-shadow:0 7px 15px rgba(15,23,42,.16)}
+#home .home-exam-endowment .home-card-cta{background:linear-gradient(100deg,#ef1b20,#c90018);border-color:#ffefb8;color:#fff;font-size:16px}
+#home .home-exam-highcourt .home-card-cta{color:#5b16bd}
+#home .home-card-cta span{font-size:23px;line-height:1}
+#home .home-card-ribbon{position:absolute;top:13px;right:14px;width:auto;padding:8px 10px;transform:none;border-radius:50%;background:linear-gradient(145deg,#fff000,#f7a900);color:#7b2600;text-align:center;font-size:22px;font-weight:950;box-shadow:0 0 0 4px rgba(255,255,255,.5),0 4px 15px rgba(150,90,0,.3)}
+#home .home-proof-strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;margin:34px 0 10px;padding:19px 12px;border:1px solid #e5eaff;border-radius:24px;background:rgba(255,255,255,.92);box-shadow:0 12px 28px rgba(47,76,160,.10)}
+#home .home-proof-item{display:flex;align-items:center;justify-content:center;gap:10px;padding:5px 10px;border-right:1px solid #cbd5e1;color:#10265f;font-size:14px;font-weight:950;line-height:1.25}
+#home .home-proof-item:last-child{border-right:0}
+#home .home-proof-item b{font-size:30px}
+@media(max-width:900px){#home .home-exam-grid{grid-template-columns:repeat(2,minmax(0,1fr))}#home .home-exam-featured{transform:none}}
+@media(max-width:650px){#home .hero{padding:30px 14px 32px}#home .hero-kicker{font-size:9px;letter-spacing:.6px;padding:6px 10px}#home .hero h1{font-size:clamp(28px,8vw,39px);letter-spacing:-.8px}#home .hero-promise{padding:8px 12px;font-size:15px;transform:none}#home .hero p{font-size:12px;line-height:1.5}#home .hero-benefits{grid-template-columns:repeat(2,minmax(0,1fr));gap:13px 0;margin:19px auto}#home .hero-benefit{justify-content:flex-start;padding:4px 9px;font-size:12px;border-right:0}#home .hero-benefit:nth-child(odd){border-right:1px solid rgba(255,255,255,.25)}#home .hero-benefit-icon{font-size:25px}#home .hero-buttons{grid-template-columns:1fr;gap:13px;margin-top:17px;max-width:440px}#home .hero-buttons .hero-action{min-height:72px;padding:8px 12px}#home .hero-action-icon{flex-basis:48px;width:48px;height:48px;font-size:28px}#home .hero-action-copy strong{font-size:20px}#home .hero-action-copy small{font-size:10px}#home .hero-action-arrow{flex-basis:37px;width:37px;height:37px;font-size:24px}#home .home-exam-grid{grid-template-columns:1fr;gap:16px;margin-top:18px}#home .home-exam-card,#home .home-exam-featured{min-height:0;padding:19px;border-radius:20px;transform:none}#home .home-exam-card h3{font-size:24px}#home .home-exam-endowment h3{font-size:26px}#home .home-card-features{margin:14px 0 16px}#home .home-card-cta{padding:13px 12px;font-size:14px}#home .home-proof-strip{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:25px;padding:13px 8px}#home .home-proof-item{justify-content:flex-start;border-right:0;padding:8px;font-size:12px}#home .home-proof-item b{font-size:24px}}
+@media(prefers-reduced-motion:reduce){#home .home-exam-card,#home .hero-buttons .hero-action{transition:none}#home .home-exam-card:hover,#home .hero-buttons .hero-action:hover{transform:none}}
 </style>
 
 
@@ -2542,15 +2560,20 @@ class="page">
 
 <section class="hero">
   <div class="hero-content">
-    <div class="hero-kicker"><span class="hero-live-dot"></span> VK EXAMS ONLINE · COMPETITIVE EXAM PREPARATION</div>
+    <div class="hero-kicker"><span class="hero-live-dot"></span> VK EXAMS ONLINE – COMPETITIVE EXAM PREPARATION</div>
     <h1>REAL-TIME <span>EXAM PRACTICE</span></h1>
     <div class="hero-promise">Experience the <strong>Actual CBT Exam Environment</strong></div>
-    <p>Prepare with full-length mock tests, timed exam simulation and performance-focused practice for competitive examinations.</p>
+    <div class="hero-benefits" aria-label="Exam platform features">
+      <div class="hero-benefit"><span class="hero-benefit-icon">▣</span><span>Real CBT<br>Interface</span></div>
+      <div class="hero-benefit"><span class="hero-benefit-icon">◴</span><span>Live<br>Timer</span></div>
+      <div class="hero-benefit"><span class="hero-benefit-icon">▦</span><span>Question<br>Palette</span></div>
+      <div class="hero-benefit"><span class="hero-benefit-icon">▥</span><span>Instant<br>Results</span></div>
+    </div>
     <div class="hero-buttons">
-      <button type="button" class="btn btn-primary hero-action hero-packages" onclick="openStore()">
-        <span class="hero-action-icon">♛</span><span class="hero-action-copy"><small>CLICK HERE FOR</small><strong>VIEW PACKAGES</strong></span><span class="hero-action-arrow">➜</span>
+      <button type="button" class="btn btn-primary hero-action hero-packages" onclick="openStore()" aria-label="Click here to view packages">
+        <span class="hero-action-icon">♛</span><span class="hero-action-copy"><small>CLICK HERE TO</small><strong>VIEW PACKAGES</strong></span><span class="hero-action-arrow">➜</span>
       </button>
-      <button type="button" class="btn btn-light hero-action hero-free" onclick="openFreeMocks()">
+      <button type="button" class="btn btn-light hero-action hero-free" onclick="openFreeMocks()" aria-label="Click here for free mock test">
         <span class="hero-action-icon">◎</span><span class="hero-action-copy"><small>CLICK HERE FOR</small><strong>FREE MOCK TEST</strong></span><span class="hero-action-arrow">➜</span>
       </button>
     </div>
@@ -2576,7 +2599,7 @@ Select an examination and start your preparation.
 
 <div class="category-grid home-exam-grid">
   <div class="category-card home-exam-card home-exam-appsc is-coming-soon" onclick="showComingSoon('APPSC')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showComingSoon('APPSC')}">
-    <div class="home-card-topline"><span class="home-card-kicker">COMPETITIVE EXAMS</span><span class="home-card-status">COMING SOON</span></div>
+    <div class="home-card-topline"><span class="home-card-kicker">APPSC EXAM SERIES</span><span class="home-card-status">COMING SOON</span></div>
     <div class="home-card-icon">📚</div>
     <h3>APPSC</h3>
     <p>Prepare for Andhra Pradesh Public Service Commission examinations with structured practice.</p>
@@ -2585,7 +2608,7 @@ Select an examination and start your preparation.
   </div>
 
   <div class="category-card home-exam-card home-exam-endowment home-exam-featured" onclick="openCourse('Endowment Officer')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openCourse('Endowment Officer')}">
-    <div class="home-card-topline"><span class="home-card-kicker">POPULAR TEST SERIES</span><span class="home-card-status home-card-live"><i></i> AVAILABLE NOW</span></div>
+    <div class="home-card-topline"><span class="home-card-kicker">⭐ PAID TEST SERIES</span><span class="home-card-status home-card-live"><i></i> AVAILABLE NOW</span></div>
     <div class="home-card-icon">🛕</div>
     <h3>Endowment Officer</h3>
     <p>Prepare with exam-focused paid test series and full-length CBT-style practice.</p>
@@ -2595,13 +2618,20 @@ Select an examination and start your preparation.
   </div>
 
   <div class="category-card home-exam-card home-exam-highcourt is-coming-soon" onclick="showComingSoon('High Court')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showComingSoon('High Court')}">
-    <div class="home-card-topline"><span class="home-card-kicker">JUDICIARY RECRUITMENT</span><span class="home-card-status">COMING SOON</span></div>
+    <div class="home-card-topline"><span class="home-card-kicker">JUDICIARY EXAM SERIES</span><span class="home-card-status">COMING SOON</span></div>
     <div class="home-card-icon">⚖️</div>
     <h3>High Court</h3>
     <p>Get ready for High Court recruitment examinations with focused preparation.</p>
     <div class="home-card-features"><span>✓ Exam-oriented practice</span><span>✓ Recruitment updates</span></div>
     <div class="home-card-cta">Explore High Court <span>→</span></div>
   </div>
+</div>
+
+<div class="home-proof-strip" aria-label="VK Exams advantages">
+  <div class="home-proof-item"><b>🎯</b><span>Exam-Focused<br>Preparation</span></div>
+  <div class="home-proof-item"><b>⚡</b><span>150 Q | 150 Min<br>Real-Time Tests</span></div>
+  <div class="home-proof-item"><b>📈</b><span>Performance<br>Analysis</span></div>
+  <div class="home-proof-item"><b>📱</b><span>Mobile Friendly<br>Practice Anytime</span></div>
 </div>
 
 <!-- VK Exams horizontal AdSense banner: placed above Why VK Exams -->
