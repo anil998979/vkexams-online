@@ -2331,23 +2331,44 @@ footer p{
 @media(max-width:800px){.exam-hall-topbar{position:relative;padding:10px;gap:8px}.exam-hall-titlebox{width:100%;max-width:none}.exam-hall-progress{order:0;width:100%;max-width:none;overflow:auto;justify-content:flex-start}.exam-hall-actions{width:100%;justify-content:space-between;flex-wrap:wrap}.hall-tool{padding:0 8px}.exam-hall-body{display:flex;flex-direction:column}.exam-question-navigator{border-left:0;border-top:1px solid #dce5ef;min-height:300px}.question-palette{grid-template-columns:repeat(6,minmax(0,1fr))}.exam-hall-main{padding:12px}.exam-hall-notice{flex-wrap:wrap}.notice-secondary{display:none}.exam-question-panel{padding:16px;border-radius:16px}.exam-question-panel h2{font-size:16px}.question-utility-row{align-items:flex-start;flex-direction:column}.question-utility-actions{width:100%}.question-utility-actions button{flex:1;padding:9px 6px}.exam-hall-footer{padding:6px 9px}.exam-hall-footer .footer-hide-nav{display:none}}
 @media(max-width:440px){.hall-tool{font-size:9px;height:38px}.hall-timer{height:38px;min-width:65px}.hall-submit{padding:11px}.exam-hall-progress{font-size:9px;gap:7px;padding:8px}.question-meta{align-items:flex-start}.language-switch button{padding:7px;font-size:10px}.question-palette{grid-template-columns:repeat(5,minmax(0,1fr))}.exam-hall-notice{font-size:10px}.exam-hall-notice button{margin-left:0}}
 
-/* Exam navigation uses one consistent control bar in the footer. */
-.exam-hall-footer{position:sticky;bottom:0;z-index:60;}
-.exam-hall-footer button:disabled{opacity:.45;cursor:not-allowed}
-@media(max-width:800px){
-  .exam-hall-body{display:flex;flex-direction:column;min-height:0;}
-  .exam-hall-main{order:1;min-width:0;width:100%;}
-  .exam-question-navigator{order:2;width:100%;min-height:0;max-height:280px;overflow-y:auto;padding:13px 12px;}
-  .question-palette{grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;}
-  .question-palette button{height:38px;}
-  .navigator-legend{margin-top:12px;padding:10px 0;}
-  .exam-hall-footer{position:sticky;bottom:0;min-height:54px;}
-  .exam-hall-footer .footer-previous,.exam-hall-footer .footer-next{min-width:112px;}
+/* Question navigation controls inside the question card */
+.question-step-controls{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+    margin-top:18px;
 }
-@media(max-width:440px){
-  .question-palette{grid-template-columns:repeat(5,minmax(0,1fr));}
-  .exam-hall-footer{gap:8px;padding:6px 8px;}
-  .exam-hall-footer .footer-previous,.exam-hall-footer .footer-next{flex:1;min-width:0;padding:10px 8px;font-size:10px;}
+.question-step-controls button{
+    min-width:135px;
+    border:1px solid #d8e2ee;
+    border-radius:11px;
+    padding:12px 18px;
+    background:#fff;
+    color:#334b68;
+    font-size:12px;
+    font-weight:850;
+    cursor:pointer;
+}
+.question-step-controls button:last-child{
+    background:#101827;
+    border-color:#101827;
+    color:#fff;
+}
+.question-step-controls button:disabled{
+    opacity:.4;
+    cursor:not-allowed;
+}
+.language-switch button{
+    cursor:pointer;
+    background:#fff;
+}
+.language-switch button.active{
+    background:#078477;
+    color:#fff;
+}
+@media(max-width:560px){
+    .question-step-controls button{min-width:0;flex:1;padding:12px 10px}
 }
 
 /* =====================================================
@@ -3403,6 +3424,11 @@ class="test-list">
 
           <h2 id="questionText">Question</h2>
           <div id="options" class="exam-answer-options"></div>
+
+          <div class="question-step-controls">
+            <button type="button" id="questionPreviousButton" onclick="previousQuestion()">← Previous</button>
+            <button type="button" id="questionNextButton" onclick="nextQuestion()">Save &amp; Next →</button>
+          </div>
 
           <div class="question-utility-row">
             <button type="button" class="clear-answer" onclick="clearCurrentAnswer()">Clear answer</button>
@@ -4754,6 +4780,16 @@ const $ = id =>
 
 let vkHomeAdInitialized = false;
 
+/* Keep SPA route context in the URL so refresh restores dynamic pages. */
+function setVkRoute(page, params = {}, state = {}){
+    const query = new URLSearchParams();
+    Object.entries(params).forEach(([key,value]) => {
+        if(value !== undefined && value !== null && value !== "") query.set(key, String(value));
+    });
+    const url = "#" + page + (query.toString() ? "?" + query.toString() : "");
+    history.replaceState({ ...(history.state || {}), vkPage:page, ...state, ...params }, "", url);
+}
+
 function initializeVkHomeAd(){
     const ad = document.querySelector("#home .home-ad-container ins.adsbygoogle");
     if(!ad || vkHomeAdInitialized || ad.getAttribute("data-adsbygoogle-status")){
@@ -5564,6 +5600,8 @@ function openCourse(course, addHistory = true){
     }
 
     showPage("course", addHistory);
+    try{ sessionStorage.setItem("vk_last_course", course); }catch(error){}
+    setVkRoute("course", {course}, {course});
 }
 
 /* =====================================================
@@ -5593,6 +5631,7 @@ function openAPPSCGroups(addHistory = true){
     `;
 
     showPage("appGroups", addHistory);
+    setVkRoute("appGroups", {course:"APPSC"}, {course:"APPSC"});
 
 }
 
@@ -5621,6 +5660,7 @@ function openAPPSCGroup(group, addHistory = true){
     `;
 
     showPage("appGroupDetail", addHistory);
+    setVkRoute("appGroupDetail", {course:"APPSC", group}, {course:"APPSC", group});
 
 }
 
@@ -5840,7 +5880,7 @@ function getSyllabus(course){
 }
 
 
-function openSyllabus(){
+function openSyllabus(addHistory = true){
 
     const title =
         currentCourse === "APPSC" && currentGroup
@@ -5859,7 +5899,8 @@ function openSyllabus(){
             `;
         }).join("");
 
-    showPage("syllabus");
+    showPage("syllabus", addHistory);
+    setVkRoute("syllabus", {course:currentCourse, group:currentGroup});
 
 }
 
@@ -5963,6 +6004,7 @@ function openTestSeries(addHistory = true){
     }
 
     showPage("testseries", addHistory);
+    setVkRoute("testseries", {course:currentCourse, group:currentGroup});
 
 }
 
@@ -6218,6 +6260,7 @@ if (isLoggedIn() && supabaseClient) {
     list.innerHTML = html;
 
 showPage("papers");
+setVkRoute("papers", {course:currentCourse, group:currentGroup, paper:currentPaper});
 
 hideLoading();
 
@@ -11772,6 +11815,10 @@ function renderQuestion(){
     renderTimer();
     updateExamHallStats();
 
+    const previousButton=$("questionPreviousButton");
+    const nextButton=$("questionNextButton");
+    if(previousButton) previousButton.disabled=currentQuestionIndex===0;
+    if(nextButton) nextButton.textContent=currentQuestionIndex===total-1?"Finish Test →":"Save & Next →";
     const englishButton=$("languageEnglishButton");
     const teluguButton=$("languageTeluguButton");
     if(englishButton) englishButton.classList.toggle("active",examLanguage==="en");
@@ -12411,10 +12458,9 @@ async function viewSolutions(){
                             Number(selectedIndex)
                           ];
 
-                    const explanation = formatBilingualText(
+                    const explanation =
                         answer?.explanation ||
-                        "Explanation not available."
-                    );
+                        "Explanation not available.";
 
                     return `
 
@@ -12615,6 +12661,39 @@ if(
             return;
         }
 
+        if(page === "course"){
+            const course = hashParams.get("course") || event.state?.course || sessionStorage.getItem("vk_last_course") || "Endowment Officer";
+            openCourse(course, false);
+            return;
+        }
+        if(page === "testseries"){
+            currentCourse = hashParams.get("course") || event.state?.course || sessionStorage.getItem("vk_last_course") || "Endowment Officer";
+            currentGroup = hashParams.get("group") || event.state?.group || "";
+            openTestSeries(false);
+            return;
+        }
+        if(page === "syllabus"){
+            currentCourse = hashParams.get("course") || event.state?.course || sessionStorage.getItem("vk_last_course") || "Endowment Officer";
+            currentGroup = hashParams.get("group") || event.state?.group || "";
+            openSyllabus(false);
+            return;
+        }
+        if(page === "papers"){
+            currentCourse = hashParams.get("course") || event.state?.course || sessionStorage.getItem("vk_last_course") || "Endowment Officer";
+            currentGroup = hashParams.get("group") || event.state?.group || "";
+            const paper = hashParams.get("paper") || event.state?.paper;
+            if(paper) openPaper(paper); else openTestSeries(false);
+            return;
+        }
+        if(page === "appGroups"){
+            openAPPSCGroups(false);
+            return;
+        }
+        if(page === "appGroupDetail"){
+            openAPPSCGroup(hashParams.get("group") || event.state?.group || "Group 2", false);
+            return;
+        }
+
         if(page === "settings"){
 
               showPage(
@@ -12810,13 +12889,114 @@ async function toggleStudyMaterial(id,published){const allowed=await refreshVkAd
 async function deleteStudyMaterial(id){const allowed=await refreshVkAdminAccess();if(!allowed)return;if(!confirm("Delete this study material permanently?"))return;try{const {data:m,error}=await supabaseClient.from("study_materials").select("storage_path").eq("id",id).single();if(error)throw error;const {error:dbError}=await supabaseClient.from("study_materials").delete().eq("id",id);if(dbError)throw dbError;await supabaseClient.storage.from(VK_STUDY_BUCKET).remove([m.storage_path]);await loadAdminStudyMaterials();}catch(e){toast("Delete failed: "+(e.message||e));}}
 
 
+/* =====================================================
+   GLOBAL SPA REFRESH RESTORATION
+   Preserve the last active page's rendered content and UI state so that
+   every in-app page survives a browser refresh, not only the course page.
+   Exam sessions keep using their dedicated answer/timer restoration.
+===================================================== */
+const VK_PAGE_SNAPSHOT_KEY = "vk_page_snapshot_v2";
+const vkOriginalShowPage = showPage;
+
+function vkCapturePageSnapshot(page){
+    if(!page || page === "home" || page === "examPage") return;
+    const node = document.getElementById(page);
+    if(!node) return;
+    try{
+        const fields = Array.from(node.querySelectorAll("input, textarea, select"))
+            .filter(el => el.type !== "password" && el.type !== "file")
+            .map((el,index) => ({
+                key: el.id ? "#" + el.id : (el.name ? `[name="${CSS.escape(el.name)}"]` : "@" + index),
+                value: el.type === "checkbox" || el.type === "radio" ? el.checked : el.value,
+                checked: el.type === "checkbox" || el.type === "radio",
+                type: el.type
+            }));
+        const snapshot = {
+            page,
+            html: node.innerHTML,
+            className: node.className,
+            fields,
+            course: currentCourse || "",
+            group: currentGroup || "",
+            paper: currentPaper || "",
+            testNumber: currentTestNumber || 0,
+            selectedStoreCourse: selectedStoreCourse || "",
+            testListParentPage: testListParentPage || "testseries",
+            testSeriesReturnPage: testSeriesReturnPage || "course",
+            savedAt: Date.now()
+        };
+        sessionStorage.setItem(VK_PAGE_SNAPSHOT_KEY, JSON.stringify(snapshot));
+    }catch(error){
+        console.warn("VK page snapshot could not be saved:", error);
+    }
+}
+
+showPage = function(page, addHistory = true){
+    vkOriginalShowPage(page, addHistory);
+    if(page && page !== "home" && page !== "examPage"){
+        vkCapturePageSnapshot(page);
+    }else if(page === "home"){
+        try{ sessionStorage.removeItem(VK_PAGE_SNAPSHOT_KEY); }catch(error){}
+    }
+};
+
+function vkRestoreLastPageSnapshot(requestedPage){
+    try{
+        const raw = sessionStorage.getItem(VK_PAGE_SNAPSHOT_KEY);
+        if(!raw) return false;
+        const saved = JSON.parse(raw);
+        if(!saved || !saved.page || saved.page !== requestedPage || saved.page === "examPage") return false;
+        const node = document.getElementById(saved.page);
+        if(!node || typeof saved.html !== "string") return false;
+        currentCourse = saved.course || currentCourse || "";
+        currentGroup = saved.group || "";
+        currentPaper = saved.paper || "";
+        currentTestNumber = Number(saved.testNumber || 0);
+        selectedStoreCourse = saved.selectedStoreCourse || "";
+        testListParentPage = saved.testListParentPage || "testseries";
+        testSeriesReturnPage = saved.testSeriesReturnPage || "course";
+        node.innerHTML = saved.html;
+        node.className = saved.className || "page";
+        (saved.fields || []).forEach(field => {
+            try{
+                let el = field.key.startsWith("@") ? null : node.querySelector(field.key);
+                if(!el && field.key.startsWith("@")){
+                    const index = Number(field.key.slice(1));
+                    el = node.querySelectorAll("input, textarea, select")[index];
+                }
+                if(!el) return;
+                if(field.checked) el.checked = !!field.value;
+                else el.value = field.value ?? "";
+            }catch(error){}
+        });
+        vkOriginalShowPage(saved.page, false);
+        return true;
+    }catch(error){
+        console.warn("VK page snapshot could not be restored:", error);
+        return false;
+    }
+}
+
+window.addEventListener("beforeunload", function(){
+    const active = document.querySelector(".page.active");
+    if(active && active.id && active.id !== "home" && active.id !== "examPage"){
+        vkCapturePageSnapshot(active.id);
+    }
+});
+
 const initialHash = location.hash.replace(/^#/, "");
 const initialHashParts = initialHash.split("?");
 const initialPage = initialHashParts[0] || "";
 const initialHashParams = new URLSearchParams(initialHashParts[1] || "");
 const initialFreeMockCourse = initialHashParams.get("course");
+const restoredPageSnapshot = initialPage && initialPage !== "examPage" && initialPage !== "studyMaterial"
+    ? vkRestoreLastPageSnapshot(initialPage)
+    : false;
 
-if(initialPage === "examPage"){
+if(restoredPageSnapshot){
+    /* The last page's rendered UI and non-sensitive form state were restored above. */
+}
+else if(initialPage === "examPage"){
     const initialExamCourse = initialHashParams.get("course");
     const initialExamNumber = Number(initialHashParams.get("test"));
     const savedExam = readFreeMockExamState();
@@ -12845,6 +13025,32 @@ else if(initialPage === "freeMocks"){
     }else{
         openFreeMocks(false);
     }
+}
+else if(initialPage === "course"){
+    const initialCourse = initialHashParams.get("course") || sessionStorage.getItem("vk_last_course") || "Endowment Officer";
+    openCourse(initialCourse, false);
+}
+else if(initialPage === "testseries"){
+    currentCourse = initialHashParams.get("course") || sessionStorage.getItem("vk_last_course") || "Endowment Officer";
+    currentGroup = initialHashParams.get("group") || "";
+    openTestSeries(false);
+}
+else if(initialPage === "syllabus"){
+    currentCourse = initialHashParams.get("course") || sessionStorage.getItem("vk_last_course") || "Endowment Officer";
+    currentGroup = initialHashParams.get("group") || "";
+    openSyllabus(false);
+}
+else if(initialPage === "papers"){
+    currentCourse = initialHashParams.get("course") || sessionStorage.getItem("vk_last_course") || "Endowment Officer";
+    currentGroup = initialHashParams.get("group") || "";
+    const initialPaper = initialHashParams.get("paper");
+    if(initialPaper) openPaper(initialPaper); else openTestSeries(false);
+}
+else if(initialPage === "appGroups"){
+    openAPPSCGroups(false);
+}
+else if(initialPage === "appGroupDetail"){
+    openAPPSCGroup(initialHashParams.get("group") || "Group 2", false);
 }
 else if(initialPage === "settings"){
 
