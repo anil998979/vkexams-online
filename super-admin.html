@@ -157,7 +157,7 @@ input:focus,select:focus,textarea:focus{outline:3px solid #dfe7ff;border-color:#
     <p id="accessMsg" class="small muted" aria-live="polite">Examples must match the permission keys implemented in your database function.</p>
   </div>
   <h3>Available student accounts</h3>
-  <div class="tablewrap"><table><thead><tr><th>Name</th><th>Email</th><th>Account status</th></tr></thead><tbody id="accessStudentRows"></tbody></table></div>
+  <div class="tablewrap"><table><thead><tr><th>Student</th><th>Account</th><th>Free Tests</th><th>Paid Tests</th><th>Materials</th><th>Syllabus</th><th>Store</th><th>Jobs</th></tr></thead><tbody id="accessStudentRows"></tbody></table></div>
 </section>
 
 <section id="emailTab" class="panel section hidden">
@@ -338,7 +338,13 @@ async function loadManagedStudents(){
     $('accessStudentRows').innerHTML='';
     return;
   }
-  managedStudents=(data||[]).filter(x=>(x.role||'student').toLowerCase()!=='admin');
+  const {data:permData,error:permError}=await sb.from('vk_student_permissions')
+    .select('student_id,account_status,allow_free_tests,allow_paid_tests,allow_study_materials,allow_syllabus,allow_store,allow_jobs')
+    .limit(1000);
+  if(permError){if(msg)msg.textContent='Profiles loaded, but permissions could not be read: '+permError.message;return;}
+  const permissionMap=new Map((permData||[]).map(x=>[x.student_id,x]));
+  managedStudents=(data||[]).filter(x=>(x.role||'').toLowerCase()==='student')
+    .map(x=>({...x,permissions:permissionMap.get(x.id)||null}));
   renderManagedStudents();
   const select=$('accessStudent');
   if(select){
@@ -346,7 +352,16 @@ async function loadManagedStudents(){
     select.innerHTML='<option value="">Select student</option>'+managedStudents.map(s=>`<option value="${esc(s.id)}">${esc(s.full_name||s.email||s.id)} — ${esc(s.email||'')}</option>`).join('');
     if(prior)select.value=prior;
   }
-  $('accessStudentRows').innerHTML=managedStudents.map(s=>`<tr><td>${esc(s.full_name||'—')}</td><td>${esc(s.email||'—')}</td><td><span class="badge-active">Permission-managed</span></td></tr>`).join('')||'<tr><td colspan="3">No student profiles found.</td></tr>';
+  $('accessStudentRows').innerHTML=managedStudents.map(s=>{
+    const p=s.permissions||{};
+    const status=p.account_status||'unknown';
+    const cell=(key,label)=>`<td><label class="small"><input type="checkbox" ${p[key]===true?'checked':''} ${s.permissions?'':'disabled'} onchange="setStudentPermission('${esc(s.id)}','${label}',this.checked)"> ${p[key]===true?'ON':'OFF'}</label></td>`;
+    return `<tr><td>${esc(s.full_name||s.email||'—')}<div class="small muted">${esc(s.email||'')}</div></td>
+      <td><span class="${status==='active'?'badge-active':'badge-off'}">${esc(status)}</span></td>
+      ${cell('allow_free_tests','free_tests')}${cell('allow_paid_tests','paid_tests')}
+      ${cell('allow_study_materials','study_materials')}${cell('allow_syllabus','syllabus')}
+      ${cell('allow_store','store')}${cell('allow_jobs','jobs')}</tr>`;
+  }).join('')||'<tr><td colspan="8">No student profiles found.</td></tr>';
   if(msg)msg.textContent=`Loaded ${managedStudents.length} student profile(s). Account status is managed by the secured permission RPC.`;
 }
 
@@ -361,7 +376,7 @@ function renderManagedStudents(){
       <td><span class="${notify?'badge-active':'badge-off'}">${notify?'ON':'OFF'}</span></td>
       <td>${date(s.created_at)}</td>
       <td><button class="btn action-btn" onclick="toggleStudentEmail('${esc(s.id)}',${!notify})">${notify?'Disable alerts':'Enable alerts'}</button>
-      <button class="btn action-btn" onclick="changeStudentStatus('${esc(s.id)}','${esc(s.email||'')}','${notify?'active':'active'}')">Suspend / Activate</button></td>
+      <button class="btn action-btn" onclick="changeStudentStatus('${esc(s.id)}','${esc(s.email||'')}')">Suspend / Activate</button></td>
     </tr>`;
   }).join('')||'<tr><td colspan="7">No matching students.</td></tr>';
 }
@@ -378,7 +393,7 @@ async function toggleStudentEmail(studentId,enabled){
   if(!s)return;
   const label=enabled?'enable':'disable';
   if(!confirm(`Are you sure you want to ${label} email notifications for ${s.email||'this student'}?`))return;
-  const {error}=await sb.rpc('vk_set_student_email_notifications',{p_user_id:studentId,p_enabled:enabled});
+  const {error}=await sb.rpc('vk_set_student_email_notifications',{p_student_id:studentId,p_enabled:enabled});
   if(error){alert('Could not update notification preference: '+error.message);return}
   s.notifications_enabled=enabled;
   renderManagedStudents();
@@ -387,15 +402,26 @@ async function toggleStudentEmail(studentId,enabled){
 }
 
 async function changeStudentStatus(studentId,email){
-  const choice=prompt(`Enter account status for ${email}:\nType active or suspended.\nNo permanent deletion will be performed.`);
+  const choice=prompt(`Enter account status for ${email}:\\nType active, suspended or blocked.`);
   if(choice===null)return;
   const status=choice.trim().toLowerCase();
-  if(!['active','suspended'].includes(status)){alert('Use only active or suspended.');return}
+  if(!['active','suspended','blocked'].includes(status)){alert('Use only active, suspended or blocked.');return}
   if(!confirm(`Set ${email} account status to "${status}"?`))return;
-  const {error}=await sb.rpc('vk_set_student_account_status',{p_user_id:studentId,p_status:status});
+  const {error}=await sb.rpc('vk_set_student_account_status',{p_student_id:studentId,p_new_status:status});
   if(error){alert('Status update failed: '+error.message);return}
-  await writeAdminAudit('student_account_status_updated','vk_student_permissions',studentId,{status,email});
-  $('studentManageMsg').textContent=`Account status updated to ${status}. Refresh to verify the database value.`;
+  await loadManagedStudents();
+  $('studentManageMsg').textContent=`Account status updated to ${status} for ${email}.`;
+}
+
+async function setStudentPermission(studentId,permission,enabled){
+  const student=managedStudents.find(x=>x.id===studentId);
+  if(!student)return;
+  const {error}=await sb.rpc('vk_set_student_access_permission',{
+    p_student_id:studentId,p_permission:permission,p_enabled:enabled
+  });
+  if(error){alert('Permission update failed: '+error.message);await loadManagedStudents();return}
+  await loadManagedStudents();
+  $('accessMsg').textContent=`${permission} access ${enabled?'enabled':'disabled'} for ${student.email||'student'}.`;
 }
 
 async function setStudentAccess(){
@@ -406,7 +432,7 @@ async function setStudentAccess(){
   if(!permission){$('accessMsg').textContent='Enter the exact permission key configured in Supabase.';return}
   if(!confirm(`${enabled?'Enable':'Disable'} "${permission}" access for the selected student?`))return;
   const {error}=await sb.rpc('vk_set_student_access_permission',{
-    p_user_id:studentId,p_permission:permission,p_enabled:enabled
+    p_student_id:studentId,p_permission:permission,p_enabled:enabled
   });
   if(error){$('accessMsg').textContent='Permission update failed: '+error.message;return}
   await writeAdminAudit('student_access_permission_updated','vk_student_permissions',studentId,{permission,enabled});
