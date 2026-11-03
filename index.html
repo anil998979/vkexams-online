@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+  <!DOCTYPE html>
 <html lang="en">
 <head>
 
@@ -2489,6 +2489,332 @@ footer p{
 @media(max-width:850px){#home .vk-hero-inner{grid-template-columns:1fr;gap:5px}#home .vk-hero-copy{text-align:center}#home .vk-hero-lead{margin-left:auto;margin-right:auto}#home .vk-hero-points{display:inline-grid;text-align:left}#home .vk-hero-visual{min-height:210px}#home .vk-temple-art{right:5%;font-size:78px}#home .vk-book-stack{right:2%}#home .vk-exam-grid{grid-template-columns:1fr 1fr}#home .vk-endowment-card{grid-column:1/-1;grid-row:1}#home .vk-appsc-card,#home .vk-court-card{min-height:300px}}
 @media(max-width:560px){#home .vk-home-hero{padding:25px 14px 22px;border-radius:0 0 20px 20px}#home .vk-kicker{font-size:9px;padding:7px 10px}#home .vk-hero-copy h1{font-size:34px;margin:15px 0 10px}#home .vk-hero-ribbon{font-size:14px;padding:9px 11px}#home .vk-hero-lead{font-size:13px}#home .vk-hero-points li{font-size:12px}#home .vk-hero-visual{min-height:170px}#home .vk-laptop{width:83%;padding:7px;border-width:3px;border-bottom-width:8px}#home .vk-laptop-screen{min-height:95px;padding:8px;gap:6px}#home .vk-laptop-top{font-size:8px;padding:6px}#home .vk-options{font-size:9px}#home .vk-palette{font-size:8px;padding:4px}#home .vk-palette b{font-size:7px}#home .vk-laptop-actions{font-size:8px;padding-top:5px}#home .vk-laptop-actions span{padding:5px}#home .vk-temple-art{font-size:55px;right:0;top:0}#home .vk-book-stack{right:-3px;bottom:-2px}#home .vk-book-stack span{font-size:7px;padding:4px 7px}#home .vk-hero-benefits{grid-template-columns:repeat(4,1fr);margin:8px auto 14px;border-radius:12px}#home .vk-hero-benefits div{gap:4px;padding:8px 2px;flex-direction:column;text-align:center}#home .vk-hero-benefits b{font-size:22px}#home .vk-hero-benefits span{font-size:9px}#home .vk-hero-ctas{grid-template-columns:1fr;gap:12px}#home .vk-cta{min-height:75px;padding:8px 12px;gap:8px}#home .vk-cta-icon{width:48px;height:48px;flex-basis:48px;font-size:27px}#home .vk-cta small{font-size:10px}#home .vk-cta strong{font-size:22px}#home .vk-arrow{width:34px;height:34px;flex-basis:34px;font-size:23px}#home .section-title{margin:24px 0 18px}#home .section-title h2{font-size:27px}#home .vk-exam-grid{grid-template-columns:1fr;gap:14px}#home .vk-exam-card{min-height:275px;padding:18px}#home .vk-endowment-card{grid-column:auto;grid-row:auto;min-height:300px}#home .vk-exam-card h3{font-size:29px}#home .vk-card-art{font-size:100px}#home .vk-card-features{margin:14px 0 12px}#home .vk-stats-strip{grid-template-columns:1fr 1fr;row-gap:10px;padding:14px 8px}#home .vk-stats-strip div{padding:7px;border-right:0}#home .vk-stats-strip strong{font-size:16px}#home .vk-stats-strip span{font-size:10px}}
 @media(prefers-reduced-motion:reduce){#home .vk-exam-card,#home .vk-cta{transition:none}}
+
+
+
+/* =====================================================
+   ENDOWMENT OFFICER COURSE PAGE — PREMIUM CBT DESIGN
+   Scoped to this page only; existing navigation/actions retained.
+===================================================== */
+#course.vk-eo-premium{
+    background:
+      radial-gradient(ellipse at 8% 8%,rgba(96,165,250,.13),transparent 38%),
+      radial-gradient(ellipse at 95% 25%,rgba(168,85,247,.12),transparent 38%),
+      linear-gradient(180deg,#f8faff 0%,#fffaff 100%);
+}
+#course.vk-eo-premium .container{
+    max-width:1180px;
+    padding:22px 20px 38px;
+}
+#course.vk-eo-premium .back{
+    margin:0 0 16px;
+    padding:8px 12px;
+    border-radius:9px;
+    background:#fff;
+    box-shadow:0 3px 12px rgba(30,64,175,.08);
+}
+#course.vk-eo-premium .exam-header{
+    position:relative;
+    overflow:hidden;
+    min-height:132px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    padding:25px 30px;
+    margin:0 0 22px;
+    border:1px solid rgba(255,255,255,.55);
+    border-radius:22px;
+    background:linear-gradient(112deg,#1724a8 0%,#4f24d2 56%,#7c20d8 100%);
+    box-shadow:0 12px 28px rgba(79,36,210,.22);
+}
+#course.vk-eo-premium .exam-header:after{
+    content:"🛕";
+    position:absolute;
+    right:22px;
+    bottom:-15px;
+    font-size:100px;
+    opacity:.24;
+    filter:drop-shadow(0 5px 8px rgba(0,0,0,.2));
+}
+#course.vk-eo-premium #courseTitle{
+    position:relative;
+    z-index:1;
+    color:#ffe36a;
+    font-size:clamp(25px,4vw,36px);
+    font-weight:900;
+    letter-spacing:-.5px;
+    margin:0 0 8px;
+}
+#course.vk-eo-premium .exam-header p{
+    position:relative;
+    z-index:1;
+    color:#fff;
+    font-size:15px;
+    font-weight:600;
+}
+#course.vk-eo-premium .vk-eo-choice-grid{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:18px;
+    align-items:stretch;
+}
+#course.vk-eo-premium .vk-eo-card{
+    position:relative;
+    isolation:isolate;
+    display:flex;
+    align-items:center;
+    gap:17px;
+    min-width:0;
+    min-height:178px;
+    padding:22px;
+    overflow:hidden;
+    border:1px solid #dce5ff;
+    border-radius:22px;
+    background:linear-gradient(145deg,#fff 0%,#f8faff 100%);
+    box-shadow:0 8px 22px rgba(45,65,150,.10);
+    cursor:pointer;
+    transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease;
+}
+#course.vk-eo-premium .vk-eo-card:hover{
+    transform:translateY(-4px);
+    box-shadow:0 14px 30px rgba(45,65,150,.16);
+    border-color:#a9baff;
+}
+#course.vk-eo-premium .vk-eo-card:focus-visible{
+    outline:3px solid #2563eb;
+    outline-offset:3px;
+}
+#course.vk-eo-premium .vk-eo-card:after{
+    content:"";
+    position:absolute;
+    z-index:-1;
+    width:145px;
+    height:145px;
+    right:-48px;
+    bottom:-66px;
+    border-radius:50%;
+    background:rgba(96,120,255,.07);
+}
+#course.vk-eo-premium .vk-eo-card-art{
+    flex:0 0 76px;
+    width:76px;
+    height:76px;
+    display:grid;
+    place-items:center;
+    border-radius:20px;
+    background:linear-gradient(145deg,#eaf1ff,#fff);
+    box-shadow:inset 0 0 0 1px #dce6ff;
+    font-size:43px;
+}
+#course.vk-eo-premium .vk-eo-card-copy{
+    position:relative;
+    z-index:1;
+    flex:1;
+    min-width:0;
+}
+#course.vk-eo-premium .vk-eo-eyebrow{
+    display:block;
+    margin-bottom:7px;
+    color:#64748b;
+    font-size:9px;
+    font-weight:900;
+    letter-spacing:1px;
+}
+#course.vk-eo-premium .vk-eo-card h2{
+    margin:0 0 7px;
+    color:#153b9b;
+    font-size:clamp(19px,2.4vw,25px);
+    line-height:1.15;
+    font-weight:900;
+}
+#course.vk-eo-premium .vk-eo-card p{
+    margin:0;
+    max-width:360px;
+    color:#46536b;
+    font-size:13px;
+    line-height:1.5;
+    font-weight:550;
+}
+#course.vk-eo-premium .vk-eo-card-cta{
+    display:inline-flex;
+    align-items:center;
+    gap:12px;
+    margin-top:14px;
+    padding:8px 13px;
+    border-radius:999px;
+    background:#edf3ff;
+    color:#1745bd;
+    font-size:12px;
+    font-weight:900;
+}
+#course.vk-eo-premium .vk-eo-card-cta b{
+    font-size:18px;
+    line-height:12px;
+}
+#course.vk-eo-premium .vk-eo-series{
+    min-height:205px;
+    border:2px solid #ffd33d;
+    background:
+      radial-gradient(circle at 88% 10%,rgba(255,255,255,.75),transparent 28%),
+      linear-gradient(130deg,#fff6c9 0%,#ffe36d 50%,#ffbd22 100%);
+    box-shadow:0 10px 28px rgba(234,155,0,.25),0 0 0 4px rgba(255,215,70,.16);
+}
+#course.vk-eo-premium .vk-eo-series:before{
+    content:"";
+    position:absolute;
+    z-index:-1;
+    width:190px;
+    height:190px;
+    right:-45px;
+    top:4px;
+    border:2px solid rgba(255,255,255,.38);
+    border-radius:50%;
+}
+#course.vk-eo-premium .vk-eo-series-ribbon{
+    position:absolute;
+    top:15px;
+    left:18px;
+    padding:7px 13px;
+    border-radius:7px;
+    background:linear-gradient(90deg,#d71920,#f04438);
+    color:#fff;
+    font-size:12px;
+    font-weight:950;
+    letter-spacing:.5px;
+    box-shadow:0 4px 10px rgba(185,28,28,.2);
+}
+#course.vk-eo-premium .vk-eo-series-target{
+    position:absolute;
+    right:18px;
+    top:12px;
+    font-size:47px;
+    filter:drop-shadow(0 4px 3px rgba(130,80,0,.2));
+}
+#course.vk-eo-premium .vk-eo-series .vk-eo-card-copy{
+    padding-top:32px;
+}
+#course.vk-eo-premium .vk-eo-series-kicker{
+    display:block;
+    margin-bottom:4px;
+    color:#8b4a00;
+    font-size:9px;
+    font-weight:950;
+    letter-spacing:1px;
+}
+#course.vk-eo-premium .vk-eo-series h2{
+    color:#32106f;
+    font-size:clamp(25px,3vw,34px);
+    letter-spacing:-.6px;
+}
+#course.vk-eo-premium .vk-eo-series p{
+    color:#4c3512;
+    font-weight:700;
+}
+#course.vk-eo-premium .vk-eo-series-cta{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    width:100%;
+    max-width:330px;
+    margin-top:14px;
+    padding:12px 16px;
+    border:1px solid rgba(255,255,255,.7);
+    border-radius:12px;
+    background:linear-gradient(100deg,#b70e1b,#e21d2b);
+    color:#fff;
+    font-size:14px;
+    font-weight:950;
+    box-shadow:0 6px 14px rgba(166,20,30,.24);
+}
+#course.vk-eo-premium .vk-eo-series-cta b{font-size:22px}
+#course.vk-eo-premium .vk-eo-study{
+    border-color:#d9ccff;
+    background:linear-gradient(135deg,#fff,#f4efff);
+}
+#course.vk-eo-premium .vk-eo-study .vk-eo-card-art{
+    background:linear-gradient(145deg,#f0eaff,#fff);
+}
+#course.vk-eo-premium .vk-eo-free{
+    border-color:#c9e8df;
+    background:linear-gradient(135deg,#fff,#effcf7);
+}
+#course.vk-eo-premium .vk-eo-free .vk-eo-card-art{
+    background:linear-gradient(145deg,#e3fbf1,#fff);
+}
+#course.vk-eo-premium .vk-eo-feature-strip{
+    display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:0;
+    margin-top:22px;
+    padding:17px 10px;
+    border:1px solid #e4dcff;
+    border-radius:20px;
+    background:rgba(255,255,255,.92);
+    box-shadow:0 9px 25px rgba(99,65,180,.12);
+}
+#course.vk-eo-premium .vk-eo-feature-strip>div{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    padding:4px 8px;
+    text-align:left;
+}
+#course.vk-eo-premium .vk-eo-feature-strip>div+div{
+    border-left:1px solid #d9d5eb;
+}
+#course.vk-eo-premium .vk-eo-feature-strip span{
+    font-size:29px;
+}
+#course.vk-eo-premium .vk-eo-feature-strip strong{
+    color:#172554;
+    font-size:12px;
+    line-height:1.35;
+    font-weight:900;
+}
+@media(max-width:650px){
+    #course.vk-eo-premium .container{padding:16px 14px 28px}
+    #course.vk-eo-premium .exam-header{min-height:112px;padding:20px 18px;border-radius:18px}
+    #course.vk-eo-premium .exam-header:after{right:8px;font-size:75px}
+    #course.vk-eo-premium .exam-header p{max-width:78%;font-size:12px;line-height:1.5}
+    #course.vk-eo-premium .vk-eo-choice-grid{gap:12px}
+    #course.vk-eo-premium .vk-eo-card{
+        min-height:190px;
+        display:block;
+        padding:15px 13px;
+        border-radius:18px;
+    }
+    #course.vk-eo-premium .vk-eo-card-art{
+        width:54px;height:54px;margin-bottom:10px;
+        border-radius:15px;font-size:31px;
+    }
+    #course.vk-eo-premium .vk-eo-card h2{font-size:17px}
+    #course.vk-eo-premium .vk-eo-card p{font-size:11px;line-height:1.45}
+    #course.vk-eo-premium .vk-eo-eyebrow{font-size:8px;letter-spacing:.5px}
+    #course.vk-eo-premium .vk-eo-card-cta{margin-top:11px;padding:7px 9px;font-size:10px;gap:6px}
+    #course.vk-eo-premium .vk-eo-series{min-height:205px}
+    #course.vk-eo-premium .vk-eo-series-ribbon{top:12px;left:11px;padding:6px 8px;font-size:9px}
+    #course.vk-eo-premium .vk-eo-series-target{right:8px;top:8px;font-size:34px}
+    #course.vk-eo-premium .vk-eo-series .vk-eo-card-copy{padding-top:34px}
+    #course.vk-eo-premium .vk-eo-series h2{font-size:21px}
+    #course.vk-eo-premium .vk-eo-series-kicker{font-size:7px;letter-spacing:.4px}
+    #course.vk-eo-premium .vk-eo-series-cta{padding:10px 10px;font-size:10px;margin-top:12px}
+    #course.vk-eo-premium .vk-eo-series-cta b{font-size:17px}
+    #course.vk-eo-premium .vk-eo-feature-strip{margin-top:16px;padding:12px 3px;border-radius:16px}
+    #course.vk-eo-premium .vk-eo-feature-strip>div{flex-direction:column;gap:5px;text-align:center;padding:3px 2px}
+    #course.vk-eo-premium .vk-eo-feature-strip span{font-size:23px}
+    #course.vk-eo-premium .vk-eo-feature-strip strong{font-size:9px}
+}
+@media(max-width:360px){
+    #course.vk-eo-premium .vk-eo-choice-grid{grid-template-columns:1fr}
+    #course.vk-eo-premium .vk-eo-card{min-height:150px;display:flex;align-items:center}
+    #course.vk-eo-premium .vk-eo-card-art{flex-basis:54px;margin:0}
+    #course.vk-eo-premium .vk-eo-series{min-height:180px}
+}
+@media(prefers-reduced-motion:reduce){
+    #course.vk-eo-premium .vk-eo-card{transition:none}
+}
 
 </style>
 
@@ -5162,47 +5488,110 @@ function openCourse(course, addHistory = true){
     currentGroup = "";
 
     if(course === "APPSC"){
-
         openAPPSCGroups(addHistory);
         return;
-
     }
 
     $("courseTitle").textContent = course;
-
     const options = $("courseOptions");
+    const coursePage = $("course");
+    const courseContainer = coursePage.querySelector(".container");
 
-    options.innerHTML = `
+    if(course === "Endowment Officer"){
+        coursePage.classList.add("vk-eo-premium");
+        options.className = "choice-grid vk-eo-choice-grid";
+        options.innerHTML = `
+            <div class="vk-eo-card vk-eo-syllabus" role="button" tabindex="0"
+                 onclick="openSyllabus()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openSyllabus();}">
+                <div class="vk-eo-card-art">📖</div>
+                <div class="vk-eo-card-copy">
+                    <span class="vk-eo-eyebrow">OFFICIAL EXAM OUTLINE</span>
+                    <h2>Syllabus</h2>
+                    <p>Explore the complete Endowment Officer examination syllabus.</p>
+                    <span class="vk-eo-card-cta">Explore Syllabus <b>→</b></span>
+                </div>
+            </div>
 
-        <div class="choice-card" onclick="openSyllabus()">
-            <div class="big-icon">📖</div>
-            <h2>Syllabus</h2>
-            <p>View complete examination syllabus</p>
-        </div>
+            <div class="vk-eo-card vk-eo-series" role="button" tabindex="0"
+                 onclick="openTestSeries()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openTestSeries();}">
+                <div class="vk-eo-series-glow"></div>
+                <span class="vk-eo-series-ribbon">🔥 REAL-TIME</span>
+                <div class="vk-eo-series-target">🎯</div>
+                <div class="vk-eo-card-copy">
+                    <span class="vk-eo-series-kicker">ACTUAL CBT EXAM EXPERIENCE</span>
+                    <h2>EXAM SERIES</h2>
+                    <p>Full-Length CBT Tests • Timed Practice • Exam-Level Preparation</p>
+                    <span class="vk-eo-series-cta">Start Real-Time Exam <b>➜</b></span>
+                </div>
+            </div>
 
-        <div class="choice-card" onclick="openTestSeries()">
-            <div class="big-icon">🎯</div>
-            <h2>Test Series</h2>
-            <p>Practice examination tests</p>
-        </div>
+            <div class="vk-eo-card vk-eo-study" role="button" tabindex="0"
+                 onclick="openStudyMaterials('Endowment Officer')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openStudyMaterials('Endowment Officer');}">
+                <div class="vk-eo-card-art">📚</div>
+                <div class="vk-eo-card-copy">
+                    <span class="vk-eo-eyebrow">PREPARE SMARTER</span>
+                    <h2>Study Material</h2>
+                    <p>Read topic-wise study material and learning resources online.</p>
+                    <span class="vk-eo-card-cta">Read Materials <b>→</b></span>
+                </div>
+            </div>
 
-        <div class="choice-card" onclick="openStudyMaterials('${course}')">
-            <div class="big-icon">📚</div>
-            <h2>Study Material</h2>
-            <p>Read free study materials online</p>
-        </div>
+            <div class="vk-eo-card vk-eo-free" role="button" tabindex="0"
+                 onclick="openFreeMockTests('Endowment Officer')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openFreeMockTests('Endowment Officer');}">
+                <div class="vk-eo-card-art">📝</div>
+                <div class="vk-eo-card-copy">
+                    <span class="vk-eo-eyebrow">PRACTICE & IMPROVE</span>
+                    <h2>Free Mock Tests</h2>
+                    <p>Attempt free practice tests and check your preparation.</p>
+                    <span class="vk-eo-card-cta">Attempt Free Tests <b>→</b></span>
+                </div>
+            </div>
+        `;
 
-        <div class="choice-card" onclick="openFreeMockTests('${course}')">
-            <div class="big-icon">📝</div>
-            <h2>Free Mock Tests</h2>
-            <p>View available free practice tests</p>
-        </div>
+        let featureStrip = document.getElementById("vkEoFeatureStrip");
+        if(!featureStrip){
+            featureStrip = document.createElement("div");
+            featureStrip.id = "vkEoFeatureStrip";
+            featureStrip.className = "vk-eo-feature-strip";
+            featureStrip.innerHTML = `
+                <div><span>🖥️</span><strong>Real CBT<br>Experience</strong></div>
+                <div><span>⏱️</span><strong>Live<br>Timer</strong></div>
+                <div><span>▦</span><strong>Question<br>Palette</strong></div>
+                <div><span>📈</span><strong>Instant<br>Results</strong></div>
+            `;
+            options.insertAdjacentElement("afterend", featureStrip);
+        }
+    }else{
+        coursePage.classList.remove("vk-eo-premium");
+        options.className = "choice-grid";
+        options.innerHTML = `
+            <div class="choice-card" onclick="openSyllabus()">
+                <div class="big-icon">📖</div>
+                <h2>Syllabus</h2>
+                <p>View complete examination syllabus</p>
+            </div>
+            <div class="choice-card" onclick="openTestSeries()">
+                <div class="big-icon">🎯</div>
+                <h2>Test Series</h2>
+                <p>Practice examination tests</p>
+            </div>
+            <div class="choice-card" onclick="openStudyMaterials('${course}')">
+                <div class="big-icon">📚</div>
+                <h2>Study Material</h2>
+                <p>Read free study materials online</p>
+            </div>
+            <div class="choice-card" onclick="openFreeMockTests('${course}')">
+                <div class="big-icon">📝</div>
+                <h2>Free Mock Tests</h2>
+                <p>View available free practice tests</p>
+            </div>
+        `;
+        document.getElementById("vkEoFeatureStrip")?.remove();
+    }
 
-    `;
-
-    showPage("course");
-
+    showPage("course", addHistory);
 }
+
 /* =====================================================
    COMMON LOADING POPUP
 ===================================================== */
