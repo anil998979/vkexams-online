@@ -6252,62 +6252,85 @@ if (isLoggedIn() && supabaseClient) {
 
 
     /* =========================================
-       BUILD TEST LIST
+       BUILD TEST LIST FROM DATABASE
+       Only existing, published tests are Available.
+       Missing or draft tests are Coming Soon.
     ========================================= */
+
+    let publishedTests = [];
+
+    try {
+        const { data: courseForTests, error: courseForTestsError } =
+            await supabaseClient
+                .from("courses")
+                .select("id")
+                .eq("name", currentCourse)
+                .single();
+
+        if (courseForTestsError || !courseForTests) {
+            throw courseForTestsError || new Error("Course not found.");
+        }
+
+        const { data: seriesForTests, error: seriesForTestsError } =
+            await supabaseClient
+                .from("test_series")
+                .select("id")
+                .eq("course_id", courseForTests.id)
+                .eq("name", paper)
+                .single();
+
+        if (seriesForTestsError || !seriesForTests) {
+            throw seriesForTestsError || new Error("Test series not found.");
+        }
+
+        const { data: testRows, error: testListError } =
+            await supabaseClient
+                .from("tests")
+                .select("id,title,test_number,is_active")
+                .eq("test_series_id", seriesForTests.id)
+                .eq("is_free", false)
+                .order("test_number", { ascending: true });
+
+        if (testListError) throw testListError;
+        publishedTests = testRows || [];
+    } catch (testListError) {
+        console.error("Paid test list loading failed:", testListError);
+        hideLoading();
+        toast("Unable to load the published test list. Please try again.");
+        return;
+    }
+
+    const testByNumber = new Map(
+        publishedTests.map(test => [Number(test.test_number), test])
+    );
 
     let html = "";
 
-    for(
-        let i = 1;
-        i <= 15;
-        i++
-    ){
+    // Keep 15 planned slots; a slot is Available only when a published
+    // database record exists for that exact test number.
+    for (let i = 1; i <= 15; i++) {
+        const test = testByNumber.get(i);
+        const isPublished = !!test && test.is_active === true;
+        const label = test?.title || `Test-${i}`;
 
-        if(hasAccess){
-
+        if (isPublished) {
             html += `
-
                 <div
                     class="test-item unlocked"
                     onclick="openLockedTest(${i})">
-
-                    <span>
-                        Test-${i}
-                    </span>
-
-                    <span class="unlocked-label">
-                        ✓ Available
-                    </span>
-
+                    <span>${vkAdminEscape(label)}</span>
+                    <span class="unlocked-label">✓ Available</span>
                 </div>
-
             `;
-
-        }
-        else{
-
+        } else {
             html += `
-
-                <div
-                    class="test-item locked"
-                    onclick="openLockedTest(${i})">
-
-                    <span>
-                        Test-${i}
-                    </span>
-
-                    <span class="locked-label">
-                        🔒
-                    </span>
-
+                <div class="test-item locked" aria-disabled="true">
+                    <span>${vkAdminEscape(label)}</span>
+                    <span class="locked-label">Coming Soon</span>
                 </div>
-
             `;
-
         }
-
     }
-
 
     list.innerHTML = html;
 
@@ -6702,6 +6725,10 @@ async function startPaidTest(testNumber){
             .eq(
                 "is_free",
                 false
+            )
+            .eq(
+                "is_active",
+                true
             )
             .single();
 
