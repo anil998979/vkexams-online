@@ -5959,7 +5959,20 @@ function backFromSyllabus(){
 function openTestSeries(addHistory = true){
 
     const activePage = document.querySelector(".page.active")?.id;
-    if(activePage && activePage !== "testseries" && activePage !== "loading"){
+
+    /*
+       Capture the page that opened Test Series only during a
+       forward navigation. When returning from the Paper/Test List
+       with openTestSeries(false), do not overwrite the original
+       parent page with "papers" — that caused the Back navigation
+       loop between Test Series and the Paper/Test List.
+    */
+    if(
+        addHistory &&
+        activePage &&
+        activePage !== "testseries" &&
+        activePage !== "loading"
+    ){
         testSeriesReturnPage = activePage;
     }
 
