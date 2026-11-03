@@ -6064,9 +6064,10 @@ if (isLoggedIn() && supabaseClient) {
     ========================================= */
 
     if(
-        isLoggedIn() &&
-        supabaseClient
-    ){
+    !hasAccess &&
+    isLoggedIn() &&
+    supabaseClient
+){
 
         try{
 
