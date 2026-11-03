@@ -6340,7 +6340,18 @@ async function openLockedTest(testNumber){
         const userId =
             userData.user.id;
 
+      // ADMIN ACCESS BYPASS
+const {
+    data: isAdmin,
+    error: adminError
+} = await supabaseClient.rpc("vk_is_exam_admin");
 
+if (!adminError && isAdmin === true) {
+    hideLoading();
+    closeLockModal();
+    await startPaidTest(testNumber);
+    return;
+}
         /* COURSE */
 
         const {
