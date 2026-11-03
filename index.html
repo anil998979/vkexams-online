@@ -6049,6 +6049,15 @@ async function openPaper(paper){
     ========================================= */
 
     let hasAccess = false;
+  // ADMIN ACCESS BYPASS
+if (isLoggedIn() && supabaseClient) {
+    const { data: isAdmin, error } =
+        await supabaseClient.rpc("vk_is_exam_admin");
+
+    if (!error && isAdmin === true) {
+        hasAccess = true;
+    }
+}
 
     /* =========================================
        CHECK LOGIN
