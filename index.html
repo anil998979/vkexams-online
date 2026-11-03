@@ -1,4 +1,4 @@
-   <!DOCTYPE html>
+    <!DOCTYPE html>
 <html lang="en">
 <head>
 
@@ -1180,6 +1180,21 @@ header{
     color:#15803d;
     font-weight:800;
 }
+/* Paid CBT tests show a premium lock state until a valid package is active. */
+.test-item.paid-locked{
+    border:1.5px solid #d6a23a;
+    background:linear-gradient(100deg,#fffaf0,#fff4d6);
+    cursor:pointer;
+}
+.test-item.paid-locked:hover{
+    background:linear-gradient(100deg,#fff4d6,#ffedbd);
+    border-color:#b7791f;
+}
+.paid-locked-label{
+    color:#9a5b08;
+    font-weight:850;
+}
+
 
 
 /* =====================================================
@@ -6388,13 +6403,28 @@ if (isLoggedIn() && supabaseClient) {
         const isPublished = !!test && test.is_active === true;
         const label = test?.title || `Test-${i}`;
 
-        if (isPublished) {
+        if (isPublished && hasAccess) {
             html += `
                 <div
                     class="test-item unlocked"
-                    onclick="openLockedTest(${i})">
+                    onclick="openLockedTest(${i})"
+                    role="button"
+                    tabindex="0"
+                    aria-label="${vkAdminEscape(label)} - Available">
                     <span>${vkAdminEscape(label)}</span>
                     <span class="unlocked-label">✓ Available</span>
+                </div>
+            `;
+        } else if (isPublished) {
+            html += `
+                <div
+                    class="test-item locked paid-locked"
+                    onclick="openLockedTest(${i})"
+                    role="button"
+                    tabindex="0"
+                    aria-label="${vkAdminEscape(label)} - Locked, buy course package">
+                    <span>${vkAdminEscape(label)}</span>
+                    <span class="locked-label paid-locked-label">🔒 Locked</span>
                 </div>
             `;
         } else {
@@ -12815,49 +12845,62 @@ function reattempt(){
 
 async function initializeAuth(){
 
-
     if(!supabaseClient){
         updateLoginButton();
         return;
     }
 
-    const { data } = await supabaseClient.auth.getSession();
-    await refreshVkAdminAccess();
+    /*
+       Resolve the persisted session and update the header first.
+       Admin-role lookup is non-blocking so it cannot delay the
+       Login -> Logout header change.
+    */
+    try{
+        const { data, error } = await supabaseClient.auth.getSession();
 
-    if(data.session){
-        const user=data.session.user;
+        if(error){
+            console.warn("Initial session lookup failed:", error);
+        }
 
-        if(user.is_anonymous){
-            try{ await supabaseClient.auth.signOut(); }catch(e){}
-            clearUser();
-        }else{
+        const session = data?.session || null;
+
+        if(session?.user && !session.user.is_anonymous){
             applyUser(
-                user.email,
-                user.user_metadata?.full_name || user.email?.split("@")[0] || "Student",
+                session.user.email,
+                session.user.user_metadata?.full_name ||
+                    session.user.email?.split("@")[0] ||
+                    "Student",
                 "supabase"
             );
+        }else{
+            clearUser();
         }
-    }else{
+    }catch(error){
+        console.warn("Auth initialization failed:", error);
         updateLoginButton();
     }
 
-    supabaseClient.auth.onAuthStateChange(function(event,session){
-        setTimeout(function(){ refreshVkAdminAccess(); }, 0);
-        if(session){
-            const user=session.user;
-            if(user.is_anonymous){
-                try{ supabaseClient.auth.signOut(); }catch(e){}
-                clearUser();
-            }else{
-                applyUser(
-                    user.email,
-                    user.user_metadata?.full_name || user.email?.split("@")[0] || "Student",
-                    "supabase"
-                );
-            }
+    /* Auth changes update the header immediately; admin checks run separately. */
+    supabaseClient.auth.onAuthStateChange(function(event, session){
+        if(session?.user && !session.user.is_anonymous){
+            applyUser(
+                session.user.email,
+                session.user.user_metadata?.full_name ||
+                    session.user.email?.split("@")[0] ||
+                    "Student",
+                "supabase"
+            );
         }else{
-            updateLoginButton();
+            clearUser();
         }
+
+        setTimeout(function(){
+            refreshVkAdminAccess();
+        }, 0);
+    });
+
+    refreshVkAdminAccess().catch(function(error){
+        console.warn("Admin access refresh failed:", error);
     });
 }
 
