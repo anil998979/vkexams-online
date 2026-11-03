@@ -3933,6 +3933,14 @@ Select
         <div class="vk-admin-field" id="vkAdminFreeEditWarning" style="display:none;grid-column:1/-1">
           <div class="vk-bulk-error">You are editing a published Free Mock Test. Saving updates its existing questions and keeps the same Test ID and Share Link. Take a database backup before editing.</div>
         </div>
+        <div class="vk-admin-field" id="vkAdminFreeRenameWrap" style="display:none;grid-column:1/-1">
+          <label for="vkAdminFreeRenameInput">Edit Test Name</label>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+            <input id="vkAdminFreeRenameInput" type="text" maxlength="120" placeholder="e.g. Ramayanam" style="flex:1;min-width:220px">
+            <button type="button" class="vk-admin-btn vk-admin-btn-primary" id="vkAdminFreeRenameBtn" onclick="vkAdminUpdateFreeTestName()">Update Test Name</button>
+          </div>
+          <p class="vk-admin-hint">Only the topic name will change. Test number, questions, marks, duration, Test ID, student attempts and results will remain unchanged.</p>
+        </div>
         <div class="vk-admin-field" id="vkAdminPaidModeWrap" style="display:none">
           <label for="vkAdminPaidMode">Paid Test Action</label>
           <select id="vkAdminPaidMode" onchange="vkAdminPaidModeChanged()">
@@ -5412,11 +5420,11 @@ async function openFreeMockTests(course, addHistory = true, selectedTestNumber =
                 questions.reduce((sum,q) => sum + (Number(q.marks) || 1),0);
             // Student-facing title uses the topic-specific sequence.
             // Keep test_number unchanged as the internal unique test key.
-            const topicName = String(test.topic_name || "").trim();
+            const topicName = vkAdminNormalizeFreeTopicName(test.topic_name || "");
             const topicTestNumber = Number(test.topic_test_number);
             const displayTitle = topicName && Number.isFinite(topicTestNumber) && topicTestNumber > 0
                 ? `${topicName} - Test ${topicTestNumber}`
-                : (test.title || `Mock Test ${String(number).padStart(2,"0")}`);
+                : vkAdminNormalizeFreeTopicName(test.title || `Mock Test ${String(number).padStart(2,"0")}`);
             const title = escapeText(displayTitle);
             const displayNumber = String(number).padStart(2,"0");
 
@@ -8037,12 +8045,16 @@ async function vkAdminFreeModeChanged(){
     const editMode=document.getElementById("vkAdminFreeMode")?.value==="edit";
     const existingWrap=document.getElementById("vkAdminExistingFreeTestWrap");
     const warning=document.getElementById("vkAdminFreeEditWarning");
+    const renameWrap=document.getElementById("vkAdminFreeRenameWrap");
     const topicWrap=document.getElementById("vkAdminTopicWrap");
     const publish=document.getElementById("vkAdminPublishBtn");
     if(existingWrap) existingWrap.style.display=editMode?"block":"none";
     if(warning) warning.style.display=editMode?"block":"none";
+    if(renameWrap) renameWrap.style.display=editMode?"block":"none";
     if(topicWrap) topicWrap.style.display=editMode?"none":"block";
     vkAdminEditingFreeTestId=null;
+    const renameInput=document.getElementById("vkAdminFreeRenameInput");
+    if(renameInput) renameInput.value="";
     if(publish) publish.textContent=editMode?"Save Existing Free Test":"Publish Free Test";
     const host=document.getElementById("vkAdminQuestions");
     if(host) host.innerHTML="";
@@ -8075,7 +8087,11 @@ async function vkAdminLoadFreeTests(){
         vkAdminFreeTestsCache=tests||[];
         testSelect.innerHTML='<option value="">Select a free test</option>'+
             vkAdminFreeTestsCache.map(t=>{
-                const title=t.title||((t.topic_name||"Free Mock")+" - Test "+(t.topic_test_number||t.test_number));
+                const cleanTopic = vkAdminNormalizeFreeTopicName(t.topic_name || "");
+                const topicNumber = Number(t.topic_test_number);
+                const title = cleanTopic && Number.isFinite(topicNumber) && topicNumber > 0
+                    ? `${cleanTopic} - Test ${topicNumber}`
+                    : vkAdminNormalizeFreeTopicName(t.title || ("Free Mock " + (t.test_number || "")));
                 return `<option value="${t.id}">${vkAdminEscape(title)} · ${t.is_active?"Published":"Draft"}</option>`;
             }).join("");
         if(!vkAdminFreeTestsCache.length)testSelect.innerHTML='<option value="">No existing free tests found</option>';
@@ -8100,6 +8116,8 @@ async function vkAdminLoadFreeTestForEdit(){
         document.getElementById("vkAdminNegative").value=result.negative_marks??0.333333;
         const topic=document.getElementById("vkAdminTopic");
         if(topic)topic.value=result.topic_name||"";
+        const renameInput=document.getElementById("vkAdminFreeRenameInput");
+        if(renameInput)renameInput.value=vkAdminNormalizeFreeTopicName(result.topic_name||"");
         const host=document.getElementById("vkAdminQuestions");
         host.innerHTML="";
         result.questions.forEach(q=>{
@@ -8121,6 +8139,78 @@ async function vkAdminLoadFreeTestForEdit(){
     }catch(e){
         console.error("Free test edit load failed",e);
         vkAdminShowStatus("Could not load existing Free Test: "+(e.message||e),true);
+    }
+}
+
+async function vkAdminUpdateFreeTestName(){
+    const button=document.getElementById("vkAdminFreeRenameBtn");
+    const input=document.getElementById("vkAdminFreeRenameInput");
+    const testId=vkAdminEditingFreeTestId;
+    const newTopicName=vkAdminNormalizeFreeTopicName(input?.value||"");
+
+    if(!await refreshVkAdminAccess()){
+        vkAdminShowStatus("Admin permission is required to rename tests.",true);
+        return;
+    }
+    if(!testId){
+        vkAdminShowStatus("Select and load an existing Free Test first.",true);
+        return;
+    }
+    if(!newTopicName){
+        vkAdminShowStatus("Enter a valid test name.",true);
+        input?.focus();
+        return;
+    }
+    if(newTopicName.length>120){
+        vkAdminShowStatus("Test name must be 120 characters or fewer.",true);
+        return;
+    }
+
+    const selected=vkAdminFreeTestsCache.find(t=>String(t.id)===String(testId));
+    const currentName=vkAdminNormalizeFreeTopicName(selected?.topic_name||"");
+    if(newTopicName===currentName){
+        vkAdminShowStatus("The test name is unchanged.",false);
+        return;
+    }
+
+    if(button){button.disabled=true;button.textContent="Updating...";}
+    try{
+        // Update only topic_name. The existing database trigger maintains the
+        // generated title; no question, attempt, result or ID rows are touched.
+        const {data,error}=await supabaseClient.from("tests")
+            .update({topic_name:newTopicName})
+            .eq("id",testId)
+            .select("id,topic_name,title,topic_test_number")
+            .single();
+        if(error)throw error;
+        if(!data)throw new Error("The test name was not updated.");
+
+        const cached=vkAdminFreeTestsCache.find(t=>String(t.id)===String(testId));
+        if(cached){
+            cached.topic_name=data.topic_name||newTopicName;
+            if(data.title)cached.title=data.title;
+            if(data.topic_test_number!==undefined)cached.topic_test_number=data.topic_test_number;
+        }
+        const select=document.getElementById("vkAdminExistingFreeTest");
+        const option=select?.querySelector(`option[value="${CSS.escape(String(testId))}"]`);
+        if(option){
+            const number=Number(data.topic_test_number ?? cached?.topic_test_number);
+            const label=Number.isFinite(number)&&number>0
+                ? `${newTopicName} - Test ${number}`
+                : (data.title||newTopicName);
+            option.textContent=`${label} · ${(cached?.is_active)?"Published":"Draft"}`;
+        }
+
+        window.__freeMockCache=window.__freeMockCache||{};
+        const courseName=document.getElementById("vkAdminCourse")?.value;
+        if(courseName)delete window.__freeMockCache[courseName];
+
+        vkAdminShowStatus(`Test name updated successfully: ${newTopicName}${data.topic_test_number ? " - Test "+data.topic_test_number : ""}. Existing questions, Test ID and student results were not changed.`,false);
+    }catch(error){
+        console.error("Free Test rename failed:",error);
+        vkAdminShowStatus("Could not update test name: "+(error.message||error)+". Check that the admin role has UPDATE permission on public.tests.",true);
+    }finally{
+        if(button){button.disabled=false;button.textContent="Update Test Name";}
     }
 }
 
@@ -8294,6 +8384,15 @@ function vkAdminResetBuilder(){
     if(status){status.textContent="";status.className="vk-admin-status";}
 }
 
+/* Keep the topic field as a topic only. The test sequence is
+   assigned automatically by the database (Test 1, Test 2, ...). */
+function vkAdminNormalizeFreeTopicName(value){
+    return String(value || "")
+        .trim()
+        .replace(/\\s*[-–—]?\\s*Test\\s*[-#]?\\s*\\d+\\s*$/i, "")
+        .trim();
+}
+
 async function vkAdminPublishTest(){
     const button = document.getElementById("vkAdminPublishBtn");
     if(!await refreshVkAdminAccess()){
@@ -8303,7 +8402,8 @@ async function vkAdminPublishTest(){
     const testType = document.getElementById("vkAdminTestType")?.value || "free";
     const isPaid = testType === "paid";
     const courseName = (document.getElementById("vkAdminCourse")?.value || "").trim();
-    const topicName = (document.getElementById("vkAdminTopic")?.value || "").trim();
+    const topicNameInput = (document.getElementById("vkAdminTopic")?.value || "").trim();
+    const topicName = isPaid ? topicNameInput : vkAdminNormalizeFreeTopicName(topicNameInput);
     const paperName = (document.getElementById("vkAdminPaper")?.value || "Paper 1").trim();
     const duration = Number(document.getElementById("vkAdminDuration")?.value);
     const negativeMarks = Number(document.getElementById("vkAdminNegative")?.value);
