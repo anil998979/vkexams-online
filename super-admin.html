@@ -64,6 +64,12 @@ tbody tr:hover{background:#f8faff}
 .bar span{font-size:10px;position:absolute;bottom:-21px;left:0;color:#71809a}
 input:focus,select:focus,textarea:focus{outline:3px solid #dfe7ff;border-color:#7188e8}
 #updated{margin-left:auto}
+
+.badge-active{display:inline-block;padding:5px 9px;border-radius:20px;background:#e8f8ef;color:#087b4e;font-size:11px;font-weight:800}
+.badge-off{display:inline-block;padding:5px 9px;border-radius:20px;background:#fff0f1;color:#b4233b;font-size:11px;font-weight:800}
+.action-btn{padding:7px 9px;font-size:12px;margin:2px}
+.nav button{font-size:13px}
+#studentManageTab .tablewrap,#accessTab .tablewrap,#auditTab .tablewrap{margin-top:12px}
 @media(max-width:850px){
  .grid{grid-template-columns:repeat(2,1fr)}
  .layout{grid-template-columns:1fr}
@@ -111,8 +117,73 @@ input:focus,select:focus,textarea:focus{outline:3px solid #dfe7ff;border-color:#
 <div class="panel"><div class="label">Ad Analytics</div><div class="metric" style="font-size:18px">Not connected</div><div class="small muted">AdSense reporting API required</div></div>
 </div>
 <div class="layout"><aside class="panel nav">
-<button class="active" onclick="showTab('overview',this)">Overview</button><button onclick="showTab('studentsTab',this)">Students</button><button onclick="showTab('purchasesTab',this)">Purchases</button><button onclick="showTab('attemptsTab',this)">Test Attempts</button><button onclick="showTab('reportsTab',this)">Daily / Monthly Reports</button><button onclick="showTab('adsTab',this)">Ad Analytics</button><button onclick="showTab('cleanupTab',this)">Test Data Cleanup</button><button onclick="showTab('jobsTab',this);loadAdminJobs()">Jobs Management</button>
+<button class="active" onclick="showTab('overview',this)">◈ Overview</button>
+<button onclick="showTab('studentManageTab',this);loadManagedStudents()">♙ Student Management</button>
+<button onclick="showTab('accessTab',this);loadManagedStudents()">⚿ Access Control</button>
+<button onclick="showTab('emailTab',this);loadEmailSettings()">✉ Email Management</button>
+<button onclick="showTab('studentsTab',this)">Students</button>
+<button onclick="showTab('purchasesTab',this)">Purchases</button>
+<button onclick="showTab('attemptsTab',this)">Test Attempts</button>
+<button onclick="showTab('reportsTab',this)">Daily / Monthly Reports</button>
+<button onclick="showTab('auditTab',this);loadAuditLogs()">▤ Audit Logs</button>
+<button onclick="showTab('adsTab',this)">Ad Analytics</button>
+<button onclick="showTab('cleanupTab',this)">Test Data Cleanup</button>
+<button onclick="showTab('jobsTab',this);loadAdminJobs()">Jobs Management</button>
 </aside><div>
+
+<section id="studentManageTab" class="panel section hidden">
+  <h2>Student Management</h2>
+  <p class="muted small">Manage student account status and notification preference. Passwords are never visible; use Supabase Auth recovery for password resets.</p>
+  <div class="toolbar">
+    <input id="studentSearch" type="search" placeholder="Search name, email or phone" style="min-width:240px;flex:1" oninput="renderManagedStudents()">
+    <button class="btn" onclick="loadManagedStudents()">Refresh students</button>
+  </div>
+  <div id="studentManageMsg" class="small muted" aria-live="polite">Loading student records when this section opens.</div>
+  <div class="tablewrap"><table><thead><tr><th>Student</th><th>Email</th><th>Phone</th><th>Account</th><th>Email alerts</th><th>Registered</th><th>Actions</th></tr></thead><tbody id="managedStudentRows"></tbody></table></div>
+</section>
+
+<section id="accessTab" class="panel section hidden">
+  <h2>Student Access Control</h2>
+  <p class="muted small">Apply an access permission to one student using the existing secured database RPC. Enter the exact permission key configured in your Supabase permission function; this page does not assume undocumented database keys.</p>
+  <div class="panel" style="background:#f8faff;margin:12px 0">
+    <div class="toolbar">
+      <select id="accessStudent" style="min-width:220px;flex:1"><option value="">Select student</option></select>
+      <input id="accessPermission" placeholder="Permission key (exact database key)" style="min-width:230px;flex:1">
+    </div>
+    <div class="toolbar">
+      <select id="accessEnabled"><option value="true">Enable access</option><option value="false">Disable access</option></select>
+      <button class="btn primary" onclick="setStudentAccess()">Apply permission</button>
+    </div>
+    <p id="accessMsg" class="small muted" aria-live="polite">Examples must match the permission keys implemented in your database function.</p>
+  </div>
+  <h3>Available student accounts</h3>
+  <div class="tablewrap"><table><thead><tr><th>Name</th><th>Email</th><th>Account status</th></tr></thead><tbody id="accessStudentRows"></tbody></table></div>
+</section>
+
+<section id="emailTab" class="panel section hidden">
+  <h2>Email Notification Management</h2>
+  <p class="muted small">Global email OFF overrides individual notification preferences. Existing test-publish queue and duplicate-prevention logic are not changed by this dashboard update.</p>
+  <div class="panel" style="background:#f8faff;margin:12px 0">
+    <div class="label">GLOBAL EMAIL SWITCH</div>
+    <div class="toolbar">
+      <strong id="globalEmailState">Checking setting…</strong>
+      <select id="globalEmailSelect"><option value="true">Global ON</option><option value="false">Global OFF</option></select>
+      <button class="btn primary" onclick="saveGlobalEmail()">Save global setting</button>
+    </div>
+    <p id="globalEmailMsg" class="small muted" aria-live="polite"></p>
+  </div>
+  <p><b>Individual notification preference</b></p>
+  <p class="muted small">Turn email notifications ON/OFF for an individual student in Student Management. Bulk campaigns and test-specific recipient controls require their own server-side queue/edge-function workflow and are not falsely shown as active here.</p>
+</section>
+
+<section id="auditTab" class="panel section hidden">
+  <h2>Audit Logs</h2>
+  <p class="muted small">Recent administrative actions recorded in the existing admin_logs table.</p>
+  <div class="toolbar"><button class="btn" onclick="loadAuditLogs()">Refresh audit logs</button></div>
+  <p id="auditMsg" class="small muted" aria-live="polite"></p>
+  <div class="tablewrap"><table><thead><tr><th>Time</th><th>Action</th><th>Table</th><th>Record ID</th><th>Details</th></tr></thead><tbody id="auditRows"></tbody></table></div>
+</section>
+
 <section id="overview" class="panel section"><h2>Activity overview</h2><p class="muted small">Daily new students, test attempts and paid revenue for the selected period (daily series capped to recent 30 days).</p><div id="dailyChart" class="chart"></div><div class="tablewrap"><table id="dailyTable"><thead><tr><th>Date</th><th>New students</th><th>Attempts</th><th>Paid revenue</th></tr></thead><tbody></tbody></table></div></section>
 <section id="studentsTab" class="panel section hidden"><h2>Recent students</h2><p class="muted small">Latest 100 Auth accounts. Passwords and OTPs are never displayed.</p><div class="tablewrap"><table><thead><tr><th>Name</th><th>Email</th><th>Registered</th><th>Last login</th></tr></thead><tbody id="studentRows"></tbody></table></div></section>
 <section id="purchasesTab" class="panel section hidden"><h2>Purchases</h2><div class="tablewrap"><table><thead><tr><th>Date</th><th>Student</th><th>Course</th><th>Package</th><th>Amount</th><th>Status</th></tr></thead><tbody id="purchaseRows"></tbody></table></div></section>
@@ -251,6 +322,129 @@ async function saveAdminJob(){
 }
 async function deleteAdminJob(id){const j=adminJobs.find(x=>x.id===id);if(!j||!confirm('Delete job notification: '+j.title+'?'))return;const {error}=await sb.from('jobs').delete().eq('id',id);if(error){alert('Delete failed: '+error.message);return}await loadAdminJobs()}
 function exportCurrent(){let table=$(currentTab).querySelector('table');if(!table){alert('No table to export');return}let rows=[...table.querySelectorAll('tr')].map(r=>[...r.children].map(c=>'"'+c.innerText.replace(/"/g,'""')+'"').join(',')).join('\n');let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([rows],{type:'text/csv;charset=utf-8'}));a.download='vk-exams-'+currentTab+'.csv';a.click();URL.revokeObjectURL(a.href)}
+
+let managedStudents=[];
+let globalEmailEnabled=null;
+
+async function loadManagedStudents(){
+  const msg=$('studentManageMsg');
+  if(msg)msg.textContent='Loading student profiles…';
+  const {data,error}=await sb.from('profiles')
+    .select('id,full_name,email,phone,role,notifications_enabled,created_at')
+    .order('created_at',{ascending:false}).limit(500);
+  if(error){
+    if(msg)msg.textContent='Could not load profiles: '+error.message;
+    $('managedStudentRows').innerHTML='';
+    $('accessStudentRows').innerHTML='';
+    return;
+  }
+  managedStudents=(data||[]).filter(x=>(x.role||'student').toLowerCase()!=='admin');
+  renderManagedStudents();
+  const select=$('accessStudent');
+  if(select){
+    const prior=select.value;
+    select.innerHTML='<option value="">Select student</option>'+managedStudents.map(s=>`<option value="${esc(s.id)}">${esc(s.full_name||s.email||s.id)} — ${esc(s.email||'')}</option>`).join('');
+    if(prior)select.value=prior;
+  }
+  $('accessStudentRows').innerHTML=managedStudents.map(s=>`<tr><td>${esc(s.full_name||'—')}</td><td>${esc(s.email||'—')}</td><td><span class="badge-active">Permission-managed</span></td></tr>`).join('')||'<tr><td colspan="3">No student profiles found.</td></tr>';
+  if(msg)msg.textContent=`Loaded ${managedStudents.length} student profile(s). Account status is managed by the secured permission RPC.`;
+}
+
+function renderManagedStudents(){
+  const q=($('studentSearch')?.value||'').trim().toLowerCase();
+  const filtered=managedStudents.filter(s=>[s.full_name,s.email,s.phone].some(v=>String(v||'').toLowerCase().includes(q)));
+  $('managedStudentRows').innerHTML=filtered.map(s=>{
+    const notify=s.notifications_enabled!==false;
+    return `<tr>
+      <td>${esc(s.full_name||'—')}</td><td>${esc(s.email||'—')}</td><td>${esc(s.phone||'—')}</td>
+      <td><span class="status">See permission status</span></td>
+      <td><span class="${notify?'badge-active':'badge-off'}">${notify?'ON':'OFF'}</span></td>
+      <td>${date(s.created_at)}</td>
+      <td><button class="btn action-btn" onclick="toggleStudentEmail('${esc(s.id)}',${!notify})">${notify?'Disable alerts':'Enable alerts'}</button>
+      <button class="btn action-btn" onclick="changeStudentStatus('${esc(s.id)}','${esc(s.email||'')}','${notify?'active':'active'}')">Suspend / Activate</button></td>
+    </tr>`;
+  }).join('')||'<tr><td colspan="7">No matching students.</td></tr>';
+}
+
+async function writeAdminAudit(action,tableName,recordId,details){
+  const {error}=await sb.rpc('vk_write_admin_audit_log',{
+    p_action:action,p_table_name:tableName,p_record_id:recordId||null,p_details:details||{}
+  });
+  if(error)console.warn('Audit log write failed:',error.message);
+}
+
+async function toggleStudentEmail(studentId,enabled){
+  const s=managedStudents.find(x=>x.id===studentId);
+  if(!s)return;
+  const label=enabled?'enable':'disable';
+  if(!confirm(`Are you sure you want to ${label} email notifications for ${s.email||'this student'}?`))return;
+  const {error}=await sb.rpc('vk_set_student_email_notifications',{p_user_id:studentId,p_enabled:enabled});
+  if(error){alert('Could not update notification preference: '+error.message);return}
+  s.notifications_enabled=enabled;
+  renderManagedStudents();
+  await writeAdminAudit('student_email_notifications_updated','profiles',studentId,{enabled,email:s.email||null});
+  $('studentManageMsg').textContent=`Email notifications ${enabled?'enabled':'disabled'} for ${s.email||'student'}.`;
+}
+
+async function changeStudentStatus(studentId,email){
+  const choice=prompt(`Enter account status for ${email}:\nType active or suspended.\nNo permanent deletion will be performed.`);
+  if(choice===null)return;
+  const status=choice.trim().toLowerCase();
+  if(!['active','suspended'].includes(status)){alert('Use only active or suspended.');return}
+  if(!confirm(`Set ${email} account status to "${status}"?`))return;
+  const {error}=await sb.rpc('vk_set_student_account_status',{p_user_id:studentId,p_status:status});
+  if(error){alert('Status update failed: '+error.message);return}
+  await writeAdminAudit('student_account_status_updated','vk_student_permissions',studentId,{status,email});
+  $('studentManageMsg').textContent=`Account status updated to ${status}. Refresh to verify the database value.`;
+}
+
+async function setStudentAccess(){
+  const studentId=$('accessStudent').value;
+  const permission=$('accessPermission').value.trim();
+  const enabled=$('accessEnabled').value==='true';
+  if(!studentId){$('accessMsg').textContent='Select a student first.';return}
+  if(!permission){$('accessMsg').textContent='Enter the exact permission key configured in Supabase.';return}
+  if(!confirm(`${enabled?'Enable':'Disable'} "${permission}" access for the selected student?`))return;
+  const {error}=await sb.rpc('vk_set_student_access_permission',{
+    p_user_id:studentId,p_permission:permission,p_enabled:enabled
+  });
+  if(error){$('accessMsg').textContent='Permission update failed: '+error.message;return}
+  await writeAdminAudit('student_access_permission_updated','vk_student_permissions',studentId,{permission,enabled});
+  $('accessMsg').textContent=`Permission "${permission}" updated.`;
+}
+
+async function loadEmailSettings(){
+  $('globalEmailMsg').textContent='Reading platform setting…';
+  const {data,error}=await sb.from('vk_platform_settings').select('global_email_enabled').eq('id',1).maybeSingle();
+  if(error){$('globalEmailState').textContent='Unavailable';$('globalEmailMsg').textContent='Could not read setting: '+error.message;return}
+  globalEmailEnabled=data?.global_email_enabled===true;
+  $('globalEmailSelect').value=String(globalEmailEnabled);
+  $('globalEmailState').innerHTML=globalEmailEnabled?'<span class="badge-active">GLOBAL EMAIL ON</span>':'<span class="badge-off">GLOBAL EMAIL OFF</span>';
+  $('globalEmailMsg').textContent='Current value read from vk_platform_settings.';
+}
+
+async function saveGlobalEmail(){
+  const enabled=$('globalEmailSelect').value==='true';
+  if(!confirm(`Set global email notifications to ${enabled?'ON':'OFF'}? Global OFF overrides student-level preferences.`))return;
+  const {error}=await sb.rpc('vk_set_global_email',{p_enabled:enabled});
+  if(error){$('globalEmailMsg').textContent='Update failed: '+error.message;return}
+  globalEmailEnabled=enabled;
+  $('globalEmailState').innerHTML=enabled?'<span class="badge-active">GLOBAL EMAIL ON</span>':'<span class="badge-off">GLOBAL EMAIL OFF</span>';
+  $('globalEmailMsg').textContent='Global email setting updated.';
+  await writeAdminAudit('global_email_setting_updated','vk_platform_settings',null,{global_email_enabled:enabled});
+}
+
+async function loadAuditLogs(){
+  $('auditMsg').textContent='Loading recent audit records…';
+  const {data,error}=await sb.from('admin_logs')
+    .select('id,action,table_name,record_id,details,created_at')
+    .order('created_at',{ascending:false}).limit(200);
+  if(error){$('auditMsg').textContent='Could not load audit logs: '+error.message;return}
+  $('auditRows').innerHTML=(data||[]).map(x=>`<tr><td>${date(x.created_at)}</td><td>${esc(x.action)}</td><td>${esc(x.table_name||'—')}</td><td>${esc(x.record_id||'—')}</td><td title="${esc(JSON.stringify(x.details||{}))}">${esc(JSON.stringify(x.details||{}).slice(0,120))}</td></tr>`).join('')||'<tr><td colspan="5">No audit records found.</td></tr>';
+  $('auditMsg').textContent=`Showing ${(data||[]).length} recent record(s).`;
+}
+
+
 sb.auth.onAuthStateChange((event,session)=>{if(event==='PASSWORD_RECOVERY'){showRecovery();return}if(session && event==='SIGNED_IN')gate()});
 (async()=>{const params=new URLSearchParams(location.search);if(params.get('mode')==='recovery'){const {data}=await sb.auth.getSession();if(data.session){showRecovery();return}}await gate()})();
 </script></body></html>
