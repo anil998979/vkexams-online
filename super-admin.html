@@ -5,11 +5,84 @@
 <title>VK Exams | Super Admin</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root{font-family:Inter,Arial,sans-serif;color:#172033;background:#f4f7fb}*{box-sizing:border-box}body{margin:0}.wrap{max-width:1280px;margin:auto;padding:24px}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.brand{font-size:23px;font-weight:900;color:#245ce5}.muted{color:#64748b}.btn,select,input{border:1px solid #d8e0ec;border-radius:9px;padding:10px 13px;background:white;font:inherit}.btn{cursor:pointer;font-weight:700}.primary{background:#245ce5;color:white;border-color:#245ce5}.danger{color:#b91c1c}.panel{background:#fff;border:1px solid #e4eaf2;border-radius:15px;padding:18px;box-shadow:0 5px 18px #102b5010}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:22px 0}.metric{font-size:28px;font-weight:850;margin-top:8px}.label{font-size:13px;color:#64748b}.layout{display:grid;grid-template-columns:220px 1fr;gap:16px}.nav button{display:block;width:100%;text-align:left;margin:4px 0;border:0;background:transparent;padding:12px;border-radius:9px;color:#334155}.nav button.active,.nav button:hover{background:#edf3ff;color:#245ce5}.section{margin:16px 0}.section h2{font-size:19px;margin:0 0 12px}.tablewrap{overflow:auto}table{border-collapse:collapse;width:100%;font-size:13px}th,td{text-align:left;padding:10px;border-bottom:1px solid #edf0f5;white-space:nowrap}th{color:#64748b;background:#fafbfd}.status{padding:7px 10px;border-radius:8px;background:#fff7ed;color:#9a3412;font-size:12px}.hidden{display:none}.error{color:#b91c1c;background:#fef2f2;padding:12px;border-radius:8px}.ok{color:#166534;background:#f0fdf4;padding:12px;border-radius:8px}.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:16px 0}.login{max-width:420px;margin:10vh auto}.small{font-size:12px}.chart{display:flex;gap:5px;align-items:end;height:130px;padding:12px 0}.bar{flex:1;background:#4f7de8;border-radius:5px 5px 0 0;min-width:8px;position:relative}.bar span{font-size:10px;position:absolute;bottom:-20px;left:0;color:#64748b}
-@media(max-width:850px){.grid{grid-template-columns:repeat(2,1fr)}.layout{grid-template-columns:1fr}.nav{display:grid;grid-template-columns:repeat(2,1fr)}}@media(max-width:520px){.wrap{padding:14px}.grid{grid-template-columns:1fr 1fr}.metric{font-size:22px}}
+:root{
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+  color:#18243b;background:#f3f6fc;
+  --navy:#172554;--blue:#4169e1;--violet:#7954d8;--teal:#0f9f91;
+  --amber:#e99a25;--rose:#e45b78;--line:#e5eaf4;--muted:#71809a;
+}
+*{box-sizing:border-box}
+body{margin:0;background:linear-gradient(135deg,#f5f7ff 0%,#f7f9fc 48%,#f1f8fb 100%)}
+.wrap{max-width:1440px;margin:auto;padding:26px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;
+  padding:17px 21px;margin-bottom:20px;border-radius:18px;color:#fff;
+  background:linear-gradient(110deg,#172554 0%,#304bb2 55%,#6547bb 100%);
+  box-shadow:0 12px 28px #243b7a26}
+.brand{font-size:23px;font-weight:900;letter-spacing:.3px;color:#fff}
+.top .muted{color:#dbe5ff}
+.btn,select,input{border:1px solid #dbe3f0;border-radius:10px;padding:10px 13px;background:#fff;font:inherit;color:#25324a}
+.btn{cursor:pointer;font-weight:700;transition:.18s ease;box-shadow:0 2px 5px #1d35570b}
+.btn:hover{transform:translateY(-1px);box-shadow:0 5px 12px #1d35571a}
+.primary{background:linear-gradient(110deg,#4169e1,#6554d9);color:#fff;border-color:transparent}
+.danger{color:#c43d54}
+.panel{background:#fff;border:1px solid #e5eaf4;border-radius:17px;padding:19px;
+  box-shadow:0 7px 22px #20345d0b}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin:22px 0}
+.metric{font-size:29px;font-weight:850;margin-top:9px;letter-spacing:-.5px;color:#172554}
+.label{font-size:13px;color:#71809a;font-weight:650}
+.grid>.panel,.grid>div.panel{position:relative;overflow:hidden}
+#app>.grid>.panel:nth-child(1){border-top:4px solid #4169e1;background:linear-gradient(145deg,#fff,#f3f6ff)}
+#app>.grid>.panel:nth-child(2){border-top:4px solid #0f9f91;background:linear-gradient(145deg,#fff,#effbf8)}
+#app>.grid>.panel:nth-child(3){border-top:4px solid #e99a25;background:linear-gradient(145deg,#fff,#fff8ed)}
+#app>.grid>.panel:nth-child(4){border-top:4px solid #9a65d5;background:linear-gradient(145deg,#fff,#f8f2ff)}
+.layout{display:grid;grid-template-columns:238px minmax(0,1fr);gap:17px;align-items:start}
+.nav{position:sticky;top:14px;padding:12px;background:linear-gradient(180deg,#fff,#f8faff)}
+.nav:before{content:"CONTROL MENU";display:block;padding:9px 12px 12px;font-size:10px;letter-spacing:1.4px;font-weight:850;color:#8995aa}
+.nav button{display:block;width:100%;text-align:left;margin:4px 0;border:0;background:transparent;padding:12px 13px;border-radius:11px;color:#53617a;font-weight:650;cursor:pointer;transition:.18s}
+.nav button.active,.nav button:hover{background:linear-gradient(100deg,#eaf0ff,#f1edff);color:#3859c7;box-shadow:inset 3px 0 #5369df}
+.section{margin:0 0 17px;min-width:0}
+.section h2{font-size:19px;margin:0 0 12px;color:#1c2b4b}
+.section h3{color:#27385c}
+.tablewrap{overflow:auto;border:1px solid #edf0f6;border-radius:11px}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{text-align:left;padding:11px 12px;border-bottom:1px solid #edf0f5;white-space:nowrap}
+th{color:#586987;background:#f5f7fc;font-weight:750}
+tbody tr:hover{background:#f8faff}
+.status{padding:7px 10px;border-radius:8px;background:#fff4df;color:#99600b;font-size:12px;font-weight:700}
+.hidden{display:none}
+.error{color:#a72d43;background:#fff0f2;padding:12px;border-radius:9px}
+.ok{color:#087b62;background:#eafaf5;padding:12px;border-radius:9px}
+.toolbar{display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin:16px 0}
+.login{max-width:430px;margin:10vh auto;border-top:5px solid #5369df}
+.login h2{color:#243b86}
+.small{font-size:12px}
+.muted{color:var(--muted)}
+.chart{display:flex;gap:6px;align-items:end;height:140px;padding:14px 4px 25px}
+.bar{flex:1;background:linear-gradient(180deg,#8b78ed,#4169e1);border-radius:6px 6px 2px 2px;min-width:8px;position:relative;box-shadow:0 3px 8px #5369df22}
+.bar:nth-child(3n+2){background:linear-gradient(180deg,#54c5b5,#0f9f91)}
+.bar:nth-child(3n){background:linear-gradient(180deg,#f4bf68,#e99a25)}
+.bar span{font-size:10px;position:absolute;bottom:-21px;left:0;color:#71809a}
+input:focus,select:focus,textarea:focus{outline:3px solid #dfe7ff;border-color:#7188e8}
+#updated{margin-left:auto}
+@media(max-width:850px){
+ .grid{grid-template-columns:repeat(2,1fr)}
+ .layout{grid-template-columns:1fr}
+ .nav{position:static;display:grid;grid-template-columns:repeat(2,1fr)}
+ .nav:before{grid-column:1/-1}
+}
+@media(max-width:520px){
+ .wrap{padding:12px}
+ .top{padding:15px;border-radius:14px}
+ .grid{grid-template-columns:1fr 1fr;gap:9px}
+ .metric{font-size:22px}
+ .panel{padding:14px}
+ .nav{gap:2px}
+ .nav button{padding:10px;font-size:12px}
+ #updated{width:100%;margin-left:0}
+}
 </style></head>
 <body><main class="wrap">
-<header class="top"><div><div class="brand">VK EXAMS <span class="muted" style="font-size:13px">/ SUPER ADMIN</span></div><div class="muted small">Private administration dashboard</div></div><div><span id="who" class="muted small"></span> <button class="btn" id="logout" onclick="logout()" hidden>Sign out</button></div></header>
+<header class="top"><div><div class="brand">✦ VK EXAMS <span class="muted" style="font-size:13px">/ SUPER ADMIN</span></div><div class="muted small">Super Admin Control Center · Secure platform management</div></div><div><span id="who" class="muted small"></span> <button class="btn" id="logout" onclick="logout()" hidden>Sign out</button></div></header>
 <section id="loginBox" class="panel login">
 <h2>Super Admin Login</h2>
 <p class="muted">Sign in using the authorized VK Exams admin account.</p>
