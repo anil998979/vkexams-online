@@ -70,6 +70,15 @@ input:focus,select:focus,textarea:focus{outline:3px solid #dfe7ff;border-color:#
 .action-btn{padding:7px 9px;font-size:12px;margin:2px}
 .nav button{font-size:13px}
 #studentManageTab .tablewrap,#accessTab .tablewrap,#auditTab .tablewrap{margin-top:12px}
+#studentManageTab table{width:100%;table-layout:auto}
+#studentManageTab th:last-child,#studentManageTab td:last-child{min-width:190px;width:200px;white-space:normal}
+#studentManageTab td:last-child .action-stack{display:flex;flex-direction:column;gap:7px;align-items:stretch;min-width:170px}
+#studentManageTab td:last-child .action-stack .action-btn{width:100%;margin:0;white-space:normal;line-height:1.25;padding:9px 10px}
+#studentManageTab th,#studentManageTab td{vertical-align:middle}
+@media(max-width:900px){
+  #studentManageTab .tablewrap{overflow-x:auto}
+  #studentManageTab table{min-width:850px}
+}
 @media(max-width:850px){
  .grid{grid-template-columns:repeat(2,1fr)}
  .layout{grid-template-columns:1fr}
@@ -375,8 +384,10 @@ function renderManagedStudents(){
       <td><span class="status">See permission status</span></td>
       <td><span class="${notify?'badge-active':'badge-off'}">${notify?'ON':'OFF'}</span></td>
       <td>${date(s.created_at)}</td>
-      <td><button class="btn action-btn" onclick="toggleStudentEmail('${esc(s.id)}',${!notify})">${notify?'Disable alerts':'Enable alerts'}</button>
-      <button class="btn action-btn" onclick="changeStudentStatus('${esc(s.id)}','${esc(s.email||'')}')">Suspend / Activate</button></td>
+      <td><div class="action-stack">
+      <button class="btn action-btn" onclick="toggleStudentEmail('${esc(s.id)}',${!notify})">${notify?'Disable alerts':'Enable alerts'}</button>
+      <button class="btn action-btn" onclick="changeStudentStatus('${esc(s.id)}','${esc(s.email||'')}')">Suspend / Activate</button>
+      </div></td>
     </tr>`;
   }).join('')||'<tr><td colspan="7">No matching students.</td></tr>';
 }
