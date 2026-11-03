@@ -2863,6 +2863,25 @@ footer p{
     #course.vk-eo-premium .vk-eo-card{transition:none}
 }
 
+
+
+/* VK EXAMS GLOBAL DARK MODE */
+body.dark-mode{background:#0b1220!important;color:#e5edf8!important}
+body.dark-mode header{background:rgba(15,23,42,.97)!important;border-bottom-color:#263449!important}
+body.dark-mode .nav-links a{color:#e5edf8!important}
+body.dark-mode .nav-links a:hover{background:#1e293b!important;color:#93c5fd!important}
+body.dark-mode .page{color:#e5edf8!important}
+body.dark-mode .page:not(#home){background:transparent!important}
+body.dark-mode .page h1,body.dark-mode .page h2,body.dark-mode .page h3,body.dark-mode .page p,body.dark-mode .page label{color:inherit}
+body.dark-mode .choice-card,body.dark-mode .profile-summary,body.dark-mode .profile-menu,body.dark-mode .job-card,body.dark-mode .free-mock-card,body.dark-mode .free-mock-empty,body.dark-mode .syllabus-item,body.dark-mode .vk-exam-card,body.dark-mode .feature,body.dark-mode .course-card,body.dark-mode #profileContent>div[style*="background"],body.dark-mode #profileContent article{background:#172337!important;color:#e5edf8!important;border-color:#334155!important}
+body.dark-mode input,body.dark-mode select,body.dark-mode textarea{background:#111c2e!important;color:#e5edf8!important;border-color:#475569!important}
+body.dark-mode .nav-links .login-btn{color:#fff!important}
+body.dark-mode .job-meta>div,body.dark-mode .job-description{background:#111c2e!important;color:#dbeafe!important;border-color:#334155!important}
+body.dark-mode .profile-menu-btn{background:#172337!important;color:#e5edf8!important;border-color:#334155!important}
+body.dark-mode .home-ad-container{color:#94a3b8!important}
+.vk-theme-toggle{border:1px solid #dbe3ef;background:#f1f5f9;color:#172033;border-radius:9px;padding:8px 10px;font-weight:800;font-size:13px;white-space:nowrap}
+body.dark-mode .vk-theme-toggle{background:#243247;color:#f8fafc;border-color:#475569}
+
 </style>
 
 
@@ -2892,6 +2911,8 @@ VK <span>EXAMS</span>
 
 
 <div class="nav-links">
+
+<button type="button" class="vk-theme-toggle" id="vkThemeToggle" onclick="toggleVkDarkMode()" aria-label="Toggle dark mode">🌙 Dark</button>
 
 <a onclick="showHome()">
 Home
@@ -4854,6 +4875,42 @@ function initializeVkHomeAd(){
     }
 }
 
+function vkPushContextRoute(page, params = {}) {
+    const query = new URLSearchParams();
+    Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && String(value) !== "") {
+            query.set(key, String(value));
+        }
+    });
+    const queryString = query.toString();
+    const url = "#" + page + (queryString ? "?" + queryString : "");
+    history.pushState(
+        { vkPage: page, ...params },
+        "",
+        url
+    );
+}
+
+function applyVkTheme(){
+    const enabled = localStorage.getItem("vkDarkMode") === "true";
+    document.body.classList.toggle("dark-mode", enabled);
+    const button = document.getElementById("vkThemeToggle");
+    if(button){ button.textContent = enabled ? "☀️ Light" : "🌙 Dark"; }
+    const status = document.getElementById("darkModeStatus");
+    if(status){
+        status.textContent = enabled ? "ON" : "OFF";
+        status.style.background = enabled ? "#dcfce7" : "#f3f4f6";
+        status.style.color = enabled ? "#166534" : "#6b7280";
+    }
+    const description = document.getElementById("darkModeDescription");
+    if(description) description.textContent = enabled ? "Dark mode is currently enabled." : "Dark mode is currently disabled.";
+}
+function toggleVkDarkMode(){
+    const enabled = localStorage.getItem("vkDarkMode") === "true";
+    localStorage.setItem("vkDarkMode", enabled ? "false" : "true");
+    applyVkTheme();
+}
+
 function showPage(
     page,
     addHistory = true
@@ -5644,7 +5701,8 @@ function openCourse(course, addHistory = true){
         document.getElementById("vkEoFeatureStrip")?.remove();
     }
 
-    showPage("course", addHistory);
+    showPage("course", false);
+    if(addHistory) vkPushContextRoute("course", {course: currentCourse});
 }
 
 /* =====================================================
@@ -5673,7 +5731,8 @@ function openAPPSCGroups(addHistory = true){
 
     `;
 
-    showPage("appGroups", addHistory);
+    showPage("appGroups", false);
+    if(addHistory) vkPushContextRoute("appGroups", {course: "APPSC"});
 
 }
 
@@ -5701,7 +5760,8 @@ function openAPPSCGroup(group, addHistory = true){
 
     `;
 
-    showPage("appGroupDetail", addHistory);
+    showPage("appGroupDetail", false);
+    if(addHistory) vkPushContextRoute("appGroupDetail", {course: "APPSC", group: currentGroup});
 
 }
 
@@ -5921,7 +5981,7 @@ function getSyllabus(course){
 }
 
 
-function openSyllabus(){
+function openSyllabus(addHistory = true){
 
     const title =
         currentCourse === "APPSC" && currentGroup
@@ -5930,17 +5990,19 @@ function openSyllabus(){
 
     $("syllabusTitle").textContent = title;
 
+    const syllabusTopics = getSyllabus(currentCourse);
     $("syllabusContent").innerHTML =
-        getSyllabus(currentCourse)
+        (Array.isArray(syllabusTopics) ? syllabusTopics : [])
         .map(function(topic){
             return `
                 <div class="syllabus-item">
                     📌 ${topic}
                 </div>
             `;
-        }).join("");
+        }).join("") || `<div class="free-mock-empty"><strong>Syllabus content is not available.</strong><p style="margin:6px 0 0">Please return to the course page and select Syllabus again.</p></div>`;
 
-    showPage("syllabus");
+    showPage("syllabus", false);
+    if(addHistory) vkPushContextRoute("syllabus", {course: currentCourse, group: currentGroup});
 
 }
 
@@ -6056,11 +6118,13 @@ function openTestSeries(addHistory = true){
 
     }
 
-    showPage("testseries", addHistory);
+    showPage("testseries", false);
+    if(addHistory) vkPushContextRoute("testseries", {course: currentCourse, group: currentGroup});
 
 }
 
 
+/* Rebuild the selected course's Test Series page after refresh/back navigation. */
 function backFromTestSeries(){
 
     if(testSeriesReturnPage === "appGroupDetail" && currentCourse === "APPSC" && currentGroup){
@@ -6091,7 +6155,11 @@ function backFromTestSeries(){
    PAPER / TESTS
 ===================================================== */
 
-async function openPaper(paper){
+async function openPaper(paper, addHistory = true){
+
+    if(window.__vkAuthInitialization){
+        await window.__vkAuthInitialization;
+    }
 
     showLoading(
         "Loading " + paper + "...",
@@ -6258,17 +6326,26 @@ if (isLoggedIn() && supabaseClient) {
     ========================================= */
 
     let publishedTests = [];
+    let testListLoadError = null;
 
+    /*
+       Always complete the page render, even if Supabase is temporarily
+       unavailable during a hard refresh. Previously this catch returned
+       before filling #testList, leaving only the page heading visible.
+       A failed data request must never turn a valid route into a blank page.
+    */
     try {
+        if (!supabaseClient) throw new Error("Supabase client is not ready.");
+
         const { data: courseForTests, error: courseForTestsError } =
             await supabaseClient
                 .from("courses")
                 .select("id")
                 .eq("name", currentCourse)
-                .single();
+                .maybeSingle();
 
         if (courseForTestsError || !courseForTests) {
-            throw courseForTestsError || new Error("Course not found.");
+            throw courseForTestsError || new Error("Course not found: " + currentCourse);
         }
 
         const { data: seriesForTests, error: seriesForTestsError } =
@@ -6277,10 +6354,10 @@ if (isLoggedIn() && supabaseClient) {
                 .select("id")
                 .eq("course_id", courseForTests.id)
                 .eq("name", paper)
-                .single();
+                .maybeSingle();
 
         if (seriesForTestsError || !seriesForTests) {
-            throw seriesForTestsError || new Error("Test series not found.");
+            throw seriesForTestsError || new Error("Test series not found: " + paper);
         }
 
         const { data: testRows, error: testListError } =
@@ -6293,11 +6370,9 @@ if (isLoggedIn() && supabaseClient) {
 
         if (testListError) throw testListError;
         publishedTests = testRows || [];
-    } catch (testListError) {
-        console.error("Paid test list loading failed:", testListError);
-        hideLoading();
-        toast("Unable to load the published test list. Please try again.");
-        return;
+    } catch (error) {
+        testListLoadError = error;
+        console.error("Paid test list loading failed:", error);
     }
 
     const testByNumber = new Map(
@@ -6334,9 +6409,24 @@ if (isLoggedIn() && supabaseClient) {
 
     list.innerHTML = html;
 
-showPage("papers");
+    if (testListLoadError) {
+        const warning = document.createElement("div");
+        warning.className = "free-mock-empty";
+        warning.style.marginBottom = "12px";
+        warning.innerHTML = `<strong>Test details could not be refreshed.</strong><p style="margin:6px 0 0">Please check your connection and refresh again. The test list page is still available.</p>`;
+        list.prepend(warning);
+    }
 
-hideLoading();
+    showPage("papers", false);
+    if(addHistory) {
+        vkPushContextRoute("papers", {
+            course: currentCourse,
+            group: currentGroup,
+            paper: currentPaper
+        });
+    }
+
+    hideLoading();
 
 }
 /* =====================================================
@@ -7062,49 +7152,56 @@ function goToStoreFromLock(){
    STORE
 ===================================================== */
 
-function openStore(){
+function vkSetStoreRoute(course = "", replace = true){
+    const params = new URLSearchParams();
+    if(course) params.set("course", course);
+    const url = "#store" + (params.toString() ? "?" + params.toString() : "");
+    const state = { ...(history.state || {}), vkPage: "store", course: course || null };
+    if(replace) history.replaceState(state, "", url);
+    else history.pushState(state, "", url);
+}
 
+function renderStoreCourseSelection(course = ""){
+    const area = $("selectedCourseArea");
+    const cards = document.querySelectorAll("#store .category-card");
     selectedStoreCourse = "";
 
-    $("selectedCourseArea").style.display = "none";
-
-    document.querySelectorAll("#store .category-card").forEach(function(c){
+    if(area) area.style.display = "none";
+    cards.forEach(function(c){
         c.style.display = "block";
         c.style.outline = "";
     });
 
-    showPage("store");
-
+    if(course === "Endowment Officer"){
+        selectedStoreCourse = course;
+        $("selectedCourseName").textContent = course;
+        area.style.display = "block";
+        cards.forEach(function(c){
+            const isSelected = (c.getAttribute("onclick") || "").includes("Endowment Officer");
+            c.style.display = isSelected ? "block" : "none";
+            c.style.outline = isSelected ? "2px solid #6366f1" : "";
+        });
+    }
 }
 
+function openStore(addHistory = true, course = ""){
+    renderStoreCourseSelection(course);
+    showPage("store", false);
+    if(addHistory) vkSetStoreRoute(course, false);
+}
 
 function resetStoreCourses(){
-    openStore();
+    renderStoreCourseSelection("");
+    vkSetStoreRoute("", true);
 }
 
-
 function selectStoreCourse(course, card){
-
     if(course !== "Endowment Officer"){
         showComingSoon(course);
         return;
     }
-
-    selectedStoreCourse = course;
-
-    $("selectedCourseName").textContent = course;
-    $("selectedCourseArea").style.display = "block";
-
-    document.querySelectorAll("#store .category-card").forEach(function(c){
-        c.style.outline = "";
-        c.style.display = "none";
-    });
-
-    if(card){
-        card.style.display = "block";
-        card.style.outline = "2px solid #6366f1";
-    }
-
+    renderStoreCourseSelection(course);
+    vkSetStoreRoute(course, true);
 }
 
 
@@ -8731,30 +8828,40 @@ function vkJobsDate(value){
     const d = new Date(value + (String(value).length === 10 ? 'T00:00:00' : ''));
     return Number.isNaN(d.getTime()) ? vkJobsEscape(value) : d.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
 }
-function openJobs(){
-    showPage('jobs');
+function openJobs(addHistory = true){
+    showPage('jobs', false);
+    if(addHistory) vkPushContextRoute('jobs');
     if(vkJobsCache.length){ filterJobs(); }
     else { loadJobs(); }
 }
 async function loadJobs(){
+    if(window.__vkAuthInitialization){
+        try{ await window.__vkAuthInitialization; }catch(e){ console.warn("Auth initialization before jobs load:",e); }
+    }
     const list = $('jobsList');
     const status = $('jobsStatus');
     if(!supabaseClient){ status.textContent='Unable to connect to the jobs service.'; return; }
     status.textContent='Loading jobs...';
     list.innerHTML='';
     try{
-        const {data,error} = await supabaseClient
+        let timeoutId;
+        const request = supabaseClient
             .from('jobs')
             .select('id,title,organization,category,posts,qualification,age_limit,salary,notification_date,last_date,apply_mode,apply_link,description,status')
             .ilike('status','active')
             .order('notification_date',{ascending:false});
-        if(error) throw error;
-        vkJobsCache = data || [];
+        const result = await Promise.race([
+            request,
+            new Promise((_, reject) => { timeoutId = setTimeout(() => reject(new Error('Request timed out after 15 seconds')), 15000); })
+        ]);
+        clearTimeout(timeoutId);
+        if(result.error) throw result.error;
+        vkJobsCache = result.data || [];
         filterJobs();
     }catch(err){
         console.error('Jobs load error:',err);
         status.textContent='Jobs could not be loaded. Please check the Supabase jobs table and its SELECT policy.';
-        list.innerHTML='<div class="job-empty">Unable to load job notifications right now.</div>';
+        list.innerHTML='<div class="job-empty">Unable to load job notifications right now. <button class="btn btn-blue" type="button" onclick="loadJobs()">Retry</button></div>';
     }
 }
 function filterJobs(){
@@ -9362,56 +9469,12 @@ function openSettings(addHistory = true){
 
         <!-- DARK MODE -->
 
-        <div style="
-            background:#fff;
-            border:1px solid #e5e7eb;
-            border-radius:14px;
-            padding:18px;
-            margin-bottom:12px;
-            box-shadow:0 4px 14px rgba(0,0,0,.05);
-        ">
-
-            <div style="
-                display:flex;
-                justify-content:space-between;
-                align-items:center;
-                gap:12px;
-            ">
-
-                <div>
-
-                    <h3 style="
-                        margin:0;
-                        font-size:16px;
-                        color:#111827;
-                    ">
-                        🌙 Dark Mode
-                    </h3>
-
-                    <p style="
-                        margin-top:6px;
-                        color:#6b7280;
-                        font-size:13px;
-                    ">
-                        Dark mode is currently disabled.
-                    </p>
-
-                </div>
-
-                <span style="
-                    background:#f3f4f6;
-                    color:#6b7280;
-                    padding:7px 12px;
-                    border-radius:20px;
-                    font-size:12px;
-                    font-weight:800;
-                    white-space:nowrap;
-                ">
-                    OFF
-                </span>
-
-            </div>
-
+        <div onclick="toggleVkDarkMode()" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleVkDarkMode();}" style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:18px;margin-bottom:12px;box-shadow:0 4px 14px rgba(0,0,0,.05);cursor:pointer">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+            <div><h3 style="margin:0;font-size:16px;color:#111827">🌙 Dark Mode</h3>
+              <p id="darkModeDescription" style="margin-top:6px;color:#6b7280;font-size:13px">Dark mode is currently disabled.</p></div>
+            <span id="darkModeStatus" style="background:#f3f4f6;color:#6b7280;padding:7px 12px;border-radius:20px;font-size:12px;font-weight:800;white-space:nowrap">OFF</span>
+          </div>
         </div>
 
 
@@ -9566,12 +9629,12 @@ function openSettings(addHistory = true){
 
 
     updateNotificationStatus();
-
+    applyVkTheme();
 
 }
 
 
-        function toggleNotifications(){
+function toggleNotifications(){
 
     const current =
         localStorage.getItem("vkNotifications") === "true";
@@ -9788,7 +9851,12 @@ function showPurchaseHistory(){
         </div>
     `;
 }
-async function showTestResults(){
+async function showTestResults(addHistory = true){
+    if(window.__vkAuthInitialization){
+        try{ await window.__vkAuthInitialization; }catch(e){ console.warn("Auth initialization before results load:",e); }
+    }
+    showPage("profile", false);
+    if(addHistory) vkPushContextRoute("testResults");
 if(!supabaseClient){
         toast("Supabase is not connected.");
         return;
@@ -9899,7 +9967,7 @@ if(!supabaseClient){
                 <button
                     class="btn btn-blue"
                     style="margin-top:18px"
-                    onclick="renderProfile()"
+                    onclick="openProfile()"
                 >
                     ← Back to Profile
                 </button>
@@ -9941,7 +10009,7 @@ if(!supabaseClient){
                 <button
                     class="btn btn-blue"
                     style="margin-top:18px"
-                    onclick="renderProfile()"
+                    onclick="openProfile()"
                 >
                     ← Back to Profile
                 </button>
@@ -9960,7 +10028,7 @@ if(!supabaseClient){
         ">
 
             <button
-                onclick="renderProfile()"
+                onclick="openProfile()"
                 style="
                     border:none;
                     background:none;
@@ -10451,7 +10519,7 @@ async function showActivePackage(){
 
                             <button
                                 class="btn btn-primary"
-                                onclick="renderProfile()">
+                                onclick="openProfile()">
                                 Close
                             </button>
 
@@ -10668,7 +10736,7 @@ async function showActivePackage(){
 
                         <button
                             class="btn btn-primary"
-                            onclick="renderProfile()">
+                            onclick="openProfile()">
                             Close
                         </button>
 
@@ -10852,7 +10920,7 @@ async function showActivePackage(){
 
                     <button
                         class="btn btn-outline"
-                        onclick="renderProfile()">
+                        onclick="openProfile()">
                         Cancel
                     </button>
 
@@ -11029,7 +11097,7 @@ async function showActivePackage(){
                     <button
                         class="btn btn-primary"
                         style="margin-top:20px;"
-                        onclick="renderProfile()">
+                        onclick="openProfile()">
                         Back to Profile
                     </button>
 
@@ -12836,6 +12904,16 @@ if(
             return;
         }
 
+        if(page === "jobs"){
+            openJobs(false);
+            return;
+        }
+        if(page === "testResults"){
+            showPage("profile", false);
+            showTestResults(false);
+            return;
+        }
+
         if(page === "settings"){
 
               showPage(
@@ -12878,6 +12956,56 @@ if(
             }
             return;
        }
+
+        if(page === "store"){
+            const storeCourse = hashParams.get("course") || event.state?.course || "";
+            openStore(false, storeCourse);
+            return;
+        }
+
+        if(page === "course"){
+            const course = hashParams.get("course") || event.state?.course;
+            if(course){ openCourse(course, false); }
+            else { showHome(); }
+            return;
+        }
+
+        if(page === "appGroups"){
+            openAPPSCGroups(false);
+            return;
+        }
+
+        if(page === "appGroupDetail"){
+            const group = hashParams.get("group") || event.state?.group;
+            if(group){ openAPPSCGroup(group, false); }
+            else { openAPPSCGroups(false); }
+            return;
+        }
+
+        if(page === "testseries"){
+            currentCourse = hashParams.get("course") || event.state?.course || currentCourse;
+            currentGroup = hashParams.get("group") || event.state?.group || "";
+            if(currentCourse){ openTestSeries(false); }
+            else { showHome(); }
+            return;
+        }
+
+        if(page === "papers"){
+            currentCourse = hashParams.get("course") || event.state?.course || currentCourse;
+            currentGroup = hashParams.get("group") || event.state?.group || "";
+            const paper = hashParams.get("paper") || event.state?.paper;
+            if(currentCourse && paper){ openPaper(paper, false); }
+            else { showHome(); }
+            return;
+        }
+
+        if(page === "syllabus"){
+            currentCourse = hashParams.get("course") || event.state?.course || currentCourse;
+            currentGroup = hashParams.get("group") || event.state?.group || "";
+            if(currentCourse){ openSyllabus(false); }
+            else { showHome(); }
+            return;
+        }
        
         if($(page)){
 
@@ -13031,6 +13159,9 @@ async function toggleStudyMaterial(id,published){const allowed=await refreshVkAd
 async function deleteStudyMaterial(id){const allowed=await refreshVkAdminAccess();if(!allowed)return;if(!confirm("Delete this study material permanently?"))return;try{const {data:m,error}=await supabaseClient.from("study_materials").select("storage_path").eq("id",id).single();if(error)throw error;const {error:dbError}=await supabaseClient.from("study_materials").delete().eq("id",id);if(dbError)throw dbError;await supabaseClient.storage.from(VK_STUDY_BUCKET).remove([m.storage_path]);await loadAdminStudyMaterials();}catch(e){toast("Delete failed: "+(e.message||e));}}
 
 
+applyVkTheme();
+window.__vkAuthInitialization = initializeAuth();
+
 const initialHash = location.hash.replace(/^#/, "");
 const initialHashParts = initialHash.split("?");
 const initialPage = initialHashParts[0] || "";
@@ -13067,6 +13198,13 @@ else if(initialPage === "freeMocks"){
         openFreeMocks(false);
     }
 }
+else if(initialPage === "jobs"){
+    openJobs(false);
+}
+else if(initialPage === "testResults"){
+    showPage("profile", false);
+    showTestResults(false);
+}
 else if(initialPage === "settings"){
 
     showPage(
@@ -13086,6 +13224,42 @@ else if(initialPage === "profile"){
         false
     );
 
+}
+else if(initialPage === "store"){
+    const storeCourse = initialHashParams.get("course") || "";
+    openStore(false, storeCourse);
+}
+else if(initialPage === "course"){
+    const course = initialHashParams.get("course") || history.state?.course;
+    if(course) openCourse(course, false);
+    else showHome();
+}
+else if(initialPage === "appGroups"){
+    openAPPSCGroups(false);
+}
+else if(initialPage === "appGroupDetail"){
+    const group = initialHashParams.get("group");
+    if(group) openAPPSCGroup(group, false);
+    else openAPPSCGroups(false);
+}
+else if(initialPage === "testseries"){
+    currentCourse = initialHashParams.get("course") || history.state?.course || "";
+    currentGroup = initialHashParams.get("group") || history.state?.group || "";
+    if(currentCourse) openTestSeries(false);
+    else showHome();
+}
+else if(initialPage === "papers"){
+    currentCourse = initialHashParams.get("course") || history.state?.course || "";
+    currentGroup = initialHashParams.get("group") || history.state?.group || "";
+    const paper = initialHashParams.get("paper") || history.state?.paper;
+    if(currentCourse && paper) openPaper(paper, false);
+    else showHome();
+}
+else if(initialPage === "syllabus"){
+    currentCourse = initialHashParams.get("course") || history.state?.course || "";
+    currentGroup = initialHashParams.get("group") || history.state?.group || "";
+    if(currentCourse) openSyllabus(false);
+    else showHome();
 }
 else if($(initialPage)){
 
@@ -13107,11 +13281,8 @@ else{
 
 
 /* =====================================================
-   INITIALIZE SUPABASE AUTH
+   SAVE EXAM STATE BEFORE LEAVING
 ===================================================== */
-
-initializeAuth();
-
 
 window.addEventListener("beforeunload", function(){
     saveFreeMockExamState();
