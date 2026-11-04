@@ -1,4 +1,4 @@
-    <!DOCTYPE html>
+     <!DOCTYPE html>
 <html lang="en">
 <head>
 
@@ -5251,9 +5251,8 @@ function openFreeMocks(addHistory = true){
                 cache;
         }
 
-        if(cache.preloaded){
-            return;
-        }
+        // Refresh the published test list whenever the Free Mock page is opened,
+        // so newly uploaded tests appear first without requiring a full page reload.
 
         const {
             data: tests,
@@ -5261,7 +5260,7 @@ function openFreeMocks(addHistory = true){
         } = await supabaseClient
             .from("tests")
             .select(
-                "id,title,test_number,topic_name,topic_test_number,duration_minutes,total_marks,is_free"
+                "id,title,test_number,topic_name,topic_test_number,duration_minutes,total_marks,is_free,created_at"
             )
             .eq(
                 "test_series_id",
@@ -5276,9 +5275,10 @@ function openFreeMocks(addHistory = true){
                 true
             )
             .order(
-                "test_number",
+                "created_at",
                 {
-                    ascending:true
+                    ascending:false,
+                    nullsFirst:false
                 }
             );
 
@@ -5473,7 +5473,12 @@ async function openFreeMockTests(course, addHistory = true, selectedTestNumber =
     let tests =
         Object.values(cache.tests || {})
             .filter(test => test && test.id)
-            .sort((a,b) => Number(a.test_number) - Number(b.test_number));
+            .sort((a,b) => {
+                const dateA = Date.parse(a.created_at || "") || 0;
+                const dateB = Date.parse(b.created_at || "") || 0;
+                if(dateA !== dateB) return dateB - dateA;
+                return Number(b.test_number) - Number(a.test_number);
+            });
 
     if(requestedTestNumber){
         tests = tests.filter(test => Number(test.test_number) === requestedTestNumber);
