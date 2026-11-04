@@ -2247,39 +2247,28 @@ footer p{
    JOBS PAGE
 ===================================================== */
 .jobs-toolbar{display:grid;grid-template-columns:2fr 1fr;gap:12px;margin:20px 0}
-.jobs-input,.jobs-select{width:100%;padding:13px 14px;border:1px solid #d1d5db;border-radius:9px;background:#fff;color:#172033}
-.jobs-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
-.job-card{position:relative;background:#fff;border:1px solid #e5eaf3;border-radius:17px;padding:21px;box-shadow:0 8px 24px rgba(37,99,235,.07);transition:.2s;overflow:hidden}
-.job-card:before{content:"";position:absolute;left:0;right:0;top:0;height:4px;background:linear-gradient(90deg,#2563eb,#7c3aed)}
-.job-card:hover{transform:translateY(-3px);box-shadow:0 14px 30px rgba(37,99,235,.12)}
-.job-card h3{color:#1d4ed8;margin:9px 0;font-size:19px;line-height:1.35}
-.job-org{color:#6b7280;font-size:14px;margin-bottom:12px}
-.job-meta{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:14px 0;font-size:13px}
-.job-meta div{background:#f8fafc;border:1px solid #edf1f7;border-radius:9px;padding:10px;min-width:0}
-.job-meta strong{display:block;color:#475569;margin-bottom:4px;font-size:11px;text-transform:uppercase;letter-spacing:.3px}
-.job-tag{display:inline-block;background:#eff6ff;color:#1d4ed8;border-radius:999px;padding:5px 9px;font-size:11px;font-weight:800}
-.job-featured{display:inline-block;margin-left:6px;background:#fff7e6;color:#a16207;border-radius:999px;padding:5px 9px;font-size:11px;font-weight:800}
-.job-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:14px}
-.job-actions .btn{display:inline-flex;align-items:center;justify-content:center}
-.job-description{display:none;margin-top:12px;padding:12px;background:#f8fafc;border-radius:8px;white-space:pre-line;line-height:1.55;color:#475569;font-size:14px}
+.jobs-input,.jobs-select{width:100%;padding:13px 14px;border:1px solid #cbd5e1;border-radius:11px;background:#fff;color:#172033;box-shadow:0 2px 8px rgba(30,64,175,.04)}
+.jobs-filter-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:10px 0 18px}
+.jobs-filter-chip{border:1px solid #dbe3f0;border-radius:999px;background:#fff;color:#334155;padding:8px 14px;font-weight:700;font-size:13px}
+.jobs-filter-chip.active{background:#2563eb;color:#fff;border-color:#2563eb}
+.jobs-sort{margin-left:auto;min-width:155px;padding:9px 12px;border:1px solid #dbe3f0;border-radius:10px;background:#fff}
+.jobs-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;align-items:stretch}
+.job-card{background:#fff;border:1px solid #dce5f3;border-radius:15px;overflow:hidden;box-shadow:0 7px 20px rgba(37,99,235,.08);display:flex;flex-direction:column;min-width:0}
+.job-card h3{color:#10254b;font-size:17px;line-height:1.3;margin:10px 12px 5px}
+.job-poster{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;background:linear-gradient(135deg,#123b9c,#6d42d9);}
+.job-poster-fallback{width:100%;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;text-align:center;padding:18px;color:#fff;background:linear-gradient(135deg,#123b9c,#6944d8);font-size:22px;font-weight:900}
+.job-card-body{padding:0 12px 13px;display:flex;flex-direction:column;flex:1}
+.job-org{color:#64748b;font-size:12px;line-height:1.4;margin:0 12px 9px}
+.job-tag{display:inline-block;align-self:flex-start;background:#eff6ff;color:#1d4ed8;border-radius:999px;padding:5px 9px;font-size:11px;font-weight:800;margin:10px 12px 0}
+.job-meta{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0;font-size:12px}
+.job-meta div{background:#f5f7fc;border:1px solid #e7edf7;border-radius:8px;padding:8px;min-width:0;overflow-wrap:anywhere}
+.job-meta strong{display:block;color:#475569;margin-bottom:3px;font-size:11px}
+.job-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:auto;padding-top:4px}
+.job-actions .btn{flex:1;text-align:center;justify-content:center;min-width:105px}
+.job-description{display:none;margin-top:12px;padding:12px;background:#f8fafc;border-radius:8px;white-space:pre-line;line-height:1.55;color:#475569;font-size:13px}
 .job-empty{grid-column:1/-1;text-align:center;padding:30px;background:#fff;border:1px solid #e5e7eb;border-radius:12px;color:#64748b}
-.job-detail-shell{max-width:1000px;margin:0 auto;background:#fff;border:1px solid #e4eaf3;border-radius:20px;overflow:hidden;box-shadow:0 12px 35px rgba(15,23,42,.08)}
-.job-detail-hero{padding:28px;background:linear-gradient(120deg,#172554,#3154bd 62%,#7046bd);color:#fff}
-.job-detail-hero h1{font-size:clamp(24px,4vw,34px);line-height:1.2;margin:12px 0 8px}
-.job-detail-hero p{color:#e3eaff;line-height:1.6}
-.job-detail-body{padding:24px}
-.job-detail-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:18px 0}
-.job-detail-stat{padding:13px;border:1px solid #e5eaf3;border-radius:12px;background:#f8faff}
-.job-detail-stat span{display:block;color:#64748b;font-size:11px;font-weight:800;text-transform:uppercase;margin-bottom:5px}
-.job-detail-stat strong{color:#172554;font-size:14px;overflow-wrap:anywhere}
-.job-detail-section{padding:18px 0;border-top:1px solid #edf0f5}
-.job-detail-section h2{font-size:17px;color:#172554;margin-bottom:10px}
-.job-detail-section .job-detail-text{white-space:pre-line;line-height:1.75;color:#475569;font-size:14px}
-.job-detail-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
-.job-verified{font-size:12px;color:#dbeafe;margin-top:10px}
-.job-detail-back{display:inline-flex;align-items:center;gap:7px;margin-bottom:16px;color:#2457c5;font-weight:800;cursor:pointer}
-.job-detail-notice{margin-top:16px;padding:13px;border-radius:11px;background:#fff8e8;color:#875b12;font-size:12px;line-height:1.6}
-@media(max-width:650px){.jobs-toolbar,.jobs-list{grid-template-columns:1fr}.job-meta{grid-template-columns:1fr 1fr}.job-detail-body{padding:17px}.job-detail-hero{padding:22px 18px}.job-detail-stats{grid-template-columns:1fr 1fr}.job-detail-actions .btn{width:100%}}
+@media(max-width:900px){.jobs-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:650px){.jobs-toolbar,.jobs-list{grid-template-columns:1fr}.job-meta{grid-template-columns:1fr 1fr}.jobs-sort{margin-left:0;width:100%}}
 
 
 /* =====================================================
@@ -3922,7 +3911,7 @@ Select
       <h1>💼 Government Jobs</h1>
       <p>Latest recruitment notifications, eligibility details and official application links.</p>
     </div>
-    <div id="jobsToolbar" class="jobs-toolbar">
+    <div class="jobs-toolbar">
       <input id="jobsSearch" class="jobs-input" type="search" placeholder="Search job title, department or qualification..." oninput="filterJobs()" aria-label="Search jobs">
       <select id="jobsCategory" class="jobs-select" onchange="filterJobs()" aria-label="Filter jobs by category">
         <option value="">All Categories</option>
@@ -3931,12 +3920,22 @@ Select
         <option value="Police">Police</option>
         <option value="DSC">DSC</option>
         <option value="Banks">Banks</option>
+        <option value="Central Govt">Central Govt</option>
+        <option value="State Govt">State Govt</option>
+        <option value="Teaching">Teaching</option>
         <option value="Other">Other</option>
       </select>
     </div>
+    <div class="jobs-filter-row" aria-label="Quick job filters">
+      <button type="button" class="jobs-filter-chip active" data-job-filter="all" onclick="setJobsQuickFilter('all',this)">All Jobs</button>
+      <button type="button" class="jobs-filter-chip" data-job-filter="APPSC" onclick="setJobsQuickFilter('APPSC',this)">APPSC</button>
+      <button type="button" class="jobs-filter-chip" data-job-filter="Central Govt" onclick="setJobsQuickFilter('Central Govt',this)">Central Govt</button>
+      <button type="button" class="jobs-filter-chip" data-job-filter="State Govt" onclick="setJobsQuickFilter('State Govt',this)">State Govt</button>
+      <button type="button" class="jobs-filter-chip" data-job-filter="Teaching" onclick="setJobsQuickFilter('Teaching',this)">Teaching</button>
+      <select id="jobsSort" class="jobs-sort" onchange="filterJobs()" aria-label="Sort jobs"><option value="latest">Sort: Latest First</option><option value="closing">Closing Soon</option><option value="title">Job Title A–Z</option></select>
+    </div>
     <p id="jobsStatus" style="color:#64748b;margin:0 0 14px">Loading jobs...</p>
     <div id="jobsList" class="jobs-list"></div>
-    <div id="jobDetailView" class="hidden"></div>
   </div>
 </div>
 
@@ -9000,13 +8999,12 @@ function vkAdminDownloadCsvTemplate(){
 
 
 /* =====================================================
-   JOBS PAGE - Public jobs and shareable detail pages
+   JOBS PAGE - Supabase public.jobs
 ===================================================== */
 let vkJobsCache = [];
-let vkCurrentJob = null;
 function vkJobsEscape(value){
     return String(value == null ? '' : value).replace(/[&<>"']/g, function(ch){
-        return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'};
+        return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch];
     });
 }
 function vkJobsDate(value){
@@ -9014,17 +9012,8 @@ function vkJobsDate(value){
     const d = new Date(value + (String(value).length === 10 ? 'T00:00:00' : ''));
     return Number.isNaN(d.getTime()) ? vkJobsEscape(value) : d.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
 }
-function vkJobShareUrl(job){
-    const slug = String(job?.slug || job?.id || '').trim();
-    return location.origin + location.pathname + '#job?slug=' + encodeURIComponent(slug);
-}
 function openJobs(addHistory = true){
-    document.title='VK Exams Online | Government Job Notifications';
     showPage('jobs', false);
-    $('jobsList').classList.remove('hidden');
-    $('jobsToolbar')?.classList.remove('hidden');
-    $('jobsStatus').classList.remove('hidden');
-    $('jobDetailView').classList.add('hidden');
     if(addHistory) vkPushContextRoute('jobs');
     if(vkJobsCache.length){ filterJobs(); }
     else { loadJobs(); }
@@ -9036,15 +9025,14 @@ async function loadJobs(){
     const list = $('jobsList');
     const status = $('jobsStatus');
     if(!supabaseClient){ status.textContent='Unable to connect to the jobs service.'; return; }
-    status.textContent='Loading latest notifications...';
+    status.textContent='Loading jobs...';
     list.innerHTML='';
     try{
         let timeoutId;
         const request = supabaseClient
             .from('jobs')
-            .select('id,title,organization,category,posts,qualification,age_limit,salary,notification_date,last_date,apply_mode,apply_link,notification_url,source_url,description,status,slug,notification_number,application_fee,selection_process,exam_pattern,syllabus,documents_required,important_instructions,verified_at,featured')
+            .select('id,title,organization,category,posts,qualification,age_limit,salary,notification_date,last_date,apply_mode,apply_link,description,status,image_url,notification_url,notification_number,application_fee,selection_process,exam_pattern,syllabus,documents_required,important_instructions,slug')
             .ilike('status','active')
-            .order('featured',{ascending:false})
             .order('notification_date',{ascending:false});
         const result = await Promise.race([
             request,
@@ -9054,122 +9042,72 @@ async function loadJobs(){
         if(result.error) throw result.error;
         vkJobsCache = result.data || [];
         filterJobs();
-        const params = new URLSearchParams((location.hash.split('?')[1] || ''));
-        const targetSlug = params.get('slug');
-        if(targetSlug && location.hash.startsWith('#job')) showJobDetail(targetSlug,false);
     }catch(err){
         console.error('Jobs load error:',err);
-        status.textContent='Jobs could not be loaded. Please check the Supabase jobs table, columns and public SELECT policy.';
+        status.textContent='Jobs could not be loaded. Please check the Supabase jobs table and its SELECT policy.';
         list.innerHTML='<div class="job-empty">Unable to load job notifications right now. <button class="btn btn-blue" type="button" onclick="loadJobs()">Retry</button></div>';
     }
+}
+let vkJobsQuickFilter='all';
+function setJobsQuickFilter(value,button){
+    vkJobsQuickFilter=value;
+    document.querySelectorAll('.jobs-filter-chip').forEach(x=>x.classList.toggle('active',x===button));
+    filterJobs();
 }
 function filterJobs(){
     const search = (($('jobsSearch')||{}).value || '').trim().toLowerCase();
     const category = (($('jobsCategory')||{}).value || '').trim().toLowerCase();
-    const filtered = vkJobsCache.filter(j=>{
-        const text=[j.title,j.organization,j.category,j.posts,j.qualification,j.description,j.notification_number].join(' ').toLowerCase();
-        return (!search || text.includes(search)) && (!category || String(j.category||'').toLowerCase()===category);
+    const today=new Date();today.setHours(0,0,0,0);
+    let filtered = vkJobsCache.filter(j=>{
+        const text=[j.title,j.organization,j.category,j.posts,j.qualification,j.description].join(' ').toLowerCase();
+        const matchesQuick=vkJobsQuickFilter==='all'||String(j.category||'').toLowerCase()===vkJobsQuickFilter.toLowerCase();
+        return (!search || text.includes(search)) && (!category || String(j.category||'').toLowerCase()===category) && matchesQuick;
     });
+    const sort=(($('jobsSort')||{}).value||'latest');
+    if(sort==='closing') filtered.sort((a,b)=>(a.last_date||'9999').localeCompare(b.last_date||'9999'));
+    else if(sort==='title') filtered.sort((a,b)=>(a.title||'').localeCompare(b.title||''));
+    else filtered.sort((a,b)=>(b.notification_date||'').localeCompare(a.notification_date||''));
     $('jobsStatus').textContent = filtered.length + (filtered.length===1?' job found':' jobs found');
     if(!filtered.length){ $('jobsList').innerHTML='<div class="job-empty">No active jobs found. Please check again later.</div>'; return; }
     $('jobsList').innerHTML=filtered.map(j=>{
-        const featured=j.featured?'<span class="job-featured">★ Featured</span>':'';
+        const applyUrl=String(j.apply_link||'').trim();
+        const safeApply=/^https:\/\//i.test(applyUrl) ? applyUrl : '';
+        const image=String(j.image_url||'').trim();
+        const safeImage=/^https:\/\//i.test(image)?image:'';
+        const lastDate=j.last_date?new Date(j.last_date+'T23:59:59'):null;
+        const expired=lastDate && !Number.isNaN(lastDate.getTime()) && lastDate<new Date();
+        const poster=safeImage?`<img class="job-poster" src="${vkJobsEscape(safeImage)}" alt="${vkJobsEscape(j.title||'Government job')} recruitment poster" loading="lazy" onerror="this.style.display='none'">`:`<div class="job-poster-fallback">${vkJobsEscape(j.organization||'VK EXAMS')}<br>${vkJobsEscape(j.title||'Government Recruitment')}</div>`;
+        const detailParts=[j.description,j.selection_process?'Selection Process: '+j.selection_process:'',j.exam_pattern?'Exam Pattern: '+j.exam_pattern:'',j.syllabus?'Syllabus: '+j.syllabus:'',j.documents_required?'Documents Required: '+j.documents_required:'',j.important_instructions?'Important Instructions: '+j.important_instructions:''].filter(Boolean).join('\n\n');
+        const safePdf=/^https:\/\//i.test(String(j.notification_url||''))?String(j.notification_url):'';
         return `<article class="job-card">
-          <span class="job-tag">${vkJobsEscape(j.category||'Government Job')}</span>${featured}
+          ${poster}
+          <span class="job-tag">${vkJobsEscape(j.category||'Government Job')}${expired?' · Deadline passed':''}</span>
           <h3>${vkJobsEscape(j.title||'Untitled Recruitment')}</h3>
-          <p class="job-org">${vkJobsEscape(j.organization||'Department not specified')}${j.notification_number?' · '+vkJobsEscape(j.notification_number):''}</p>
-          <div class="job-meta">
+          <p class="job-org">${vkJobsEscape(j.organization||'Department not specified')}</p>
+          <div class="job-card-body"><div class="job-meta">
             <div><strong>Vacancies</strong>${vkJobsEscape(j.posts||'See notification')}</div>
             <div><strong>Qualification</strong>${vkJobsEscape(j.qualification||'See notification')}</div>
-            <div><strong>Last Date</strong>${vkJobsDate(j.last_date)}</div>
+            <div><strong>Age Limit</strong>${vkJobsEscape(j.age_limit||'See notification')}</div>
             <div><strong>Salary</strong>${vkJobsEscape(j.salary||'As per notification')}</div>
+            <div><strong>Notification</strong>${vkJobsDate(j.notification_date)}</div>
+            <div><strong>Last Date</strong>${vkJobsDate(j.last_date)}</div>
           </div>
           <div class="job-actions">
-            <button class="btn btn-blue" type="button" onclick="showJobDetail('${vkJobsEscape(j.slug||j.id)}',true)">View Full Details →</button>
-            <button class="btn btn-outline" type="button" onclick="shareJob('${vkJobsEscape(j.slug||j.id)}')">Share Job</button>
+            <button class="btn btn-blue" type="button" onclick="toggleJobDescription('${vkJobsEscape(j.id)}')">View Details →</button>
+            <button class="btn btn-outline" type="button" onclick="shareJob('${vkJobsEscape(j.slug||j.id)}','${vkJobsEscape(j.title||'Government Job')}')">↗ Share</button>
+          </div>
+          <div class="job-description" id="jobDescription-${vkJobsEscape(j.id)}">${vkJobsEscape(detailParts||'Please read the official notification for complete details.')}${j.notification_number?'<br><br><b>Notification No:</b> '+vkJobsEscape(j.notification_number):''}${j.application_fee?'<br><b>Application Fee:</b> '+vkJobsEscape(j.application_fee):''}${safePdf?'<br><br><a href="'+vkJobsEscape(safePdf)+'" target="_blank" rel="noopener">Official Notification PDF ↗</a>':''}${safeApply?'<br><br><a href="'+vkJobsEscape(safeApply)+'" target="_blank" rel="noopener">Apply Online ↗</a>':''}</div>
           </div>
         </article>`;
     }).join('');
 }
-function vkJobSection(title,value){
-    if(!String(value||'').trim()) return '';
-    return `<section class="job-detail-section"><h2>${vkJobsEscape(title)}</h2><div class="job-detail-text">${vkJobsEscape(value)}</div></section>`;
+async function shareJob(slug,title){
+    const url=location.origin+'/#job?slug='+encodeURIComponent(slug);
+    try{if(navigator.share){await navigator.share({title:title,text:'View this recruitment on VK EXAMS',url});}else if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(url);toast('Job link copied.');}else{window.prompt('Copy job link:',url);}}catch(e){if(e?.name!=='AbortError')window.prompt('Copy job link:',url);}
 }
-function showJobDetail(slugOrId,addHistory=true){
-    const key=String(slugOrId||'');
-    const job=vkJobsCache.find(j=>String(j.slug||'')===key || String(j.id)===key);
-    if(!job){
-        if(!vkJobsCache.length){loadJobs();return;}
-        $('jobsStatus').textContent='The requested job notification was not found or is no longer active.';
-        openJobs(false);
-        return;
-    }
-    vkCurrentJob=job;
-    showPage('jobs',false);
-    $('jobsList').classList.add('hidden');
-    $('jobsToolbar')?.classList.add('hidden');
-    $('jobsStatus').classList.add('hidden');
-    const view=$('jobDetailView');
-    view.classList.remove('hidden');
-    const safeApply=/^https:\/\//i.test(String(job.apply_link||'').trim())?String(job.apply_link).trim():'';
-    const safePdf=/^https:\/\//i.test(String(job.notification_url||'').trim())?String(job.notification_url).trim():'';
-    const safeSource=/^https:\/\//i.test(String(job.source_url||'').trim())?String(job.source_url).trim():'';
-    view.innerHTML=`
-      <button class="job-detail-back" type="button" onclick="openJobs(true)">← All Government Jobs</button>
-      <article class="job-detail-shell">
-        <header class="job-detail-hero">
-          <span class="job-tag">${vkJobsEscape(job.category||'Government Job')}</span>
-          ${job.featured?'<span class="job-featured">★ Featured</span>':''}
-          <h1>${vkJobsEscape(job.title)}</h1>
-          <p>${vkJobsEscape(job.organization)}${job.notification_number?' · Notification '+vkJobsEscape(job.notification_number):''}</p>
-          <div class="job-verified">Last verified: ${vkJobsDate(job.verified_at||job.updated_at||job.notification_date)}</div>
-        </header>
-        <div class="job-detail-body">
-          <div class="job-detail-stats">
-            <div class="job-detail-stat"><span>Total Vacancies</span><strong>${vkJobsEscape(job.posts||'Refer to PDF')}</strong></div>
-            <div class="job-detail-stat"><span>Qualification</span><strong>${vkJobsEscape(job.qualification||'Refer to PDF')}</strong></div>
-            <div class="job-detail-stat"><span>Age Limit</span><strong>${vkJobsEscape(job.age_limit||'Refer to PDF')}</strong></div>
-            <div class="job-detail-stat"><span>Pay / Salary</span><strong>${vkJobsEscape(job.salary||'As per notification')}</strong></div>
-            <div class="job-detail-stat"><span>Application Fee</span><strong>${vkJobsEscape(job.application_fee||'Refer to PDF')}</strong></div>
-            <div class="job-detail-stat"><span>Last Date</span><strong>${vkJobsDate(job.last_date)}</strong></div>
-          </div>
-          ${vkJobSection('About the Recruitment',job.description)}
-          ${vkJobSection('Important Dates','Notification Date: '+vkJobsDate(job.notification_date)+'\\nLast Date to Apply: '+vkJobsDate(job.last_date))}
-          ${vkJobSection('Eligibility & Educational Qualification',job.qualification)}
-          ${vkJobSection('Age Limit & Relaxation',job.age_limit)}
-          ${vkJobSection('Selection Process',job.selection_process)}
-          ${vkJobSection('Exam Pattern',job.exam_pattern)}
-          ${vkJobSection('Syllabus',job.syllabus)}
-          ${vkJobSection('Application Fee',job.application_fee)}
-          ${vkJobSection('Documents Required',job.documents_required)}
-          ${vkJobSection('Important Instructions',job.important_instructions)}
-          <section class="job-detail-section">
-            <h2>Official Links & Application</h2>
-            <p class="job-detail-text">Read the official notification carefully before submitting your application.</p>
-            <div class="job-detail-actions">
-              ${safePdf?`<a class="btn btn-outline" href="${vkJobsEscape(safePdf)}" target="_blank" rel="noopener noreferrer">View Official Notification PDF ↗</a>`:''}
-              ${safeSource?`<a class="btn btn-outline" href="${vkJobsEscape(safeSource)}" target="_blank" rel="noopener noreferrer">Official Website ↗</a>`:''}
-              ${safeApply?`<a class="btn btn-primary" href="${vkJobsEscape(safeApply)}" target="_blank" rel="noopener noreferrer">Apply Online ↗</a>`:'<span class="job-detail-notice">Official application link has not yet been added. Please check the official notification.</span>'}
-              <button class="btn btn-blue" type="button" onclick="shareJob('${vkJobsEscape(job.slug||job.id)}')">Share this Job</button>
-            </div>
-            <div class="job-detail-notice">VK Exams provides this information for guidance. Candidates must verify eligibility, dates, fees and instructions in the official notification. Applications are submitted only through the official recruitment portal.</div>
-          </section>
-        </div>
-      </article>`;
-    document.title=job.title+' | Government Jobs | VK Exams';
-    if(addHistory) vkPushContextRoute('job',{slug:job.slug||job.id});
-    window.scrollTo({top:0,behavior:'instant'});
-}
-async function shareJob(slugOrId){
-    const job=vkJobsCache.find(j=>String(j.slug||'')===String(slugOrId)||String(j.id)===String(slugOrId));
-    if(!job){toast('Job not found. Please refresh the jobs page.','error');return;}
-    const url=vkJobShareUrl(job);
-    const shareData={title:job.title+' | VK Exams',text:'Full job notification details, eligibility and official application link:',url};
-    try{
-        if(navigator.share){await navigator.share(shareData);}
-        else if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(url);toast('Job link copied. Share it with students.','success');}
-        else{window.prompt('Copy this VK Exams job link:',url);}
-    }catch(e){if(e?.name!=='AbortError')toast('Could not share this link. Copy the URL from the address bar.','error');}
+function toggleJobDescription(id){
+    const el=document.getElementById('jobDescription-'+id);
+    if(el) el.style.display=el.style.display==='block'?'none':'block';
 }
 
 function openProfile(){
@@ -13423,21 +13361,6 @@ async function deleteStudyMaterial(id){const allowed=await refreshVkAdminAccess(
 applyVkTheme();
 window.__vkAuthInitialization = initializeAuth();
 
-
-window.addEventListener("popstate", function(){
-    const hash=location.hash||"";
-    if(hash.startsWith("#job?")){
-        const params=new URLSearchParams(hash.split("?")[1]||"");
-        const slug=params.get("slug");
-        if(slug){
-            if(vkJobsCache.length) showJobDetail(slug,false);
-            else openJobs(false);
-        }
-    }else if(hash==="#jobs"){
-        openJobs(false);
-    }
-});
-
 const initialHash = location.hash.replace(/^#/, "");
 const initialHashParts = initialHash.split("?");
 const initialPage = initialHashParts[0] || "";
@@ -13475,9 +13398,6 @@ else if(initialPage === "freeMocks"){
     }
 }
 else if(initialPage === "jobs"){
-    openJobs(false);
-}
-else if(initialPage === "job"){
     openJobs(false);
 }
 else if(initialPage === "testResults"){
