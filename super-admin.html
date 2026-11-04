@@ -70,21 +70,27 @@ input:focus,select:focus,textarea:focus{outline:3px solid #dfe7ff;border-color:#
 .action-btn{padding:7px 9px;font-size:12px;margin:2px}
 .nav button{font-size:13px}
 #studentManageTab .tablewrap,#accessTab .tablewrap,#auditTab .tablewrap{margin-top:12px}
-#studentManageTab .tablewrap{overflow-x:auto;position:relative}
-#studentManageTab table{width:100%;min-width:760px;table-layout:fixed}
-#studentManageTab th:nth-child(1),#studentManageTab td:nth-child(1){width:15%}
-#studentManageTab th:nth-child(2),#studentManageTab td:nth-child(2){width:19%}
-#studentManageTab th:nth-child(3),#studentManageTab td:nth-child(3){width:11%}
-#studentManageTab th:nth-child(4),#studentManageTab td:nth-child(4){width:12%}
-#studentManageTab th:nth-child(5),#studentManageTab td:nth-child(5){width:10%}
-#studentManageTab th:nth-child(6),#studentManageTab td:nth-child(6){width:12%}
-#studentManageTab th:last-child,#studentManageTab td:last-child{width:21%;min-width:165px;white-space:normal;position:sticky;right:0;background:#fff;z-index:2;box-shadow:-5px 0 8px rgba(15,23,42,.06)}
-#studentManageTab th:last-child{z-index:3;background:#f8fafc}
-#studentManageTab td:last-child .action-stack{display:flex;flex-direction:column;gap:6px;align-items:stretch;min-width:0}
-#studentManageTab td:last-child .action-stack .action-btn{width:100%;margin:0;white-space:normal;line-height:1.2;padding:7px 6px;font-size:11px}
-#studentManageTab th,#studentManageTab td{vertical-align:middle;padding:8px 6px}
+#studentManageTab .tablewrap{overflow-x:auto;position:relative;max-width:100%}
+#studentManageTab table{width:100%;min-width:1080px;table-layout:fixed}
+#studentManageTab th[data-col="student"],#studentManageTab td[data-col="student"]{width:150px}
+#studentManageTab th[data-col="email"],#studentManageTab td[data-col="email"]{width:235px}
+#studentManageTab th[data-col="phone"],#studentManageTab td[data-col="phone"]{width:125px}
+#studentManageTab th[data-col="account"],#studentManageTab td[data-col="account"]{width:150px}
+#studentManageTab th[data-col="alerts"],#studentManageTab td[data-col="alerts"]{width:115px}
+#studentManageTab th[data-col="registered"],#studentManageTab td[data-col="registered"]{width:205px;white-space:nowrap}
+#studentManageTab th[data-col="actions"],#studentManageTab td[data-col="actions"]{width:210px;min-width:210px;white-space:normal;position:sticky;right:0;background:#fff;z-index:2;box-shadow:-5px 0 8px rgba(15,23,42,.06)}
+#studentManageTab th[data-col="actions"]{z-index:3;background:#f8fafc}
+#studentManageTab td[data-col="actions"] .action-stack{display:flex;flex-direction:column;gap:6px;align-items:stretch;min-width:0}
+#studentManageTab td[data-col="actions"] .action-stack .action-btn{width:100%;margin:0;white-space:nowrap;line-height:1.2;padding:8px 7px;font-size:11px}
+#studentManageTab th,#studentManageTab td{vertical-align:middle;padding:10px 9px}
+#studentManageTab .col-hidden{display:none!important}
+.column-settings{border:1px solid #dbe3f0;border-radius:12px;background:#f8faff;padding:13px;margin:8px 0 14px}
+.column-settings-grid{display:flex;flex-wrap:wrap;gap:10px 18px;margin-top:10px}
+.column-settings-grid label{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:#344563;font-weight:650}
+.column-settings-grid input{width:16px;height:16px;accent-color:#4169e1}
+#studentManageTab .registered-cell{white-space:nowrap;font-variant-numeric:tabular-nums}
 @media(max-width:900px){
-  #studentManageTab table{min-width:760px}
+  #studentManageTab table{min-width:1080px}
 }
 @media(max-width:850px){
  .grid{grid-template-columns:repeat(2,1fr)}
@@ -152,10 +158,26 @@ input:focus,select:focus,textarea:focus{outline:3px solid #dfe7ff;border-color:#
   <p class="muted small">Manage student account status and notification preference. Passwords are never visible; use Supabase Auth recovery for password resets.</p>
   <div class="toolbar">
     <input id="studentSearch" type="search" placeholder="Search name, email or phone" style="min-width:240px;flex:1" oninput="renderManagedStudents()">
+    <button class="btn" onclick="toggleColumnSettings()" aria-expanded="false" id="manageColumnsBtn">⚙ Manage Columns</button>
     <button class="btn" onclick="loadManagedStudents()">Refresh students</button>
   </div>
+  <div id="columnSettings" class="column-settings hidden">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+      <strong>Choose visible columns</strong>
+      <div class="toolbar" style="margin:0">
+        <button class="btn" type="button" onclick="showAllStudentColumns()">Show all</button>
+        <button class="btn" type="button" onclick="resetStudentColumns()">Reset to default</button>
+      </div>
+    </div>
+    <div id="studentColumnToggles" class="column-settings-grid"></div>
+    <div class="small muted" style="margin-top:8px">Column preferences are saved on this browser. Hiding a column does not delete any student data.</div>
+  </div>
   <div id="studentManageMsg" class="small muted" aria-live="polite">Loading student records when this section opens.</div>
-  <div class="tablewrap"><table><thead><tr><th>Student</th><th>Email</th><th>Phone</th><th>Account</th><th>Email alerts</th><th>Registered</th><th>Actions</th></tr></thead><tbody id="managedStudentRows"></tbody></table></div>
+  <div class="tablewrap"><table><thead><tr>
+    <th data-col="student">Student</th><th data-col="email">Email</th><th data-col="phone">Phone</th>
+    <th data-col="account">Account</th><th data-col="alerts">Email alerts</th>
+    <th data-col="registered">Registered</th><th data-col="actions">Actions</th>
+  </tr></thead><tbody id="managedStudentRows"></tbody></table></div>
 </section>
 
 <section id="accessTab" class="panel section hidden">
@@ -381,22 +403,81 @@ async function loadManagedStudents(){
   if(msg)msg.textContent=`Loaded ${managedStudents.length} student profile(s). Account status is managed by the secured permission RPC.`;
 }
 
+const STUDENT_COLUMN_DEFS=[
+  {key:'student',label:'Student',defaultVisible:true},
+  {key:'email',label:'Email',defaultVisible:true},
+  {key:'phone',label:'Phone',defaultVisible:false},
+  {key:'account',label:'Account',defaultVisible:true},
+  {key:'alerts',label:'Email alerts',defaultVisible:true},
+  {key:'registered',label:'Registered',defaultVisible:true},
+  {key:'actions',label:'Actions',defaultVisible:true}
+];
+const STUDENT_COLUMNS_STORAGE_KEY='vkexams_superadmin_student_columns_v1';
+let studentColumnVisibility=null;
+function getStudentColumnVisibility(){
+  if(studentColumnVisibility)return studentColumnVisibility;
+  const defaults=Object.fromEntries(STUDENT_COLUMN_DEFS.map(c=>[c.key,c.defaultVisible]));
+  try{
+    const saved=JSON.parse(localStorage.getItem(STUDENT_COLUMNS_STORAGE_KEY)||'null');
+    studentColumnVisibility=saved&&typeof saved==='object'?{...defaults,...saved}:defaults;
+  }catch(_){studentColumnVisibility=defaults}
+  return studentColumnVisibility;
+}
+function saveStudentColumnVisibility(){
+  try{localStorage.setItem(STUDENT_COLUMNS_STORAGE_KEY,JSON.stringify(getStudentColumnVisibility()))}
+  catch(e){console.warn('Could not save column preferences',e)}
+}
+function renderStudentColumnSettings(){
+  const host=$('studentColumnToggles');if(!host)return;
+  const visibility=getStudentColumnVisibility();
+  host.innerHTML=STUDENT_COLUMN_DEFS.map(c=>`<label><input type="checkbox" ${visibility[c.key]?'checked':''} onchange="setStudentColumnVisibility('${c.key}',this.checked)"> ${c.label}</label>`).join('');
+}
+function applyStudentColumnVisibility(){
+  const visibility=getStudentColumnVisibility();
+  document.querySelectorAll('#studentManageTab [data-col]').forEach(el=>{
+    el.classList.toggle('col-hidden',visibility[el.getAttribute('data-col')]===false);
+  });
+}
+function setStudentColumnVisibility(key,visible){
+  if(!STUDENT_COLUMN_DEFS.some(c=>c.key===key))return;
+  getStudentColumnVisibility()[key]=!!visible;
+  saveStudentColumnVisibility();applyStudentColumnVisibility();renderStudentColumnSettings();
+}
+function toggleColumnSettings(){
+  const panel=$('columnSettings'),btn=$('manageColumnsBtn');
+  const opening=panel.classList.contains('hidden');
+  panel.classList.toggle('hidden',!opening);
+  btn.setAttribute('aria-expanded',String(opening));
+  if(opening)renderStudentColumnSettings();
+}
+function showAllStudentColumns(){
+  const visibility=getStudentColumnVisibility();
+  STUDENT_COLUMN_DEFS.forEach(c=>visibility[c.key]=true);
+  saveStudentColumnVisibility();renderStudentColumnSettings();applyStudentColumnVisibility();
+}
+function resetStudentColumns(){
+  studentColumnVisibility=Object.fromEntries(STUDENT_COLUMN_DEFS.map(c=>[c.key,c.defaultVisible]));
+  saveStudentColumnVisibility();renderStudentColumnSettings();applyStudentColumnVisibility();
+}
 function renderManagedStudents(){
   const q=($('studentSearch')?.value||'').trim().toLowerCase();
   const filtered=managedStudents.filter(s=>[s.full_name,s.email,s.phone].some(v=>String(v||'').toLowerCase().includes(q)));
   $('managedStudentRows').innerHTML=filtered.map(s=>{
     const notify=s.notifications_enabled!==false;
     return `<tr>
-      <td>${esc(s.full_name||'—')}</td><td>${esc(s.email||'—')}</td><td>${esc(s.phone||'—')}</td>
-      <td><span class="status">See permission status</span></td>
-      <td><span class="${notify?'badge-active':'badge-off'}">${notify?'ON':'OFF'}</span></td>
-      <td>${date(s.created_at)}</td>
-      <td><div class="action-stack">
+      <td data-col="student">${esc(s.full_name||'—')}</td>
+      <td data-col="email">${esc(s.email||'—')}</td>
+      <td data-col="phone">${esc(s.phone||'—')}</td>
+      <td data-col="account"><span class="status">See permission status</span></td>
+      <td data-col="alerts"><span class="${notify?'badge-active':'badge-off'}">${notify?'ON':'OFF'}</span></td>
+      <td data-col="registered" class="registered-cell">${date(s.created_at)}</td>
+      <td data-col="actions"><div class="action-stack">
       <button class="btn action-btn" onclick="toggleStudentEmail('${esc(s.id)}',${!notify})">${notify?'Disable alerts':'Enable alerts'}</button>
       <button class="btn action-btn" onclick="changeStudentStatus('${esc(s.id)}','${esc(s.email||'')}')">Suspend / Activate</button>
       </div></td>
     </tr>`;
   }).join('')||'<tr><td colspan="7">No matching students.</td></tr>';
+  applyStudentColumnVisibility();
 }
 
 async function writeAdminAudit(action,tableName,recordId,details){
@@ -489,6 +570,7 @@ async function loadAuditLogs(){
 }
 
 
+getStudentColumnVisibility();
 sb.auth.onAuthStateChange((event,session)=>{if(event==='PASSWORD_RECOVERY'){showRecovery();return}if(session && event==='SIGNED_IN')gate()});
 (async()=>{const params=new URLSearchParams(location.search);if(params.get('mode')==='recovery'){const {data}=await sb.auth.getSession();if(data.session){showRecovery();return}}await gate()})();
 </script></body></html>
