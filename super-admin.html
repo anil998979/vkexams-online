@@ -264,6 +264,15 @@ input:focus,select:focus,textarea:focus{outline:3px solid #dfe7ff;border-color:#
  <label class="small">Last verified date <input id="jobVerifiedDate" type="date"></label>
  <label class="small" style="display:flex;align-items:center;gap:8px"><input id="jobFeatured" type="checkbox" style="width:18px;height:18px"> Feature this notification</label>
  <select id="jobSourceType"><option value="manual">Manual</option><option value="automatic">Automatic import (reviewed)</option></select>
+ <div class="job-image-upload" style="grid-column:1/-1;border:2px dashed #c4b5fd;border-radius:13px;padding:14px;background:#faf8ff">
+   <label for="jobImageFile" style="display:block;font-weight:800;margin-bottom:8px">Job Image / Banner <span class="small muted">(Recommended 1280 × 720 px · JPG, PNG, WebP · Max 2 MB)</span></label>
+   <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(220px,1fr);gap:12px;align-items:center">
+     <div id="jobImagePreviewWrap" class="hidden"><img id="jobImagePreview" alt="Job poster preview" style="width:100%;max-height:170px;object-fit:cover;border-radius:9px;border:1px solid #dbe3f0"><div class="toolbar" style="margin-top:7px"><button type="button" class="btn" onclick="clearJobImage()">Remove Image</button></div></div>
+     <label for="jobImageFile" style="display:flex;min-height:115px;align-items:center;justify-content:center;text-align:center;border:1px dashed #cbd5e1;border-radius:10px;background:#fff;padding:16px;cursor:pointer">☁️<br><b>Click to Upload Image</b><br><span class="small muted">or drag & drop · JPG / PNG / WebP · up to 2 MB</span><input id="jobImageFile" type="file" accept="image/jpeg,image/png,image/webp" style="display:none" onchange="previewJobImage(event)"></label>
+   </div>
+   <input id="jobImageUrl" type="hidden"><input id="jobImageRemove" type="hidden" value="0">
+   <p class="small muted" style="margin:8px 0 0">Each job can have its own recruitment photo/poster. The image appears on the Jobs card and details view.</p>
+ </div>
  <textarea id="jobDescription" placeholder="About the recruitment / short summary" style="grid-column:1/-1;min-height:90px;padding:12px;border:1px solid #d8e0ec;border-radius:9px;font:inherit"></textarea>
  <textarea id="jobSelectionProcess" placeholder="Selection process" style="grid-column:1/-1;min-height:80px;padding:12px;border:1px solid #d8e0ec;border-radius:9px;font:inherit"></textarea>
  <textarea id="jobExamPattern" placeholder="Exam pattern / marks / duration" style="grid-column:1/-1;min-height:80px;padding:12px;border:1px solid #d8e0ec;border-radius:9px;font:inherit"></textarea>
@@ -274,7 +283,7 @@ input:focus,select:focus,textarea:focus{outline:3px solid #dfe7ff;border-color:#
 <div class="toolbar"><button class="btn primary" onclick="saveAdminJob()">Save Job</button><button class="btn" onclick="resetJobForm()">Cancel</button></div>
 <p id="jobFormMsg" class="small muted"></p>
 </div>
-<div class="tablewrap"><table><thead><tr><th>Title</th><th>Organization</th><th>Category</th><th>Source</th><th>Last Date</th><th>Status</th><th>Share Link</th><th>Actions</th></tr></thead><tbody id="adminJobRows"></tbody></table></div>
+<div class="tablewrap"><table><thead><tr><th>Title</th><th>Organization</th><th>Category</th><th>Source</th><th>Last Date</th><th>Image</th><th>Status</th><th>Share Link</th><th>Actions</th></tr></thead><tbody id="adminJobRows"></tbody></table></div>
 </section>
 <section id="cleanupTab" class="panel section hidden">
 <h2>Test Data Cleanup</h2>
@@ -363,10 +372,36 @@ async function loadAdminJobs(){
  const {data,error}=await sb.from('jobs').select('*').order('created_at',{ascending:false}).limit(300);
  if(error){body.innerHTML='<tr><td colspan="8">Load failed: '+esc(error.message)+'</td></tr>';return}
  adminJobs=data||[];
- body.innerHTML=adminJobs.map(j=>`<tr><td>${esc(j.title)}</td><td>${esc(j.organization)}</td><td>${esc(j.category)}</td><td>${esc(j.source_type||'manual')}</td><td>${esc(j.last_date||'—')}</td><td>${esc(j.status)}</td><td><button class="btn action-btn" onclick="copyAdminJobLink('${j.slug||j.id}')">Copy link</button></td><td><button class="btn" onclick="editAdminJob('${j.id}')">Edit</button> <button class="btn danger" onclick="deleteAdminJob('${j.id}')">Delete</button></td></tr>`).join('')||'<tr><td colspan="8">No job notifications yet.</td></tr>';
+ body.innerHTML=adminJobs.map(j=>`<tr><td>${esc(j.title)}</td><td>${esc(j.organization)}</td><td>${esc(j.category)}</td><td>${esc(j.source_type||'manual')}</td><td>${esc(j.last_date||'—')}</td><td>${j.image_url?'<span style="color:#059669;font-weight:700">Uploaded</span>':'<span style="color:#b45309">Not added</span>'}</td><td>${esc(j.status)}</td><td><button class="btn action-btn" onclick="copyAdminJobLink('${j.slug||j.id}')">Copy link</button></td><td><button class="btn" onclick="editAdminJob('${j.id}')">Edit</button> <button class="btn danger" onclick="deleteAdminJob('${j.id}')">Delete</button></td></tr>`).join('')||'<tr><td colspan="9">No job notifications yet.</td></tr>';
 }
-function resetJobForm(){ $('jobForm').classList.remove('hidden');$('jobFormTitle').textContent='Add Job Notification';$('jobId').value='';['jobTitle','jobOrg','jobPosts','jobQualification','jobAge','jobSalary','jobNotificationDate','jobLastDate','jobApplyLink','jobNotificationUrl','jobSourceUrl','jobDescription','jobSlug','jobNotificationNumber','jobApplicationFee','jobVerifiedDate','jobSelectionProcess','jobExamPattern','jobSyllabus','jobDocuments','jobInstructions'].forEach(id=>$(id).value='');$('jobFeatured').checked=false;$('jobCategory').value='APPSC';$('jobApplyMode').value='Online';$('jobStatus').value='draft';$('jobSourceType').value='manual';$('jobFormMsg').textContent='';}
-function editAdminJob(id){const j=adminJobs.find(x=>x.id===id);if(!j)return;resetJobForm();$('jobFormTitle').textContent='Edit Job Notification';$('jobId').value=j.id;$('jobTitle').value=j.title||'';$('jobOrg').value=j.organization||'';$('jobCategory').value=j.category||'Other';$('jobPosts').value=j.posts||'';$('jobQualification').value=j.qualification||'';$('jobAge').value=j.age_limit||'';$('jobSalary').value=j.salary||'';$('jobNotificationDate').value=j.notification_date||'';$('jobLastDate').value=j.last_date||'';$('jobApplyMode').value=j.apply_mode||'Online';$('jobStatus').value=j.status||'draft';$('jobApplyLink').value=j.apply_link||'';$('jobNotificationUrl').value=j.notification_url||'';$('jobSourceUrl').value=j.source_url||'';$('jobSourceType').value=j.source_type||'manual';$('jobDescription').value=j.description||'';$('jobSlug').value=j.slug||'';$('jobNotificationNumber').value=j.notification_number||'';$('jobApplicationFee').value=j.application_fee||'';$('jobVerifiedDate').value=j.verified_at||'';$('jobFeatured').checked=!!j.featured;$('jobSelectionProcess').value=j.selection_process||'';$('jobExamPattern').value=j.exam_pattern||'';$('jobSyllabus').value=j.syllabus||'';$('jobDocuments').value=j.documents_required||'';$('jobInstructions').value=j.important_instructions||'';}
+function resetJobForm(){ $('jobForm').classList.remove('hidden');$('jobFormTitle').textContent='Add Job Notification';$('jobId').value='';['jobTitle','jobOrg','jobPosts','jobQualification','jobAge','jobSalary','jobNotificationDate','jobLastDate','jobApplyLink','jobNotificationUrl','jobSourceUrl','jobDescription','jobSlug','jobNotificationNumber','jobApplicationFee','jobVerifiedDate','jobSelectionProcess','jobExamPattern','jobSyllabus','jobDocuments','jobInstructions','jobImageUrl'].forEach(id=>$(id).value='');$('jobImageFile').value='';$('jobImageRemove').value='0';$('jobImagePreviewWrap').classList.add('hidden');$('jobFeatured').checked=false;$('jobCategory').value='APPSC';$('jobApplyMode').value='Online';$('jobStatus').value='draft';$('jobSourceType').value='manual';$('jobFormMsg').textContent='';}
+function editAdminJob(id){const j=adminJobs.find(x=>x.id===id);if(!j)return;resetJobForm();$('jobFormTitle').textContent='Edit Job Notification';$('jobId').value=j.id;$('jobTitle').value=j.title||'';$('jobOrg').value=j.organization||'';$('jobCategory').value=j.category||'Other';$('jobPosts').value=j.posts||'';$('jobQualification').value=j.qualification||'';$('jobAge').value=j.age_limit||'';$('jobSalary').value=j.salary||'';$('jobNotificationDate').value=j.notification_date||'';$('jobLastDate').value=j.last_date||'';$('jobApplyMode').value=j.apply_mode||'Online';$('jobStatus').value=j.status||'draft';$('jobApplyLink').value=j.apply_link||'';$('jobNotificationUrl').value=j.notification_url||'';$('jobSourceUrl').value=j.source_url||'';$('jobSourceType').value=j.source_type||'manual';$('jobDescription').value=j.description||'';$('jobSlug').value=j.slug||'';$('jobNotificationNumber').value=j.notification_number||'';$('jobApplicationFee').value=j.application_fee||'';$('jobVerifiedDate').value=j.verified_at||'';$('jobFeatured').checked=!!j.featured;$('jobSelectionProcess').value=j.selection_process||'';$('jobExamPattern').value=j.exam_pattern||'';$('jobSyllabus').value=j.syllabus||'';$('jobDocuments').value=j.documents_required||'';$('jobInstructions').value=j.important_instructions||'';$('jobImageUrl').value=j.image_url||'';$('jobImageRemove').value='0';$('jobImageFile').value='';if(j.image_url){$('jobImagePreview').src=j.image_url;$('jobImagePreviewWrap').classList.remove('hidden');}else{$('jobImagePreviewWrap').classList.add('hidden');}}
+let vkJobImageObjectUrl=null;
+function previewJobImage(event){
+ const file=event?.target?.files?.[0];if(!file)return;
+ if(!['image/jpeg','image/png','image/webp'].includes(file.type)){alert('Please select a JPG, PNG or WebP image.');event.target.value='';return;}
+ if(file.size>2*1024*1024){alert('Image must be 2 MB or smaller.');event.target.value='';return;}
+ if(vkJobImageObjectUrl)URL.revokeObjectURL(vkJobImageObjectUrl);
+ vkJobImageObjectUrl=URL.createObjectURL(file);
+ $('jobImagePreview').src=vkJobImageObjectUrl;$('jobImagePreviewWrap').classList.remove('hidden');$('jobImageRemove').value='0';
+}
+function clearJobImage(){
+ $('jobImageFile').value='';$('jobImageUrl').value='';$('jobImageRemove').value='1';$('jobImagePreviewWrap').classList.add('hidden');
+ if(vkJobImageObjectUrl){URL.revokeObjectURL(vkJobImageObjectUrl);vkJobImageObjectUrl=null;}
+}
+async function uploadJobImageIfNeeded(jobId){
+ const file=$('jobImageFile').files?.[0];
+ if(!file)return $('jobImageRemove').value==='1'?null:($('jobImageUrl').value||null);
+ const ext=file.type==='image/png'?'png':file.type==='image/webp'?'webp':'jpg';
+ const safeId=String(jobId||'job').replace(/[^a-zA-Z0-9_-]/g,'');
+ const path=safeId+'/'+Date.now()+'-'+Math.random().toString(36).slice(2,8)+'.'+ext;
+ $('jobFormMsg').textContent='Uploading job image…';
+ const {data,error}=await sb.storage.from('vk-job-images').upload(path,file,{cacheControl:'3600',upsert:false,contentType:file.type});
+ if(error)throw new Error('Image upload failed: '+error.message);
+ const {data:publicData}=sb.storage.from('vk-job-images').getPublicUrl(data.path);
+ if(!publicData?.publicUrl)throw new Error('Could not create a public image URL.');
+ return publicData.publicUrl;
+}
 async function saveAdminJob(){
  const title=$('jobTitle').value.trim(),organization=$('jobOrg').value.trim();
  if(!title||!organization){$('jobFormMsg').textContent='Title and Organization are required.';return}
@@ -378,6 +413,7 @@ async function saveAdminJob(){
  const slug=slugInput?slugify(slugInput):(existing?.slug||((slugify(title)||'job')+'-'+Date.now().toString(36)));
  const row={title,organization,category:$('jobCategory').value,posts:$('jobPosts').value.trim(),qualification:$('jobQualification').value.trim(),age_limit:$('jobAge').value.trim(),salary:$('jobSalary').value.trim(),notification_date:$('jobNotificationDate').value||null,last_date:$('jobLastDate').value||null,apply_mode:$('jobApplyMode').value,status:$('jobStatus').value,apply_link:$('jobApplyLink').value.trim()||null,notification_url:$('jobNotificationUrl').value.trim()||null,source_url:$('jobSourceUrl').value.trim()||null,source_type:$('jobSourceType').value,description:$('jobDescription').value.trim(),slug,notification_number:$('jobNotificationNumber').value.trim()||null,application_fee:$('jobApplicationFee').value.trim()||null,verified_at:$('jobVerifiedDate').value||null,featured:$('jobFeatured').checked,selection_process:$('jobSelectionProcess').value.trim()||null,exam_pattern:$('jobExamPattern').value.trim()||null,syllabus:$('jobSyllabus').value.trim()||null,documents_required:$('jobDocuments').value.trim()||null,important_instructions:$('jobInstructions').value.trim()||null,updated_at:new Date().toISOString()};
  const id=$('jobId').value;$('jobFormMsg').textContent='Saving…';
+ try{row.image_url=await uploadJobImageIfNeeded(id||('job-'+Date.now()));}catch(imageError){$('jobFormMsg').textContent=imageError.message;return;}
  const result=id?await sb.from('jobs').update(row).eq('id',id):await sb.from('jobs').insert(row);
  if(result.error){$('jobFormMsg').textContent='Save failed: '+result.error.message;return}
  $('jobFormMsg').textContent='Saved successfully.';await loadAdminJobs();$('jobForm').classList.add('hidden');
