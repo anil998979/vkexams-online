@@ -7452,6 +7452,154 @@ function applyUser(email,name,provider){
     updateLoginButton();
 }
 
+
+/* =====================================================
+   FIRST-LOGIN PROFILE COMPLETION
+   Uses existing public.profiles columns: id, full_name, email, phone.
+   No database schema changes are required.
+===================================================== */
+let vkProfileCheckPromise = null;
+let vkProfileCompletionUser = null;
+
+async function checkAndCompleteStudentProfile(user){
+    if(!supabaseClient || !user || user.is_anonymous) return true;
+
+    // Prevent duplicate profile lookups/modals from INITIAL_SESSION and SIGNED_IN.
+    if(vkProfileCheckPromise) return vkProfileCheckPromise;
+
+    vkProfileCheckPromise = (async function(){
+        const {data:profile, error} = await supabaseClient
+            .from("profiles")
+            .select("id,full_name,email,phone,role")
+            .eq("id", user.id)
+            .maybeSingle();
+
+        if(error){
+            console.error("Profile completion lookup failed:", error);
+            toast("Unable to check your profile. Please try again.");
+            return false;
+        }
+
+        if(!profile){
+            // The current RLS setup has no INSERT policy. Do not attempt to create
+            // a profile row or alter auth/database records from the browser.
+            console.error("No profiles row found for authenticated user:", user.id);
+            toast("Your student profile could not be found. Please contact VK Exams support.");
+            return false;
+        }
+
+        const savedName = String(profile.full_name || "").trim();
+        if(savedName){
+            applyUser(user.email, savedName, "supabase");
+            return true;
+        }
+
+        vkProfileCompletionUser = user;
+        showFirstLoginProfileForm(profile);
+        return false;
+    })();
+
+    try{
+        return await vkProfileCheckPromise;
+    }finally{
+        vkProfileCheckPromise = null;
+    }
+}
+
+function showFirstLoginProfileForm(profile){
+    if(document.getElementById("vkFirstLoginProfileOverlay")) return;
+
+    const overlay = document.createElement("div");
+    overlay.id = "vkFirstLoginProfileOverlay";
+    overlay.style.cssText = "position:fixed;inset:0;z-index:100000;background:rgba(15,23,42,.72);display:flex;align-items:center;justify-content:center;padding:18px;";
+    overlay.innerHTML = `
+      <section role="dialog" aria-modal="true" aria-labelledby="vkProfileTitle"
+        style="width:100%;max-width:440px;background:#fff;border-radius:18px;padding:26px;box-shadow:0 24px 70px rgba(0,0,0,.28);color:#172554;">
+        <div style="font-size:30px;margin-bottom:8px;">👤</div>
+        <h2 id="vkProfileTitle" style="margin:0 0 8px;">Complete Your Profile</h2>
+        <p style="margin:0 0 20px;color:#64748b;line-height:1.5;">Welcome to VK Exams. Please enter your name to continue. Mobile number is optional.</p>
+        <label for="vkFirstProfileName" style="display:block;font-weight:700;margin:0 0 7px;">Student Name <span style="color:#dc2626;">*</span></label>
+        <input id="vkFirstProfileName" type="text" maxlength="100" autocomplete="name"
+          placeholder="Enter your full name" value="${String(profile.full_name || "").replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;")}"
+          style="width:100%;padding:13px;border:1px solid #cbd5e1;border-radius:10px;margin-bottom:16px;box-sizing:border-box;font:inherit;">
+        <label for="vkFirstProfilePhone" style="display:block;font-weight:700;margin:0 0 7px;">Mobile Number <span style="font-weight:400;color:#64748b;">(Optional)</span></label>
+        <input id="vkFirstProfilePhone" type="tel" maxlength="14" inputmode="numeric" autocomplete="tel"
+          placeholder="10-digit mobile number" value="${String(profile.phone || "").replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;")}"
+          style="width:100%;padding:13px;border:1px solid #cbd5e1;border-radius:10px;margin-bottom:10px;box-sizing:border-box;font:inherit;">
+        <p id="vkFirstProfileMessage" role="status" style="min-height:20px;color:#b91c1c;font-size:13px;margin:0 0 12px;"></p>
+        <button id="vkFirstProfileSave" type="button"
+          style="width:100%;padding:13px;border:0;border-radius:10px;background:#2563eb;color:white;font-weight:800;font-size:15px;cursor:pointer;"
+          onclick="saveFirstLoginProfile()">Save & Continue</button>
+        <p style="font-size:12px;color:#64748b;text-align:center;margin:12px 0 0;">Your details are used for your VK Exams student profile.</p>
+      </section>`;
+    document.body.appendChild(overlay);
+    setTimeout(()=>document.getElementById("vkFirstProfileName")?.focus(),50);
+}
+
+async function saveFirstLoginProfile(){
+    const user = vkProfileCompletionUser;
+    const name = (document.getElementById("vkFirstProfileName")?.value || "").trim();
+    const rawPhone = (document.getElementById("vkFirstProfilePhone")?.value || "").trim();
+    const message = document.getElementById("vkFirstProfileMessage");
+    const button = document.getElementById("vkFirstProfileSave");
+
+    if(!user || !supabaseClient){
+        if(message) message.textContent = "Login session expired. Please login again.";
+        return;
+    }
+    if(!name){
+        if(message) message.textContent = "Please enter your name.";
+        document.getElementById("vkFirstProfileName")?.focus();
+        return;
+    }
+    const digits = rawPhone.replace(/\D/g,"");
+    let phone = null;
+    if(rawPhone){
+        const normalized = digits.length === 12 && digits.startsWith("91") ? digits.slice(2) : digits;
+        if(!/^[6-9]\d{9}$/.test(normalized)){
+            if(message) message.textContent = "Enter a valid 10-digit Indian mobile number, or leave it blank.";
+            document.getElementById("vkFirstProfilePhone")?.focus();
+            return;
+        }
+        phone = normalized;
+    }
+
+    if(button){button.disabled = true; button.textContent = "Saving…";}
+    if(message) message.textContent = "";
+
+    const {data:updatedProfile,error} = await supabaseClient
+        .from("profiles")
+        .update({
+            full_name: name,
+            phone: phone,
+            email: user.email || null
+        })
+        .eq("id", user.id)
+        .select("id")
+        .maybeSingle();
+
+    if(error || !updatedProfile){
+        console.error("Profile save failed:", error || "No profile row was updated.");
+        if(message) message.textContent = "Could not save your profile. " + (error?.message || "No profile row was updated. Please contact support.");
+        if(button){button.disabled = false; button.textContent = "Save & Continue";}
+        return;
+    }
+
+    // Keep the Supabase auth metadata and local header name aligned.
+    try{
+        await supabaseClient.auth.updateUser({data:{full_name:name}});
+    }catch(e){
+        console.warn("Auth metadata name update was not completed:", e);
+    }
+
+    applyUser(user.email, name, "supabase");
+    vkProfileCompletionUser = null;
+    document.getElementById("vkFirstLoginProfileOverlay")?.remove();
+    showHome();
+    toast("Profile saved successfully.");
+}
+
+
 function clearUser(){
     localStorage.removeItem("selectedPackage");
     localStorage.removeItem("studentEmail");
@@ -7602,23 +7750,13 @@ async function emailPasswordLogin(){
 
 
         applyUser(
-
             data.user.email,
-
-            data.user
-                .user_metadata
-                ?.full_name
-                ||
-                data.user.email
-                .split("@")[0],
-
+            data.user.user_metadata?.full_name || data.user.email.split("@")[0],
             "email"
-
         );
 
-
-        showHome();
-
+        const profileReady = await checkAndCompleteStudentProfile(data.user);
+        if(profileReady) showHome();
         return;
 
     }
@@ -7749,13 +7887,9 @@ async function registerAccount(){
             data.session
         ){
 
-            applyUser(
-                email,
-                name,
-                "email"
-            );
-
-            showHome();
+            applyUser(email, name, "email");
+            const profileReady = await checkAndCompleteStudentProfile(data.user);
+            if(profileReady) showHome();
 
         }
 
@@ -9276,90 +9410,61 @@ async function renderProfile(){
 
 }
 
-function editProfile(){
-const currentName =
-        localStorage.getItem("studentName") || "";
-
-    const profileContent =
-        document.getElementById("profileContent");
-
+async function editProfile(){
+    const profileContent = document.getElementById("profileContent");
     if(!profileContent) return;
+    const {data:sessionData} = await supabaseClient?.auth.getSession() || {data:{session:null}};
+    const user = sessionData?.session?.user;
+    if(!user){ toast("Please login to edit your profile."); return; }
+
+    const {data:profile,error} = await supabaseClient
+        .from("profiles").select("full_name,phone").eq("id",user.id).maybeSingle();
+    if(error){ toast("Could not load profile: " + error.message); return; }
 
     profileContent.innerHTML = `
-
-        <div class="modal active"
-             style="
-                display:flex;
-                position:fixed;
-                inset:0;
-                z-index:9999;
-                background:rgba(0,0,0,0.55);
-                align-items:center;
-                justify-content:center;
-             ">
-
-            <div class="modal-box"
-                 style="
-                    width:90%;
-                    max-width:420px;
-                    background:#fff;
-                    border-radius:16px;
-                    padding:28px;
-                 ">
-
-                <h2 style="margin-bottom:20px;">
-                    Edit Profile
-                </h2>
-
-                <label
-                    style="
-                        display:block;
-                        font-weight:700;
-                        margin-bottom:8px;
-                    ">
-                    Name
-                </label>
-
-                <input
-                    id="editProfileName"
-                    type="text"
-                    value="${currentName.replace(/"/g, '&quot;')}"
-                    placeholder="Enter your name"
-                    style="
-                        width:100%;
-                        padding:12px;
-                        border:1px solid #d1d5db;
-                        border-radius:8px;
-                        margin-bottom:20px;
-                        box-sizing:border-box;
-                    "
-                >
-
-                <div
-                    style="
-                        display:flex;
-                        gap:10px;
-                        justify-content:flex-end;
-                    ">
-
-                    <button
-                        class="btn btn-secondary"
-                        onclick="renderProfile()">
-                        Cancel
-                    </button>
-
-                    <button
-                        class="btn btn-primary"
-                        onclick="saveEditedProfile()">
-                        Save Changes
-                    </button>
-
-                </div>
-
-            </div>
-
+      <div class="modal active" style="display:flex;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.55);align-items:center;justify-content:center;padding:16px;">
+        <div class="modal-box" style="width:90%;max-width:420px;background:#fff;border-radius:16px;padding:28px;">
+          <h2 style="margin:0 0 20px;">Edit Profile</h2>
+          <label style="display:block;font-weight:700;margin-bottom:8px;">Name *</label>
+          <input id="editProfileName" type="text" maxlength="100" value="${String(profile?.full_name||"").replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;")}" placeholder="Enter your name" style="width:100%;padding:12px;border:1px solid #d1d5db;border-radius:8px;margin-bottom:16px;box-sizing:border-box;">
+          <label style="display:block;font-weight:700;margin-bottom:8px;">Mobile Number (Optional)</label>
+          <input id="editProfilePhone" type="tel" maxlength="14" inputmode="numeric" value="${String(profile?.phone||"").replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;")}" placeholder="10-digit mobile number" style="width:100%;padding:12px;border:1px solid #d1d5db;border-radius:8px;margin-bottom:12px;box-sizing:border-box;">
+          <p id="editProfileMessage" style="min-height:18px;color:#b91c1c;font-size:13px;"></p>
+          <div style="display:flex;gap:10px;justify-content:flex-end;">
+            <button class="btn btn-secondary" onclick="renderProfile()">Cancel</button>
+            <button class="btn btn-primary" onclick="saveEditedProfile()">Save Changes</button>
+          </div>
         </div>
-    `;
+      </div>`;
+}
+
+async function saveEditedProfile(){
+    const {data:sessionData} = await supabaseClient.auth.getSession();
+    const user = sessionData?.session?.user;
+    const name = (document.getElementById("editProfileName")?.value||"").trim();
+    const rawPhone = (document.getElementById("editProfilePhone")?.value||"").trim();
+    const message = document.getElementById("editProfileMessage");
+    if(!user){ if(message)message.textContent="Please login again."; return; }
+    if(!name){ if(message)message.textContent="Name is required."; return; }
+
+    let phone = null;
+    if(rawPhone){
+        const digits=rawPhone.replace(/\D/g,"");
+        const normalized=digits.length===12&&digits.startsWith("91")?digits.slice(2):digits;
+        if(!/^[6-9]\d{9}$/.test(normalized)){
+            if(message)message.textContent="Enter a valid 10-digit Indian mobile number, or leave it blank.";
+            return;
+        }
+        phone=normalized;
+    }
+    const {data:updatedProfile,error}=await supabaseClient.from("profiles")
+        .update({full_name:name,phone,email:user.email||null})
+        .eq("id",user.id).select("id").maybeSingle();
+    if(error || !updatedProfile){if(message)message.textContent="Save failed: "+(error?.message||"No profile row was updated.");return;}
+    try{await supabaseClient.auth.updateUser({data:{full_name:name}});}catch(e){console.warn(e);}
+    applyUser(user.email,name,"supabase");
+    renderProfile();
+    toast("Profile updated successfully.");
 }
 
 function openSettings(addHistory = true){
@@ -12872,6 +12977,7 @@ async function initializeAuth(){
                     "Student",
                 "supabase"
             );
+            await checkAndCompleteStudentProfile(session.user);
         }else{
             clearUser();
         }
@@ -12890,6 +12996,11 @@ async function initializeAuth(){
                     "Student",
                 "supabase"
             );
+            setTimeout(function(){
+                checkAndCompleteStudentProfile(session.user).catch(function(e){
+                    console.error("Profile completion check failed:", e);
+                });
+            }, 0);
         }else{
             clearUser();
         }
