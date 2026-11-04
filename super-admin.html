@@ -71,17 +71,24 @@ input:focus,select:focus,textarea:focus{outline:3px solid #dfe7ff;border-color:#
 .nav button{font-size:13px}
 #studentManageTab .tablewrap,#accessTab .tablewrap,#auditTab .tablewrap{margin-top:12px}
 #studentManageTab .tablewrap{overflow-x:auto;position:relative;max-width:100%}
-#studentManageTab table{width:100%;min-width:1210px;table-layout:fixed}
-#studentManageTab th[data-col="student"],#studentManageTab td[data-col="student"]{width:150px}
-#studentManageTab th[data-col="email"],#studentManageTab td[data-col="email"]{width:235px}
-#studentManageTab th[data-col="phone"],#studentManageTab td[data-col="phone"]{width:125px}
-#studentManageTab th[data-col="account"],#studentManageTab td[data-col="account"]{width:125px}\n#studentManageTab th[data-col="permissions"],#studentManageTab td[data-col="permissions"]{width:155px}
-#studentManageTab th[data-col="alerts"],#studentManageTab td[data-col="alerts"]{width:110px}
+#studentManageTab table{width:100%;min-width:1450px;table-layout:fixed}
+#studentManageTab th[data-col="student"],#studentManageTab td[data-col="student"]{width:145px}
+#studentManageTab th[data-col="email"],#studentManageTab td[data-col="email"]{width:220px}
+#studentManageTab th[data-col="phone"],#studentManageTab td[data-col="phone"]{width:120px}
+#studentManageTab th[data-col="account"],#studentManageTab td[data-col="account"]{width:125px}
+#studentManageTab th[data-col="permissions"],#studentManageTab td[data-col="permissions"]{width:175px}
+#studentManageTab th[data-col="alerts"],#studentManageTab td[data-col="alerts"]{width:95px}
 #studentManageTab th[data-col="registered"],#studentManageTab td[data-col="registered"]{width:205px;white-space:nowrap}
-#studentManageTab th[data-col="actions"],#studentManageTab td[data-col="actions"]{width:210px;min-width:210px;white-space:normal;position:sticky;right:0;background:#fff;z-index:2;box-shadow:-5px 0 8px rgba(15,23,42,.06)}
-#studentManageTab th[data-col="actions"]{z-index:3;background:#f8fafc}
-#studentManageTab td[data-col="actions"] .action-stack{display:flex;flex-direction:column;gap:6px;align-items:stretch;min-width:0}
-#studentManageTab td[data-col="actions"] .action-stack .action-btn{width:100%;margin:0;white-space:nowrap;line-height:1.2;padding:8px 7px;font-size:11px}
+#studentManageTab th[data-col="alertsAction"],#studentManageTab td[data-col="alertsAction"]{width:145px;min-width:145px}
+#studentManageTab th[data-col="statusAction"],#studentManageTab td[data-col="statusAction"]{width:155px;min-width:155px}
+#studentManageTab td[data-col="alertsAction"] .action-btn,#studentManageTab td[data-col="statusAction"] .action-btn{width:100%;margin:0;white-space:normal;line-height:1.25;padding:8px 7px;font-size:11px}
+#studentManageTab .permission-details{margin-top:9px;padding:10px;background:#f8faff;border:1px solid #dbe5f5;border-radius:9px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px 12px;text-align:left;min-width:210px}
+#studentManageTab .permission-details[hidden]{display:none!important}
+#studentManageTab .permission-details div{font-size:12px;color:#344563}
+#studentManageTab .permission-details strong{font-weight:750}
+#studentManageTab .permission-toggle[aria-expanded="true"]{background:#eef2ff;border-color:#9aaaf5}
+#studentManageTab th,#studentManageTab td{overflow-wrap:anywhere}
+#studentManageTab th[data-col="registered"],#studentManageTab td[data-col="registered"]{overflow-wrap:normal}
 #studentManageTab th,#studentManageTab td{vertical-align:middle;padding:10px 9px}
 #studentManageTab .col-hidden{display:none!important}
 .column-settings{border:1px solid #dbe3f0;border-radius:12px;background:#f8faff;padding:13px;margin:8px 0 14px}
@@ -176,7 +183,8 @@ input:focus,select:focus,textarea:focus{outline:3px solid #dfe7ff;border-color:#
   <div class="tablewrap"><table><thead><tr>
     <th data-col="student">Student</th><th data-col="email">Email</th><th data-col="phone">Phone</th>
     <th data-col="account">Account Status</th><th data-col="permissions">Permissions</th>
-    <th data-col="alerts">Email Alerts</th><th data-col="registered">Registered</th><th data-col="actions">Actions</th>
+    <th data-col="alerts">Email Alerts</th><th data-col="registered">Registered</th>
+    <th data-col="alertsAction">Email Alert Action</th><th data-col="statusAction">Account Action</th>
   </tr></thead><tbody id="managedStudentRows"></tbody></table></div>
 </section>
 
@@ -411,7 +419,8 @@ const STUDENT_COLUMN_DEFS=[
   {key:'permissions',label:'Permissions',defaultVisible:true},
   {key:'alerts',label:'Email Alerts',defaultVisible:true},
   {key:'registered',label:'Registered',defaultVisible:true},
-  {key:'actions',label:'Actions',defaultVisible:true}
+  {key:'alertsAction',label:'Email Alert Action',defaultVisible:true},
+  {key:'statusAction',label:'Account Action',defaultVisible:true}
 ];
 const STUDENT_COLUMNS_STORAGE_KEY='vkexams_superadmin_student_columns_v1';
 let studentColumnVisibility=null;
@@ -467,21 +476,28 @@ function renderAccountStatus(permissions){
   if(status==='blocked')return '<span class="badge-off">BLOCKED</span>';
   return '<span class="status">NOT CONFIGURED</span>';
 }
-function showStudentPermissions(studentId){
-  const student=managedStudents.find(x=>x.id===studentId);
-  if(!student)return;
+function toggleStudentPermissions(studentId){
+  const panel=$('student-permissions-'+studentId);
+  const button=$('student-permissions-btn-'+studentId);
+  if(!panel||!button)return;
+  const opening=panel.hidden;
+  panel.hidden=!opening;
+  button.setAttribute('aria-expanded',String(opening));
+  button.textContent=opening?'Hide permissions':'View permissions';
+}
+function buildStudentPermissionsDetails(student){
   const p=student.permissions;
-  if(!p){alert('No permission record is configured for this student.');return;}
-  const items=[
-    ['Account status',p.account_status||'Not configured'],
-    ['Free tests',p.allow_free_tests],
-    ['Paid tests',p.allow_paid_tests],
-    ['Study materials',p.allow_study_materials],
-    ['Syllabus',p.allow_syllabus],
-    ['Store',p.allow_store],
-    ['Jobs',p.allow_jobs]
-  ];
-  alert('Student permissions\\n'+(student.full_name||student.email||'Student')+'\\n\\n'+items.map(([label,value])=>label+': '+(typeof value==='boolean'?(value?'ON':'OFF'):value)).join('\\n'));
+  if(!p)return '<div class="permission-details"><div><strong>Permissions:</strong> Not configured</div></div>';
+  const yesNo=value=>value===true?'<span class="badge-active">ON</span>':value===false?'<span class="badge-off">OFF</span>':'<span class="status">N/A</span>';
+  return `<div class="permission-details" id="student-permissions-${esc(student.id)}" hidden>
+    <div><strong>Account:</strong> ${esc(p.account_status||'Not configured')}</div>
+    <div><strong>Free Tests:</strong> ${yesNo(p.allow_free_tests)}</div>
+    <div><strong>Paid Tests:</strong> ${yesNo(p.allow_paid_tests)}</div>
+    <div><strong>Study Materials:</strong> ${yesNo(p.allow_study_materials)}</div>
+    <div><strong>Syllabus:</strong> ${yesNo(p.allow_syllabus)}</div>
+    <div><strong>Store:</strong> ${yesNo(p.allow_store)}</div>
+    <div><strong>Jobs:</strong> ${yesNo(p.allow_jobs)}</div>
+  </div>`;
 }
 function renderManagedStudents(){
   const q=($('studentSearch')?.value||'').trim().toLowerCase();
@@ -493,15 +509,16 @@ function renderManagedStudents(){
       <td data-col="email">${esc(s.email||'—')}</td>
       <td data-col="phone">${esc(s.phone||'—')}</td>
       <td data-col="account">${renderAccountStatus(s.permissions)}</td>
-      <td data-col="permissions"><button class="btn action-btn" type="button" onclick="showStudentPermissions('${esc(s.id)}')">View permissions</button></td>
+      <td data-col="permissions">
+        <button class="btn action-btn permission-toggle" id="student-permissions-btn-${esc(s.id)}" type="button" aria-expanded="false" onclick="toggleStudentPermissions('${esc(s.id)}')">View permissions</button>
+        ${buildStudentPermissionsDetails(s)}
+      </td>
       <td data-col="alerts"><span class="${notify?'badge-active':'badge-off'}">${notify?'ON':'OFF'}</span></td>
       <td data-col="registered" class="registered-cell">${date(s.created_at)}</td>
-      <td data-col="actions"><div class="action-stack">
-      <button class="btn action-btn" onclick="toggleStudentEmail('${esc(s.id)}',${!notify})">${notify?'Disable alerts':'Enable alerts'}</button>
-      <button class="btn action-btn" onclick="changeStudentStatus('${esc(s.id)}','${esc(s.email||'')}')">Suspend / Activate</button>
-      </div></td>
+      <td data-col="alertsAction"><button class="btn action-btn" type="button" onclick="toggleStudentEmail('${esc(s.id)}',${!notify})">${notify?'Disable alerts':'Enable alerts'}</button></td>
+      <td data-col="statusAction"><button class="btn action-btn" type="button" onclick="changeStudentStatus('${esc(s.id)}','${esc(s.email||'')}')">Suspend / Activate</button></td>
     </tr>`;
-  }).join('')||'<tr><td colspan="8">No matching students.</td></tr>';
+  }).join('')||'<tr><td colspan="9">No matching students.</td></tr>';
   applyStudentColumnVisibility();
 }
 
