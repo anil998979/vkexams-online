@@ -9145,25 +9145,40 @@ async function renderProfile(){
         );
 
     let activePackage = null;
-
+    let studentCode = "";
 
     /* =========================================
-       GET ACTIVE PACKAGE FROM SUPABASE
+       LOAD PERMANENT STUDENT ID FROM SUPABASE
+       Student ID is stored in profiles.student_code.
+       It is tied to the existing Supabase auth UUID,
+       so it remains unchanged after logout/login.
     ========================================= */
 
     if(supabaseClient){
 
         try{
 
-            const {
-                data: userData
-            } =
+            const { data: authData, error: authError } =
                 await supabaseClient.auth.getUser();
 
-            const userId =
-                userData?.user?.id;
+            if(authError) throw authError;
+
+            const userId = authData?.user?.id;
 
             if(userId){
+
+                const { data: profileData, error: profileError } =
+                    await supabaseClient
+                        .from("profiles")
+                        .select("student_code")
+                        .eq("id", userId)
+                        .maybeSingle();
+
+                if(profileError){
+                    console.error("Student ID lookup failed:", profileError);
+                }else{
+                    studentCode = String(profileData?.student_code || "").trim();
+                }
 
                 const {
                     data,
@@ -9327,6 +9342,11 @@ async function renderProfile(){
                 ${email}
 
             </p>
+
+            <div style="display:inline-flex;align-items:center;gap:8px;margin-top:14px;padding:9px 16px;border:1px solid #bfdbfe;border-radius:999px;background:#eff6ff;color:#1d4ed8;font-size:14px;font-weight:850;">
+                <span>🎓 Student ID</span>
+                <strong style="letter-spacing:.5px;">${studentCode || "Not assigned"}</strong>
+            </div>
 
         </div>
 
