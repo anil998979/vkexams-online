@@ -1,4 +1,4 @@
-      <!DOCTYPE html>
+       <!DOCTYPE html>
 <html lang="en">
 <head>
 
@@ -2906,6 +2906,76 @@ body.dark-mode .home-ad-container{color:#94a3b8!important}
 .vk-theme-toggle{border:1px solid #dbe3ef;background:#f1f5f9;color:#172033;border-radius:9px;padding:8px 10px;font-weight:800;font-size:13px;white-space:nowrap}
 body.dark-mode .vk-theme-toggle{background:#243247;color:#f8fafc;border-color:#475569}
 
+
+/* VK EXAMS STORE REDESIGN */
+#store{background:linear-gradient(180deg,#f8f8ff 0%,#f2f0ff 100%);}
+#store .vk-store-container{max-width:1180px;padding-top:24px;padding-bottom:55px;}
+#store .vk-store-hero{position:relative;isolation:isolate;overflow:hidden;display:flex;align-items:center;justify-content:center;min-height:205px;margin:16px 0 30px;padding:28px 7%;border-radius:24px;color:#fff;text-align:center;background:radial-gradient(circle at 8% 90%,#9139ed 0,transparent 35%),linear-gradient(115deg,#3211a9,#1829b9 58%,#0875dc);box-shadow:0 14px 32px #4b35c744;}
+#store .vk-store-hero:after{content:"";position:absolute;z-index:-1;inset:auto -5% -75px;height:120px;background:#f8f8ff;border-radius:50% 50% 0 0/65% 65% 0 0;}
+#store .vk-store-hero-copy{z-index:1;}
+#store .vk-store-eyebrow{font-size:12px;font-weight:900;letter-spacing:2px;color:#ffe58a;margin-bottom:9px;}
+#store .vk-store-hero h2{font-size:clamp(30px,4vw,48px);font-weight:1000;margin:0;color:#fff;}
+#store .vk-store-hero h2 span{color:#ffdc63;}
+#store .vk-store-hero p{font-size:clamp(14px,2vw,20px);margin:10px 0 0;color:#f4efff;}
+#store .vk-store-hero-art{position:absolute;left:4%;bottom:22px;font-size:65px;filter:drop-shadow(0 6px 5px #1115);}
+#store .vk-store-hero-temple{position:absolute;right:4%;bottom:20px;font-size:70px;opacity:.48;}
+#store .vk-store-course-heading,#store .vk-plan-heading{text-align:center;margin:24px 0 18px;}
+#store .vk-store-course-heading h3,#store .vk-plan-heading h3{font-size:25px;color:#17245b;margin:0;font-weight:950;}
+#store .vk-store-course-heading p,#store .vk-plan-heading p{color:#747b91;margin:6px 0 0;}
+#store .vk-store-courses{grid-template-columns:1fr;gap:17px;}
+#store .vk-course-card{position:relative;display:flex;align-items:center;gap:22px;min-height:150px;padding:22px 28px;border:1px solid #e2e3f4;border-radius:23px;background:linear-gradient(110deg,#fff,#f5f4ff);box-shadow:0 8px 24px #4932b51a;cursor:pointer;overflow:hidden;}
+#store .vk-course-card:after{content:"";position:absolute;right:-30px;top:-50px;width:180px;height:180px;border-radius:50%;background:#7251ef0c;}
+#store .vk-course-icon{flex:0 0 115px;text-align:center;font-size:66px;line-height:1.2;}
+#store .vk-course-copy{flex:1;min-width:0;}
+#store .vk-course-copy h3{font-size:27px;font-weight:950;color:#151c55;margin:0 0 5px;}
+#store .vk-course-copy p{font-size:17px;color:#777f92;margin:0;}
+#store .vk-course-card .coming-soon-badge{position:static;display:inline-flex;align-items:center;margin-left:auto;padding:10px 18px;border-radius:30px;background:#fff5e9;color:#b94d13;border:1px solid #ffd5aa;font-weight:850;white-space:nowrap;}
+#store .vk-course-active{border:2px solid #f5c54c;background:linear-gradient(110deg,#fff9e9,#fff);box-shadow:0 9px 28px #e6b93b3d;padding-top:30px;}
+#store .vk-available-ribbon{position:absolute;left:0;top:0;padding:7px 18px;background:#e51d3d;color:white;font-weight:900;border-radius:0 0 14px 0;font-size:13px;}
+#store .vk-course-features{display:flex;flex-wrap:wrap;gap:14px;margin-top:13px;color:#25305e;font-size:13px;font-weight:850;}
+#store .vk-course-action{z-index:1;white-space:nowrap;padding:13px 20px;border-radius:30px;color:white;font-weight:900;background:linear-gradient(110deg,#7929e8,#3921c9);box-shadow:0 6px 14px #5c32c633;}
+#store .vk-selected-course{display:flex;align-items:center;justify-content:space-between;gap:15px;padding:22px 25px;border:1px solid #d9d7ff;border-radius:18px;background:linear-gradient(110deg,#eff6ff,#f5f0ff);margin:28px 0 22px;}
+#store .vk-selected-kicker{font-size:11px;letter-spacing:1.5px;color:#6655c8;font-weight:900;}
+#store .vk-selected-course h3{font-size:26px;color:#17245b;margin:3px 0;}
+#store .vk-selected-course p{color:#6b7280;margin:0;}
+#store .vk-offer-hero{padding:22px 15px 18px;text-align:center;border-radius:22px;color:white;background:radial-gradient(circle at 10% 10%,#8438ee,transparent 35%),linear-gradient(110deg,#3713b5,#1527b9 65%,#146bdc);box-shadow:0 12px 28px #4931c744;}
+#store .vk-offer-small{font-size:13px;font-weight:950;letter-spacing:2px;color:#ffe17a;}
+#store .vk-offer-main{display:flex;align-items:center;justify-content:center;gap:14px;margin:8px 0;}
+#store .vk-megaphone{font-size:43px;}
+#store .vk-offer-main strong{display:inline-block;padding:3px 25px;border:3px solid #ffdf42;border-radius:15px;background:linear-gradient(110deg,#e71935,#a90827);font-size:clamp(43px,7vw,76px);font-style:italic;line-height:1.1;text-shadow:0 3px 0 #780c1a;}
+#store .vk-offer-main em{color:#ffed36;font-style:italic;}
+#store .vk-offer-hero p{margin:4px 0 0;color:#f3edff;font-size:14px;}
+#store .vk-plan-heading{margin-top:30px;}
+#store .vk-plan-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin-top:20px;}
+#store .vk-plan{padding:0;border:1px solid #dddff1;border-radius:20px;background:#fff;box-shadow:0 10px 24px #3525a51c;}
+#store .vk-plan:before{display:none;}
+#store .vk-plan-top{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:16px 17px;color:white;font-size:20px;font-weight:950;}
+#store .vk-plan-top b{padding:6px 9px;border-radius:8px;background:#e91d2d;color:#fff;font-size:12px;line-height:1.1;box-shadow:0 3px 8px #0002;}
+#store .vk-plan-daily .vk-plan-top{background:linear-gradient(110deg,#087de5,#0754c9);}
+#store .vk-plan-weekly .vk-plan-top{background:linear-gradient(110deg,#8129e8,#4b16bd);}
+#store .vk-plan-monthly .vk-plan-top{background:linear-gradient(110deg,#ed2793,#bf0870);}
+#store .vk-plan-body{padding:18px 17px 22px;text-align:center;}
+#store .vk-old-price{font-size:23px;font-weight:800;color:#85899a;text-decoration:line-through;text-decoration-color:#e33;text-decoration-thickness:2px;}
+#store .vk-new-price{display:inline-block;min-width:65%;margin:8px 0 12px;padding:8px 10px;border-radius:13px;background:#fff0a9;color:#a51b13;font-size:clamp(30px,4vw,43px);font-weight:1000;}
+#store .vk-plan-weekly .vk-new-price{background:#eee2ff;color:#5715b8;}
+#store .vk-plan-monthly .vk-new-price{background:#ffe0f0;color:#a10b5d;font-size:clamp(27px,3.4vw,39px);}
+#store .vk-access{display:inline-block;margin:0 0 16px;padding:9px 13px;border-radius:30px;background:#e5f1ff;color:#164c9a;font-size:14px;font-weight:850;}
+#store .vk-plan-weekly .vk-access{background:#f0e8ff;color:#5b20a9;}
+#store .vk-plan-monthly .vk-access{background:#ffe8f4;color:#a20d61;}
+#store .vk-plan button{display:block;width:100%;padding:13px 12px;border-radius:30px;font-size:17px;font-weight:950;background:linear-gradient(110deg,#087de5,#0754c9);box-shadow:0 6px 14px #087de533;}
+#store .vk-plan-weekly button{background:linear-gradient(110deg,#8129e8,#4b16bd);box-shadow:0 6px 14px #8129e833;}
+#store .vk-plan-monthly button{background:linear-gradient(110deg,#ed2793,#bf0870);box-shadow:0 6px 14px #ed279333;}
+#store .vk-limited-offer{display:flex;align-items:center;justify-content:center;gap:13px;margin:30px auto 22px;padding:14px 20px;max-width:700px;border-radius:12px;color:white;background:linear-gradient(100deg,#df1730,#b80935);box-shadow:0 8px 18px #c81b3a33;font-size:clamp(19px,3vw,27px);font-style:italic;}
+#store .vk-limited-offer span{font-size:35px;}
+#store .vk-limited-offer em{color:#ffed39;}
+#store .vk-store-benefits{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:20px 12px;border:1px solid #e4defb;border-radius:18px;background:#ffffffd9;box-shadow:0 8px 20px #4932b51a;}
+#store .vk-store-benefits div{display:flex;align-items:center;justify-content:center;gap:10px;padding:5px 8px;color:#17245b;font-weight:900;font-size:14px;}
+#store .vk-store-benefits div+div{border-left:1px solid #d9d2f5;}
+#store .vk-store-benefits b{display:grid;place-items:center;width:38px;height:38px;flex:0 0 38px;border-radius:50%;background:#1eae5a;color:white;font-size:23px;}
+#store .vk-store-benefits div:nth-child(2) b{background:#1679e9;}
+#store .vk-store-benefits div:nth-child(3) b{background:#7b32df;}
+@media(max-width:700px){#store .vk-store-hero{min-height:175px;padding:25px 15px;margin-top:12px;}#store .vk-store-hero-art{left:10px;font-size:38px;bottom:12px;opacity:.65;}#store .vk-store-hero-temple{right:10px;font-size:42px;bottom:12px;}#store .vk-store-courses{grid-template-columns:1fr;}#store .vk-course-card{min-height:125px;padding:23px 14px;gap:10px;border-radius:18px;}#store .vk-course-icon{flex-basis:62px;font-size:43px;}#store .vk-course-copy h3{font-size:19px;}#store .vk-course-copy p{font-size:13px;}#store .vk-course-card .coming-soon-badge{font-size:11px;padding:7px 9px;}#store .vk-course-action{font-size:11px;padding:10px 9px;}#store .vk-course-features{gap:7px;font-size:10px;}#store .vk-selected-course{align-items:flex-start;flex-direction:column;padding:18px;}#store .vk-selected-course h3{font-size:22px;}#store .vk-offer-hero{padding:17px 9px;}#store .vk-megaphone{font-size:29px;}#store .vk-offer-main strong{font-size:47px;padding:4px 13px;}#store .vk-plan-grid{grid-template-columns:1fr;gap:15px;}#store .vk-plan-top{padding:14px 18px;}#store .vk-plan-body{padding:15px 18px 18px;}#store .vk-new-price{font-size:38px;}#store .vk-store-benefits{grid-template-columns:1fr;gap:5px;padding:12px;}#store .vk-store-benefits div{justify-content:flex-start;padding:8px 15px;}#store .vk-store-benefits div+div{border-left:0;border-top:1px solid #e5e0f7;}#store .vk-limited-offer{margin:23px 0 17px;padding:12px;font-size:19px;}}
+
 </style>
 
 
@@ -3680,226 +3750,87 @@ id="solutions">
      STORE
 ===================================================== -->
 
-<div
-id="store"
-class="page">
+<div id="store" class="page">
+  <div class="container vk-store-container">
+    <span class="back" onclick="showHome()">← Back to Home</span>
 
-<div class="container">
+    <section class="vk-store-hero">
+      <div class="vk-store-hero-art" aria-hidden="true">📚</div>
+      <div class="vk-store-hero-copy">
+        <div class="vk-store-eyebrow">🎓 PREPARE • PRACTICE • SUCCEED</div>
+        <h2>VK Exams <span>Store</span></h2>
+        <p>Select your course and choose a test series package.</p>
+      </div>
+      <div class="vk-store-hero-temple" aria-hidden="true">🛕</div>
+    </section>
 
+    <div class="vk-store-course-heading">
+      <h3>Choose Your Course</h3>
+      <p>Start your preparation with the right test series.</p>
+    </div>
 
-<span
-class="back"
-onclick="showHome()">
+    <div class="store-course-grid vk-store-courses">
+      <div class="category-card is-coming-soon vk-course-card" onclick="showComingSoon('APPSC')">
+        <div class="vk-course-icon">📚</div>
+        <div class="vk-course-copy"><h3>APPSC</h3><p>APPSC Package</p></div>
+        <span class="coming-soon-badge">◷ Coming Soon</span>
+      </div>
 
-← Back to Home
+      <div class="category-card vk-course-card vk-course-active" onclick="selectStoreCourse('Endowment Officer',this)">
+        <span class="vk-available-ribbon">★ Available Now</span>
+        <div class="vk-course-icon">🛕</div>
+        <div class="vk-course-copy"><h3>Endowment Officer</h3><p>Endowment Package</p>
+          <div class="vk-course-features"><span>✓ Test Series</span><span>▣ Study Material</span><span>✓ Mock Tests</span></div>
+        </div>
+        <span class="vk-course-action">View Packages&nbsp; →</span>
+      </div>
 
-</span>
+      <div class="category-card is-coming-soon vk-course-card" onclick="showComingSoon('High Court')">
+        <div class="vk-course-icon">⚖️</div>
+        <div class="vk-course-copy"><h3>High Court</h3><p>High Court Package</p></div>
+        <span class="coming-soon-badge">◷ Coming Soon</span>
+      </div>
+    </div>
 
+    <div id="selectedCourseArea" style="display:none">
+      <div class="selected-course vk-selected-course">
+        <div><span class="vk-selected-kicker">YOUR SELECTED COURSE</span>
+          <h3><span id="selectedCourseName"></span></h3>
+          <p>Choose one plan below and unlock your preparation.</p>
+        </div>
+        <button class="btn btn-outline" onclick="resetStoreCourses()">Change Course</button>
+      </div>
 
-<div class="section-title">
+      <section class="vk-offer-hero">
+        <div class="vk-offer-small">SPECIAL OFFER FOR ASPIRANTS</div>
+        <div class="vk-offer-main"><span class="vk-megaphone">📣</span><strong>50% <em>OFF</em></strong></div>
+        <p>Get started today and prepare with confidence!</p>
+      </section>
 
-<h2>
-💎 VK Exams Store
-</h2>
+      <div class="vk-plan-heading"><h3>Choose Your Package</h3><p>Limited-period discounted prices</p></div>
+      <div class="plan-grid vk-plan-grid">
+        <article class="plan vk-plan vk-plan-daily">
+          <div class="vk-plan-top"><span>◷&nbsp; Daily</span><b>50% OFF</b></div>
+          <div class="vk-plan-body"><div class="vk-old-price">₹10</div><div class="vk-new-price">₹5</div><p class="vk-access">◷&nbsp; 1 Day Access</p>
+            <button onclick="buyPlan('Daily',5,1)">Select&nbsp; →</button></div>
+        </article>
+        <article class="plan vk-plan vk-plan-weekly">
+          <div class="vk-plan-top"><span>▦&nbsp; Weekly</span><b>50% OFF</b></div>
+          <div class="vk-plan-body"><div class="vk-old-price">₹50</div><div class="vk-new-price">₹25</div><p class="vk-access">▦&nbsp; 7 Days Access</p>
+            <button onclick="buyPlan('Weekly',25,7)">Select&nbsp; →</button></div>
+        </article>
+        <article class="plan vk-plan vk-plan-monthly">
+          <div class="vk-plan-top"><span>▦&nbsp; Monthly</span><b>50% OFF</b></div>
+          <div class="vk-plan-body"><div class="vk-old-price">₹189</div><div class="vk-new-price">₹94.50</div><p class="vk-access">▦&nbsp; 30 Days Access</p>
+            <button onclick="buyPlan('Monthly',94.50,30)">Select&nbsp; →</button></div>
+        </article>
+      </div>
 
-<p>
-Select one course and choose your package.
-</p>
-
+      <div class="vk-limited-offer"><span>⏱️</span><strong>Limited Offer – <em>Hurry!</em></strong></div>
+      <div class="vk-store-benefits"><div><b>✓</b><span>Full-Length<br>Test Series</span></div><div><b>▣</b><span>Comprehensive<br>Study Material</span></div><div><b>◎</b><span>Topic-wise<br>Mock Tests</span></div></div>
+    </div>
+  </div>
 </div>
-
-
-<div class="store-course-grid">
-
-
-<div
-class="category-card is-coming-soon"
-onclick="showComingSoon('APPSC')">
-
-<div class="icon">📚</div>
-<h3>APPSC</h3>
-<p>APPSC Package</p>
-<span class="coming-soon-badge">Coming Soon</span>
-
-</div>
-
-
-<div
-class="category-card"
-onclick="selectStoreCourse('Endowment Officer',this)">
-
-<div class="icon">
-🛕
-</div>
-
-<h3>
-Endowment Officer
-</h3>
-
-<p>
-Endowment Package
-</p>
-
-</div>
-
-
-<div
-class="category-card is-coming-soon"
-onclick="showComingSoon('High Court')">
-
-<div class="icon">⚖️</div>
-<h3>High Court</h3>
-<p>High Court Package</p>
-<span class="coming-soon-badge">Coming Soon</span>
-
-</div>
-
-
-
-</div>
-
-
-
-<div
-id="selectedCourseArea"
-style="display:none">
-
-
-<div class="selected-course">
-
-<h3>
-
-Selected Course:
-
-<span
-id="selectedCourseName">
-</span>
-
-</h3>
-
-<p>
-Choose one plan below.
-</p>
-
-<button
-class="btn btn-outline"
-style="margin-top:12px"
-onclick="resetStoreCourses()">
-
-Change Course
-
-</button>
-
-</div>
-
-
-<div class="plan-grid">
-
-
-<div class="plan">
-
-<h3>
-Daily
-</h3>
-
-<div class="price">
-₹10
-</div>
-
-<p>
-1 Day Access
-</p>
-
-<button
-onclick="buyPlan('Daily',10,1)">
-
-Select
-
-</button>
-
-</div>
-
-
-<div class="plan">
-
-<h3>
-Weekly
-</h3>
-
-<div class="price">
-₹50
-</div>
-
-<p>
-7 Days Access
-</p>
-
-<button
-onclick="buyPlan('Weekly',50,7)">
-
-Select
-
-</button>
-
-</div>
-
-
-<div class="plan">
-
-<h3>
-Monthly
-</h3>
-
-<div class="price">
-₹189
-</div>
-
-<p>
-30 Days Access
-</p>
-
-<button
-onclick="buyPlan('Monthly',189,30)">
-
-Select
-
-</button>
-
-</div>
-
-
-<div class="plan">
-
-<h3>
-Yearly
-</h3>
-
-<div class="price">
-₹999
-</div>
-
-<p>
-365 Days Access
-</p>
-
-<button
-onclick="buyPlan('Yearly',999,365)">
-
-Select
-
-</button>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-
 
 <!-- =====================================================
      JOBS PAGE
