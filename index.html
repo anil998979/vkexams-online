@@ -1,4 +1,4 @@
-     <!DOCTYPE html>
+      <!DOCTYPE html>
 <html lang="en">
 <head>
 
@@ -6525,17 +6525,10 @@ function backFromTestList(){
 
 async function openLockedTest(testNumber){
 
-    if(!isLoggedIn()){
-
-        openLogin();
-
-        toast(
-            "Please login/register to continue."
-        );
-
-        return;
-
-    }
+    // Do not rely on the localStorage studentEmail flag here.
+    // The authoritative login check is Supabase Auth below (auth.getUser()).
+    // This prevents a valid persisted Supabase session from being sent
+    // back to the login page when the localStorage flag is missing.
 
     if(!supabaseClient){
 
