@@ -2934,10 +2934,17 @@ body.dark-mode .vk-theme-toggle{background:#243247;color:#f8fafc;border-color:#4
 #store .vk-available-ribbon{position:absolute;left:0;top:0;padding:7px 18px;background:#e51d3d;color:white;font-weight:900;border-radius:0 0 14px 0;font-size:13px;}
 #store .vk-course-features{display:flex;flex-wrap:wrap;gap:14px;margin-top:13px;color:#25305e;font-size:13px;font-weight:850;}
 #store .vk-course-action{z-index:1;white-space:nowrap;padding:13px 20px;border-radius:30px;color:white;font-weight:900;background:linear-gradient(110deg,#7929e8,#3921c9);box-shadow:0 6px 14px #5c32c633;}
-#store .vk-selected-course{display:flex;align-items:center;justify-content:space-between;gap:15px;padding:22px 25px;border:1px solid #d9d7ff;border-radius:18px;background:linear-gradient(110deg,#eff6ff,#f5f0ff);margin:28px 0 22px;}
-#store .vk-selected-kicker{font-size:11px;letter-spacing:1.5px;color:#6655c8;font-weight:900;}
-#store .vk-selected-course h3{font-size:26px;color:#17245b;margin:3px 0;}
-#store .vk-selected-course p{color:#6b7280;margin:0;}
+#store .vk-selected-course{position:relative;display:flex;align-items:center;justify-content:space-between;gap:18px;padding:22px 24px;margin:28px 0 22px;border:1px solid #dcd7ff;border-radius:20px;background:linear-gradient(115deg,#fff 0%,#f4f1ff 58%,#eaf3ff 100%);box-shadow:0 9px 24px #4b35b51a;overflow:hidden;}
+#store .vk-selected-course:after{content:"";position:absolute;width:150px;height:150px;right:-45px;top:-75px;border-radius:50%;background:#7951ef12;pointer-events:none;}
+#store .vk-selected-main{display:flex;align-items:center;gap:15px;min-width:0;}
+#store .vk-selected-icon{display:grid;place-items:center;flex:0 0 58px;width:58px;height:58px;border-radius:17px;background:linear-gradient(140deg,#fff1c7,#ffe1a0);font-size:31px;box-shadow:0 5px 13px #d99a2b26;}
+#store .vk-selected-copy{min-width:0;}
+#store .vk-selected-kicker{display:inline-block;font-size:10px;letter-spacing:1.6px;color:#6655c8;font-weight:950;margin-bottom:3px;}
+#store .vk-selected-course h3{font-size:clamp(20px,2.6vw,27px);line-height:1.2;color:#17245b;margin:2px 0 5px;font-weight:950;}
+#store .vk-selected-course p{color:#68738a;margin:0;font-size:14px;line-height:1.45;}
+#store .vk-change-course{position:relative;z-index:1;flex:0 0 auto;border-radius:12px!important;padding:11px 15px!important;font-size:13px!important;font-weight:850!important;background:#fff!important;border:1px solid #9aa9df!important;color:#315bb6!important;}
+#store .vk-change-course:hover{background:#eef3ff!important;}
+@media(max-width:700px){#store .vk-selected-course{align-items:flex-start;flex-direction:column;padding:17px;margin:20px 0 18px;gap:13px;}#store .vk-selected-main{gap:12px;}#store .vk-selected-icon{width:49px;height:49px;flex-basis:49px;font-size:26px;border-radius:14px;}#store .vk-selected-course h3{font-size:22px;}#store .vk-selected-course p{font-size:13px;}#store .vk-change-course{align-self:flex-start;}}
 #store .vk-offer-hero{padding:22px 15px 18px;text-align:center;border-radius:22px;color:white;background:radial-gradient(circle at 10% 10%,#8438ee,transparent 35%),linear-gradient(110deg,#3713b5,#1527b9 65%,#146bdc);box-shadow:0 12px 28px #4931c744;}
 #store .vk-offer-small{font-size:13px;font-weight:950;letter-spacing:2px;color:#ffe17a;}
 #store .vk-offer-main{display:flex;align-items:center;justify-content:center;gap:14px;margin:8px 0;}
@@ -3794,11 +3801,15 @@ id="solutions">
 
     <div id="selectedCourseArea" style="display:none">
       <div class="selected-course vk-selected-course">
-        <div><span class="vk-selected-kicker">YOUR SELECTED COURSE</span>
-          <h3><span id="selectedCourseName"></span></h3>
-          <p>Choose one plan below and unlock your preparation.</p>
+        <div class="vk-selected-main">
+          <div class="vk-selected-icon" aria-hidden="true">🛕</div>
+          <div class="vk-selected-copy">
+            <span class="vk-selected-kicker">YOUR SELECTED COURSE</span>
+            <h3><span id="selectedCourseName"></span></h3>
+            <p>Choose your plan and unlock complete exam preparation.</p>
+          </div>
         </div>
-        <button class="btn btn-outline" onclick="resetStoreCourses()">Change Course</button>
+        <button class="btn btn-outline vk-change-course" onclick="resetStoreCourses()">← Change Course</button>
       </div>
 
       <section class="vk-offer-hero">
@@ -7181,6 +7192,10 @@ function selectStoreCourse(course, card){
     }
     renderStoreCourseSelection(course);
     vkSetStoreRoute(course, true);
+    requestAnimationFrame(function(){
+        const selectedArea = $("selectedCourseArea");
+        if(selectedArea){ selectedArea.scrollIntoView({behavior:"smooth", block:"start"}); }
+    });
 }
 
 
@@ -7219,34 +7234,40 @@ async function buyPlan(
         .eq("name", selectedStoreCourse)
         .single();
 
-const { data: packageData, error: packageError } =
+const { data: packageRows, error: packageError } =
     await supabaseClient
         .from("packages")
         .select("id, name, duration_days, price")
-      .eq("name", plan + " Plan")
+        .eq("name", plan + " Plan")
         .eq("duration_days", days)
-        .eq("price", amount)
         .eq("is_active", true)
-        .single();
+        .limit(2);
 
-if(packageError || !packageData){
-
-    console.error(
-        "PACKAGE SEARCH ERROR:",
-        packageError
-    );
-
-    toast(
-        "Package Search Failed\n\n" +
-        "Plan: " + plan + "\n" +
-        "Days: " + days + "\n" +
-        "Amount: ₹" + amount + "\n\n" +
-        "Error: " +
-        (packageError?.message || "No package returned")
-    );
-
+if(packageError || !packageRows || packageRows.length === 0){
+    console.error("PACKAGE SEARCH ERROR:", packageError);
+    toast("Package not found. Please contact VK Exams support.\n\nPlan: " + plan + "\nDays: " + days);
     return;
+}
 
+if(packageRows.length > 1){
+    console.error("Duplicate active package rows:", packageRows);
+    toast("Multiple active packages found for " + plan + ". Please contact VK Exams support.");
+    return;
+}
+
+const packageData = packageRows[0];
+const databasePrice = Number(packageData.price);
+const expectedPrice = Number(amount);
+
+if(!Number.isFinite(databasePrice) || Math.abs(databasePrice - expectedPrice) > 0.001){
+    console.error("PACKAGE PRICE MISMATCH:", {plan, expectedPrice, databasePrice, packageData});
+    toast(
+        "Discount price is not updated in the database yet.\n\n" +
+        "Selected price: ₹" + expectedPrice.toFixed(2) + "\n" +
+        "Database price: ₹" + (Number.isFinite(databasePrice) ? databasePrice.toFixed(2) : "Invalid") +
+        "\n\nPlease update the package price in Supabase before accepting payments."
+    );
+    return;
 }
 
 
