@@ -1,4 +1,4 @@
-       <!DOCTYPE html>
+        <!DOCTYPE html>
 <html lang="en">
 <head>
 
@@ -8647,7 +8647,9 @@ function vkAdminResetBuilder(){
 function vkAdminNormalizeFreeTopicName(value){
     return String(value || "")
         .trim()
-        .replace(/\\s*[-–—]?\\s*Test\\s*[-#]?\\s*\\d+\\s*$/i, "")
+        // Remove a trailing test sequence accidentally included in the topic name.
+        // Examples: "Hindu Festivals Test - 2" -> "Hindu Festivals".
+        .replace(/\s*[-–—]?\s*Test\s*[-#]?\s*\d+\s*$/i, "")
         .trim();
 }
 
