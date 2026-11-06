@@ -4004,7 +4004,7 @@ id="solutions">
   Change the test name here. Click Save Existing Free Test to save the name, questions, duration and negative marks together.
 </p>
           </div>
-          <p class="vk-admin-hint">Only the topic name will change. Test number, questions, marks, duration, Test ID, student attempts and results will remain unchanged.</p>
+          <p class="vk-admin-hint">The test name, questions, duration and negative marks will be saved together. The existing Test ID and historical student attempts/results are retained.</p>
         </div>
         <div class="vk-admin-field" id="vkAdminPaidModeWrap" style="display:none">
           <label for="vkAdminPaidMode">Paid Test Action</label>
@@ -8445,6 +8445,7 @@ async function vkAdminFreeModeChanged(){
     if(publish) publish.textContent=editMode?"Save Existing Free Test":"Publish Free Test";
     const host=document.getElementById("vkAdminQuestions");
     if(host) host.innerHTML="";
+    vkAdminUpdateQuestionLabels();
     if(editMode) await vkAdminLoadFreeTests();
     else {
         const select=document.getElementById("vkAdminExistingFreeTest");
@@ -8852,8 +8853,15 @@ if(!isPaid && freeMode === "edit" && !freeEditTopicName){
     if(!Number.isFinite(negativeMarks) || negativeMarks < 0 || negativeMarks > 5){
         vkAdminShowStatus("Negative marks must be between 0 and 5.",true); return;
     }
+    if(!isPaid && freeMode==="edit" && !vkAdminEditingFreeTestId){
+        vkAdminShowStatus("Select an existing Free Test from the dropdown and wait for its questions to load before saving.",true);
+        return;
+    }
     if(!cards.length){
-        vkAdminShowStatus("Add questions before publishing.",true); return;
+        vkAdminShowStatus(freeMode==="edit" && !isPaid
+            ? "No questions are loaded. Select the existing Free Test again and wait for the questions to appear."
+            : "Add questions before publishing.",true);
+        return;
     }
     if(isPaid && cards.length !== 150){
         vkAdminShowStatus(`Paid tests require exactly 150 questions. Current count: ${cards.length}.`,true); return;
@@ -8861,10 +8869,6 @@ if(!isPaid && freeMode === "edit" && !freeEditTopicName){
     if(isPaid && paidMode==="edit" && !vkAdminEditingPaidTestId){
         vkAdminShowStatus("Select an existing Paid Test and load its questions before saving.",true); return;
     }
-    if(!isPaid && freeMode==="edit" && !vkAdminEditingFreeTestId){
-        vkAdminShowStatus("Select an existing Free Test and load its questions before saving.",true); return;
-    }
-
     const questions = [];
     for(let index=0; index<cards.length; index++){
         const card = cards[index];
@@ -8911,13 +8915,13 @@ if(!isPaid && freeMode === "edit" && !freeEditTopicName){
             p_duration_minutes:duration,
             p_negative_marks:negativeMarks,
             p_questions:questions
-       }) : (freeMode==="edit" ? {
-    p_test_id:vkAdminEditingFreeTestId,
-    p_duration_minutes:duration,
-    p_negative_marks:negativeMarks,
-    p_questions:questions,
-    p_topic_name:freeEditTopicName
-} : {
+        }) : (freeMode==="edit" ? {
+            p_test_id:vkAdminEditingFreeTestId,
+            p_duration_minutes:duration,
+            p_negative_marks:negativeMarks,
+            p_questions:questions,
+            p_topic_name:freeEditTopicName
+        } : {
             p_course_name:courseName,
             p_topic_name:topicName,
             p_duration_minutes:duration,
