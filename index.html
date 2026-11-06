@@ -2983,6 +2983,24 @@ body.dark-mode .vk-theme-toggle{background:#243247;color:#f8fafc;border-color:#4
 #store .vk-store-benefits div:nth-child(3) b{background:#7b32df;}
 @media(max-width:700px){#store .vk-store-hero{min-height:175px;padding:25px 15px;margin-top:12px;}#store .vk-store-hero-art{left:10px;font-size:38px;bottom:12px;opacity:.65;}#store .vk-store-hero-temple{right:10px;font-size:42px;bottom:12px;}#store .vk-store-courses{grid-template-columns:1fr;}#store .vk-course-card{min-height:125px;padding:23px 14px;gap:10px;border-radius:18px;}#store .vk-course-icon{flex-basis:62px;font-size:43px;}#store .vk-course-copy h3{font-size:19px;}#store .vk-course-copy p{font-size:13px;}#store .vk-course-card .coming-soon-badge{font-size:11px;padding:7px 9px;}#store .vk-course-action{font-size:11px;padding:10px 9px;}#store .vk-course-features{gap:7px;font-size:10px;}#store .vk-selected-course{align-items:flex-start;flex-direction:column;padding:18px;}#store .vk-selected-course h3{font-size:22px;}#store .vk-offer-hero{padding:17px 9px;}#store .vk-megaphone{font-size:29px;}#store .vk-offer-main strong{font-size:47px;padding:4px 13px;}#store .vk-plan-grid{grid-template-columns:1fr;gap:15px;}#store .vk-plan-top{padding:14px 18px;}#store .vk-plan-body{padding:15px 18px 18px;}#store .vk-new-price{font-size:38px;}#store .vk-store-benefits{grid-template-columns:1fr;gap:5px;padding:12px;}#store .vk-store-benefits div{justify-content:flex-start;padding:8px 15px;}#store .vk-store-benefits div+div{border-left:0;border-top:1px solid #e5e0f7;}#store .vk-limited-offer{margin:23px 0 17px;padding:12px;font-size:19px;}}
 
+
+/* VK Exams requested updates: Study hub, searchable mock tests and responsive cards */
+.vk-free-search-wrap{display:flex;gap:8px;margin:14px 0 18px;}
+.vk-free-search-wrap input{flex:1;min-width:0;padding:13px 15px;border:1px solid #cbd5e1;border-radius:12px;background:#fff;outline:none;}
+.vk-free-search-wrap input:focus{border-color:#0d9488;box-shadow:0 0 0 3px #0d94881c;}
+.vk-free-search-wrap button{width:44px;border:1px solid #cbd5e1;border-radius:12px;background:#fff;font-size:24px;color:#64748b;}
+.free-mock-heading h3{white-space:normal!important;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;text-overflow:clip;min-height:2.5em;}
+.vk-study-hub-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin-top:22px;}
+.vk-study-hub-card{background:#fff;border:1px solid #dbe4ef;border-radius:18px;padding:20px;box-shadow:0 8px 22px #0f172a0b;cursor:pointer;display:flex;flex-direction:column;gap:10px;}
+.vk-study-hub-card h3{font-size:20px;color:#172554}.vk-study-hub-card p{color:#64748b;line-height:1.5;flex:1;font-size:14px}
+.vk-study-hub-art{height:125px;border-radius:13px;display:grid;place-items:center;font-size:56px;background:linear-gradient(135deg,#e0e7ff,#f5f3ff)}
+.vk-study-temple{background:linear-gradient(135deg,#fef3c7,#ffedd5)}.vk-study-court{background:linear-gradient(135deg,#dbeafe,#e0f2fe)}
+@media(max-width:900px){.vk-study-hub-grid{grid-template-columns:repeat(2,minmax(0,1fr));}}
+@media(max-width:560px){#freeMocks.mock-list-mode .free-mock-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important}.free-mock-card{padding:12px 10px!important}.free-mock-card-top{gap:7px}.free-mock-number{width:30px!important;height:30px!important;flex-basis:30px!important;font-size:11px!important}.free-mock-heading h3{font-size:14px!important;line-height:1.25!important}.free-mock-heading p{font-size:9px!important}.free-mock-badge{font-size:9px;padding:3px 6px}.free-mock-stats{gap:2px;padding:7px 3px;margin-top:11px}.free-mock-stat{font-size:9px;white-space:normal}.free-mock-stat strong{font-size:11px;display:block;margin:0}.free-mock-footer{gap:5px;align-items:stretch;flex-direction:column}.free-mock-info{font-size:10px}.free-mock-footer>div:last-child{width:100%;gap:4px!important}.free-mock-start{padding:8px 5px!important;font-size:10px!important;flex:1!important}.vk-study-hub-grid{grid-template-columns:1fr;}}
+
+
+.vk-grandtest-card{max-width:1000px;margin:30px auto;padding:25px;border-radius:20px;text-align:center;color:#fff;background:linear-gradient(130deg,#172554,#4338ca 60%,#6d28d9);box-shadow:0 15px 35px #312e8130}.vk-grandtest-kicker{font-size:11px;letter-spacing:1.5px;font-weight:900;color:#fde68a}.vk-grandtest-card h2{font-size:25px;margin:9px 0}.vk-grandtest-card p{color:#e0e7ff}.vk-grandtest-count-title{font-weight:900;letter-spacing:1px;margin:18px 0 9px;color:#fde68a}.vk-grandtest-count{display:flex;justify-content:center;gap:10px;margin-bottom:18px}.vk-grandtest-count span{min-width:78px;padding:10px;background:#fff;color:#172554;border-radius:12px;font-size:25px;font-weight:900}.vk-grandtest-count small{display:block;font-size:10px;color:#64748b}
+
 </style>
 
 
@@ -3019,8 +3037,8 @@ VK <span>EXAMS</span>
 Home
 </a>
 
-<a onclick="openStore()">
-Store
+<a onclick="openStudyHub()">
+Study
 </a>
 
     <a onclick="openJobs()">
@@ -3229,6 +3247,14 @@ Prepare from mobile, tablet or computer.
 
 </div>
 
+<section id="vkGrandTestHomeCard" class="vk-grandtest-card" style="display:none">
+  <div class="vk-grandtest-kicker">VK EXAMS · STATE-WIDE FREE GRAND TEST</div>
+  <h2>AP Endowment Officer – Paper II</h2>
+  <p>08 November 2026 · Exam starts at 10:00 AM</p>
+  <div class="vk-grandtest-count-title">EXAM STARTS IN</div>
+  <div class="vk-grandtest-count" id="vkGrandTestCountdown"><span>--<small>Hours</small></span><span>--<small>Minutes</small></span><span>--<small>Seconds</small></span></div>
+  <button type="button" class="btn btn-primary" id="vkGrandTestAction" onclick="openGrandTestRegistration()">Grand Test Registration</button>
+</section>
 <div class="vk-stats-strip">
   <div><b>♟</b><strong>10,000+</strong><span>Aspirants</span></div>
   <div><b>☑</b><strong>150+</strong><span>Mock Tests</span></div>
@@ -3259,6 +3285,10 @@ Prepare from mobile, tablet or computer.
 <p>Choose a course and attempt free practice tests.</p>
 </div>
 
+<div id="freeMockSearchWrap" class="vk-free-search-wrap" style="display:none">
+  <input id="freeMockSearch" type="search" placeholder="Search exams by topic or test name..." oninput="filterFreeMockCards()" aria-label="Search free mock tests">
+  <button type="button" onclick="clearFreeMockSearch()" aria-label="Clear search">×</button>
+</div>
 <div id="freeMockCourses" class="choice-grid"></div>
 
 </div>
@@ -4029,6 +4059,21 @@ id="solutions">
         <button type="button" class="vk-admin-btn vk-admin-btn-secondary" onclick="vkAdminResetBuilder()">Clear Form</button>
       </div>
       <div id="vkAdminStatus" class="vk-admin-status" role="status" aria-live="polite"></div>
+    </div>
+  </div>
+</div>
+
+<!-- =====================================================
+     STUDY HUB: APPSC / ENDOWMENT / HIGH COURT
+===================================================== -->
+<div id="studyHub" class="page">
+  <div class="container">
+    <span class="back" onclick="showHome()">← Back to Home</span>
+    <div class="section-title"><h2>Study Materials</h2><p>Select your examination and explore topic-wise learning resources.</p></div>
+    <div class="vk-study-hub-grid">
+      <article class="vk-study-hub-card" onclick="openStudyMaterials('APPSC')"><div class="vk-study-hub-art vk-study-appsc">📚</div><h3>APPSC</h3><p>General Studies, subject-wise notes and exam preparation material.</p><button class="btn btn-blue">Explore APPSC →</button></article>
+      <article class="vk-study-hub-card" onclick="openStudyMaterials('Endowment Officer')"><div class="vk-study-hub-art vk-study-temple">🛕</div><h3>Endowment Officer</h3><p>Temple system, Hindu philosophy, Endowments Act and related topics.</p><button class="btn btn-blue">Explore Endowment →</button></article>
+      <article class="vk-study-hub-card" onclick="openStudyMaterials('High Court')"><div class="vk-study-hub-art vk-study-court">⚖️</div><h3>High Court</h3><p>Recruitment exam notes and topic-wise study resources.</p><button class="btn btn-blue">Explore High Court →</button></article>
     </div>
   </div>
 </div>
@@ -4942,9 +4987,8 @@ function showPage(
 
 
 function showHome(){
-
     showPage("home");
-
+    initGrandTestHomeCard();
 }
 
 
@@ -5439,6 +5483,9 @@ async function openFreeMockTests(course, addHistory = true, selectedTestNumber =
     };
 
     $("freeMockCourses").className = "free-mock-grid";
+    const searchWrap = document.getElementById("freeMockSearchWrap");
+    if(searchWrap) searchWrap.style.display = requestedTestNumber ? "none" : "flex";
+    clearFreeMockSearch();
 
     let html = "";
 
@@ -13109,6 +13156,7 @@ if(
             return;
         }
 
+        if(page === "studyHub"){ openStudyHub(false); return; }
         if(page === "studyMaterials"){
             openStudyMaterials(hashParams.get("course") || event.state?.course || currentCourse, false);
             return;
@@ -13204,6 +13252,41 @@ localStorage.removeItem("selectedPackage");
    VK EXAMS STUDY MATERIALS
    Private bucket + signed read URLs + PDF.js canvas reader.
 ===================================================== */
+function openStudyHub(addHistory=true){
+  showPage("studyHub",false);
+  if(addHistory) history.pushState({vkPage:"studyHub"},"","#studyHub");
+}
+function filterFreeMockCards(){
+  const q=(document.getElementById("freeMockSearch")?.value||"").trim().toLowerCase();
+  const cards=[...document.querySelectorAll("#freeMockCourses .free-mock-card")];
+  let visible=0;
+  cards.forEach(card=>{const match=card.textContent.toLowerCase().includes(q);card.style.display=match?"":"none";if(match)visible++;});
+  let empty=document.getElementById("freeMockSearchEmpty");
+  if(!empty){empty=document.createElement("div");empty.id="freeMockSearchEmpty";empty.className="free-mock-empty";empty.textContent="No exams found. Try another search.";document.getElementById("freeMockCourses")?.appendChild(empty);}
+  empty.style.display=(q && visible===0)?"block":"none";
+}
+function clearFreeMockSearch(){const input=document.getElementById("freeMockSearch");if(input)input.value="";filterFreeMockCards();}
+
+const VK_GRAND_TEST_START = new Date("2026-11-08T10:00:00+05:30").getTime();
+const VK_GRAND_TEST_LOBBY = new Date("2026-11-08T09:30:00+05:30").getTime();
+const VK_GRAND_TEST_REG_END = new Date("2026-11-07T12:00:00+05:30").getTime();
+let vkGrandTestTimer=null;
+function initGrandTestHomeCard(){
+  const card=document.getElementById("vkGrandTestHomeCard");if(!card)return;
+  const tick=()=>{const now=Date.now();card.style.display=now>=VK_GRAND_TEST_LOBBY?"block":"none";if(now<VK_GRAND_TEST_LOBBY)return;const count=document.getElementById("vkGrandTestCountdown");const action=document.getElementById("vkGrandTestAction");
+    if(now>=VK_GRAND_TEST_START){if(count)count.innerHTML='<span>00<small>Hours</small></span><span>00<small>Minutes</small></span><span>00<small>Seconds</small></span>';if(action){action.textContent=now>=VK_GRAND_TEST_LOBBY?"Open Grand Test Lobby":"Exam Starting";action.disabled=now<VK_GRAND_TEST_LOBBY;}return;}
+    const d=VK_GRAND_TEST_START-now;const h=Math.floor(d/3600000),m=Math.floor((d%3600000)/60000),sec=Math.floor((d%60000)/1000);
+    if(count)count.innerHTML=`<span>${String(h).padStart(2,"0")}<small>Hours</small></span><span>${String(m).padStart(2,"0")}<small>Minutes</small></span><span>${String(sec).padStart(2,"0")}<small>Seconds</small></span>`;
+    if(action){action.textContent=now>=VK_GRAND_TEST_LOBBY?"Open Grand Test Lobby":"Registration / Details";action.disabled=false;}
+  };tick();if(vkGrandTestTimer)clearInterval(vkGrandTestTimer);vkGrandTestTimer=setInterval(tick,1000);
+}
+function openGrandTestRegistration(){
+  const now=Date.now();
+  if(now>VK_GRAND_TEST_REG_END){toast("Grand Test registration is closed. Registered students can join the exam lobby.");return;}
+  if(!isLoggedIn()){window.__vkAfterLogin="grandTestRegistration";openLogin();toast("Grand Test registration కోసం ముందుగా Login చేయండి.");return;}
+  toast("Grand Test registration backend setup అవసరం. Registration table మరియు confirmation email function configure చేసిన తర్వాత ఇది పూర్తిగా పనిచేస్తుంది.");
+}
+
 const VK_STUDY_BUCKET = "study-materials";
 let vkStudyMaterialsCache = [];
 let vkStudyPdfDoc = null;
@@ -13505,6 +13588,7 @@ document.addEventListener(
 
     </div>
 </div>
+<script>window.addEventListener("load",function(){initGrandTestHomeCard();});</script>
 </body>
 
 </html>
