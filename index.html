@@ -3729,6 +3729,8 @@ Your test has been submitted successfully.
 
 </p>
 
+<div id="resultStats" class="result-stats" style="margin-top:18px;"></div>
+
 
 <div
 class="result-buttons"
@@ -10659,24 +10661,12 @@ const resultTestId = result.test_id || result.tests?.id || "";
                         flex-wrap:wrap;
                         margin-top:14px;
                     ">
-                        ${attemptId && resultTestId ? `
-                            <button type="button"
-                                class="btn btn-blue"
-                                style="flex:1;min-width:135px;padding:10px 14px;"
-                                onclick="openProfileHistoricalSolutions('${String(attemptId).replace(/'/g, '')}','${String(resultTestId).replace(/'/g, '')}','${encodeURIComponent(courseName)}','${encodeURIComponent(paperName)}',${testNumber || 1})">
-                                View Solutions
-                            </button>
-                            ${testNumber && paperName ? `
-                                <button type="button"
-                                    class="btn btn-outline"
-                                    style="flex:1;min-width:135px;padding:10px 14px;"
-                                    onclick="reattemptFromHistory('${encodeURIComponent(courseName)}','${encodeURIComponent(paperName)}',${testNumber})">
-                                    ↻ Reattempt
-                                </button>
-                            ` : ""}
-                        ` : `
-                            <span style="color:#9ca3af;font-size:12px;">Solution history is not linked to this result.</span>
-                        `}
+                        <button type="button"
+                            class="btn btn-blue"
+                            style="width:100%;padding:11px 14px;"
+                            onclick="openSavedTestResult('${encodeURIComponent(displayTestName)}',${score},${total},${percentage},${correct},${wrong},${unanswered},'${encodeURIComponent(date)}')">
+                            View Results
+                        </button>
                     </div>
 
                 </div>
@@ -12843,6 +12833,7 @@ lastResult = {
             }
 
 
+            restoreLiveResultActions();
             showPage(
                 "resultPage"
             );
@@ -12951,10 +12942,72 @@ lastResult = {
         `;
     }
 
+    restoreLiveResultActions();
     showPage("resultPage");
 
 }
 
+
+/* =====================================================
+   HISTORICAL RESULT VIEW
+   Profile > Test Results cards use this view-only screen.
+===================================================== */
+function openSavedTestResult(encodedTitle, score, total, percentage, correct, wrong, unanswered, encodedDate){
+    const title = decodeURIComponent(encodedTitle || "Test Result");
+    const completedDate = decodeURIComponent(encodedDate || "-");
+
+    const heading = document.querySelector("#resultPage .result-card h1");
+    if(heading) heading.textContent = "📊 Test Result";
+
+    const scoreNode = document.getElementById("scoreText");
+    if(scoreNode) scoreNode.textContent = `${score} / ${total}`;
+
+    const messageNode = document.getElementById("resultMessage");
+    if(messageNode) messageNode.textContent = `${title} • Completed: ${completedDate}`;
+
+    const stats = document.getElementById("resultStats");
+    if(stats){
+        stats.innerHTML = `
+            <div class="stat"><b>${correct}</b> Correct</div>
+            <div class="stat"><b>${wrong}</b> Wrong</div>
+            <div class="stat"><b>${unanswered}</b> Unanswered</div>
+            <div class="stat"><b>${Number(percentage).toFixed(2)}%</b> Percentage</div>
+        `;
+    }
+
+    const actions = document.querySelectorAll("#resultPage .result-buttons button");
+    if(actions[0]) actions[0].style.display = "none";
+    if(actions[1]) actions[1].style.display = "none";
+    if(actions[2]){
+        actions[2].textContent = "← Back to Test Results";
+        actions[2].setAttribute("onclick", "showTestResults(false)");
+        actions[2].style.background = "#e5e7eb";
+    }
+
+    showPage("resultPage");
+}
+
+function restoreLiveResultActions(){
+    const heading = document.querySelector("#resultPage .result-card h1");
+    if(heading) heading.textContent = "🎉 Test Completed";
+
+    const actions = document.querySelectorAll("#resultPage .result-buttons button");
+    if(actions[0]){
+        actions[0].style.display = "";
+        actions[0].textContent = "View Solutions";
+        actions[0].setAttribute("onclick", "viewSolutions()");
+    }
+    if(actions[1]){
+        actions[1].style.display = "";
+        actions[1].textContent = "Reattempt";
+        actions[1].setAttribute("onclick", "reattempt()");
+    }
+    if(actions[2]){
+        actions[2].textContent = "Back to Test Series";
+        actions[2].setAttribute("onclick", "backToTestSeriesFromResult()");
+        actions[2].style.background = "#e5e7eb";
+    }
+}
 
 /* =====================================================
    SOLUTIONS
