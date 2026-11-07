@@ -1803,98 +1803,61 @@ header{
 
 
 /* =====================================================
-   RESULT
+   RESULT ANALYTICS DASHBOARD
 ===================================================== */
-
-.result-card{
-    max-width:700px;
-
-    margin:auto;
-
-    background:#fff;
-
-    border-radius:16px;
-
-    padding:32px;
-
-    text-align:center;
-
-    border:
-        1px solid #e5e7eb;
+#resultPage{background:#f7faff}
+#resultPage .container{max-width:1120px;padding-top:28px}
+.result-dashboard{display:grid;gap:18px}
+.result-hero{display:grid;grid-template-columns:1.1fr .9fr;gap:20px;align-items:center;background:#fff;border:1px solid #cbdcf5;border-radius:18px;padding:24px}
+.result-kicker{font-size:11px;font-weight:900;letter-spacing:1px;color:#2563eb;text-transform:uppercase}
+.result-hero h1{font-size:25px;color:#14213d;margin:7px 0}
+.result-hero p{color:#64748b;line-height:1.55}
+.result-score-number{font-size:42px;line-height:1.15;font-weight:900;color:#1d4ed8;margin:12px 0 5px}
+.result-score-caption{font-size:13px;color:#64748b}
+.result-score-ring{--score:0%;width:150px;height:150px;border-radius:50%;margin:auto;display:grid;place-items:center;background:conic-gradient(#2563eb var(--score),#e8eef7 0);position:relative}
+.result-score-ring:before{content:"";position:absolute;inset:12px;border-radius:50%;background:#fff}
+.result-score-ring-inner{position:relative;text-align:center}
+.result-score-ring-inner strong{display:block;font-size:27px;color:#172554}
+.result-score-ring-inner span{font-size:11px;color:#64748b}
+.result-stat-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.result-stat-box{background:#fff;border:1px solid #d5e1f1;border-radius:13px;padding:16px}
+.result-stat-box span{display:block;font-size:12px;color:#64748b;margin-bottom:7px}
+.result-stat-box strong{font-size:25px;color:#172554}
+.result-stat-box small{display:block;color:#64748b;margin-top:4px}
+.result-analytics-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.result-panel{background:#fff;border:1px solid #d5e1f1;border-radius:15px;padding:19px;min-width:0}
+.result-panel h2{font-size:16px;color:#172554;margin-bottom:5px}
+.result-panel-sub{font-size:12px;color:#64748b;margin-bottom:16px}
+.result-answer-layout{display:flex;align-items:center;gap:18px}
+.result-answer-donut{width:130px;height:130px;flex:0 0 130px;border-radius:50%;display:grid;place-items:center;background:#e8eef7}
+.result-answer-donut:before{content:"";grid-area:1/1;width:84px;height:84px;background:#fff;border-radius:50%}
+.result-answer-donut strong{grid-area:1/1;z-index:1;color:#172554;font-size:16px}
+.result-legend{display:grid;gap:10px;flex:1}
+.result-legend-row{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:13px;color:#475569}
+.result-legend-label{display:flex;align-items:center;gap:8px}
+.result-dot{width:9px;height:9px;border-radius:50%;display:inline-block;background:#2563eb}
+.result-dot.wrong{background:#94a3b8}.result-dot.skip{background:#dbe4f0;border:1px solid #b8c7da}
+.result-topic-list{display:grid;gap:13px}
+.result-topic-row{display:grid;grid-template-columns:minmax(100px,1fr) 2fr 42px;gap:10px;align-items:center;font-size:12px;color:#475569}
+.result-topic-track{height:9px;border-radius:20px;background:#edf2f8;overflow:hidden}
+.result-topic-fill{height:100%;border-radius:20px;background:#2563eb}
+.result-topic-value{text-align:right;font-weight:800;color:#172554}
+.result-insight{border:1px solid #d5e1f1;background:#fff;border-radius:15px;padding:18px}
+.result-insight h2{font-size:16px;color:#172554;margin-bottom:8px}
+.result-insight p,.result-insight li{font-size:13px;line-height:1.6;color:#475569}
+.result-insight ul{padding-left:19px;margin-top:7px}
+.result-benchmark-note{padding:12px 14px;background:#f8fbff;border:1px dashed #b7c9e2;border-radius:10px;color:#53657d;font-size:12px;line-height:1.5;margin-top:12px}
+.result-buttons{margin-top:2px!important;justify-content:flex-start}
+.result-buttons .btn{min-height:44px}
+@media(max-width:760px){
+ .result-hero{grid-template-columns:1fr;text-align:center;padding:20px}
+ .result-score-ring{width:128px;height:128px}
+ .result-stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .result-analytics-grid{grid-template-columns:1fr}
+ .result-answer-layout{justify-content:center;flex-wrap:wrap}
+ .result-topic-row{grid-template-columns:105px 1fr 38px}
+ .result-score-number{font-size:36px}
 }
-
-.score{
-    font-size:45px;
-
-    font-weight:900;
-
-    color:#2563eb;
-
-    margin:18px;
-}
-
-.result-buttons{
-    display:flex;
-
-    gap:10px;
-
-    justify-content:center;
-
-    flex-wrap:wrap;
-}
-
-.solution-card{
-    background:#fff;
-
-    border:
-        1px solid #e5e7eb;
-
-    border-radius:12px;
-
-    padding:18px;
-
-    margin-bottom:12px;
-}
-   
-.solution-card{
-    background:#fff;
-    border:1px solid #e5e7eb;
-    border-radius:12px;
-    padding:16px;
-    margin-bottom:12px;
-}
-
-.solution-card h3{
-    margin:0 0 10px 0;
-    font-size:17px;
-    line-height:1.5;
-    font-weight:800;
-}
-
-.solution-line{
-    margin:6px 0;
-    padding:0;
-    line-height:1.5;
-    font-size:15px;
-}
-
-.solution-your-answer{
-    color:#dc2626;
-    font-weight:800;
-}
-
-.solution-correct-answer{
-    color:#16a34a !important;
-    font-weight:800;
-}
-
-.solution-explanation{
-    color:#6b7280;
-    margin-top:8px;
-    line-height:1.5;
-    font-size:14px;
-   }
-
 /* =====================================================
    MODAL
 ===================================================== */
@@ -3700,74 +3663,70 @@ class="test-list">
      RESULT PAGE
 ===================================================== -->
 
-<div
-id="resultPage"
-class="page">
-
-<div class="container">
-
-<div class="result-card">
-
-<h1>
-🎉 Test Completed
-</h1>
-
-
-<div
-id="scoreText"
-class="score">
-
-0 / 10
-
-</div>
-
-
-<p
-id="resultMessage">
-
-Your test has been submitted successfully.
-
-</p>
-
-
-<div
-class="result-buttons"
-style="margin-top:22px">
-
-
-<button
-class="btn btn-blue"
-onclick="viewSolutions()">
-
-View Solutions
-
-</button>
-
-
-<button
-class="btn btn-primary"
-onclick="reattempt()">
-
-Reattempt
-
-</button>
-
-
-<button
-    class="btn"
-    style="background:#e5e7eb"
-    onclick="backToTestSeriesFromResult()">
-
-    Back to Test Series
-
-</button>
-
-</div>
-
-</div>
-
-</div>
-
+<div id="resultPage" class="page">
+  <div class="container">
+    <div class="result-dashboard">
+      <section class="result-hero">
+        <div>
+          <div class="result-kicker">VK EXAMS · PERFORMANCE REPORT</div>
+          <h1 id="resultHeading">Test Completed</h1>
+          <p id="resultMessage">Your test has been submitted successfully.</p>
+          <div class="result-score-number" id="scoreText">0 / 10</div>
+          <div class="result-score-caption">Your score after applicable negative marking</div>
+        </div>
+        <div class="result-score-ring" id="resultScoreRing" style="--score:0%">
+          <div class="result-score-ring-inner"><strong id="resultPercentage">0%</strong><span>Overall score</span></div>
+        </div>
+      </section>
+      <section class="result-stat-grid" aria-label="Exam statistics">
+        <div class="result-stat-box"><span>Correct answers</span><strong id="resultCorrect">0</strong><small>Questions answered correctly</small></div>
+        <div class="result-stat-box"><span>Wrong answers</span><strong id="resultWrong">0</strong><small>Review these concepts</small></div>
+        <div class="result-stat-box"><span>Not answered</span><strong id="resultSkipped">0</strong><small>Questions left blank</small></div>
+        <div class="result-stat-box"><span>Accuracy</span><strong id="resultAccuracy">0%</strong><small>Correct / attempted</small></div>
+      </section>
+      <section class="result-analytics-grid">
+        <div class="result-panel">
+          <h2>Answer Distribution</h2><p class="result-panel-sub">How your responses were distributed</p>
+          <div class="result-answer-layout">
+            <div class="result-answer-donut" id="resultAnswerDonut"><strong id="resultAttemptedCount">0 attempted</strong></div>
+            <div class="result-legend">
+              <div class="result-legend-row"><span class="result-legend-label"><i class="result-dot"></i>Correct</span><b id="legendCorrect">0</b></div>
+              <div class="result-legend-row"><span class="result-legend-label"><i class="result-dot wrong"></i>Wrong</span><b id="legendWrong">0</b></div>
+              <div class="result-legend-row"><span class="result-legend-label"><i class="result-dot skip"></i>Skipped</span><b id="legendSkipped">0</b></div>
+            </div>
+          </div>
+        </div>
+        <div class="result-panel">
+          <h2>Topic-wise Performance</h2><p class="result-panel-sub">Based on topic labels and answer keys available for this test</p>
+          <div id="resultTopicAnalysis" class="result-topic-list"><p class="result-panel-sub">Topic-wise data will appear when question records include topic labels and answer keys.</p></div>
+        </div>
+      </section>
+      <section class="result-analytics-grid">
+        <div class="result-panel">
+          <h2>Time Management</h2><p class="result-panel-sub">Time used during this attempt</p>
+          <div class="result-stat-box" style="background:#f8fbff"><span>Total time used</span><strong id="resultTimeUsed">Not available</strong><small id="resultAvgTime">Average time per question: Not available</small></div>
+        </div>
+        <div class="result-panel">
+          <h2>Cut-off Benchmark</h2><p class="result-panel-sub">A reference point for your preparation</p>
+          <div id="resultBenchmark" class="result-benchmark-note">A verified previous cut-off dataset has not been configured. No rank or percentile is estimated.</div>
+        </div>
+      </section>
+      <section class="result-insight">
+        <h2>Personal Improvement Plan</h2>
+        <p id="resultInsightSummary">Review incorrect and unanswered questions to identify areas that need more practice.</p>
+        <ul id="resultImprovementList">
+          <li>Open View Solutions and revise explanations for incorrect answers.</li>
+          <li>Practise the topics where your accuracy is lowest.</li>
+          <li>Attempt another test and compare your actual scores over time.</li>
+        </ul>
+      </section>
+      <div class="result-buttons">
+        <button class="btn btn-blue" onclick="viewSolutions()">View Solutions</button>
+        <button class="btn btn-primary" onclick="reattempt()">Reattempt</button>
+        <button class="btn" style="background:#e5e7eb" onclick="backToTestSeriesFromResult()">Back to Test Series</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 
@@ -4861,6 +4820,8 @@ let examQuestions = [];
 let timerInterval = null;
 
 let timeLeft = 900;
+let examInitialTimeLimit = 900;
+let examStartedAt = null;
 
 let lastResult = null;
    let currentFreeMockTestId = null;
@@ -7149,6 +7110,8 @@ async function startPaidTest(testNumber){
             Number(
                 testData.duration_minutes || 120
             ) * 60;
+        examInitialTimeLimit = timeLeft;
+        examStartedAt = Date.now();
 
 
         /* =========================================
@@ -12175,6 +12138,8 @@ if (!testData) {
         timeLeft = restoreState && Number.isFinite(Number(restoreState.timeLeft))
             ? Math.max(0, Number(restoreState.timeLeft))
             : defaultDuration;
+        examInitialTimeLimit = defaultDuration;
+        examStartedAt = Date.now() - Math.max(0, defaultDuration - timeLeft) * 1000;
 
 
         $("examTitle").textContent =
@@ -12531,6 +12496,50 @@ function closeLastQuestionPopup(){
    SUBMIT
 ===================================================== */
 
+function vkFormatDuration(seconds){
+    if(!Number.isFinite(seconds)||seconds<0)return "Not available";
+    const mins=Math.floor(seconds/60),secs=Math.floor(seconds%60);
+    return mins+" min "+String(secs).padStart(2,"0")+" sec";
+}
+function vkRenderResultAnalytics(){
+    if(!lastResult)return;
+    const r=lastResult,totalQ=(r.questions||[]).length;
+    const attempted=Math.max(0,Number(r.correct||0)+Number(r.wrong||0));
+    const accuracy=attempted?Number(r.correct||0)/attempted*100:0;
+    const pct=Math.max(0,Math.min(100,Number(r.percentage||0)));
+    const set=(id,value)=>{const el=document.getElementById(id);if(el)el.textContent=value;};
+    set("resultPercentage",Math.round(pct)+"%");set("resultCorrect",r.correct||0);
+    set("resultWrong",r.wrong||0);set("resultSkipped",r.unanswered||0);
+    set("resultAccuracy",Math.round(accuracy)+"%");set("legendCorrect",r.correct||0);
+    set("legendWrong",r.wrong||0);set("legendSkipped",r.unanswered||0);
+    set("resultAttemptedCount",attempted+" attempted");
+    const ring=document.getElementById("resultScoreRing");if(ring)ring.style.setProperty("--score",pct+"%");
+    const donut=document.getElementById("resultAnswerDonut");
+    if(donut){const c=totalQ?Number(r.correct||0)/totalQ*360:0,w=totalQ?Number(r.wrong||0)/totalQ*360:0;
+      donut.style.background=`conic-gradient(#2563eb 0deg ${c}deg,#94a3b8 ${c}deg ${c+w}deg,#dbe4f0 ${c+w}deg 360deg)`;}
+    const elapsed=Number.isFinite(r.elapsedSeconds)?r.elapsedSeconds:(examStartedAt?Math.max(0,Math.round((Date.now()-examStartedAt)/1000)):null);
+    set("resultTimeUsed",elapsed===null?"Not available":vkFormatDuration(elapsed));
+    set("resultAvgTime",elapsed===null?"Average time per question: Not available":"Average time per question: "+(totalQ?(elapsed/totalQ).toFixed(1)+" sec":"Not available"));
+    const topicMap={};
+    (r.questions||[]).forEach((q,i)=>{
+      const topic=String(q.topic||q.topic_name||q.subject||q.category||"").trim();
+      const key=String(q.correctOption||q.correct_option||"").trim().toUpperCase();
+      if(!topic||!/^[ABCD]$/.test(key))return;
+      const selected=r.answers[i],selectedKey=selected===null||selected===undefined?"":"ABCD"[Number(selected)];
+      if(!topicMap[topic])topicMap[topic]={total:0,correct:0};
+      topicMap[topic].total++;if(selectedKey===key)topicMap[topic].correct++;
+    });
+    const topicEl=document.getElementById("resultTopicAnalysis"),improvement=document.getElementById("resultImprovementList");
+    if(topicEl){
+      const entries=Object.entries(topicMap).map(([name,v])=>({name,...v,pct:v.total?Math.round(v.correct/v.total*100):0})).sort((a,b)=>a.pct-b.pct);
+      if(entries.length){
+        topicEl.innerHTML=entries.map(t=>`<div class="result-topic-row"><span>${t.name.replace(/[<>]/g,"")}</span><div class="result-topic-track"><div class="result-topic-fill" style="width:${t.pct}%"></div></div><b class="result-topic-value">${t.pct}%</b></div>`).join("");
+        if(improvement){const low=entries.filter(t=>t.pct<70).slice(0,3);
+          improvement.innerHTML=(low.length?low.map(t=>`<li><strong>${t.name.replace(/[<>]/g,"")}</strong>: ${t.pct}% — ఈ అంశంపై మళ్లీ చదివి సాధన చేయండి.</li>`):["ప్రతి Topicలో 70% లేదా అంతకంటే ఎక్కువ సాధించారు. తప్పుగా గుర్తించిన ప్రశ్నల వివరణలను మరోసారి చదవండి."].map(x=>`<li>${x}</li>`)).join("")+`<li>సమాధానం ఇవ్వని ${r.unanswered||0} ప్రశ్నలను కూడా తిరిగి ప్రయత్నించండి.</li>`;}
+      }else{topicEl.innerHTML='<p class="result-panel-sub">ఈ పరీక్ష ప్రశ్నల డేటాలో Topic tag మరియు answer key అందుబాటులో లేవు. అందువల్ల topic graph చూపించడం లేదు.</p>';}
+    }
+    set("resultInsightSummary",accuracy>=75?"మీ attempted questionsలో accuracy బాగుంది. ఇప్పుడు speed మరియు బలహీన అంశాలపై దృష్టి పెట్టండి.":"మీ accuracy పెంచడానికి తప్పుగా సమాధానమిచ్చిన ప్రశ్నల భావనలను తిరిగి చదివి topic-wise practice చేయండి.");
+}
 async function submitExam(timeout = false){
 
     if(!examQuestions.length){
@@ -12768,11 +12777,10 @@ lastResult = {
                 `;
 
             }
+    vkRenderResultAnalytics();
 
 
-            showPage(
-                "resultPage"
-            );
+            showPage("resultPage");
 
 
         }catch(error){
@@ -12878,7 +12886,9 @@ lastResult = {
         `;
     }
 
-    showPage("resultPage");
+    vkRenderResultAnalytics();
+
+    vkRenderResultAnalytics();    showPage("resultPage");
 
 }
 
