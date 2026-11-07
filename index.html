@@ -6522,7 +6522,7 @@ if (isLoggedIn() && supabaseClient) {
                         <span>${vkAdminEscape(label)}</span>
                         <span style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
                             <button type="button" class="btn btn-blue" style="padding:8px 13px;font-size:13px;" onclick="openLockedTest(${i})">↻ Reattempt</button>
-                            <button type="button" class="btn" style="padding:8px 13px;font-size:13px;background:#fff;border:1px solid #2563eb;color:#2563eb;" onclick="openHistoricalSolutions('${String(completedAttempt.attempt_id).replace("'", "")}', '${String(test.id).replace("'", "")}', ${i})">View Solutions</button>
+                            <button type="button" class="btn" style="padding:8px 13px;font-size:13px;background:#fff;border:1px solid #2563eb;color:#2563eb;" onclick="openHistoricalSolutions('${String(completedAttempt.attempt_id).replace("'", "")}', '${String(test.id).replace("'", "")}', ${i}, 'testlist')">View Solutions</button>
                         </span>
                     </div>
                 `;
@@ -10274,6 +10274,8 @@ if(!supabaseClient){
 } = await supabaseClient
     .from("test_results")
     .select(`
+        attempt_id,
+        test_id,
         score,
         total_marks,
         percentage,
@@ -10282,7 +10284,9 @@ if(!supabaseClient){
         unanswered,
         completed_at,
         tests (
+            id,
             title,
+            test_number,
             test_series (
                 name,
                 courses (
@@ -10455,15 +10459,17 @@ const testSeriesName =
     result.tests?.test_series?.name ||
     "";
 
-let displayTestName = testName;
-if(testSeriesName === "Free Mock Tests"){
-    displayTestName =
-        `${courseName} – ${testName}`;
-}
-else{
-    displayTestName =
-        `${courseName} – ${testName}`;
-}
+const testNumber =
+    Number(result.tests?.test_number || 0);
+
+const paperName = testSeriesName || "";
+const displayTestName = testNumber
+    ? `${courseName} – ${paperName} – Test ${testNumber}`
+    : `${courseName} – ${testName}`;
+
+const attemptLabel = `Attempt ${index + 1}`;
+const attemptId = result.attempt_id || "";
+const resultTestId = result.test_id || result.tests?.id || "";
 
         const score =
             Number(result.score || 0);
@@ -10516,7 +10522,7 @@ else{
                                 font-size:12px;
                                 margin-bottom:5px;
                             ">
-                                Test ${index + 1}
+                                ${attemptLabel}
                             </div>
 
                             <h3 style="
@@ -10645,6 +10651,32 @@ else{
                         color:#6b7280;
                     ">
                         🕒 Completed: ${date}
+                    </div>
+
+                    <div style="
+                        display:flex;
+                        gap:9px;
+                        flex-wrap:wrap;
+                        margin-top:14px;
+                    ">
+                        ${attemptId && resultTestId ? `
+                            <button type="button"
+                                class="btn btn-blue"
+                                style="flex:1;min-width:135px;padding:10px 14px;"
+                                onclick="openProfileHistoricalSolutions('${String(attemptId).replace(/'/g, '')}','${String(resultTestId).replace(/'/g, '')}','${encodeURIComponent(courseName)}','${encodeURIComponent(paperName)}',${testNumber || 1})">
+                                View Solutions
+                            </button>
+                            ${testNumber && paperName ? `
+                                <button type="button"
+                                    class="btn btn-outline"
+                                    style="flex:1;min-width:135px;padding:10px 14px;"
+                                    onclick="reattemptFromHistory('${encodeURIComponent(courseName)}','${encodeURIComponent(paperName)}',${testNumber})">
+                                    ↻ Reattempt
+                                </button>
+                            ` : ""}
+                        ` : `
+                            <span style="color:#9ca3af;font-size:12px;">Solution history is not linked to this result.</span>
+                        `}
                     </div>
 
                 </div>
@@ -13134,16 +13166,17 @@ async function viewSolutions(){
 ===================================================== */
 let historicalSolutionsContext = null;
 
-async function openHistoricalSolutions(attemptId, testId, testNumber){
+async function openHistoricalSolutions(attemptId, testId, testNumber, returnTo = "testlist", courseOverride = "", paperOverride = ""){
     if(!supabaseClient || !attemptId || !testId){
         toast("Solution history is not available for this attempt.");
         return;
     }
 
     historicalSolutionsContext = {
-        course: currentCourse,
-        paper: currentPaper,
-        testNumber: Number(testNumber) || 1
+        course: courseOverride || currentCourse,
+        paper: paperOverride || currentPaper,
+        testNumber: Number(testNumber) || 1,
+        returnTo: returnTo
     };
 
     showLoading("Loading solutions...", "Please wait...");
@@ -13196,14 +13229,37 @@ async function openHistoricalSolutions(attemptId, testId, testNumber){
     }
 }
 
-function backFromSolutions(){
+async function openProfileHistoricalSolutions(attemptId, testId, encodedCourse, encodedPaper, testNumber){
+    const course = decodeURIComponent(encodedCourse || "");
+    const paper = decodeURIComponent(encodedPaper || "");
+    currentCourse = course;
+    currentPaper = paper;
+    await openHistoricalSolutions(attemptId, testId, testNumber, "profile", course, paper);
+}
+
+function reattemptFromHistory(encodedCourse, encodedPaper, testNumber){
+    currentCourse = decodeURIComponent(encodedCourse || "");
+    currentPaper = decodeURIComponent(encodedPaper || "");
+    currentTestNumber = Number(testNumber) || 1;
+    openLockedTest(currentTestNumber);
+}
+
+async function backFromSolutions(){
     if(historicalSolutionsContext){
         const context = historicalSolutionsContext;
         historicalSolutionsContext = null;
-        currentCourse = context.course;
-        currentPaper = context.paper;
-        openPaper(context.paper, false);
-        return;
+        currentCourse = context.course || currentCourse;
+        currentPaper = context.paper || currentPaper;
+
+        if(context.returnTo === "profile"){
+            await showTestResults(false);
+            return;
+        }
+
+        if(context.paper){
+            await openPaper(context.paper, false);
+            return;
+        }
     }
     showPage("resultPage");
 }
