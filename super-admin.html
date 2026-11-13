@@ -10,7 +10,7 @@
 </style></head>
 <body><main class="wrap">
 <header class="top"><div><div class="brand">VK EXAMS <span class="muted" style="font-size:13px">/ SUPER ADMIN</span></div><div class="muted small">Private administration dashboard</div></div><div><span id="who" class="muted small"></span> <button class="btn" id="logout" onclick="logout()" hidden>Sign out</button></div></header>
-<section id="loginBox" class="panel login"><h2>Super Admin Login</h2><p class="muted">Sign in using the authorized VK Exams admin email.</p><input id="email" type="email" placeholder="Admin email" style="width:100%;margin:8px 0"><input id="password" type="password" placeholder="Password" style="width:100%;margin:8px 0"><button class="btn primary" style="width:100%" onclick="login()">Sign in with Email</button><div style="display:flex;align-items:center;gap:10px;margin:14px 0;color:#64748b;font-size:12px"><span style="height:1px;background:#e2e8f0;flex:1"></span>OR<span style="height:1px;background:#e2e8f0;flex:1"></span></div><button class="btn" type="button" style="width:100%;display:flex;align-items:center;justify-content:center;gap:10px" onclick="loginWithGoogle()"><span style="font-weight:800;color:#4285F4">G</span> Continue with Google</button><p id="loginMsg" class="small muted"></p></section>
+<section id="loginBox" class="panel login"><h2>Super Admin Login</h2><p class="muted">Sign in using the authorized VK Exams admin email.</p><input id="email" type="email" placeholder="Admin email" style="width:100%;margin:8px 0"><input id="password" type="password" placeholder="Password" style="width:100%;margin:8px 0"><button class="btn primary" style="width:100%" onclick="login()">Sign in with Email</button><button class="btn" type="button" style="width:100%;margin-top:8px" onclick="resetAdminPassword()">Forgot password? / Set Email Password</button><div style="display:flex;align-items:center;gap:10px;margin:14px 0;color:#64748b;font-size:12px"><span style="height:1px;background:#e2e8f0;flex:1"></span>OR<span style="height:1px;background:#e2e8f0;flex:1"></span></div><button class="btn" type="button" style="width:100%;display:flex;align-items:center;justify-content:center;gap:10px" onclick="loginWithGoogle()"><span style="font-weight:800;color:#4285F4">G</span> Continue with Google</button><p id="loginMsg" class="small muted"></p></section>
 <section id="app" class="hidden">
 <div class="note">Security: this page uses the publishable key only. All privileged data must be authorized inside the Super Admin RPC; hiding UI controls is not an access-control boundary.</div><div class="toolbar"><label>Report period</label><select id="period" onchange="loadDashboard()"><option value="today">Today</option><option value="7">Last 7 days</option><option value="30" selected>Last 30 days</option><option value="month">This month</option><option value="all">All time</option></select><button class="btn primary" onclick="loadDashboard()">Refresh</button><button class="btn" onclick="exportCurrent()">Export visible CSV</button><span id="updated" class="muted small"></span></div>
 <div class="grid">
@@ -43,6 +43,17 @@ const money=n=>'₹'+Number(n||0).toLocaleString('en-IN',{maximumFractionDigits:
 const date=v=>v?new Date(v).toLocaleString('en-IN'):'—';
 function range(){const p=$('period').value,now=new Date(),to=now.toISOString();let from=new Date(0);if(p==='today'){from=new Date(now);from.setHours(0,0,0,0)}else if(p==='month'){from=new Date(now.getFullYear(),now.getMonth(),1)}else if(p!=='all'){from=new Date(now.getTime()-Number(p)*86400000)}return [from.toISOString(),to]}
 async function login(){ $('loginMsg').textContent='Signing in…';const e=$('email').value.trim().toLowerCase();if(e!==ADMIN_EMAIL){$('loginMsg').textContent='This email is not authorized.';return}const {error}=await sb.auth.signInWithPassword({email:e,password:$('password').value});if(error){$('loginMsg').textContent=error.message;return}await gate()}
+async function resetAdminPassword(){
+  const e=$('email').value.trim().toLowerCase();
+  if(e!==ADMIN_EMAIL){$('loginMsg').textContent='Enter the authorized admin email first.';return}
+  $('loginMsg').textContent='Sending password setup email…';
+  const {error}=await sb.auth.resetPasswordForEmail(e,{
+    redirectTo:window.location.origin+window.location.pathname
+  });
+  $('loginMsg').textContent=error
+    ? 'Password setup email failed: '+error.message
+    : 'Password setup link sent. Check the admin email inbox and spam folder.';
+}
 async function loginWithGoogle(){
   $('loginMsg').textContent='Redirecting to Google…';
   const {error}=await sb.auth.signInWithOAuth({
@@ -64,5 +75,22 @@ function renderPerformance(){const all=(currentData?.attempts||[]);const type=$(
 function esc(v){return String(v??'—').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function showTab(id,btn){document.querySelectorAll('#app .section').forEach(x=>x.classList.add('hidden'));$(id).classList.remove('hidden');document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));btn.classList.add('active');currentTab=id}
 function exportCurrent(){let table=$(currentTab).querySelector('table');if(!table){alert('No table to export');return}let rows=[...table.querySelectorAll('tr')].map(r=>[...r.children].map(c=>'"'+c.innerText.replace(/"/g,'""')+'"').join(',')).join('\n');let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([rows],{type:'text/csv;charset=utf-8'}));a.download='vk-exams-'+currentTab+'.csv';a.click();URL.revokeObjectURL(a.href)}
-sb.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_IN'||event==='SIGNED_OUT'){if(event==='SIGNED_OUT')location.reload();else gate()}});gate();
+sb.auth.onAuthStateChange(async (event,session)=>{
+  if(event==='PASSWORD_RECOVERY' && session){
+    const newPassword=prompt('Create a new password for the Super Admin email account (minimum 8 characters):');
+    if(newPassword && newPassword.length>=8){
+      const {error}=await sb.auth.updateUser({password:newPassword});
+      if(error){alert('Password update failed: '+error.message);return}
+      alert('Password updated. You can now sign in using Email + Password.');
+      await gate();
+    } else if(newPassword!==null){
+      alert('Password must contain at least 8 characters. Request a new reset link and try again.');
+      await sb.auth.signOut();
+    }
+    return;
+  }
+  if(event==='SIGNED_IN'||event==='SIGNED_OUT'){
+    if(event==='SIGNED_OUT')location.reload();else gate();
+  }
+});gate();
 </script></body></html>
