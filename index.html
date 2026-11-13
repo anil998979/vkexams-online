@@ -3039,6 +3039,65 @@ body.dark-mode .vk-theme-toggle{background:#243247;color:#f8fafc;border-color:#4
 #store .vk-store-benefits div:nth-child(3) b{background:#7b32df;}
 @media(max-width:700px){#store .vk-store-hero{min-height:175px;padding:25px 15px;margin-top:12px;}#store .vk-store-hero-art{left:10px;font-size:38px;bottom:12px;opacity:.65;}#store .vk-store-hero-temple{right:10px;font-size:42px;bottom:12px;}#store .vk-store-courses{grid-template-columns:1fr;}#store .vk-course-card{min-height:125px;padding:23px 14px;gap:10px;border-radius:18px;}#store .vk-course-icon{flex-basis:62px;font-size:43px;}#store .vk-course-copy h3{font-size:19px;}#store .vk-course-copy p{font-size:13px;}#store .vk-course-card .coming-soon-badge{font-size:11px;padding:7px 9px;}#store .vk-course-action{font-size:11px;padding:10px 9px;}#store .vk-course-features{gap:7px;font-size:10px;}#store .vk-selected-course{align-items:flex-start;flex-direction:column;padding:18px;}#store .vk-selected-course h3{font-size:22px;}#store .vk-offer-hero{padding:17px 9px;}#store .vk-megaphone{font-size:29px;}#store .vk-offer-main strong{font-size:47px;padding:4px 13px;}#store .vk-plan-grid{grid-template-columns:1fr;gap:15px;}#store .vk-plan-top{padding:14px 18px;}#store .vk-plan-body{padding:15px 18px 18px;}#store .vk-new-price{font-size:38px;}#store .vk-store-benefits{grid-template-columns:1fr;gap:5px;padding:12px;}#store .vk-store-benefits div{justify-content:flex-start;padding:8px 15px;}#store .vk-store-benefits div+div{border-left:0;border-top:1px solid #e5e0f7;}#store .vk-limited-offer{margin:23px 0 17px;padding:12px;font-size:19px;}}
 
+
+/* =====================================================
+   VK EXAMS - MODERN RESULT DASHBOARD
+   Presentation-only styles; existing result actions remain intact.
+===================================================== */
+#resultPage .container{max-width:980px;padding-top:34px;padding-bottom:48px}
+#resultPage .result-card{
+  max-width:900px;margin:0 auto;background:#fff;border:1px solid #e2e8f0;
+  border-radius:24px;padding:clamp(20px,4vw,38px);text-align:left;
+  box-shadow:0 18px 48px rgba(30,64,175,.09);position:relative;overflow:hidden;
+}
+#resultPage .result-card:before{
+  content:"";position:absolute;inset:0 0 auto;height:7px;
+  background:linear-gradient(90deg,#2563eb,#7c3aed,#06b6d4);
+}
+.result-topline{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:4px 0 24px}
+.result-brand{font-weight:900;letter-spacing:.5px;color:#2563eb;font-size:13px}
+.result-status{display:inline-flex;align-items:center;gap:7px;padding:7px 12px;border-radius:999px;background:#ecfdf5;color:#047857;font-size:12px;font-weight:850}
+.result-status:before{content:"";width:7px;height:7px;border-radius:50%;background:#10b981}
+.result-heading{text-align:center;margin:0 auto 22px}
+.result-heading h1{font-size:clamp(24px,4vw,32px);color:#172033;margin:0 0 7px;font-weight:900}
+#resultExamTitle{color:#64748b;font-size:13px;font-weight:750;letter-spacing:.35px;min-height:18px}
+.result-score-panel{
+  max-width:560px;margin:0 auto 22px;padding:22px 18px;border-radius:18px;
+  background:linear-gradient(135deg,#eff6ff,#f5f3ff);border:1px solid #dbeafe;text-align:center;
+}
+#resultPage .score{font-size:clamp(38px,7vw,54px);line-height:1.1;font-weight:950;color:#2857df;margin:0 0 9px}
+#resultMessage{color:#475569;font-size:14px;line-height:1.55}
+.result-progress-wrap{max-width:560px;margin:0 auto 24px}
+.result-progress-meta{display:flex;justify-content:space-between;gap:10px;margin-bottom:8px;font-size:12px;color:#64748b;font-weight:750}
+.result-progress-track{height:10px;border-radius:999px;background:#e8edf5;overflow:hidden}
+#resultProgressBar{height:100%;width:0%;border-radius:999px;background:linear-gradient(90deg,#2563eb,#7c3aed);transition:width .35s ease}
+#resultPage .result-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:0!important}
+#resultPage .result-stats .stat{
+  min-width:0;padding:17px 12px;border:1px solid #e5eaf2;border-radius:15px;
+  background:#fff;text-align:center;color:#64748b;font-size:12px;font-weight:700;
+}
+#resultPage .result-stats .stat b{display:block;font-size:26px;line-height:1.2;margin-bottom:5px;color:#172033}
+#resultPage .result-stats .stat:nth-child(1){background:#f0fdf4;border-color:#bbf7d0}
+#resultPage .result-stats .stat:nth-child(1) b{color:#15803d}
+#resultPage .result-stats .stat:nth-child(2){background:#fff1f2;border-color:#fecdd3}
+#resultPage .result-stats .stat:nth-child(2) b{color:#e11d48}
+#resultPage .result-stats .stat:nth-child(3){background:#f8fafc;border-color:#e2e8f0}
+#resultPage .result-stats .stat:nth-child(4){background:#eff6ff;border-color:#bfdbfe}
+#resultPage .result-stats .stat:nth-child(4) b{color:#2563eb}
+#resultPage .result-buttons{margin-top:25px!important;display:grid;grid-template-columns:1.35fr 1fr 1.25fr;gap:11px}
+#resultPage .result-buttons .btn{min-height:48px;border-radius:12px;font-size:14px;font-weight:850}
+#resultPage .result-buttons .btn:last-child{background:#eef2f7!important;color:#334155;border:1px solid #dbe2ea}
+#resultPage .result-buttons .btn:last-child:hover{background:#e2e8f0!important}
+@media(max-width:650px){
+  #resultPage .container{padding:22px 12px 34px}
+  #resultPage .result-card{padding:22px 15px;border-radius:19px}
+  .result-topline{margin-bottom:20px}
+  #resultPage .result-stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+  #resultPage .result-stats .stat{padding:14px 8px}
+  #resultPage .result-stats .stat b{font-size:23px}
+  #resultPage .result-buttons{grid-template-columns:1fr 1fr}
+  #resultPage .result-buttons .btn:last-child{grid-column:1/-1}
+}
 </style>
 
 
@@ -3618,89 +3677,7 @@ class="test-list">
         <span class="progress-percent" id="attemptedPercent">0%</span>
         <span class="progress-divider"></span>
         <span>Review: <b id="reviewCount">0</b></span>
-        <span class="progress-divider"></span>
-        <span>Left: <b id="remainingCount">0</b></span>
-        <span class="saved-indicator">Saved ✓</span>
-      </div>
-
-      <div class="exam-hall-actions">
-        <button type="button" class="hall-tool" onclick="toggleQuestionPalette()">▤ <span id="paletteToggleText">Hide Palette</span></button>
-        <button type="button" class="hall-tool" onclick="toggleExamPause()" id="pauseExamButton">Ⅱ Pause</button>
-        <div class="hall-timer"><small>TIME LEFT</small><strong id="timer">15:00</strong></div>
-        <button type="button" class="hall-submit" onclick="submitExam()">Submit</button>
-      </div>
-    </header>
-
-    <div class="exam-hall-body">
-      <main class="exam-hall-main">
-        <div class="exam-hall-notice">
-          <span>▣</span>
-          <strong>Exam Hall Mode:</strong> Answer the questions and use the question navigator to review your progress.
-          <span class="notice-secondary">Question Navigator</span>
-        </div>
-
-        <section class="exam-question-panel">
-          <div class="question-meta">
-            <div>
-              <strong>MULTIPLE CHOICE QUESTION</strong>
-              <span id="questionMarks">1 mark · −0.33 for a wrong answer</span>
-            </div>
-            <div class="language-switch" aria-label="Question language">
-              <button type="button" id="languageEnglishButton" onclick="setExamLanguage('en')">English</button>
-              <button type="button" id="languageTeluguButton" onclick="setExamLanguage('te')">తెలుగు</button>
-            </div>
-          </div>
-
-          <h2 id="questionText">Question</h2>
-          <div id="options" class="exam-answer-options"></div>
-
-          <div class="question-step-controls">
-            <button type="button" id="questionPreviousButton" onclick="previousQuestion()">← Previous</button>
-            <button type="button" id="questionNextButton" onclick="nextQuestion()">Save &amp; Next →</button>
-          </div>
-
-          <div class="question-utility-row">
-            <button type="button" class="clear-answer" onclick="clearCurrentAnswer()">Clear answer</button>
-            <div class="question-utility-actions">
-              <button type="button" onclick="reportQuestionIssue()">⚑ Report issue</button>
-              <button type="button" onclick="bookmarkCurrentQuestion()">☆ Bookmark</button>
-              <button type="button" id="reviewQuestionButton" onclick="toggleQuestionReview()">Mark for review</button>
-            </div>
-          </div>
-        </section>
-      </main>
-
-      <aside class="exam-question-navigator" id="examQuestionNavigator">
-        <div class="navigator-heading"><strong>QUESTION NAVIGATOR</strong><b><span id="navigatorTotal">0</span> total</b></div>
-        <div class="navigator-stats">
-          <div><strong id="navigatorAnswered">0</strong><span>Answered</span></div>
-          <div><strong id="navigatorReview">0</strong><span>Review</span></div>
-          <div><strong id="navigatorRemaining">0</strong><span>Remaining</span></div>
-        </div>
-        <div class="question-palette" id="questionPalette"></div>
-        <div class="navigator-legend">
-          <span><i class="legend-answered"></i> Answered</span>
-          <span><i class="legend-review"></i> Marked for review</span>
-          <span><i class="legend-empty"></i> Not answered</span>
-        </div>
-        <button type="button" class="navigator-submit" onclick="submitExam()">Submit / Finish test</button>
-      </aside>
-    </div>
-
-    <footer class="exam-hall-footer">
-      <button type="button" class="footer-previous" onclick="previousQuestion()">← Previous</button>
-      <button type="button" class="footer-hide-nav" onclick="toggleQuestionPalette()">▣ Hide Navigator <span id="footerQuestionPosition">1/30</span></button>
-      <button type="button" class="footer-next" onclick="nextQuestion()">Save &amp; next →</button>
-    </footer>
-  </div>
-</div>
-
-
-<!-- =====================================================
-     RESULT PAGE
-===================================================== -->
-
-<div
+        <span class="progress-divider"></span><div
 id="resultPage"
 class="page">
 
@@ -3708,63 +3685,38 @@ class="page">
 
 <div class="result-card">
 
-<h1>
-🎉 Test Completed
-</h1>
+  <div class="result-topline">
+    <div class="result-brand">VK EXAMS <span style="color:#64748b;font-weight:650">/ EXAM RESULTS</span></div>
+    <div class="result-status">Test Submitted</div>
+  </div>
 
+  <div class="result-heading">
+    <h1>🎉 Test Completed</h1>
+    <div id="resultExamTitle">YOUR TEST PERFORMANCE</div>
+  </div>
 
-<div
-id="scoreText"
-class="score">
+  <div class="result-score-panel">
+    <div id="scoreText" class="score">0 / 10</div>
+    <p id="resultMessage">Your test has been submitted successfully.</p>
+  </div>
 
-0 / 10
+  <div class="result-progress-wrap">
+    <div class="result-progress-meta">
+      <span>Score Percentage</span>
+      <strong id="resultPercentageLabel">0%</strong>
+    </div>
+    <div class="result-progress-track">
+      <div id="resultProgressBar"></div>
+    </div>
+  </div>
 
-</div>
+  <div id="resultStats" class="result-stats"></div>
 
-
-<p
-id="resultMessage">
-
-Your test has been submitted successfully.
-
-</p>
-
-<div id="resultStats" class="result-stats" style="margin-top:18px;"></div>
-
-
-<div
-class="result-buttons"
-style="margin-top:22px">
-
-
-<button
-class="btn btn-blue"
-onclick="viewSolutions()">
-
-View Solutions
-
-</button>
-
-
-<button
-class="btn btn-primary"
-onclick="reattempt()">
-
-Reattempt
-
-</button>
-
-
-<button
-    class="btn"
-    style="background:#e5e7eb"
-    onclick="backToTestSeriesFromResult()">
-
-    Back to Test Series
-
-</button>
-
-</div>
+  <div class="result-buttons">
+    <button class="btn btn-blue" onclick="viewSolutions()">View Detailed Solutions</button>
+    <button class="btn btn-primary" onclick="reattempt()">Reattempt</button>
+    <button class="btn" style="background:#e5e7eb" onclick="backToTestSeriesFromResult()">Back to Test Series</button>
+  </div>
 
 </div>
 
@@ -12800,6 +12752,8 @@ lastResult = {
                     : ""
                 );
 
+            updateResultDashboard(percentage, $("examTitle").textContent);
+
 
             const resultStats =
                 $("resultStats");
@@ -12932,6 +12886,8 @@ lastResult = {
             ? " Time expired and the test was auto-submitted."
             : "");
 
+    updateResultDashboard(percentage, $("examTitle").textContent);
+
     const resultStats = $("resultStats");
 
     if(resultStats){
@@ -12953,6 +12909,16 @@ lastResult = {
    HISTORICAL RESULT VIEW
    Profile > Test Results cards use this view-only screen.
 ===================================================== */
+function updateResultDashboard(percentage, examTitle){
+    const pct = Math.max(0, Math.min(100, Number(percentage) || 0));
+    const label = document.getElementById("resultPercentageLabel");
+    const bar = document.getElementById("resultProgressBar");
+    const title = document.getElementById("resultExamTitle");
+    if(label) label.textContent = `${pct.toFixed(0)}%`;
+    if(bar) bar.style.width = `${pct}%`;
+    if(title) title.textContent = String(examTitle || "YOUR TEST PERFORMANCE").toUpperCase();
+}
+
 function openSavedTestResult(encodedTitle, score, total, percentage, correct, wrong, unanswered, encodedDate){
     const title = decodeURIComponent(encodedTitle || "Test Result");
     const completedDate = decodeURIComponent(encodedDate || "-");
@@ -12965,6 +12931,7 @@ function openSavedTestResult(encodedTitle, score, total, percentage, correct, wr
 
     const messageNode = document.getElementById("resultMessage");
     if(messageNode) messageNode.textContent = `${title} • Completed: ${completedDate}`;
+    updateResultDashboard(percentage, title);
 
     const stats = document.getElementById("resultStats");
     if(stats){
