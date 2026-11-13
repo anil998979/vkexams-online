@@ -1828,7 +1828,6 @@ header{
 #resultPage .vk-result-kpi.wrong strong{color:#dc2626}
 #resultPage .vk-result-kpi.unanswered strong{color:#64748b}
 #resultPage .vk-result-kpi.accuracy strong{color:#2563eb}
-#resultPage .vk-result-section-panel{margin-top:18px}
 #resultPage .vk-result-panel-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
 #resultPage .vk-result-panel-heading h2{margin:0;color:#172033;font-size:17px;font-weight:800}
 #resultPage .vk-result-panel-heading p{margin:4px 0 0;color:#64748b;font-size:12px}
@@ -1837,10 +1836,6 @@ header{
 #resultPage .vk-result-dot{width:8px;height:8px;border-radius:50%;display:inline-block}
 #resultPage .vk-result-stack{display:flex;width:100%;height:13px;overflow:hidden;border-radius:99px;background:#e9eef5;gap:2px}
 #resultPage .vk-result-stack span{display:block;min-width:0}
-#resultPage .vk-result-section-row{margin:16px 0}
-#resultPage .vk-result-section-meta{display:flex;justify-content:space-between;gap:10px;margin-bottom:7px;color:#334155;font-size:13px;font-weight:700}
-#resultPage .vk-result-section-meta small{color:#64748b;font-weight:600}
-#resultPage .vk-result-empty{padding:20px;border:1px dashed #cbd5e1;border-radius:12px;color:#64748b;background:#f8fafc;font-size:13px;line-height:1.6}
 #resultPage .vk-result-insight-panel{margin-top:18px}
 #resultPage .vk-result-insight-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
 #resultPage .vk-result-insight{padding:13px;border-radius:12px;background:#f8fafc}
@@ -3820,15 +3815,6 @@ class="page">
         <div class="vk-result-stack" id="vkResultDistribution" style="margin-top:17px"></div>
       </section>
     </div>
-    <section class="vk-result-section-panel">
-      <div class="vk-result-panel-heading">
-        <div><h2>Section-wise Performance</h2><p>Correct, wrong and unanswered distribution by section</p></div>
-        <span class="vk-result-label" id="vkResultSectionStatus">Analysis</span>
-      </div>
-      <div id="vkResultSectionChart">
-        <div class="vk-result-empty">Section-wise analysis appears when this test has section or subject labels mapped to its questions.</div>
-      </div>
-    </section>
     <section class="vk-result-insight-panel">
       <div class="vk-result-panel-heading"><div><h2>Exam Insights</h2><p>Key indicators calculated from this attempt</p></div></div>
       <div class="vk-result-insight-grid">
@@ -3842,7 +3828,6 @@ class="page">
       <button class="btn btn-primary" onclick="reattempt()">Reattempt</button>
       <button class="btn" style="background:#e5e7eb;color:#111827" onclick="backToTestSeriesFromResult()">Back to Test Series</button>
     </div>
-    <p class="vk-result-note">This report reflects the submitted attempt. Section-wise figures are shown only when section mapping exists in the test data.</p>
   </div>
 </div>
 
