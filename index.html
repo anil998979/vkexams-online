@@ -1803,6 +1803,55 @@ header{
 
 
 /* =====================================================
+   PROFESSIONAL CBT RESULT DASHBOARD
+===================================================== */
+#resultPage .container{max-width:1120px;padding-top:34px;padding-bottom:48px}
+#resultPage .result-card{max-width:100%;margin:0 auto;padding:0;text-align:left;overflow:hidden;border:1px solid #e2e8f0;border-radius:22px;background:#f8fafc;box-shadow:0 16px 42px rgba(15,23,42,.08)}
+#resultPage .vk-result-header{padding:26px 30px;color:#fff;background:linear-gradient(115deg,#1d4ed8,#6d28d9)}
+#resultPage .vk-result-eyebrow{font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;opacity:.85}
+#resultPage .vk-result-header h1{margin:7px 0 5px;color:#fff;font-size:27px;font-weight:850}
+#resultPage .vk-result-subtitle{margin:0;color:rgba(255,255,255,.86);font-size:14px}
+#resultPage .vk-result-content{padding:24px 28px 28px}
+#resultPage .vk-result-top-grid{display:grid;grid-template-columns:minmax(220px,.9fr) minmax(0,1.5fr);gap:18px;margin-bottom:18px}
+#resultPage .vk-result-score-panel,#resultPage .vk-result-summary-panel,#resultPage .vk-result-section-panel,#resultPage .vk-result-insight-panel{background:#fff;border:1px solid #e5eaf2;border-radius:16px;padding:20px}
+#resultPage .vk-result-score-panel{display:flex;flex-direction:column;justify-content:center;align-items:flex-start}
+#resultPage .vk-result-label{color:#64748b;font-size:12px;font-weight:750;letter-spacing:.04em;text-transform:uppercase}
+#resultPage .score{margin:8px 0 2px;font-size:clamp(36px,5vw,48px);line-height:1.12;font-weight:900;color:#1d4ed8}
+#resultPage .vk-result-percent{color:#475569;font-size:14px;font-weight:650}
+#resultPage .vk-result-progress{width:100%;height:9px;margin-top:16px;overflow:hidden;border-radius:99px;background:#e8edf5}
+#resultPage .vk-result-progress>span{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#2563eb,#7c3aed)}
+#resultPage .vk-result-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+#resultPage .vk-result-kpi{min-height:105px;padding:14px;border:1px solid #e8edf4;border-radius:14px;background:#fff}
+#resultPage .vk-result-kpi strong{display:block;margin:8px 0 3px;font-size:27px;line-height:1.1;font-weight:850}
+#resultPage .vk-result-kpi small{color:#64748b;font-size:12px}
+#resultPage .vk-result-kpi.correct strong{color:#15803d}
+#resultPage .vk-result-kpi.wrong strong{color:#dc2626}
+#resultPage .vk-result-kpi.unanswered strong{color:#64748b}
+#resultPage .vk-result-kpi.accuracy strong{color:#2563eb}
+#resultPage .vk-result-section-panel{margin-top:18px}
+#resultPage .vk-result-panel-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
+#resultPage .vk-result-panel-heading h2{margin:0;color:#172033;font-size:17px;font-weight:800}
+#resultPage .vk-result-panel-heading p{margin:4px 0 0;color:#64748b;font-size:12px}
+#resultPage .vk-result-legend{display:flex;flex-wrap:wrap;gap:12px;color:#64748b;font-size:11px}
+#resultPage .vk-result-legend span{display:inline-flex;align-items:center;gap:5px}
+#resultPage .vk-result-dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+#resultPage .vk-result-stack{display:flex;width:100%;height:13px;overflow:hidden;border-radius:99px;background:#e9eef5;gap:2px}
+#resultPage .vk-result-stack span{display:block;min-width:0}
+#resultPage .vk-result-section-row{margin:16px 0}
+#resultPage .vk-result-section-meta{display:flex;justify-content:space-between;gap:10px;margin-bottom:7px;color:#334155;font-size:13px;font-weight:700}
+#resultPage .vk-result-section-meta small{color:#64748b;font-weight:600}
+#resultPage .vk-result-empty{padding:20px;border:1px dashed #cbd5e1;border-radius:12px;color:#64748b;background:#f8fafc;font-size:13px;line-height:1.6}
+#resultPage .vk-result-insight-panel{margin-top:18px}
+#resultPage .vk-result-insight-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+#resultPage .vk-result-insight{padding:13px;border-radius:12px;background:#f8fafc}
+#resultPage .vk-result-insight b{display:block;color:#0f172a;font-size:15px}
+#resultPage .vk-result-insight span{color:#64748b;font-size:12px}
+#resultPage .result-buttons{margin-top:22px!important;justify-content:flex-start;gap:10px}
+#resultPage .result-buttons .btn{min-height:46px;padding:12px 20px;border-radius:11px}
+#resultPage .vk-result-note{margin:16px 0 0;color:#94a3b8;font-size:11px}
+@media(max-width:760px){#resultPage .container{padding:18px 12px 32px}#resultPage .vk-result-header{padding:22px 18px}#resultPage .vk-result-header h1{font-size:22px}#resultPage .vk-result-content{padding:14px}#resultPage .vk-result-top-grid{grid-template-columns:1fr}#resultPage .vk-result-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}#resultPage .vk-result-insight-grid{grid-template-columns:1fr}#resultPage .vk-result-panel-heading{align-items:flex-start;flex-direction:column}#resultPage .result-buttons{display:grid;grid-template-columns:1fr}#resultPage .result-buttons .btn{width:100%}}
+
+/* =====================================================
    RESULT
 ===================================================== */
 
@@ -3745,63 +3794,56 @@ class="page">
 <div class="container">
 
 <div class="result-card">
-
-<h1>
-🎉 Test Completed
-</h1>
-
-
-<div
-id="scoreText"
-class="score">
-
-0 / 10
-
-</div>
-
-
-<p
-id="resultMessage">
-
-Your test has been submitted successfully.
-
-</p>
-
-<div id="resultStats" class="result-stats" style="margin-top:18px;"></div>
-
-
-<div
-class="result-buttons"
-style="margin-top:22px">
-
-
-<button
-class="btn btn-blue"
-onclick="viewSolutions()">
-
-View Solutions
-
-</button>
-
-
-<button
-class="btn btn-primary"
-onclick="reattempt()">
-
-Reattempt
-
-</button>
-
-
-<button
-    class="btn"
-    style="background:#e5e7eb"
-    onclick="backToTestSeriesFromResult()">
-
-    Back to Test Series
-
-</button>
-
+  <div class="vk-result-header">
+    <div class="vk-result-eyebrow">VK EXAMS · CBT PERFORMANCE REPORT</div>
+    <h1>🎉 Test Completed</h1>
+    <p class="vk-result-subtitle" id="vkResultTestTitle">Your examination performance summary</p>
+  </div>
+  <div class="vk-result-content">
+    <div class="vk-result-top-grid">
+      <section class="vk-result-score-panel">
+        <span class="vk-result-label">Final Score</span>
+        <div id="scoreText" class="score">0 / 10</div>
+        <div class="vk-result-percent" id="resultMessage">Your test has been submitted successfully.</div>
+        <div class="vk-result-progress"><span id="vkResultProgressFill" style="width:0%"></span></div>
+      </section>
+      <section class="vk-result-summary-panel">
+        <div class="vk-result-panel-heading">
+          <div><h2>Performance Summary</h2><p>Question-wise submission overview</p></div>
+          <div class="vk-result-legend">
+            <span><i class="vk-result-dot" style="background:#16a34a"></i>Correct</span>
+            <span><i class="vk-result-dot" style="background:#dc2626"></i>Wrong</span>
+            <span><i class="vk-result-dot" style="background:#94a3b8"></i>Unanswered</span>
+          </div>
+        </div>
+        <div class="vk-result-kpis" id="resultStats"></div>
+        <div class="vk-result-stack" id="vkResultDistribution" style="margin-top:17px"></div>
+      </section>
+    </div>
+    <section class="vk-result-section-panel">
+      <div class="vk-result-panel-heading">
+        <div><h2>Section-wise Performance</h2><p>Correct, wrong and unanswered distribution by section</p></div>
+        <span class="vk-result-label" id="vkResultSectionStatus">Analysis</span>
+      </div>
+      <div id="vkResultSectionChart">
+        <div class="vk-result-empty">Section-wise analysis appears when this test has section or subject labels mapped to its questions.</div>
+      </div>
+    </section>
+    <section class="vk-result-insight-panel">
+      <div class="vk-result-panel-heading"><div><h2>Exam Insights</h2><p>Key indicators calculated from this attempt</p></div></div>
+      <div class="vk-result-insight-grid">
+        <div class="vk-result-insight"><b id="vkResultAccuracy">—</b><span>Accuracy</span></div>
+        <div class="vk-result-insight"><b id="vkResultAttempted">—</b><span>Attempted Questions</span></div>
+        <div class="vk-result-insight"><b id="vkResultNegative">—</b><span>Marks Lost to Wrong Answers</span></div>
+      </div>
+    </section>
+    <div class="result-buttons" style="margin-top:22px">
+      <button class="btn btn-blue" onclick="viewSolutions()">View Solutions</button>
+      <button class="btn btn-primary" onclick="reattempt()">Reattempt</button>
+      <button class="btn" style="background:#e5e7eb;color:#111827" onclick="backToTestSeriesFromResult()">Back to Test Series</button>
+    </div>
+    <p class="vk-result-note">This report reflects the submitted attempt. Section-wise figures are shown only when section mapping exists in the test data.</p>
+  </div>
 </div>
 
 </div>
@@ -12872,6 +12914,7 @@ lastResult = {
             }
 
 
+            renderVkProfessionalResult(lastResult);
             restoreLiveResultActions();
             saveVkCompletedResult();
             showPage(
@@ -12982,12 +13025,78 @@ lastResult = {
         `;
     }
 
+    renderVkProfessionalResult(lastResult);
     restoreLiveResultActions();
     saveVkCompletedResult();
     showPage("resultPage");
 
 }
 
+
+/* =====================================================
+   PROFESSIONAL RESULT DASHBOARD RENDERER
+===================================================== */
+function renderVkProfessionalResult(result){
+  if(!result) return;
+  const total=Math.max(0,Number(result.total||0));
+  const correct=Math.max(0,Number(result.correct||0));
+  const wrong=Math.max(0,Number(result.wrong||0));
+  const unanswered=Math.max(0,Number(result.unanswered||0));
+  const pct=total>0?Number(result.percentage||0):0;
+  const attempted=correct+wrong;
+  const accuracy=attempted>0?correct/attempted*100:0;
+  const title=document.getElementById("vkResultTestTitle");
+  if(title) title.textContent=result.title||$("examTitle")?.textContent||"Examination performance summary";
+  const fill=document.getElementById("vkResultProgressFill");
+  if(fill) fill.style.width=Math.max(0,Math.min(100,pct))+"%";
+  const distribution=document.getElementById("vkResultDistribution");
+  if(distribution){
+    const n=correct+wrong+unanswered||1;
+    distribution.innerHTML=`<span style="width:${correct/n*100}%;background:#16a34a"></span><span style="width:${wrong/n*100}%;background:#dc2626"></span><span style="width:${unanswered/n*100}%;background:#94a3b8"></span>`;
+  }
+  const stats=document.getElementById("resultStats");
+  if(stats) stats.innerHTML=`
+    <div class="vk-result-kpi correct"><span class="vk-result-label">Correct</span><strong>${correct}</strong><small>Right answers</small></div>
+    <div class="vk-result-kpi wrong"><span class="vk-result-label">Wrong</span><strong>${wrong}</strong><small>Incorrect answers</small></div>
+    <div class="vk-result-kpi unanswered"><span class="vk-result-label">Unanswered</span><strong>${unanswered}</strong><small>Not attempted</small></div>
+    <div class="vk-result-kpi accuracy"><span class="vk-result-label">Percentage</span><strong>${Math.round(pct)}%</strong><small>Overall score</small></div>`;
+  const accuracyNode=document.getElementById("vkResultAccuracy");
+  const attemptedNode=document.getElementById("vkResultAttempted");
+  const lostNode=document.getElementById("vkResultNegative");
+  if(accuracyNode) accuracyNode.textContent=accuracy.toFixed(1)+"%";
+  if(attemptedNode) attemptedNode.textContent=attempted+" / "+(correct+wrong+unanswered);
+  if(lostNode) lostNode.textContent=Number(Math.max(0,correct-Number(result.score||0))).toFixed(2);
+
+  // Section bars are generated only from explicit section/subject/topic labels.
+  const host=document.getElementById("vkResultSectionChart");
+  const status=document.getElementById("vkResultSectionStatus");
+  if(!host) return;
+  const questions=Array.isArray(result.questions)?result.questions:[];
+  const answers=Array.isArray(result.answers)?result.answers:[];
+  const groups=new Map();
+  questions.forEach((q,i)=>{
+    const label=String(q.section_name||q.sectionName||q.section||q.subject_name||q.subjectName||q.subject||q.topic_name||q.topicName||q.topic||"").trim();
+    if(!label) return;
+    if(!groups.has(label)) groups.set(label,{total:0,correct:0,wrong:0,unanswered:0});
+    const g=groups.get(label);g.total++;
+    const selected=answers[i];
+    const chosen=selected===null||selected===undefined||selected===""?"":(typeof selected==="number"?["A","B","C","D"][selected]:String(selected).trim().toUpperCase());
+    const key=String(q.correctOption||q.correct_option||"").trim().toUpperCase();
+    if(!chosen) g.unanswered++;
+    else if(key&&chosen===key) g.correct++;
+    else if(key) g.wrong++;
+  });
+  if(groups.size){
+    if(status) status.textContent=groups.size+" sections";
+    host.innerHTML=Array.from(groups.entries()).map(([label,g])=>{
+      const n=Math.max(1,g.total);
+      return `<div class="vk-result-section-row"><div class="vk-result-section-meta"><span>${escapeHtml(label)}</span><small>${g.correct} correct · ${g.wrong} wrong · ${g.unanswered} unanswered</small></div><div class="vk-result-stack"><span style="width:${g.correct/n*100}%;background:#16a34a"></span><span style="width:${g.wrong/n*100}%;background:#dc2626"></span><span style="width:${g.unanswered/n*100}%;background:#94a3b8"></span></div></div>`;
+    }).join("");
+  }else{
+    if(status) status.textContent="Not mapped";
+    host.innerHTML='<div class="vk-result-empty">ఈ Test ప్రశ్నల డేటాలో Section / Subject / Topic పేర్లు లేవు. అందువల్ల ప్రస్తుతం నిజమైన Section-wise Bar Graph చూపించడం సాధ్యం కాదు. ప్రశ్నలకు Section Mapping జోడించిన తర్వాత ఈ గ్రాఫ్ ఆటోమేటిక్‌గా కనిపిస్తుంది. ఊహాజనిత విభాగాలు లేదా మార్కులు చూపించము.</div>';
+  }
+}
 
 /* =====================================================
    HISTORICAL RESULT VIEW
@@ -13467,6 +13576,7 @@ function restoreVkCompletedResult(){
                 <div class="stat"><b>${lastResult.unanswered}</b> Unanswered</div>
                 <div class="stat"><b>${Math.round(lastResult.percentage)}%</b> Percentage</div>`;
         }
+        renderVkProfessionalResult(lastResult);
         restoreLiveResultActions();
         return true;
     }catch(error){
