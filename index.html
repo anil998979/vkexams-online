@@ -12873,6 +12873,7 @@ lastResult = {
 
 
             restoreLiveResultActions();
+            saveVkCompletedResult();
             showPage(
                 "resultPage"
             );
@@ -12982,6 +12983,7 @@ lastResult = {
     }
 
     restoreLiveResultActions();
+    saveVkCompletedResult();
     showPage("resultPage");
 
 }
@@ -13357,52 +13359,184 @@ async function backFromSolutions(){
 }
 
 /* =====================================================
+   PERSISTED RESULT CONTEXT
+   Restores the completed result after refresh and keeps
+   the exact course/paper/test context for Reattempt.
+===================================================== */
+const VK_LAST_RESULT_KEY = "vk_last_completed_result_v1";
+
+function saveVkCompletedResult(){
+    try{
+        if(!lastResult) return;
+        const snapshot = {
+            kind: currentAttemptId ? "paid" : "free",
+            attemptId: currentAttemptId || null,
+            course: currentCourse || "",
+            paper: currentPaper || "",
+            testNumber: Number(currentTestNumber || 0),
+            freeMockNumber: Number(currentFreeMockNumber || 0),
+            freeMockTestId: currentFreeMockTestId || null,
+            title: lastResult.title || $("examTitle")?.textContent || "Test Result",
+            score: Number(lastResult.score || 0),
+            total: Number(lastResult.total || 0),
+            percentage: Number(lastResult.percentage || 0),
+            correct: Number(lastResult.correct || 0),
+            wrong: Number(lastResult.wrong || 0),
+            unanswered: Number(lastResult.unanswered || 0),
+            timeout: !!lastResult.timeout,
+            completedAt: new Date().toISOString(),
+            // Persist question text/options for rendering solutions after refresh.
+            // Paid-test answer keys are deliberately excluded; they are reloaded
+            // through the authenticated get_test_solutions RPC.
+            freeQuestions: (lastResult.questions || []).map(function(q){
+                const item = {
+                    id: q.id,
+                    number: q.number,
+                    q: q.q,
+                    o: Array.isArray(q.o) ? q.o : [],
+                    marks: Number(q.marks || 1),
+                    negative: Number(q.negative || 0),
+                    explanation: currentAttemptId ? "" : (q.explanation || "")
+                };
+                if(!currentAttemptId){
+                    item.correctOption = q.correctOption || "";
+                }
+                return item;
+            }),
+            freeAnswers: lastResult.answers || []
+        };
+        localStorage.setItem(VK_LAST_RESULT_KEY, JSON.stringify(snapshot));
+        const query = new URLSearchParams();
+        query.set("kind", snapshot.kind);
+        if(snapshot.attemptId) query.set("attempt", snapshot.attemptId);
+        if(snapshot.course) query.set("course", snapshot.course);
+        if(snapshot.paper) query.set("paper", snapshot.paper);
+        if(snapshot.testNumber) query.set("test", String(snapshot.testNumber));
+        if(snapshot.freeMockNumber) query.set("freeTest", String(snapshot.freeMockNumber));
+        history.replaceState(
+            { ...(history.state || {}), vkPage:"resultPage", resultContext:true },
+            "",
+            "#resultPage?" + query.toString()
+        );
+    }catch(error){
+        console.warn("Could not persist completed result context:", error);
+    }
+}
+
+function restoreVkCompletedResult(){
+    try{
+        const saved = JSON.parse(localStorage.getItem(VK_LAST_RESULT_KEY) || "null");
+        if(!saved || !saved.completedAt) return false;
+
+        currentCourse = saved.course || "";
+        currentPaper = saved.paper || "";
+        currentTestNumber = Number(saved.testNumber || 0);
+        currentFreeMockNumber = Number(saved.freeMockNumber || 0);
+        currentFreeMockTestId = saved.freeMockTestId || null;
+        currentAttemptId = saved.attemptId || null;
+        testSubmitted = true;
+
+        lastResult = {
+            attemptId: saved.attemptId || null,
+            questions: Array.isArray(saved.freeQuestions) ? saved.freeQuestions : [],
+            answers: Array.isArray(saved.freeAnswers) ? saved.freeAnswers : [],
+            score: Number(saved.score || 0),
+            total: Number(saved.total || 0),
+            percentage: Number(saved.percentage || 0),
+            correct: Number(saved.correct || 0),
+            wrong: Number(saved.wrong || 0),
+            unanswered: Number(saved.unanswered || 0),
+            title: saved.title || "Test Result",
+            timeout: !!saved.timeout
+        };
+
+        const heading = document.querySelector("#resultPage .result-card h1");
+        if(heading) heading.textContent = "🎉 Test Completed";
+        const scoreNode = $("scoreText");
+        if(scoreNode) scoreNode.textContent = lastResult.score + " / " + lastResult.total;
+        const messageNode = $("resultMessage");
+        if(messageNode){
+            messageNode.textContent = "You scored " + Math.round(lastResult.percentage) + "%." +
+                (lastResult.timeout ? " Time expired and the test was auto-submitted." : "");
+        }
+        const stats = $("resultStats");
+        if(stats){
+            stats.innerHTML = `
+                <div class="stat"><b>${lastResult.correct}</b> Correct</div>
+                <div class="stat"><b>${lastResult.wrong}</b> Wrong</div>
+                <div class="stat"><b>${lastResult.unanswered}</b> Unanswered</div>
+                <div class="stat"><b>${Math.round(lastResult.percentage)}%</b> Percentage</div>`;
+        }
+        restoreLiveResultActions();
+        return true;
+    }catch(error){
+        console.warn("Could not restore completed result:", error);
+        return false;
+    }
+}
+
+/* =====================================================
    REATTEMPT
 ===================================================== */
 function reattempt(){
-
-    if(
-        currentPaper &&
-        currentCourse &&
-        currentTestNumber
-    ){
-
-        openLockedTest(
-            currentTestNumber
-        );
-
-        return;
-
+    // Rehydrate the saved context first if this page was refreshed.
+    if(!currentCourse || (!currentPaper && !currentFreeMockTestId)){
+        try{
+            const saved = JSON.parse(localStorage.getItem(VK_LAST_RESULT_KEY) || "null");
+            if(saved){
+                currentCourse = saved.course || currentCourse;
+                currentPaper = saved.paper || currentPaper;
+                currentTestNumber = Number(saved.testNumber || currentTestNumber || 0);
+                currentFreeMockNumber = Number(saved.freeMockNumber || currentFreeMockNumber || 0);
+                currentFreeMockTestId = saved.freeMockTestId || currentFreeMockTestId;
+                currentAttemptId = saved.attemptId || currentAttemptId;
+            }
+        }catch(error){
+            console.warn("Unable to restore Reattempt context:", error);
+        }
     }
 
-    startFreeMock(
-        currentFreeMockNumber || 1
-    );
+    if(currentAttemptId || (currentPaper && currentCourse && currentTestNumber)){
+        if(!currentCourse || !currentPaper || !currentTestNumber){
+            toast("ఈ పరీక్ష వివరాలు తిరిగి పొందలేకపోయాము. Test Results నుంచి పరీక్షను తెరిచి Reattempt చేయండి.");
+            return;
+        }
+        openLockedTest(currentTestNumber);
+        return;
+    }
+
+    if(currentFreeMockNumber){
+        startFreeMock(currentFreeMockNumber);
+        return;
+    }
+
+    toast("Reattempt కోసం పరీక్ష వివరాలు లభించలేదు. Test Results నుంచి పరీక్షను మళ్లీ తెరవండి.");
 }
-   function backToTestSeriesFromResult(){
 
-    /* Free Mock Test result */
-    if(
-        currentFreeMockTestId &&
-        currentFreeMockNumber &&
-        currentCourse
-    ){
+function backToTestSeriesFromResult(){
+    try{
+        const saved = JSON.parse(localStorage.getItem(VK_LAST_RESULT_KEY) || "null");
+        if(saved){
+            currentCourse = saved.course || currentCourse;
+            currentPaper = saved.paper || currentPaper;
+            currentTestNumber = Number(saved.testNumber || currentTestNumber || 0);
+            currentFreeMockNumber = Number(saved.freeMockNumber || currentFreeMockNumber || 0);
+            currentFreeMockTestId = saved.freeMockTestId || currentFreeMockTestId;
+        }
+    }catch(error){
+        console.warn("Unable to restore Test Series context:", error);
+    }
 
+    if(currentFreeMockTestId && currentFreeMockNumber && currentCourse){
         openFreeMockTests(currentCourse);
-
         return;
     }
-
-    /* Paid Test result */
     if(currentCourse){
-
         openTestSeries(false);
-
         return;
     }
-
     showHome();
-           }
+}
 /* =====================================================
    SUPABASE AUTH
 ===================================================== */
@@ -13837,6 +13971,14 @@ else if(initialPage === "freeMocks"){
 }
 else if(initialPage === "jobs"){
     openJobs(false);
+}
+else if(initialPage === "resultPage"){
+    if(restoreVkCompletedResult()){
+        showPage("resultPage", false);
+    }else{
+        showPage("profile", false);
+        showTestResults(false);
+    }
 }
 else if(initialPage === "testResults"){
     showPage("profile", false);
