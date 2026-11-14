@@ -3262,7 +3262,7 @@ Select an examination and start your preparation.
     <div class="vk-card-art vk-appsc-art">🏢</div>
     <h3>APPSC</h3>
     <p>Andhra Pradesh Public Service Commission Exams</p>
-    <div class="vk-card-features"><span>☑ Screening Test</span><span>▥ Mains Test</span></div>
+    <div class="vk-card-features"><span>☑ Screening Test</span></div>
     <button class="vk-card-button" type="button">Explore APPSC <b>➜</b></button>
   </article>
   <article class="vk-exam-card vk-endowment-card" onclick="openCourse('Endowment Officer')">
@@ -3824,7 +3824,7 @@ id="solutions">
       <div class="category-card vk-course-card vk-course-active" onclick="selectStoreCourse('APPSC',this)">
         <span class="vk-available-ribbon">★ Available Now</span>
         <div class="vk-course-icon">📚</div>
-        <div class="vk-course-copy"><h3>APPSC</h3><p>APPSC Paid Test Series</p><div class="vk-course-features"><span>✓ Screening Test</span><span>✓ Mains Test</span></div></div>
+        <div class="vk-course-copy"><h3>APPSC</h3><p>APPSC Screening Test Paid Series</p><div class="vk-course-features"><span>✓ Screening Test</span></div></div>
         <span class="vk-course-action">View Packages&nbsp; →</span>
       </div>
 
@@ -5662,7 +5662,7 @@ function openCourse(course, addHistory = true){
 
     if(course === "APPSC" || course === "High Court"){
         // Open the selected paid test series directly from the home exam card.
-        // APPSC shows Screening Test / Mains Test; High Court shows one exam series.
+        // APPSC shows Screening Test only; High Court shows one exam series.
         openTestSeries(addHistory);
         return;
     }
@@ -5974,12 +5974,6 @@ function openTestSeries(addHistory = true){
                 <h2>Screening Test</h2>
                 <p>APPSC Screening Test Paid Series</p>
             </div>
-
-            <div class="choice-card" onclick="openPaper('Mains Test')">
-                <div class="big-icon">📕</div>
-                <h2>Mains Test</h2>
-                <p>APPSC Mains Test Paid Series</p>
-            </div>
         `;
 
     }
@@ -6037,7 +6031,7 @@ function openTestSeries(addHistory = true){
         // Keep the URL aligned with the page being displayed.
         // When returning from the Test List without adding a new history
         // entry, replace the stale #papers route so refresh restores
-        // the Screening Test / Mains Test selection page.
+        // the Screening Test selection page.
         const query = new URLSearchParams();
         if(currentCourse) query.set("course", currentCourse);
         if(currentGroup) query.set("group", currentGroup);
@@ -6056,7 +6050,7 @@ function openTestSeries(addHistory = true){
 /* Rebuild the selected course's Test Series page after refresh/back navigation. */
 function backFromTestSeries(){
 
-    // APPSC opens directly on Screening Test / Mains Test.
+    // APPSC opens directly on the Screening Test selection page.
     // Back from this page must return to the main Home screen.
     if(currentCourse === "APPSC"){
         currentGroup = "";
@@ -8273,8 +8267,7 @@ const VK_ADMIN_ALLOWED_COURSES = ["APPSC","Endowment Officer","High Court"];
 function vkAdminPaidSeriesOptions(courseName){
     const options = {
         "APPSC": [
-            {value:"Paper 1", label:"Screening Test"},
-            {value:"Paper 2", label:"Mains Test"}
+            {value:"Paper 1", label:"Screening Test"}
         ],
         "Endowment Officer": [
             {value:"Paper 1", label:"Paper 1"},
@@ -8300,7 +8293,7 @@ function vkAdminUpdatePaidSeriesControl(){
     select.innerHTML=choices.map(item=>`<option value="${vkAdminEscape(item.value)}">${vkAdminEscape(item.label)}</option>`).join("");
     if(hint){
         hint.textContent=courseName==="APPSC"
-          ? "APPSC paid tests are organized as Screening Test and Mains Test."
+          ? "APPSC paid tests are organized under Screening Test only."
           : courseName==="High Court"
           ? "High Court paid tests are organized under one High Court Exam series."
           : "Test number is assigned automatically within the selected paper.";
