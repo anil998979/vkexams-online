@@ -3457,89 +3457,6 @@ class="choice-grid">
 
 
 <!-- =====================================================
-     APPSC GROUPS
-===================================================== -->
-
-<div
-id="appGroups"
-class="page">
-
-<div class="container">
-
-<span
-class="back"
-onclick="showHome()">
-
-← Back to Home
-
-</span>
-
-<div class="exam-header">
-
-<h1>
-APPSC
-</h1>
-
-<p>
-Select Group 2 or Group 4.
-
-</p>
-
-</div>
-
-<div
-id="appGroupOptions"
-class="choice-grid">
-</div>
-
-</div>
-
-</div>
-
-
-<!-- =====================================================
-     APPSC GROUP DETAIL
-===================================================== -->
-
-<div
-id="appGroupDetail"
-class="page">
-
-<div class="container">
-
-<span
-class="back"
-onclick="openAPPSCGroups(false)">
-
-← Back to Groups
-
-</span>
-
-<div class="exam-header">
-
-<h1
-id="appGroupTitle">
-APPSC Group
-</h1>
-
-<p>
-Select Syllabus or Test Series.
-
-</p>
-
-</div>
-
-<div
-id="appGroupDetailOptions"
-class="choice-grid">
-</div>
-
-</div>
-
-</div>
-
-
-<!-- =====================================================
      SYLLABUS
 ===================================================== -->
 
@@ -5856,62 +5773,6 @@ function openCourse(course, addHistory = true){
 ===================================================== */
 
 
-function openAPPSCGroups(addHistory = true){
-
-    currentCourse = "APPSC";
-    currentGroup = "";
-
-    $("appGroupOptions").innerHTML = `
-
-        <div class="choice-card" onclick="openAPPSCGroup('Group 2')">
-            <div class="big-icon">📘</div>
-            <h2>Group 2</h2>
-            <p>APPSC Group 2 – Syllabus & Test Series</p>
-        </div>
-
-        <div class="choice-card" onclick="openAPPSCGroup('Group 4')">
-            <div class="big-icon">📕</div>
-            <h2>Group 4</h2>
-            <p>APPSC Group 4 – Syllabus & Test Series</p>
-        </div>
-
-    `;
-
-    showPage("appGroups", false);
-    if(addHistory) vkPushContextRoute("appGroups", {course: "APPSC"});
-
-}
-
-function openAPPSCGroup(group, addHistory = true){
-
-    currentCourse = "APPSC";
-    currentGroup = group;
-
-    $("appGroupTitle").textContent =
-        "APPSC " + group;
-
-    $("appGroupDetailOptions").innerHTML = `
-
-        <div class="choice-card" onclick="openSyllabus()">
-            <div class="big-icon">📖</div>
-            <h2>Syllabus</h2>
-            <p>${group} syllabus</p>
-        </div>
-
-        <div class="choice-card" onclick="openTestSeries()">
-            <div class="big-icon">🎯</div>
-            <h2>Test Series</h2>
-            <p>Prelims and Mains</p>
-        </div>
-
-    `;
-
-    showPage("appGroupDetail", false);
-    if(addHistory) vkPushContextRoute("appGroupDetail", {course: "APPSC", group: currentGroup});
-
-}
-
-
 /* =====================================================
    SYLLABUS
 ===================================================== */
@@ -6044,14 +5905,11 @@ function openSyllabus(addHistory = true){
 
 
 function backFromSyllabus(){
-
-    if(currentCourse === "APPSC" && currentGroup){
-        openAPPSCGroup(currentGroup, false);
+    if(currentCourse === "APPSC"){
+        showHome();
         return;
     }
-
     openCourse(currentCourse);
-
 }
 /* =====================================================
    COMMON LOADING POPUP
@@ -6180,13 +6038,11 @@ function openTestSeries(addHistory = true){
 /* Rebuild the selected course's Test Series page after refresh/back navigation. */
 function backFromTestSeries(){
 
-    if(testSeriesReturnPage === "appGroupDetail" && currentCourse === "APPSC" && currentGroup){
-        openAPPSCGroup(currentGroup, false);
-        return;
-    }
-
-    if(testSeriesReturnPage === "appGroups" || (currentCourse === "APPSC" && !currentGroup)){
-        openAPPSCGroups(false);
+    // APPSC opens directly on Screening Test / Mains Test.
+    // Back from this page must return to the main Home screen.
+    if(currentCourse === "APPSC"){
+        currentGroup = "";
+        showHome();
         return;
     }
 
@@ -6865,22 +6721,30 @@ async function startPaidTest(testNumber){
            Test Series
         ========================================= */
 
+        // The public APPSC labels differ from the existing database series names.
+        // Keep the database records unchanged and resolve the existing top-level series.
+        const databaseSeriesName =
+            currentCourse === "APPSC" && !currentGroup && currentPaper === "Screening Test"
+                ? "Prelims"
+                : currentCourse === "APPSC" && !currentGroup && currentPaper === "Mains Test"
+                    ? "Mains"
+                    : currentPaper;
+
+        let paidSeriesQuery = supabaseClient
+            .from("test_series")
+            .select("id,name")
+            .eq("course_id", courseData.id)
+            .eq("name", databaseSeriesName);
+
+        // Avoid matching legacy Group 2 / Group 4 child series for the main APPSC page.
+        if (currentCourse === "APPSC" && !currentGroup) {
+            paidSeriesQuery = paidSeriesQuery.is("parent_series_id", null);
+        }
+
         const {
             data:seriesData,
             error:seriesError
-        } =
-        await supabaseClient
-            .from("test_series")
-            .select("id,name")
-            .eq(
-                "course_id",
-                courseData.id
-            )
-            .eq(
-                "name",
-                currentPaper
-            )
-            .single();
+        } = await paidSeriesQuery.maybeSingle();
 
 
         if(
@@ -13752,20 +13616,7 @@ if(
             else { showHome(); }
             return;
         }
-
-        if(page === "appGroups"){
-            openAPPSCGroups(false);
-            return;
-        }
-
-        if(page === "appGroupDetail"){
-            const group = hashParams.get("group") || event.state?.group;
-            if(group){ openAPPSCGroup(group, false); }
-            else { openAPPSCGroups(false); }
-            return;
-        }
-
-        if(page === "testseries"){
+if(page === "testseries"){
             currentCourse = hashParams.get("course") || event.state?.course || currentCourse;
             currentGroup = hashParams.get("group") || event.state?.group || "";
             if(currentCourse){ openTestSeries(false); }
@@ -14049,13 +13900,8 @@ else if(initialPage === "course"){
     if(course) openCourse(course, false);
     else showHome();
 }
-else if(initialPage === "appGroups"){
-    openAPPSCGroups(false);
-}
-else if(initialPage === "appGroupDetail"){
-    const group = initialHashParams.get("group");
-    if(group) openAPPSCGroup(group, false);
-    else openAPPSCGroups(false);
+else if(initialPage === "appGroups" || initialPage === "appGroupDetail"){
+    showHome();
 }
 else if(initialPage === "testseries"){
     currentCourse = initialHashParams.get("course") || history.state?.course || "";
