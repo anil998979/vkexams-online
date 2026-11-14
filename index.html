@@ -3904,10 +3904,11 @@ id="solutions">
     </div>
 
     <div class="store-course-grid vk-store-courses">
-      <div class="category-card is-coming-soon vk-course-card" onclick="showComingSoon('APPSC')">
+      <div class="category-card vk-course-card vk-course-active" onclick="selectStoreCourse('APPSC',this)">
+        <span class="vk-available-ribbon">★ Available Now</span>
         <div class="vk-course-icon">📚</div>
-        <div class="vk-course-copy"><h3>APPSC</h3><p>APPSC Package</p></div>
-        <span class="coming-soon-badge">◷ Coming Soon</span>
+        <div class="vk-course-copy"><h3>APPSC</h3><p>APPSC Paid Test Series</p><div class="vk-course-features"><span>✓ Screening Test</span><span>✓ Mains Test</span></div></div>
+        <span class="vk-course-action">View Packages&nbsp; →</span>
       </div>
 
       <div class="category-card vk-course-card vk-course-active" onclick="selectStoreCourse('Endowment Officer',this)">
@@ -3919,10 +3920,11 @@ id="solutions">
         <span class="vk-course-action">View Packages&nbsp; →</span>
       </div>
 
-      <div class="category-card is-coming-soon vk-course-card" onclick="showComingSoon('High Court')">
+      <div class="category-card vk-course-card vk-course-active" onclick="selectStoreCourse('High Court',this)">
+        <span class="vk-available-ribbon">★ Available Now</span>
         <div class="vk-course-icon">⚖️</div>
-        <div class="vk-course-copy"><h3>High Court</h3><p>High Court Package</p></div>
-        <span class="coming-soon-badge">◷ Coming Soon</span>
+        <div class="vk-course-copy"><h3>High Court</h3><p>High Court Exam Paid Test Series</p><div class="vk-course-features"><span>✓ High Court Exam</span></div></div>
+        <span class="vk-course-action">View Packages&nbsp; →</span>
       </div>
     </div>
 
@@ -7253,15 +7255,17 @@ function renderStoreCourseSelection(course = ""){
         c.style.outline = "";
     });
 
-    if(course === "Endowment Officer"){
+    if(["APPSC", "Endowment Officer", "High Court"].includes(course)){
         selectedStoreCourse = course;
         $("selectedCourseName").textContent = course;
         area.style.display = "block";
         cards.forEach(function(c){
-            const isSelected = (c.getAttribute("onclick") || "").includes("Endowment Officer");
+            const isSelected = (c.getAttribute("onclick") || "").includes("'" + course + "'");
             c.style.display = isSelected ? "block" : "none";
             c.style.outline = isSelected ? "2px solid #6366f1" : "";
         });
+        const selectedIcon = area.querySelector(".vk-selected-icon");
+        if(selectedIcon) selectedIcon.textContent = course === "APPSC" ? "📚" : (course === "High Court" ? "⚖️" : "🛕");
     }
 }
 
@@ -7277,7 +7281,7 @@ function resetStoreCourses(){
 }
 
 function selectStoreCourse(course, card){
-    if(course !== "Endowment Officer"){
+    if(!["APPSC", "Endowment Officer", "High Court"].includes(course)){
         showComingSoon(course);
         return;
     }
