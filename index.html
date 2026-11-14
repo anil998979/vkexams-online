@@ -3975,25 +3975,8 @@ id="solutions">
     </div>
     <div class="jobs-toolbar">
       <input id="jobsSearch" class="jobs-input" type="search" placeholder="Search job title, department or qualification..." oninput="filterJobs()" aria-label="Search jobs">
-      <select id="jobsCategory" class="jobs-select" onchange="filterJobs()" aria-label="Filter jobs by category">
-        <option value="">All Categories</option>
-        <option value="APPSC">APPSC</option>
-        <option value="High Court">High Court</option>
-        <option value="Police">Police</option>
-        <option value="DSC">DSC</option>
-        <option value="Banks">Banks</option>
-        <option value="Central Govt">Central Govt</option>
-        <option value="State Govt">State Govt</option>
-        <option value="Teaching">Teaching</option>
-        <option value="Other">Other</option>
-      </select>
     </div>
-    <div class="jobs-filter-row" aria-label="Quick job filters">
-      <button type="button" class="jobs-filter-chip active" data-job-filter="all" onclick="setJobsQuickFilter('all',this)">All Jobs</button>
-      <button type="button" class="jobs-filter-chip" data-job-filter="APPSC" onclick="setJobsQuickFilter('APPSC',this)">APPSC</button>
-      <button type="button" class="jobs-filter-chip" data-job-filter="Central Govt" onclick="setJobsQuickFilter('Central Govt',this)">Central Govt</button>
-      <button type="button" class="jobs-filter-chip" data-job-filter="State Govt" onclick="setJobsQuickFilter('State Govt',this)">State Govt</button>
-      <button type="button" class="jobs-filter-chip" data-job-filter="Teaching" onclick="setJobsQuickFilter('Teaching',this)">Teaching</button>
+    <div class="jobs-filter-row">
       <select id="jobsSort" class="jobs-sort" onchange="filterJobs()" aria-label="Sort jobs"><option value="latest">Sort: Latest First</option><option value="closing">Closing Soon</option><option value="title">Job Title A–Z</option></select>
     </div>
     <p id="jobsStatus" style="color:#64748b;margin:0 0 14px">Loading jobs...</p>
@@ -6025,117 +6008,7 @@ function getSyllabus(course){
         ];
 
     }
-
-
-    if(
-        course ===
-        "Police"
-    ){
-
-        return [
-
-            "General Knowledge",
-
-            "Current Affairs",
-
-            "Indian Constitution",
-
-            "Indian History",
-
-            "Geography",
-
-            "Reasoning",
-
-            "Arithmetic",
-
-            "General Science",
-
-            "Police Related Knowledge",
-
-            "Mental Ability"
-
-        ];
-
-    }
-
-
-    if(
-        course ===
-        "DSC"
-    ){
-
-        return [
-
-            "Child Development",
-
-            "Learning & Teaching",
-
-            "Educational Psychology",
-
-            "General Knowledge",
-
-            "Current Affairs",
-
-            "Teaching Methodology",
-
-            "Language Skills",
-
-            "Mathematics",
-
-            "Environmental Studies",
-
-            "Subject Knowledge"
-
-        ];
-
-    }
-
-
-    if(
-        course ===
-        "Banks"
-    ){
-
-        return [
-
-            "Quantitative Aptitude",
-
-            "Reasoning Ability",
-
-            "English Language",
-
-            "General Awareness",
-
-            "Banking Awareness",
-
-            "Current Affairs",
-
-            "Computer Awareness",
-
-            "Data Interpretation",
-
-            "Financial Awareness",
-
-            "Digital Banking"
-
-        ];
-
-    }
-
-
-    return [
-
-        "General Knowledge",
-
-        "Current Affairs",
-
-        "Indian Constitution",
-
-        "Indian History",
-
-        "Indian Geography"
-
-    ];
+return [];
 
 }
 
@@ -9276,20 +9149,12 @@ async function loadJobs(){
         list.innerHTML='<div class="job-empty">Unable to load job notifications right now. <button class="btn btn-blue" type="button" onclick="loadJobs()">Retry</button></div>';
     }
 }
-let vkJobsQuickFilter='all';
-function setJobsQuickFilter(value,button){
-    vkJobsQuickFilter=value;
-    document.querySelectorAll('.jobs-filter-chip').forEach(x=>x.classList.toggle('active',x===button));
-    filterJobs();
-}
 function filterJobs(){
     const search = (($('jobsSearch')||{}).value || '').trim().toLowerCase();
-    const category = (($('jobsCategory')||{}).value || '').trim().toLowerCase();
     const today=new Date();today.setHours(0,0,0,0);
     let filtered = vkJobsCache.filter(j=>{
         const text=[j.title,j.organization,j.category,j.posts,j.qualification,j.description].join(' ').toLowerCase();
-        const matchesQuick=vkJobsQuickFilter==='all'||String(j.category||'').toLowerCase()===vkJobsQuickFilter.toLowerCase();
-        return (!search || text.includes(search)) && (!category || String(j.category||'').toLowerCase()===category) && matchesQuick;
+        return !search || text.includes(search);
     });
     const sort=(($('jobsSort')||{}).value||'latest');
     if(sort==='closing') filtered.sort((a,b)=>(a.last_date||'9999').localeCompare(b.last_date||'9999'));
