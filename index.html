@@ -6030,7 +6030,25 @@ function openTestSeries(addHistory = true){
     }
 
     showPage("testseries", false);
-    if(addHistory) vkPushContextRoute("testseries", {course: currentCourse, group: currentGroup});
+
+    if(addHistory){
+        vkPushContextRoute("testseries", {course: currentCourse, group: currentGroup});
+    }else{
+        // Keep the URL aligned with the page being displayed.
+        // When returning from the Test List without adding a new history
+        // entry, replace the stale #papers route so refresh restores
+        // the Screening Test / Mains Test selection page.
+        const query = new URLSearchParams();
+        if(currentCourse) query.set("course", currentCourse);
+        if(currentGroup) query.set("group", currentGroup);
+        const queryString = query.toString();
+        const route = "#testseries" + (queryString ? "?" + queryString : "");
+        history.replaceState(
+            {vkPage: "testseries", course: currentCourse, group: currentGroup},
+            "",
+            route
+        );
+    }
 
 }
 
