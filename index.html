@@ -4083,7 +4083,7 @@ id="solutions">
           <input id="vkAdminNegative" type="number" min="0" max="5" step="0.000001" value="0.333333">
         </div>
       </div>
-      <p id="vkAdminNamingHint" class="vk-admin-hint" style="margin-top:12px">Free tests receive automatic topic-wise titles, for example: Ramayanam - Test 2. Paid tests are numbered separately under Paper 1 and Paper 2.</p>
+      <p id="vkAdminNamingHint" class="vk-admin-hint" style="margin-top:12px">Free tests receive automatic topic-wise titles, for example: Ramayanam - Test 2. Paid tests are numbered separately within each selected course test series.</p>
     </div>
 
 
@@ -6109,8 +6109,8 @@ function openTestSeries(addHistory = true){
         list.innerHTML = `
             <div class="choice-card" onclick="openPaper('Test Series')">
                 <div class="big-icon">⚖️</div>
-                <h2>Test Series</h2>
-                <p>100 Marks • Single Series</p>
+                <h2>High Court Exam</h2>
+                <p>Single Test Series</p>
             </div>
         `;
 
@@ -8347,17 +8347,59 @@ async function openAdminMockBuilder(){
     }
 }
 
+const VK_ADMIN_ALLOWED_COURSES = ["APPSC","Endowment Officer","High Court"];
+
+function vkAdminPaidSeriesOptions(courseName){
+    const options = {
+        "APPSC": [
+            {value:"Prelims", label:"Screening Test"},
+            {value:"Mains", label:"Mains Test"}
+        ],
+        "Endowment Officer": [
+            {value:"Paper 1", label:"Paper 1"},
+            {value:"Paper 2", label:"Paper 2"}
+        ],
+        "High Court": [
+            {value:"Test Series", label:"High Court Exam"}
+        ]
+    };
+    return options[courseName] || [];
+}
+
+function vkAdminUpdatePaidSeriesControl(){
+    const courseName=document.getElementById("vkAdminCourse")?.value || "";
+    const wrap=document.getElementById("vkAdminPaperWrap");
+    const select=document.getElementById("vkAdminPaper");
+    const label=wrap?.querySelector("label");
+    const hint=wrap?.querySelector(".vk-admin-hint");
+    const choices=vkAdminPaidSeriesOptions(courseName);
+    if(!wrap || !select) return;
+    wrap.style.display=document.getElementById("vkAdminTestType")?.value==="paid" && choices.length ? "block" : "none";
+    if(label) label.textContent=courseName==="High Court" ? "Exam" : courseName==="APPSC" ? "APPSC Test Type" : "Paid Paper";
+    select.innerHTML=choices.map(item=>`<option value="${vkAdminEscape(item.value)}">${vkAdminEscape(item.label)}</option>`).join("");
+    if(hint){
+        hint.textContent=courseName==="APPSC"
+          ? "APPSC paid tests are organized as Screening Test and Mains Test."
+          : courseName==="High Court"
+          ? "High Court paid tests are organized under one High Court Exam series."
+          : "Test number is assigned automatically within the selected paper.";
+    }
+}
+
 async function vkAdminLoadCourses(){
     const select = document.getElementById("vkAdminCourse");
     if(!select || !supabaseClient) return;
     select.innerHTML = '<option value="">Loading courses...</option>';
     try{
-        const {data,error} = await supabaseClient.from("courses").select("name").order("name",{ascending:true});
+        const {data,error} = await supabaseClient.from("courses").select("name").in("name",VK_ADMIN_ALLOWED_COURSES).order("name",{ascending:true});
         if(error) throw error;
+        const available = new Set((data || []).map(row=>row.name));
+        const ordered = VK_ADMIN_ALLOWED_COURSES.filter(name=>available.has(name));
         select.innerHTML = '<option value="">Select course</option>' +
-            (data || []).map(row => `<option value="${vkAdminEscape(row.name)}">${vkAdminEscape(row.name)}</option>`).join("");
-        const eo = Array.from(select.options).find(o => o.value === "Endowment Officer");
-        if(eo) select.value = eo.value;
+            ordered.map(name => `<option value="${vkAdminEscape(name)}">${vkAdminEscape(name)}</option>`).join("");
+        if(available.has("Endowment Officer")) select.value="Endowment Officer";
+        else if(ordered.length) select.value=ordered[0];
+        vkAdminUpdatePaidSeriesControl();
     }catch(error){
         console.error("Admin course load failed:",error);
         select.innerHTML = '<option value="">Unable to load courses</option>';
@@ -8373,13 +8415,13 @@ function vkAdminOnTestTypeChange(){
     const hint=document.getElementById("vkAdminNamingHint");
     const bulkTitle=document.querySelector("#vkAdminBulkImportPanel h2");
     if(topicWrap) topicWrap.style.display=paid?"none":"block";
-    if(paperWrap) paperWrap.style.display=paid?"block":"none";
+    if(paperWrap) vkAdminUpdatePaidSeriesControl();
     const paidModeWrap=document.getElementById("vkAdminPaidModeWrap");
     if(paidModeWrap) paidModeWrap.style.display=paid?"block":"none";
     const freeModeWrap=document.getElementById("vkAdminFreeModeWrap");
     if(freeModeWrap) freeModeWrap.style.display=paid?"none":"block";
     if(hint) hint.textContent=paid
-      ? "Paid tests are created under the selected Paper 1 or Paper 2 series. Each paid test must contain exactly 150 questions."
+      ? "Paid tests require exactly 150 questions. Select the appropriate test series for the chosen course."
       : "Free tests receive automatic topic-wise titles, for example: Ramayanam - Test 2.";
     if(bulkTitle) bulkTitle.textContent=paid?"Bulk Question Upload – Paid Test":"Bulk Question Upload – Free Test";
     const publish=document.getElementById("vkAdminPublishBtn");
@@ -8582,6 +8624,7 @@ let vkAdminEditingPaidTestId = null;
 let vkAdminPaidTestsCache = [];
 
 async function vkAdminOnCourseChanged(){
+    vkAdminUpdatePaidSeriesControl();
     if(document.getElementById("vkAdminTestType")?.value==="paid"){
         await vkAdminLoadPaidSeriesAndTests();
     } else if(document.getElementById("vkAdminFreeMode")?.value==="edit"){
@@ -8819,8 +8862,9 @@ if(!isPaid && freeMode === "edit" && !freeEditTopicName){
     vkAdminShowStatus("Please enter the Free Test name.",true);
     return;
 }
-    if(isPaid && !["Paper 1","Paper 2"].includes(paperName)){
-        vkAdminShowStatus("Select Paper 1 or Paper 2.",true); return;
+    const allowedPaidSeries=vkAdminPaidSeriesOptions(courseName).map(item=>item.value);
+    if(isPaid && !allowedPaidSeries.includes(paperName)){
+        vkAdminShowStatus("Select a valid test series for the selected course.",true); return;
     }
     if(!Number.isInteger(duration) || duration < 1 || duration > 300){
         vkAdminShowStatus("Duration must be between 1 and 300 minutes.",true); return;
