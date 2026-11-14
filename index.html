@@ -9048,32 +9048,34 @@ async function vkAdminParseBulkFile(){
     }
 }
 
-async function vkAdminApplyBulkQuestions(){
+function vkAdminApplyBulkQuestions(){
     if(!vkAdminBulkParsedQuestions.length)return;
 
-    // In Paid Test edit mode, bind the imported questions to the selected
-    // existing test before replacing the editor contents. This prevents the
-    // save guard from rejecting the import because the edit RPC was never run.
     const isPaidEdit =
         document.getElementById("vkAdminTestType")?.value === "paid" &&
         document.getElementById("vkAdminPaidMode")?.value === "edit";
 
+    // For an existing Paid Test, the selected dropdown ID is sufficient to
+    // target the update RPC. Do not call the edit-load RPC here: that RPC may
+    // fail independently and is unnecessary when replacing all 150 questions.
     if(isPaidEdit){
         const selectedId = document.getElementById("vkAdminExistingTest")?.value;
         if(!selectedId){
             vkAdminShowStatus("Select an existing Paid Test before applying the imported questions.",true);
             return;
         }
-        if(vkAdminEditingPaidTestId !== selectedId){
-            await vkAdminLoadPaidTestForEdit();
-        }
-        if(vkAdminEditingPaidTestId !== selectedId){
-            vkAdminShowStatus("The selected Paid Test could not be loaded. Imported questions were not applied. Check the test selection and try again.",true);
+        if(vkAdminBulkParsedQuestions.length !== 150){
+            vkAdminShowStatus(`Paid tests require exactly 150 imported questions. Current count: ${vkAdminBulkParsedQuestions.length}.`,true);
             return;
         }
+        vkAdminEditingPaidTestId = selectedId;
     }
 
     const host=document.getElementById("vkAdminQuestions");
+    if(!host){
+        vkAdminShowStatus("The question editor was not found. Refresh the page and try again.",true);
+        return;
+    }
     host.innerHTML="";
     vkAdminBulkParsedQuestions.forEach(q=>{
         vkAdminAddQuestion();
@@ -9084,14 +9086,18 @@ async function vkAdminApplyBulkQuestions(){
         });
     });
     vkAdminUpdateQuestionLabels();
+
+    const count = vkAdminBulkParsedQuestions.length;
     vkAdminShowStatus(
         isPaidEdit
-            ? `${vkAdminBulkParsedQuestions.length} imported questions are ready to replace the questions in the selected Paid Test. Review carefully, then click Save Existing Paid Test.`
-            : `${vkAdminBulkParsedQuestions.length} questions imported into the editor. Review them and click Publish Mock Test when ready.`,
+            ? `${count} imported questions are now in the editor for the selected Paid Test. Review them and click Save Existing Paid Test.`
+            : `${count} questions imported into the editor. Review them and click Publish Mock Test when ready.`,
         false
     );
-    document.getElementById("vkAdminBulkFeedback").innerHTML='<div class="vk-bulk-success">Questions copied to the editor. Publishing has not happened yet.</div>';
-    document.getElementById("vkAdminBulkApplyWrap").style.display="none";
+    const feedback=document.getElementById("vkAdminBulkFeedback");
+    if(feedback)feedback.innerHTML='<div class="vk-bulk-success">Questions copied to the editor. Publishing has not happened yet.</div>';
+    const applyWrap=document.getElementById("vkAdminBulkApplyWrap");
+    if(applyWrap)applyWrap.style.display="none";
 }
 
 function vkAdminDownloadCsvTemplate(){
