@@ -8352,15 +8352,15 @@ const VK_ADMIN_ALLOWED_COURSES = ["APPSC","Endowment Officer","High Court"];
 function vkAdminPaidSeriesOptions(courseName){
     const options = {
         "APPSC": [
-            {value:"Prelims", label:"Screening Test"},
-            {value:"Mains", label:"Mains Test"}
+            {value:"Paper 1", label:"Screening Test"},
+            {value:"Paper 2", label:"Mains Test"}
         ],
         "Endowment Officer": [
             {value:"Paper 1", label:"Paper 1"},
             {value:"Paper 2", label:"Paper 2"}
         ],
         "High Court": [
-            {value:"Test Series", label:"High Court Exam"}
+            {value:"Paper 1", label:"High Court Exam"}
         ]
     };
     return options[courseName] || [];
