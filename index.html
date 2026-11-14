@@ -3257,13 +3257,13 @@ Select an examination and start your preparation.
 
 
 <div class="vk-exam-grid">
-  <article class="vk-exam-card vk-appsc-card" onclick="showComingSoon('APPSC')">
-    <div class="vk-card-top"><span class="vk-card-emblem">🏛️</span><span class="vk-status">COMING SOON</span></div>
+  <article class="vk-exam-card vk-appsc-card" onclick="openCourse('APPSC')">
+    <div class="vk-card-top"><span class="vk-card-emblem">🏛️</span></div>
     <div class="vk-card-art vk-appsc-art">🏢</div>
     <h3>APPSC</h3>
     <p>Andhra Pradesh Public Service Commission Exams</p>
-    <div class="vk-card-features"><span>☑ Syllabus Tests</span><span>▥ Practice Papers</span></div>
-    <button class="vk-card-button">Explore APPSC <b>➜</b></button>
+    <div class="vk-card-features"><span>☑ Screening Test</span><span>▥ Mains Test</span></div>
+    <button class="vk-card-button" type="button">Explore APPSC <b>➜</b></button>
   </article>
   <article class="vk-exam-card vk-endowment-card" onclick="openCourse('Endowment Officer')">
     <div class="vk-crown">♛</div>
@@ -3274,13 +3274,13 @@ Select an examination and start your preparation.
     <div class="vk-card-features"><span>▣ Real Exam<br>(CBT Mode)</span><span>▱ Full-Length<br>Tests (150 Q)</span><span>▥ Detailed<br>Analysis</span></div>
     <button class="vk-card-button vk-paid-button">Start Paid Test Series <b>➜</b></button>
   </article>
-  <article class="vk-exam-card vk-court-card" onclick="showComingSoon('High Court')">
-    <div class="vk-card-top"><span class="vk-card-emblem">⚖</span><span class="vk-status">COMING SOON</span></div>
+  <article class="vk-exam-card vk-court-card" onclick="openCourse('High Court')">
+    <div class="vk-card-top"><span class="vk-card-emblem">⚖</span></div>
     <div class="vk-card-art vk-court-art">🏛</div>
     <h3>High Court</h3>
     <p>AP High Court Recruitment Exams</p>
-    <div class="vk-card-features"><span>☑ Topic Tests</span><span>▥ Practice Papers</span></div>
-    <button class="vk-card-button">Explore High Court <b>➜</b></button>
+    <div class="vk-card-features"><span>☑ High Court Exam</span><span>▥ Paid Test Series</span></div>
+    <button class="vk-card-button" type="button">Explore High Court <b>➜</b></button>
   </article>
 </div>
 
@@ -5743,8 +5743,10 @@ function openCourse(course, addHistory = true){
     currentCourse = course;
     currentGroup = "";
 
-    if(course === "APPSC"){
-        openAPPSCGroups(addHistory);
+    if(course === "APPSC" || course === "High Court"){
+        // Open the selected paid test series directly from the home exam card.
+        // APPSC shows Screening Test / Mains Test; High Court shows one exam series.
+        openTestSeries(addHistory);
         return;
     }
 
@@ -6106,6 +6108,23 @@ function openTestSeries(addHistory = true){
         `;
 
     }
+    else if(currentCourse === "APPSC"){
+
+        list.innerHTML = `
+            <div class="choice-card" onclick="openPaper('Screening Test')">
+                <div class="big-icon">📘</div>
+                <h2>Screening Test</h2>
+                <p>APPSC Screening Test Paid Series</p>
+            </div>
+
+            <div class="choice-card" onclick="openPaper('Mains Test')">
+                <div class="big-icon">📕</div>
+                <h2>Mains Test</h2>
+                <p>APPSC Mains Test Paid Series</p>
+            </div>
+        `;
+
+    }
     else if(currentCourse === "High Court"){
 
         list.innerHTML = `
@@ -6382,13 +6401,29 @@ if (isLoggedIn() && supabaseClient) {
             throw courseForTestsError || new Error("Course not found: " + currentCourse);
         }
 
+        // Keep the public APPSC label "Screening Test" while reusing
+        // the existing Prelims series records; no database rows are renamed/deleted.
+        const databaseSeriesName =
+            currentCourse === "APPSC" && !currentGroup && paper === "Screening Test"
+                ? "Prelims"
+                : currentCourse === "APPSC" && !currentGroup && paper === "Mains Test"
+                    ? "Mains"
+                    : paper;
+
+        let seriesQuery = supabaseClient
+            .from("test_series")
+            .select("id")
+            .eq("course_id", courseForTests.id)
+            .eq("name", databaseSeriesName);
+
+        // Direct APPSC series are the existing top-level series, not the
+        // legacy Group 2 / Group 4 child series.
+        if (currentCourse === "APPSC" && !currentGroup) {
+            seriesQuery = seriesQuery.is("parent_series_id", null);
+        }
+
         const { data: seriesForTests, error: seriesForTestsError } =
-            await supabaseClient
-                .from("test_series")
-                .select("id")
-                .eq("course_id", courseForTests.id)
-                .eq("name", paper)
-                .maybeSingle();
+            await seriesQuery.maybeSingle();
 
         if (seriesForTestsError || !seriesForTests) {
             throw seriesForTestsError || new Error("Test series not found: " + paper);
