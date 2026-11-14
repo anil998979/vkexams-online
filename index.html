@@ -9048,8 +9048,31 @@ async function vkAdminParseBulkFile(){
     }
 }
 
-function vkAdminApplyBulkQuestions(){
+async function vkAdminApplyBulkQuestions(){
     if(!vkAdminBulkParsedQuestions.length)return;
+
+    // In Paid Test edit mode, bind the imported questions to the selected
+    // existing test before replacing the editor contents. This prevents the
+    // save guard from rejecting the import because the edit RPC was never run.
+    const isPaidEdit =
+        document.getElementById("vkAdminTestType")?.value === "paid" &&
+        document.getElementById("vkAdminPaidMode")?.value === "edit";
+
+    if(isPaidEdit){
+        const selectedId = document.getElementById("vkAdminExistingTest")?.value;
+        if(!selectedId){
+            vkAdminShowStatus("Select an existing Paid Test before applying the imported questions.",true);
+            return;
+        }
+        if(vkAdminEditingPaidTestId !== selectedId){
+            await vkAdminLoadPaidTestForEdit();
+        }
+        if(vkAdminEditingPaidTestId !== selectedId){
+            vkAdminShowStatus("The selected Paid Test could not be loaded. Imported questions were not applied. Check the test selection and try again.",true);
+            return;
+        }
+    }
+
     const host=document.getElementById("vkAdminQuestions");
     host.innerHTML="";
     vkAdminBulkParsedQuestions.forEach(q=>{
@@ -9061,7 +9084,12 @@ function vkAdminApplyBulkQuestions(){
         });
     });
     vkAdminUpdateQuestionLabels();
-    vkAdminShowStatus(`${vkAdminBulkParsedQuestions.length} questions imported into the editor. Review them and click Publish Mock Test when ready.`,false);
+    vkAdminShowStatus(
+        isPaidEdit
+            ? `${vkAdminBulkParsedQuestions.length} imported questions are ready to replace the questions in the selected Paid Test. Review carefully, then click Save Existing Paid Test.`
+            : `${vkAdminBulkParsedQuestions.length} questions imported into the editor. Review them and click Publish Mock Test when ready.`,
+        false
+    );
     document.getElementById("vkAdminBulkFeedback").innerHTML='<div class="vk-bulk-success">Questions copied to the editor. Publishing has not happened yet.</div>';
     document.getElementById("vkAdminBulkApplyWrap").style.display="none";
 }
