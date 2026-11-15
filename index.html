@@ -1,4 +1,4 @@
-          <!DOCTYPE html>
+           <!DOCTYPE html>
 <html lang="en">
 <head>
 
@@ -3915,6 +3915,22 @@ id="solutions">
       <div class="vk-admin-actions"><button type="button" class="vk-admin-btn vk-admin-btn-secondary" onclick="openAdminStudyMaterials()">📚 Manage Study Materials</button></div>
     </div>
 
+    <div class="vk-admin-panel" id="vkCategoryManager" style="margin:16px 0">
+      <h2>Category & Homepage Card Management</h2>
+      <p>Super Admin మరియు అనుమతి ఉన్న Normal Admin ఇక్కడ Courses, Free/Paid Test Series నిర్వహించవచ్చు. Disable చేయడం ద్వారా పాత tests/attempts తొలగించబడవు.</p>
+      <div class="vk-admin-grid">
+        <div><label>Category name</label><input id="vkCatName" maxlength="100" placeholder="ఉదా: APPSC"></div>
+        <div><label>Slug</label><input id="vkCatSlug" maxlength="100" placeholder="ఉదా: appsc"></div>
+        <div><label>Icon / Emoji</label><input id="vkCatIcon" maxlength="20" placeholder="🏛️"></div>
+        <div><label>Display order</label><input id="vkCatOrder" type="number" min="0" value="10"></div>
+      </div>
+      <input id="vkCatId" type="hidden">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0"><button type="button" class="vk-admin-btn" onclick="vkSaveCategory()">Save Category</button><button type="button" class="vk-admin-btn vk-admin-btn-secondary" onclick="vkResetCategoryForm()">Clear</button><button type="button" class="vk-admin-btn vk-admin-btn-secondary" onclick="vkLoadCategoryManager()">Refresh</button></div>
+      <div id="vkCategoryStatus" role="status" style="margin:8px 0"></div><div id="vkCategoryRows"></div>
+      <hr><h3>Test Series</h3>
+      <div class="vk-admin-grid"><div><label>Course</label><select id="vkSeriesCourse"></select></div><div><label>Series name</label><input id="vkSeriesName" maxlength="100" placeholder="Screening Test / Free Mock Tests"></div><div><label>Series type</label><select id="vkSeriesType"><option value="general">general</option><option value="prelims">prelims</option><option value="mains">mains</option><option value="free_mock">free_mock</option><option value="paper_1">paper_1</option><option value="paper_2">paper_2</option><option value="topic_wise">topic_wise</option></select></div></div>
+      <input id="vkSeriesId" type="hidden"><div style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0"><button type="button" class="vk-admin-btn" onclick="vkSaveSeries()">Save Series</button><button type="button" class="vk-admin-btn vk-admin-btn-secondary" onclick="vkLoadCategoryManager()">Refresh Series</button></div><div id="vkSeriesRows"></div>
+    </div>
     <div class="vk-admin-panel">
       <h2 style="margin-bottom:16px">Test Details</h2>
       <div class="vk-admin-grid">
@@ -5127,7 +5143,7 @@ function backToFreeMockCourses(){
     );
 }
 
-function openFreeMocks(addHistory = true){
+async function openFreeMocks(addHistory = true){
 
     /* Browsing Free Mock courses and test lists is public.
        Authentication is enforced only when the student starts a test. */
@@ -5140,10 +5156,14 @@ function openFreeMocks(addHistory = true){
         }
     }
 
-    const courses = [
-        ["Endowment Officer","🛕"],
-        ["APPSC","🏛️"]
-    ];
+    const fallbackCourses = [["Endowment Officer","🛕"],["APPSC","🏛️"]];
+    let courses = fallbackCourses;
+    try {
+        if (supabaseClient) {
+            const {data,error} = await supabaseClient.from("courses").select("name,icon,is_active,display_order").eq("is_active",true).order("display_order",{ascending:true});
+            if (!error && Array.isArray(data) && data.length) courses = data.map(c=>[c.name,c.icon || (c.name.includes("Endowment")?"🛕":"🏛️")]);
+        }
+    } catch(e) { console.warn("Dynamic free mock categories unavailable; using fallback.",e); }
 
     $("freeMocks").classList.remove("mock-list-mode");
     $("freeMockCourses").className = "choice-grid";
@@ -8259,11 +8279,37 @@ async function openAdminMockBuilder(){
     }
     showPage("vkAdminMockBuilder");
     await vkAdminLoadCourses();
+    await vkLoadCategoryManager();
     vkAdminOnTestTypeChange();
     if(!document.getElementById("vkAdminQuestions").children.length){
         vkAdminAddQuestion();
     }
 }
+
+async function vkLoadCategoryManager(){
+  if(!vkAdminAuthorized || !supabaseClient) return;
+  const status=document.getElementById("vkCategoryStatus");
+  if(status) status.textContent="Loading categories…";
+  const [cr,sr]=await Promise.all([
+    supabaseClient.from("courses").select("id,name,slug,description,icon,is_active,display_order").order("display_order"),
+    supabaseClient.from("test_series").select("id,course_id,name,series_type,is_active,display_order,parent_series_id").order("display_order")
+  ]);
+  if(cr.error || sr.error){if(status)status.textContent="Load failed: "+(cr.error||sr.error).message;return;}
+  window.__vkCourses=cr.data||[]; window.__vkSeries=sr.data||[];
+  const esc=vkAdminEscape;
+  document.getElementById("vkCategoryRows").innerHTML='<div class="table-wrap"><table><thead><tr><th>Category</th><th>Slug</th><th>Icon</th><th>Status</th><th>Actions</th></tr></thead><tbody>'+window.__vkCourses.map(c=>`<tr><td>${esc(c.name)}</td><td>${esc(c.slug)}</td><td>${esc(c.icon||'')}</td><td>${c.is_active?'Active':'Disabled'}</td><td><button type="button" onclick="vkEditCategory('${c.id}')">Edit</button> <button type="button" onclick="vkToggleCategory('${c.id}',${!c.is_active})">${c.is_active?'Disable':'Enable'}</button></td></tr>`).join('')+'</tbody></table></div>';
+  const select=document.getElementById("vkSeriesCourse"); select.innerHTML=window.__vkCourses.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');
+  const names=new Map(window.__vkCourses.map(c=>[c.id,c.name]));
+  document.getElementById("vkSeriesRows").innerHTML='<div class="table-wrap"><table><thead><tr><th>Course</th><th>Series</th><th>Type</th><th>Status</th><th>Actions</th></tr></thead><tbody>'+window.__vkSeries.map(s=>`<tr><td>${esc(names.get(s.course_id)||'')}</td><td>${esc(s.name)}</td><td>${esc(s.series_type)}</td><td>${s.is_active?'Active':'Disabled'}</td><td><button type="button" onclick="vkEditSeries('${s.id}')">Edit</button> <button type="button" onclick="vkToggleSeries('${s.id}',${!s.is_active})">${s.is_active?'Disable':'Enable'}</button></td></tr>`).join('')+'</tbody></table></div>';
+  if(status)status.textContent='Loaded '+window.__vkCourses.length+' categories and '+window.__vkSeries.length+' test series.';
+}
+function vkResetCategoryForm(){['vkCatId','vkCatName','vkCatSlug','vkCatIcon'].forEach(id=>document.getElementById(id).value='');document.getElementById('vkCatOrder').value='10'}
+function vkEditCategory(id){const c=(window.__vkCourses||[]).find(x=>x.id===id);if(!c)return;document.getElementById('vkCatId').value=c.id;document.getElementById('vkCatName').value=c.name||'';document.getElementById('vkCatSlug').value=c.slug||'';document.getElementById('vkCatIcon').value=c.icon||'';document.getElementById('vkCatOrder').value=c.display_order??10;document.getElementById('vkCatName').scrollIntoView({behavior:'smooth',block:'center'})}
+async function vkSaveCategory(){const id=document.getElementById('vkCatId').value;const name=document.getElementById('vkCatName').value.trim();const slug=document.getElementById('vkCatSlug').value.trim().toLowerCase();if(!name||!slug){alert('Category name and slug are required.');return}const row={name,slug,icon:document.getElementById('vkCatIcon').value.trim()||null,display_order:Number(document.getElementById('vkCatOrder').value||0),is_active:true};const q=id?supabaseClient.from('courses').update(row).eq('id',id):supabaseClient.from('courses').insert(row);const {error}=await q;if(error){alert('Save failed: '+error.message);return}vkResetCategoryForm();await vkLoadCategoryManager();await vkAdminLoadCourses()}
+async function vkToggleCategory(id,active){const {error}=await supabaseClient.from('courses').update({is_active:active}).eq('id',id);if(error){alert(error.message);return}await vkLoadCategoryManager()}
+function vkEditSeries(id){const s=(window.__vkSeries||[]).find(x=>x.id===id);if(!s)return;document.getElementById('vkSeriesId').value=s.id;document.getElementById('vkSeriesCourse').value=s.course_id;document.getElementById('vkSeriesName').value=s.name;document.getElementById('vkSeriesType').value=s.series_type||'general'}
+async function vkSaveSeries(){const id=document.getElementById('vkSeriesId').value;const course_id=document.getElementById('vkSeriesCourse').value;const name=document.getElementById('vkSeriesName').value.trim();const series_type=document.getElementById('vkSeriesType').value;if(!course_id||!name){alert('Course and series name are required.');return}const row={course_id,name,series_type,is_active:true};const q=id?supabaseClient.from('test_series').update(row).eq('id',id):supabaseClient.from('test_series').insert(row);const {error}=await q;if(error){alert('Save failed: '+error.message);return}document.getElementById('vkSeriesId').value='';document.getElementById('vkSeriesName').value='';await vkLoadCategoryManager()}
+async function vkToggleSeries(id,active){const {error}=await supabaseClient.from('test_series').update({is_active:active}).eq('id',id);if(error){alert(error.message);return}await vkLoadCategoryManager()}
 
 const VK_ADMIN_ALLOWED_COURSES = ["APPSC","Endowment Officer","High Court"];
 
