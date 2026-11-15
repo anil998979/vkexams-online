@@ -1,4 +1,4 @@
-           <!DOCTYPE html>
+            <!DOCTYPE html>
 <html lang="en">
 <head>
 
@@ -3859,22 +3859,8 @@ id="solutions">
       </div>
 
       <div class="vk-plan-heading"><h3>Choose Your Package</h3><p>Affordable access plans</p></div>
-      <div class="plan-grid vk-plan-grid">
-        <article class="plan vk-plan vk-plan-daily">
-          <div class="vk-plan-top"><span>◷&nbsp; Daily</span></div>
-          <div class="vk-plan-body"><div class="vk-new-price">₹15</div><p class="vk-access">◷&nbsp; 1 Day Access</p>
-            <button onclick="buyPlan('Daily',15,1)">Select&nbsp; →</button></div>
-        </article>
-        <article class="plan vk-plan vk-plan-weekly">
-          <div class="vk-plan-top"><span>▦&nbsp; Weekly</span></div>
-          <div class="vk-plan-body"><div class="vk-new-price">₹90</div><p class="vk-access">▦&nbsp; 7 Days Access</p>
-            <button onclick="buyPlan('Weekly',90,7)">Select&nbsp; →</button></div>
-        </article>
-        <article class="plan vk-plan vk-plan-monthly">
-          <div class="vk-plan-top"><span>▦&nbsp; Monthly</span></div>
-          <div class="vk-plan-body"><div class="vk-new-price">₹400</div><p class="vk-access">▦&nbsp; 30 Days Access</p>
-            <button onclick="buyPlan('Monthly',400,30)">Select&nbsp; →</button></div>
-        </article>
+      <div id="storePackagesGrid" class="plan-grid vk-plan-grid" aria-live="polite">
+        <p class="vk-package-loading">Loading available packages...</p>
       </div>
 
       <div class="vk-store-benefits"><div><b>✓</b><span>Full-Length<br>Test Series</span></div><div><b>▣</b><span>Comprehensive<br>Study Material</span></div><div><b>◎</b><span>Topic-wise<br>Mock Tests</span></div></div>
@@ -7178,6 +7164,53 @@ function vkSetStoreRoute(course = "", replace = true){
     else history.pushState(state, "", url);
 }
 
+async function loadStorePackages(){
+    const grid = $("storePackagesGrid");
+    if(!grid) return;
+    grid.innerHTML = '<p class="vk-package-loading">Loading available packages...</p>';
+
+    const { data, error } = await supabaseClient
+        .from("packages")
+        .select("id, name, duration_days, price")
+        .eq("is_active", true)
+        .in("name", ["Daily Plan", "Weekly Plan", "Monthly Plan"])
+        .order("duration_days", { ascending: true });
+
+    if(error){
+        console.error("ACTIVE PACKAGES LOAD ERROR:", error);
+        grid.innerHTML = '<p class="vk-package-error">Packages could not be loaded. Please refresh and try again.</p>';
+        return;
+    }
+
+    const expected = [
+        { name: "Daily Plan", days: 1, label: "Daily", icon: "◷", css: "daily", access: "1 Day Access" },
+        { name: "Weekly Plan", days: 7, label: "Weekly", icon: "▦", css: "weekly", access: "7 Days Access" },
+        { name: "Monthly Plan", days: 30, label: "Monthly", icon: "▦", css: "monthly", access: "30 Days Access" }
+    ];
+    const active = Array.isArray(data) ? data : [];
+    const cards = expected.map(spec => {
+        const matches = active.filter(row => row.name === spec.name && Number(row.duration_days) === spec.days);
+        if(matches.length !== 1) return "";
+        const pkg = matches[0];
+        const price = Number(pkg.price);
+        if(!pkg.id || !Number.isFinite(price) || price <= 0) return "";
+        const safeId = String(pkg.id).replace(/[^a-zA-Z0-9-]/g, "");
+        return `<article class="plan vk-plan vk-plan-${spec.css}">
+          <div class="vk-plan-top"><span>${spec.icon}&nbsp; ${spec.label}</span></div>
+          <div class="vk-plan-body"><div class="vk-new-price">₹${price.toLocaleString("en-IN", {maximumFractionDigits: 2})}</div>
+          <p class="vk-access">${spec.icon}&nbsp; ${spec.access}</p>
+          <button onclick="buyPlan('${safeId}', ${price}, ${spec.days}, '${spec.label}')">Select&nbsp; →</button></div>
+        </article>`;
+    }).filter(Boolean);
+
+    if(cards.length !== 3){
+        console.error("Expected exactly the three current active packages:", active);
+        grid.innerHTML = '<p class="vk-package-error">The current Daily, Weekly and Monthly packages are not configured correctly. Please contact VK Exams support.</p>';
+        return;
+    }
+    grid.innerHTML = cards.join("");
+}
+
 function renderStoreCourseSelection(course = ""){
     const area = $("selectedCourseArea");
     const cards = document.querySelectorAll("#store .category-card");
@@ -7200,6 +7233,7 @@ function renderStoreCourseSelection(course = ""){
         });
         const selectedIcon = area.querySelector(".vk-selected-icon");
         if(selectedIcon) selectedIcon.textContent = course === "APPSC" ? "📚" : (course === "High Court" ? "⚖️" : "🛕");
+        loadStorePackages();
     }
 }
 
@@ -7229,9 +7263,10 @@ function selectStoreCourse(course, card){
 
 
 async function buyPlan(
-       plan,
+    packageId,
     amount,
-    days
+    days,
+    plan
 ){
 
     if(!selectedStoreCourse){
@@ -7263,28 +7298,30 @@ async function buyPlan(
         .eq("name", selectedStoreCourse)
         .single();
 
-const { data: packageRows, error: packageError } =
-    await supabaseClient
-        .from("packages")
-        .select("id, name, duration_days, price")
-        .eq("name", plan + " Plan")
-        .eq("duration_days", days)
-        .eq("is_active", true)
-        .limit(2);
-
-if(packageError || !packageRows || packageRows.length === 0){
-    console.error("PACKAGE SEARCH ERROR:", packageError);
-    toast("Package not found. Please contact VK Exams support.\n\nPlan: " + plan + "\nDays: " + days);
+if(courseError || !courseData){
+    console.error("STORE COURSE LOOKUP ERROR:", courseError);
+    toast("Selected course could not be found. Please refresh and try again.");
     return;
 }
 
-if(packageRows.length > 1){
-    console.error("Duplicate active package rows:", packageRows);
-    toast("Multiple active packages found for " + plan + ". Please contact VK Exams support.");
+const { data: packageData, error: packageError } = await supabaseClient
+    .from("packages")
+    .select("id, name, duration_days, price")
+    .eq("id", packageId)
+    .eq("is_active", true)
+    .maybeSingle();
+
+if(packageError || !packageData){
+    console.error("SELECTED ACTIVE PACKAGE LOOKUP ERROR:", packageError);
+    toast("This package is no longer available. Please refresh the page and try again.");
     return;
 }
 
-const packageData = packageRows[0];
+if(Number(packageData.duration_days) !== Number(days)){
+    toast("Package details changed. Please refresh and select the package again.");
+    return;
+}
+
 const databasePrice = Number(packageData.price);
 const expectedPrice = Number(amount);
 
