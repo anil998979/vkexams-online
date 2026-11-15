@@ -3916,8 +3916,8 @@ id="solutions">
     </div>
 
     <div class="vk-admin-panel" id="vkCategoryManager" style="margin:16px 0">
-      <h2>Category & Homepage Card Management</h2>
-      <p>Super Admin మరియు అనుమతి ఉన్న Normal Admin ఇక్కడ Courses, Free/Paid Test Series నిర్వహించవచ్చు. Disable చేయడం ద్వారా పాత tests/attempts తొలగించబడవు.</p>
+      <h2>Category & Test Series Management</h2>
+      <p>Super Admin మరియు అనుమతి ఉన్న Normal Admin ఇక్కడ Courses, Free/Paid Test Series నిర్వహించవచ్చు. Homepage card image/content settings ప్రస్తుతం ఈ database schemaలో లేవు. Disable చేయడం ద్వారా పాత tests/attempts తొలగించబడవు.</p>
       <div class="vk-admin-grid">
         <div><label>Category name</label><input id="vkCatName" maxlength="100" placeholder="ఉదా: APPSC"></div>
         <div><label>Slug</label><input id="vkCatSlug" maxlength="100" placeholder="ఉదా: appsc"></div>
@@ -8286,6 +8286,11 @@ async function openAdminMockBuilder(){
     }
 }
 
+function vkSeriesDisplayName(series, courseName){
+  if(courseName === "APPSC" && String(series?.name||"").trim().toLowerCase() === "prelims") return "Screening Test";
+  return series?.name || "";
+}
+
 async function vkLoadCategoryManager(){
   if(!vkAdminAuthorized || !supabaseClient) return;
   const status=document.getElementById("vkCategoryStatus");
@@ -8300,7 +8305,7 @@ async function vkLoadCategoryManager(){
   document.getElementById("vkCategoryRows").innerHTML='<div class="table-wrap"><table><thead><tr><th>Category</th><th>Slug</th><th>Icon</th><th>Status</th><th>Actions</th></tr></thead><tbody>'+window.__vkCourses.map(c=>`<tr><td>${esc(c.name)}</td><td>${esc(c.slug)}</td><td>${esc(c.icon||'')}</td><td>${c.is_active?'Active':'Disabled'}</td><td><button type="button" onclick="vkEditCategory('${c.id}')">Edit</button> <button type="button" onclick="vkToggleCategory('${c.id}',${!c.is_active})">${c.is_active?'Disable':'Enable'}</button></td></tr>`).join('')+'</tbody></table></div>';
   const select=document.getElementById("vkSeriesCourse"); select.innerHTML=window.__vkCourses.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');
   const names=new Map(window.__vkCourses.map(c=>[c.id,c.name]));
-  document.getElementById("vkSeriesRows").innerHTML='<div class="table-wrap"><table><thead><tr><th>Course</th><th>Series</th><th>Type</th><th>Status</th><th>Actions</th></tr></thead><tbody>'+window.__vkSeries.map(s=>`<tr><td>${esc(names.get(s.course_id)||'')}</td><td>${esc(s.name)}</td><td>${esc(s.series_type)}</td><td>${s.is_active?'Active':'Disabled'}</td><td><button type="button" onclick="vkEditSeries('${s.id}')">Edit</button> <button type="button" onclick="vkToggleSeries('${s.id}',${!s.is_active})">${s.is_active?'Disable':'Enable'}</button></td></tr>`).join('')+'</tbody></table></div>';
+  document.getElementById("vkSeriesRows").innerHTML='<div class="table-wrap"><table><thead><tr><th>Course</th><th>Series</th><th>Type</th><th>Status</th><th>Actions</th></tr></thead><tbody>'+window.__vkSeries.map(s=>`<tr><td>${esc(names.get(s.course_id)||'')}</td><td>${esc(vkSeriesDisplayName(s,names.get(s.course_id)||''))}</td><td>${esc(s.series_type)}</td><td>${s.is_active?'Active':'Disabled'}</td><td><button type="button" onclick="vkEditSeries('${s.id}')">Edit</button> <button type="button" onclick="vkToggleSeries('${s.id}',${!s.is_active})">${s.is_active?'Disable':'Enable'}</button></td></tr>`).join('')+'</tbody></table></div>';
   if(status)status.textContent='Loaded '+window.__vkCourses.length+' categories and '+window.__vkSeries.length+' test series.';
 }
 function vkResetCategoryForm(){['vkCatId','vkCatName','vkCatSlug','vkCatIcon'].forEach(id=>document.getElementById(id).value='');document.getElementById('vkCatOrder').value='10'}
@@ -14138,5 +14143,25 @@ document.addEventListener(
 <style id="vk-exam-footer-isolation">
 body:has(#examPage.active) > footer{
     display:none !important;
+}
+
+/* VK Exams category manager: responsive layout */
+#vkCategoryManager .vk-admin-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:12px;align-items:end}
+#vkCategoryManager label{display:block;font-weight:650;margin:0 0 6px}
+#vkCategoryManager input,#vkCategoryManager select{box-sizing:border-box;width:100%;min-width:0;max-width:100%;min-height:46px;padding:10px 12px;border:1px solid #cbd5e1;border-radius:10px;font:inherit;background:#fff}
+#vkCategoryManager .table-wrap{width:100%;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid #e2e8f0;border-radius:12px;margin:10px 0}
+#vkCategoryManager table{width:100%;min-width:620px;border-collapse:collapse}
+#vkCategoryManager th,#vkCategoryManager td{padding:10px 12px;text-align:left;vertical-align:middle;border-bottom:1px solid #e2e8f0;white-space:normal}
+#vkCategoryManager th{font-weight:700;background:#f8fafc}
+#vkCategoryManager td button{min-height:38px;padding:7px 10px;margin:2px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;font:inherit;font-size:14px}
+#vkCategoryManager .vk-admin-btn{min-height:44px;padding:10px 16px;border-radius:10px}
+@media(max-width:640px){
+ #vkCategoryManager{padding:14px!important}
+ #vkCategoryManager h2{font-size:22px;line-height:1.25}
+ #vkCategoryManager h3{font-size:19px}
+ #vkCategoryManager .vk-admin-grid{grid-template-columns:1fr;gap:10px}
+ #vkCategoryManager>div[style*="display:flex"]{align-items:stretch}
+ #vkCategoryManager .vk-admin-btn{flex:1 1 130px}
+ #vkCategoryManager table{min-width:580px}
 }
 </style>
