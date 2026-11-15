@@ -1,4 +1,4 @@
-         <!DOCTYPE html>
+          <!DOCTYPE html>
 <html lang="en">
 <head>
 
@@ -3927,7 +3927,7 @@ id="solutions">
         </div>
         <div class="vk-admin-field">
           <label for="vkAdminCourse">Course</label>
-          <select id="vkAdminCourse" onchange="vkAdminOnCourseChanged()"><option value="">Loading courses...</option></select>
+          <select id="vkAdminCourse" onchange="vkAdminOnCourseChanged();vkAdminRefreshPaidQuestionHint()"><option value="">Loading courses...</option></select>
         </div>
         <div class="vk-admin-field" id="vkAdminPaperWrap" style="display:none">
           <label for="vkAdminPaper">Paid Paper</label>
@@ -8324,6 +8324,26 @@ async function vkAdminLoadCourses(){
     }
 }
 
+function vkAdminRefreshPaidQuestionHint(){
+    const hint = document.getElementById("vkAdminNamingHint");
+    const paid = document.getElementById("vkAdminTestType")?.value === "paid";
+    const courseName = document.getElementById("vkAdminCourse")?.value || "";
+    if(hint && paid){
+        hint.textContent = `${vkAdminPaidQuestionRuleText(courseName)} Select the appropriate test series for the chosen course.`;
+    }
+}
+
+function vkAdminExpectedPaidQuestionCount(courseName){
+    // AP High Court Junior Assistant Paid Tests use 80 questions.
+    // APPSC and Endowment Officer Paid Tests continue to use 150.
+    return String(courseName || "").trim() === "High Court" ? 80 : 150;
+}
+
+function vkAdminPaidQuestionRuleText(courseName){
+    const expected = vkAdminExpectedPaidQuestionCount(courseName);
+    return `${courseName === "High Court" ? "High Court" : courseName || "Paid"} Paid Tests require exactly ${expected} questions.`;
+}
+
 function vkAdminOnTestTypeChange(){
     const type=document.getElementById("vkAdminTestType")?.value || "free";
     const paid=type==="paid";
@@ -8338,7 +8358,7 @@ function vkAdminOnTestTypeChange(){
     const freeModeWrap=document.getElementById("vkAdminFreeModeWrap");
     if(freeModeWrap) freeModeWrap.style.display=paid?"none":"block";
     if(hint) hint.textContent=paid
-      ? "Paid tests require exactly 150 questions. Select the appropriate test series for the chosen course."
+      ? `${vkAdminPaidQuestionRuleText(document.getElementById("vkAdminCourse")?.value)} Select the appropriate test series for the chosen course.`
       : "Free tests receive automatic topic-wise titles, for example: Ramayanam - Test 2.";
     if(bulkTitle) bulkTitle.textContent=paid?"Bulk Question Upload – Paid Test":"Bulk Question Upload – Free Test";
     const publish=document.getElementById("vkAdminPublishBtn");
@@ -8624,7 +8644,9 @@ async function vkAdminLoadPaidTestForEdit(){
         if(error)throw error;
         const result=Array.isArray(data)?data[0]:data;
         if(!result||!Array.isArray(result.questions))throw new Error("Test data was not returned.");
-        if(result.questions.length!==150)throw new Error(`This test contains ${result.questions.length} questions. The current Paid Test editor requires exactly 150.`);
+        const courseName = document.getElementById("vkAdminCourse")?.value || "";
+        const expectedCount = vkAdminExpectedPaidQuestionCount(courseName);
+        if(result.questions.length!==expectedCount)throw new Error(`This ${courseName || "Paid"} Test contains ${result.questions.length} questions. The editor expects exactly ${expectedCount}.`);
         vkAdminEditingPaidTestId=id;
         document.getElementById("vkAdminDuration").value=result.duration_minutes||150;
         document.getElementById("vkAdminNegative").value=result.negative_marks??0.333333;
@@ -8816,8 +8838,9 @@ if(!isPaid && freeMode === "edit" && !freeEditTopicName){
             : "Add questions before publishing.",true);
         return;
     }
-    if(isPaid && cards.length !== 150){
-        vkAdminShowStatus(`Paid tests require exactly 150 questions. Current count: ${cards.length}.`,true); return;
+    const expectedPaidQuestionCount = vkAdminExpectedPaidQuestionCount(courseName);
+    if(isPaid && cards.length !== expectedPaidQuestionCount){
+        vkAdminShowStatus(`${vkAdminPaidQuestionRuleText(courseName)} Current count: ${cards.length}.`,true); return;
     }
     if(isPaid && paidMode==="edit" && !vkAdminEditingPaidTestId){
         vkAdminShowStatus("Select an existing Paid Test and load its questions before saving.",true); return;
@@ -9064,8 +9087,10 @@ function vkAdminApplyBulkQuestions(){
             vkAdminShowStatus("Select an existing Paid Test before applying the imported questions.",true);
             return;
         }
-        if(vkAdminBulkParsedQuestions.length !== 150){
-            vkAdminShowStatus(`Paid tests require exactly 150 imported questions. Current count: ${vkAdminBulkParsedQuestions.length}.`,true);
+        const courseName = document.getElementById("vkAdminCourse")?.value || "";
+        const expectedCount = vkAdminExpectedPaidQuestionCount(courseName);
+        if(vkAdminBulkParsedQuestions.length !== expectedCount){
+            vkAdminShowStatus(`${vkAdminPaidQuestionRuleText(courseName)} Imported count: ${vkAdminBulkParsedQuestions.length}.`,true);
             return;
         }
         vkAdminEditingPaidTestId = selectedId;
