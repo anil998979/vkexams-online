@@ -8572,8 +8572,8 @@ async function vkLoadDeleteManagerData(){
 }
 async function vkLoadDeleteSeriesOptions(){
   const courseId=document.getElementById('vkDeleteCourse')?.value,sel=document.getElementById('vkDeleteSeries');if(!sel)return;
-  const rows=(window.__vkSeries||[]).filter(s=>s.course_id===courseId);
-  sel.disabled=!courseId;sel.innerHTML=courseId?'<option value="">All series in category</option>'+rows.map(s=>`<option value="${vkAdminEscape(s.id)}">${vkAdminEscape(s.name)}${s.is_active?'':' (Removed)'}</option>`).join(''):'<option value="">Select category first</option>';
+  const rows=(window.__vkSeries||[]).filter(s=>s.course_id===courseId&&s.is_active===true);
+  sel.disabled=!courseId;sel.innerHTML=courseId?'<option value="">All active series in category</option>'+rows.map(s=>`<option value="${vkAdminEscape(s.id)}">${vkAdminEscape(s.name)}</option>`).join(''):'<option value="">Select category first</option>';
   await vkLoadDeleteTests();
 }
 async function vkLoadDeleteTests(){
@@ -8591,10 +8591,12 @@ function vkRenderDeleteTests(){
   const host=document.getElementById('vkDeleteTestRows');if(!host)return;
   const type=document.getElementById('vkDeleteTestType')?.value||'all',term=(document.getElementById('vkDeleteTestSearch')?.value||'').trim().toLowerCase();
   const seriesMap=new Map((window.__vkSeries||[]).map(s=>[s.id,s.name]));
-  const rows=vkDeleteManagerTests.filter(t=>(type==='all'||(type==='free'?t.is_free:!t.is_free))&&(!term||[t.title,t.topic_name,t.test_number,t.topic_test_number,seriesMap.get(t.test_series_id)].some(v=>String(v??'').toLowerCase().includes(term))));
-  const count=document.getElementById('vkDeleteTestCount');if(count)count.textContent=`Showing ${rows.length} tests · ${rows.filter(t=>t.is_active).length} currently visible · ${vkDeleteManagerTests.length} total in selected scope`;
-  if(!rows.length){host.innerHTML='<div class="vk-empty-state" style="padding:18px;text-align:center">No matching tests found.</div>';return;}
-  host.innerHTML='<div class="table-wrap"><table style="min-width:700px"><thead><tr><th>Select</th><th>Test</th><th>Series</th><th>Type</th><th>Status</th></tr></thead><tbody>'+rows.map(t=>`<tr><td><input class="vk-delete-test-check" type="checkbox" value="${vkAdminEscape(t.id)}" style="width:18px;min-height:18px"></td><td>${vkAdminEscape(t.title||t.topic_name||('Test '+t.test_number))}</td><td>${vkAdminEscape(seriesMap.get(t.test_series_id)||'')}</td><td>${t.is_free?'Free':'Paid'}</td><td>${t.is_active?'<span class="badge-active">Visible</span>':'<span class="badge-off">Removed</span>'}</td></tr>`).join('')+'</tbody></table></div>';
+  // Removed/archived tests are intentionally excluded from this working list.
+  // Their database rows remain for historical attempts, results and purchases.
+  const rows=vkDeleteManagerTests.filter(t=>t.is_active===true&&(type==='all'||(type==='free'?t.is_free:!t.is_free))&&(!term||[t.title,t.topic_name,t.test_number,t.topic_test_number,seriesMap.get(t.test_series_id)].some(v=>String(v??'').toLowerCase().includes(term))));
+  const count=document.getElementById('vkDeleteTestCount');if(count)count.textContent=`Showing ${rows.length} active tests`;
+  if(!rows.length){host.innerHTML='<div class="vk-empty-state" style="padding:18px;text-align:center">No active tests found in this selection.</div>';return;}
+  host.innerHTML='<div class="table-wrap"><table style="min-width:700px"><thead><tr><th>Select</th><th>Test</th><th>Series</th><th>Type</th><th>Status</th></tr></thead><tbody>'+rows.map(t=>`<tr><td><input class="vk-delete-test-check" type="checkbox" value="${vkAdminEscape(t.id)}" style="width:18px;min-height:18px"></td><td>${vkAdminEscape(t.title||t.topic_name||('Test '+t.test_number))}</td><td>${vkAdminEscape(seriesMap.get(t.test_series_id)||'')}</td><td>${t.is_free?'Free':'Paid'}</td><td><span class="badge-active">Visible</span></td></tr>`).join('')+'</tbody></table></div>';
 }
 function vkDeleteSelectAllVisible(checked){document.querySelectorAll('#vkDeleteTestRows .vk-delete-test-check').forEach(x=>x.checked=checked)}
 async function vkArchiveSelectedTests(){
@@ -14437,6 +14439,63 @@ document.addEventListener(
 
     </div>
 </div>
+
+<style id="vk-admin-exclusive-accordion-css">
+#vkAdminMockBuilder .vk-accordion-trigger{width:100%;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 14px;border:0;border-radius:12px;background:#f5f7ff;color:#173b82;text-align:left;font:inherit;font-weight:850;cursor:pointer}
+#vkAdminMockBuilder .vk-accordion-trigger:hover{background:#edf1ff}
+#vkAdminMockBuilder .vk-accordion-trigger .vk-accordion-title{display:flex;align-items:center;gap:10px;min-width:0}
+#vkAdminMockBuilder .vk-accordion-trigger .vk-accordion-arrow{display:inline-flex;align-items:center;justify-content:center;flex:0 0 28px;width:28px;height:28px;border-radius:8px;background:#e7edff;color:#4f46e5;font-size:18px;transition:transform .18s ease}
+#vkAdminMockBuilder .vk-accordion-trigger[aria-expanded="true"] .vk-accordion-arrow{transform:rotate(180deg)}
+#vkAdminMockBuilder .vk-accordion-body{padding-top:16px}
+#vkAdminMockBuilder .vk-management-card{padding:16px}
+#vkAdminMockBuilder .vk-admin-panel.vk-accordion-panel{padding:18px}
+#vkAdminMockBuilder .vk-admin-panel.vk-accordion-panel>.vk-accordion-body{padding-top:16px}
+</style>
+<script id="vk-admin-exclusive-accordion-js">
+(function(){
+  function initVkAdminAccordions(){
+    const root=document.getElementById('vkAdminMockBuilder');if(!root||root.dataset.accordionsReady==='1')return;
+    root.dataset.accordionsReady='1';
+    const items=[];
+    // Category Management and Test Series Management are separate accordion items.
+    root.querySelectorAll('#vkCategoryManager > .vk-management-card').forEach((card,index)=>{
+      const heading=card.querySelector(':scope > .vk-management-heading');if(!heading)return;
+      const body=document.createElement('div');body.className='vk-accordion-body';
+      while(heading.nextSibling)body.appendChild(heading.nextSibling);
+      const original=heading.querySelector('h2')?.textContent?.trim()||`Management section ${index+1}`;
+      const trigger=document.createElement('button');trigger.type='button';trigger.className='vk-accordion-trigger';trigger.setAttribute('aria-expanded','false');
+      trigger.innerHTML=`<span class="vk-accordion-title">${heading.innerHTML}</span><span class="vk-accordion-arrow" aria-hidden="true">⌄</span>`;
+      heading.replaceChildren(trigger);card.append(heading,body);card.classList.add('vk-accordion-panel');items.push({panel:card,trigger,body,title:original});
+    });
+    // Remaining major panels (Test Details, Bulk Upload, Questions, Publish) follow the same pattern.
+    const wrap=root.querySelector('.vk-admin-wrap');
+    if(wrap){
+      [...wrap.children].filter(el=>el.classList?.contains('vk-admin-panel')&&!el.classList.contains('vk-accordion-panel')).forEach((panel,index)=>{
+        const heading=panel.querySelector(':scope > h2, :scope > h3');if(!heading)return;
+        const body=document.createElement('div');body.className='vk-accordion-body';
+        while(heading.nextSibling)body.appendChild(heading.nextSibling);
+        const title=heading.textContent.trim()||`Test setup ${index+1}`;
+        const trigger=document.createElement('button');trigger.type='button';trigger.className='vk-accordion-trigger';trigger.setAttribute('aria-expanded','false');
+        const label=document.createElement('span');label.className='vk-accordion-title';label.textContent=title;
+        const arrow=document.createElement('span');arrow.className='vk-accordion-arrow';arrow.setAttribute('aria-hidden','true');arrow.textContent='⌄';
+        trigger.append(label,arrow);heading.replaceWith(trigger);panel.append(body);panel.classList.add('vk-accordion-panel');items.push({panel,trigger,body,title});
+      });
+    }
+    function closeAll(except){items.forEach(item=>{if(item===except)return;item.body.hidden=true;item.trigger.setAttribute('aria-expanded','false');item.panel.classList.remove('vk-accordion-open')})}
+    items.forEach(item=>{
+      item.body.hidden=true;
+      item.trigger.addEventListener('click',()=>{
+        const opening=item.body.hidden;closeAll(item);item.body.hidden=!opening;item.trigger.setAttribute('aria-expanded',String(opening));item.panel.classList.toggle('vk-accordion-open',opening);
+      });
+    });
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initVkAdminAccordions,{once:true});else initVkAdminAccordions();
+  // Admin views can be mounted after login/navigation; initialize when the builder is shown.
+  const observer=new MutationObserver(()=>{const root=document.getElementById('vkAdminMockBuilder');if(root&&root.dataset.accordionsReady!=='1')initVkAdminAccordions()});
+  observer.observe(document.documentElement,{childList:true,subtree:true});
+})();
+</script>
+
 </body>
 
 </html>
