@@ -14911,6 +14911,13 @@ document.addEventListener(
       makeAccordion(bulkPanel,bulkPanel.querySelector(':scope > .vk-admin-qtop'),'bulk-upload');
     }
 
+    // Questions editor: the question count stays visible in the accordion heading.
+    const questionsPanel=[...root.querySelectorAll('.vk-admin-panel')]
+      .find(panel=>panel.querySelector('#vkAdminQuestions'));
+    if(questionsPanel){
+      makeAccordion(questionsPanel,questionsPanel.querySelector(':scope > .vk-admin-qtop'),'questions');
+    }
+
     // Other major test-builder panels with a direct heading.
     const wrap=root.querySelector('.vk-admin-wrap');
     if(wrap){
@@ -15021,6 +15028,102 @@ document.addEventListener(
 #vkAdminMockBuilder #vkCustomPackageManager .vk-accordion-body,
 #vkAdminMockBuilder #vkAdminBulkImportPanel .vk-accordion-body{
   padding-top:16px;
+}
+</style>
+
+
+<style id="vk-admin-visual-consistency">
+/* Consistent typography throughout the admin mock-test builder. */
+#vkAdminMockBuilder,
+#vkAdminMockBuilder input,
+#vkAdminMockBuilder select,
+#vkAdminMockBuilder textarea,
+#vkAdminMockBuilder button{
+  font-family:inherit;
+}
+#vkAdminMockBuilder .vk-admin-panel,
+#vkAdminMockBuilder .vk-management-card{
+  color:#172554;
+}
+#vkAdminMockBuilder .vk-accordion-panel{
+  border:1px solid #dbe4f3;
+  border-radius:16px;
+  box-shadow:0 7px 22px rgba(30,64,175,.055);
+  background:#fff;
+}
+#vkAdminMockBuilder .vk-accordion-trigger{
+  min-height:52px;
+  padding:11px 14px;
+  border-radius:11px;
+  font-family:inherit;
+}
+#vkAdminMockBuilder .vk-accordion-title{
+  font-family:inherit;
+  font-size:16px;
+  font-weight:850;
+  line-height:1.3;
+  letter-spacing:0;
+}
+#vkAdminMockBuilder .vk-accordion-title h2,
+#vkAdminMockBuilder .vk-accordion-title h3{
+  font-family:inherit;
+  font-size:19px!important;
+  line-height:1.25;
+  font-weight:900;
+  letter-spacing:0;
+}
+#vkAdminMockBuilder .vk-management-heading .vk-accordion-title,
+#vkAdminMockBuilder .vk-admin-qtop .vk-accordion-title{
+  color:#1e3a8a;
+}
+#vkAdminMockBuilder #vkCustomPackageManager .vk-accordion-trigger{
+  background:linear-gradient(100deg,#eff6ff 0%,#f5f3ff 100%);
+  border-left:4px solid #7c3aed;
+}
+#vkAdminMockBuilder #vkAdminBulkImportPanel .vk-accordion-trigger{
+  background:linear-gradient(100deg,#ecfdf5 0%,#eff6ff 100%);
+  border-left:4px solid #0f9f8f;
+}
+#vkAdminMockBuilder .vk-admin-panel:has(#vkAdminQuestions) .vk-accordion-trigger{
+  background:linear-gradient(100deg,#fff7ed 0%,#fff1f2 100%);
+  border-left:4px solid #ea580c;
+}
+#vkAdminMockBuilder .vk-admin-panel:has(#vkAdminQuestions) .vk-accordion-title h2{
+  color:#9a3412;
+}
+#vkAdminMockBuilder .vk-accordion-arrow{
+  background:#e8edff;
+  color:#4f46e5;
+}
+#vkAdminMockBuilder .vk-accordion-panel .vk-accordion-body{
+  padding:16px 4px 2px;
+}
+#vkAdminMockBuilder .vk-admin-qtop strong{
+  font-size:12px;
+  color:#9a3412;
+  background:#ffedd5;
+  border-radius:999px;
+  padding:5px 9px;
+}
+#vkAdminMockBuilder .vk-admin-field label{
+  font-family:inherit;
+  font-weight:800;
+  color:#263b67;
+}
+#vkAdminMockBuilder .vk-admin-field input,
+#vkAdminMockBuilder .vk-admin-field select,
+#vkAdminMockBuilder .vk-admin-field textarea{
+  font-family:inherit;
+  font-size:13px;
+  color:#24324d;
+}
+#vkAdminMockBuilder .vk-admin-btn{
+  font-family:inherit;
+  font-weight:800;
+}
+@media(max-width:600px){
+  #vkAdminMockBuilder .vk-accordion-title h2,
+  #vkAdminMockBuilder .vk-accordion-title h3{font-size:16px!important}
 }
 </style>
 
