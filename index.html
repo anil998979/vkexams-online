@@ -15127,6 +15127,156 @@ document.addEventListener(
 }
 </style>
 
+
+<style id="vk-admin-home-inspired-colors">
+/* Home-page inspired palette: APPSC blue, Endowment gold, High Court violet.
+   Keep content surfaces white for strong contrast and readability. */
+#vkAdminMockBuilder .vk-accordion-panel{
+  border:1px solid #d7e2f4!important;
+  border-radius:17px!important;
+  background:#fff!important;
+  box-shadow:0 8px 24px rgba(28,48,92,.075)!important;
+  overflow:hidden;
+}
+#vkAdminMockBuilder .vk-accordion-panel > .vk-accordion-trigger{
+  min-height:62px;
+  margin:0;
+  padding:12px 16px;
+  border-radius:12px;
+  color:#14284f!important;
+  text-align:left;
+}
+#vkAdminMockBuilder .vk-accordion-title,
+#vkAdminMockBuilder .vk-accordion-title h2,
+#vkAdminMockBuilder .vk-accordion-title h3{
+  color:#14284f!important;
+  font-family:inherit!important;
+  font-weight:900!important;
+  letter-spacing:0!important;
+  text-shadow:none!important;
+}
+#vkAdminMockBuilder .vk-accordion-title p{
+  color:#435779!important;
+  font-size:12px!important;
+  font-weight:600!important;
+  line-height:1.45!important;
+}
+#vkAdminMockBuilder .vk-accordion-title .vk-management-kicker{
+  font-weight:900!important;
+  letter-spacing:.08em!important;
+}
+#vkAdminMockBuilder .vk-accordion-arrow{
+  background:rgba(255,255,255,.78)!important;
+  color:#193b78!important;
+  border:1px solid rgba(20,40,79,.10);
+}
+
+/* 01 Category Management — APPSC blue */
+#vkAdminMockBuilder #vkCategoryManager > .vk-management-card:nth-child(1) > .vk-accordion-trigger{
+  background:linear-gradient(105deg,#e7f1ff 0%,#cfe3ff 100%)!important;
+  border-left:5px solid #1265c7!important;
+}
+#vkAdminMockBuilder #vkCategoryManager > .vk-management-card:nth-child(1) .vk-management-kicker{
+  color:#0756b5!important;
+}
+#vkAdminMockBuilder #vkCategoryManager > .vk-management-card:nth-child(1) .vk-management-icon{
+  background:#1265c7!important;color:#fff!important;border-radius:11px;padding:8px;
+}
+
+/* 02 Test Series Management — Endowment gold */
+#vkAdminMockBuilder #vkCategoryManager > .vk-management-card:nth-child(2) > .vk-accordion-trigger{
+  background:linear-gradient(105deg,#fff5cf 0%,#ffe39a 100%)!important;
+  border-left:5px solid #d99a00!important;
+}
+#vkAdminMockBuilder #vkCategoryManager > .vk-management-card:nth-child(2) .vk-management-kicker{
+  color:#8a5800!important;
+}
+#vkAdminMockBuilder #vkCategoryManager > .vk-management-card:nth-child(2) .vk-management-icon{
+  background:#e0a000!important;color:#fff!important;border-radius:11px;padding:8px;
+}
+
+/* 03 Custom Paid Test Packages — High Court violet */
+#vkAdminMockBuilder #vkCustomPackageManager > .vk-accordion-trigger{
+  background:linear-gradient(105deg,#f0eaff 0%,#dfd0ff 100%)!important;
+  border-left:5px solid #7026d9!important;
+}
+#vkAdminMockBuilder #vkCustomPackageManager .vk-management-kicker{
+  color:#6420c4!important;
+}
+#vkAdminMockBuilder #vkCustomPackageManager .vk-management-icon{
+  background:#7026d9!important;color:#fff!important;border-radius:11px;padding:8px;
+}
+
+/* Test Details — clean blue */
+#vkAdminMockBuilder .vk-admin-panel.vk-accordion-panel:has(> .vk-accordion-body #vkAdminTestDetails),
+#vkAdminMockBuilder .vk-admin-panel.vk-accordion-panel:has(> .vk-accordion-body #vkAdminTestTitle){
+  border-color:#c9dcfb!important;
+}
+#vkAdminMockBuilder .vk-admin-panel.vk-accordion-panel:has(> .vk-accordion-body #vkAdminTestDetails) > .vk-accordion-trigger,
+#vkAdminMockBuilder .vk-admin-panel.vk-accordion-panel:has(> .vk-accordion-body #vkAdminTestTitle) > .vk-accordion-trigger{
+  background:linear-gradient(105deg,#e8f3ff,#d5e8ff)!important;
+  border-left:5px solid #2474d8!important;
+}
+
+/* Bulk upload — green, matching a positive import workflow */
+#vkAdminMockBuilder #vkAdminBulkImportPanel > .vk-accordion-trigger{
+  background:linear-gradient(105deg,#e4f8ef 0%,#c9f0dc 100%)!important;
+  border-left:5px solid #15945f!important;
+}
+#vkAdminMockBuilder #vkAdminBulkImportPanel .vk-accordion-title h2{
+  color:#14583d!important;
+}
+#vkAdminMockBuilder #vkAdminBulkImportPanel .vk-admin-hint{
+  color:#37634f!important;
+}
+
+/* Questions — warm red/orange, matching the Endowment card accent */
+#vkAdminMockBuilder .vk-admin-panel.vk-accordion-panel:has(> .vk-accordion-body #vkAdminQuestions) > .vk-accordion-trigger{
+  background:linear-gradient(105deg,#fff0e7 0%,#ffe0d4 100%)!important;
+  border-left:5px solid #e45a36!important;
+}
+#vkAdminMockBuilder .vk-admin-panel.vk-accordion-panel:has(> .vk-accordion-body #vkAdminQuestions) .vk-accordion-title h2{
+  color:#9f321e!important;
+}
+#vkAdminMockBuilder .vk-admin-panel.vk-accordion-panel:has(> .vk-accordion-body #vkAdminQuestions) .vk-admin-qtop strong{
+  background:#fff!important;color:#a63d24!important;border:1px solid #ffd0bf;
+}
+
+/* White form canvas and readable labels/fields inside every expanded section */
+#vkAdminMockBuilder .vk-accordion-body{
+  background:#fff!important;
+  color:#172554!important;
+}
+#vkAdminMockBuilder .vk-accordion-body label{
+  color:#253b63!important;
+  font-weight:800!important;
+}
+#vkAdminMockBuilder .vk-accordion-body input,
+#vkAdminMockBuilder .vk-accordion-body select,
+#vkAdminMockBuilder .vk-accordion-body textarea{
+  color:#1e293b!important;
+  background:#fff!important;
+  border-color:#cbd8ea!important;
+  font-family:inherit!important;
+  font-size:13px!important;
+}
+#vkAdminMockBuilder .vk-accordion-body input::placeholder,
+#vkAdminMockBuilder .vk-accordion-body textarea::placeholder{
+  color:#7b8ba5!important;opacity:1;
+}
+#vkAdminMockBuilder .vk-accordion-body .vk-admin-hint{
+  color:#526581!important;
+}
+#vkAdminMockBuilder .vk-accordion-panel.vk-accordion-open{
+  border-color:#c4d4ee!important;
+}
+@media(max-width:600px){
+  #vkAdminMockBuilder .vk-accordion-panel > .vk-accordion-trigger{padding:10px 11px;min-height:56px}
+  #vkAdminMockBuilder .vk-accordion-title h2,
+  #vkAdminMockBuilder .vk-accordion-title h3{font-size:16px!important}
+}
+</style>
+
 </body>
 
 </html>
