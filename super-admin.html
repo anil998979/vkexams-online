@@ -135,6 +135,25 @@ input:focus,select:focus,textarea:focus{outline:3px solid #dfe7ff;border-color:#
 .sa-management{display:grid;gap:18px}.sa-management>h2,.sa-management>p{margin-bottom:0}.sa-manage-card{border:1px solid #e1e8f3;border-radius:16px;padding:19px;background:linear-gradient(180deg,#fff,#fbfcff);box-shadow:0 6px 18px #243b7a0a}.sa-manage-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}.sa-manage-head h3{margin:4px 0;color:#1c2b4b}.sa-manage-head p{margin:0}.sa-kicker{font-size:10px;letter-spacing:1.2px;font-weight:850;color:#4169e1}.sa-kicker.purple{color:#7954d8}.sa-manage-symbol{display:grid;place-items:center;width:46px;height:46px;border-radius:13px;background:#eaf0ff;color:#4169e1;font-size:24px}.sa-manage-symbol.purple{background:#f1eafe;color:#7954d8}.sa-form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.sa-form-grid label{display:grid;gap:6px;font-size:13px;font-weight:700;color:#344563}.sa-form-grid input,.sa-form-grid select{width:100%;min-width:0}.sa-upload-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px;margin-top:12px;border:1px dashed #cbd7ea;border-radius:11px;background:#f8faff}.sa-upload-row label{font-size:13px;font-weight:700}.sa-upload-row input{display:block;margin-top:7px}.sa-upload-row img{width:52px;height:52px;object-fit:contain;padding:4px;border:1px solid #e2e8f0;border-radius:9px;background:white}.sa-management .tablewrap{margin-top:12px}.sa-management .tablewrap img{width:28px;height:28px;object-fit:contain;vertical-align:middle}.sa-management .delete-btn{color:#b42318;border-color:#fecaca;background:#fff7f7}
 @media(max-width:700px){.sa-form-grid{grid-template-columns:1fr}.sa-manage-card{padding:14px}.sa-upload-row{align-items:flex-start;flex-direction:column}}
 
+
+/* Super Admin management accordions */
+.sa-accordion{padding:0!important;overflow:hidden}
+.sa-accordion-summary{display:block;list-style:none;cursor:pointer;padding:18px 19px;position:relative;transition:background .18s ease}
+.sa-accordion-summary::-webkit-details-marker{display:none}
+.sa-accordion-summary::marker{content:""}
+.sa-accordion-summary:after{content:"+";position:absolute;right:18px;top:50%;transform:translateY(-50%);width:32px;height:32px;display:grid;place-items:center;border-radius:10px;background:#eef2ff;color:#4169e1;font-size:23px;font-weight:600}
+.sa-accordion[open]>.sa-accordion-summary:after{content:"−";background:#e9e7ff;color:#6848d4}
+.sa-accordion-summary:hover{background:#f8faff}
+.sa-accordion-summary .sa-manage-head{margin:0;padding-right:42px}
+.sa-accordion-content{padding:0 19px 19px;border-top:1px solid #edf1f8}
+.sa-nested-accordion{padding:0!important;overflow:hidden}
+.sa-nested-summary{display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;list-style:none;font-weight:850;color:#173b82;padding:13px 14px;border-radius:10px;background:#edf5ff}
+.sa-nested-summary::-webkit-details-marker{display:none}
+.sa-nested-summary::marker{content:""}
+.sa-nested-chevron{font-size:22px;transition:transform .18s ease}
+.sa-nested-accordion[open] .sa-nested-chevron{transform:rotate(180deg)}
+.sa-nested-content{padding:14px 0 0}
+@media(max-width:700px){.sa-accordion-summary{padding:15px}.sa-accordion-content{padding:0 14px 15px}.sa-accordion-summary .sa-manage-head{align-items:flex-start}.sa-accordion-summary:after{right:12px}}
 </style></head>
 <body><main class="wrap">
 <header class="top"><div><div class="brand">✦ VK EXAMS <span class="muted" style="font-size:13px">/ SUPER ADMIN</span></div><div class="muted small">Super Admin Control Center · Secure platform management</div></div><div><span id="who" class="muted small"></span> <button class="btn" id="logout" onclick="logout()" hidden>Sign out</button></div></header>
@@ -252,14 +271,14 @@ input:focus,select:focus,textarea:focus{outline:3px solid #dfe7ff;border-color:#
 </section>
 
 <section id="categoriesTab" class="panel section hidden sa-management"><h2>Category & Test Series Management</h2><p class="muted small">Manage exam categories and test series separately. Existing test/student history is protected.</p>
-<div class="sa-manage-card"><div class="sa-manage-head"><div><span class="sa-kicker">01 · COURSE SETUP</span><h3>Category Management</h3><p class="muted small">Create categories, update icons and control visibility.</p></div><span class="sa-manage-symbol">▦</span></div>
+<details class="sa-manage-card sa-accordion" id="saCategoryAccordion"><summary class="sa-accordion-summary"><div class="sa-manage-head"><div><span class="sa-kicker">01 · COURSE SETUP</span><h3>Category Management</h3><p class="muted small">Create categories, update icons and control visibility.</p></div><span class="sa-manage-symbol">▦</span></div></summary><div class="sa-accordion-content">
 <div class="sa-form-grid"><input id="saCatId" type="hidden"><label>Category name<input id="saCatName" placeholder="Category name" maxlength="100"></label><label>Slug<input id="saCatSlug" placeholder="slug" maxlength="100"></label><label>Icon / Emoji<input id="saCatIcon" placeholder="🏛️ or image URL" maxlength="500"></label><label>Display order<input id="saCatOrder" type="number" value="10"></label></div>
 <div class="sa-upload-row"><label>Upload icon (PNG/JPG/WEBP, max 2 MB)<input id="saCatIconFile" type="file" accept="image/png,image/jpeg,image/webp"></label><img id="saCatIconPreview" alt="Icon preview" hidden></div>
-<div class="sa-home-card-settings"><h4>Homepage Card Settings</h4><div class="sa-form-grid"><label>Card description<textarea id="saHomeCardDescription" maxlength="220" placeholder="Description shown on Home Page"></textarea></label><label>Card theme color<input id="saHomeCardColor" type="color" value="#2563eb"></label><label>Card image (PNG/JPG/WEBP, max 2 MB)<input id="saHomeCardImage" type="file" accept="image/png,image/jpeg,image/webp"><img id="saHomeCardImagePreview" alt="Homepage image preview" hidden></label></div><label class="sa-home-visible"><input id="saHomeCardVisible" type="checkbox"> Show this category on Home Page (manual enable)</label></div>
-<div class="toolbar"><button class="btn primary" onclick="saSaveCategory()">Save Category</button><button class="btn" onclick="saResetCategory()">Clear Form</button><button class="btn" onclick="loadSuperCategories()">Refresh</button></div><div id="saCategoryRows"></div></div>
-<div class="sa-manage-card"><div class="sa-manage-head"><div><span class="sa-kicker purple">02 · EXAM STRUCTURE</span><h3>Test Series Management</h3><p class="muted small">Add standard or custom series types.</p></div><span class="sa-manage-symbol purple">▤</span></div>
+<details class="sa-home-card-settings sa-nested-accordion" id="saHomepageSettingsAccordion"><summary class="sa-nested-summary"><span>Homepage Card Settings</span><span class="sa-nested-chevron" aria-hidden="true">⌄</span></summary><div class="sa-nested-content"><div class="sa-form-grid"><label>Card description<textarea id="saHomeCardDescription" maxlength="220" placeholder="Description shown on Home Page"></textarea></label><label>Card theme color<input id="saHomeCardColor" type="color" value="#2563eb"></label><label>Card image (PNG/JPG/WEBP, max 2 MB)<input id="saHomeCardImage" type="file" accept="image/png,image/jpeg,image/webp"><img id="saHomeCardImagePreview" alt="Homepage image preview" hidden></label></div><label class="sa-home-visible"><input id="saHomeCardVisible" type="checkbox"> Show this category on Home Page (manual enable)</label></div></details>
+<div class="toolbar"><button class="btn primary" onclick="saSaveCategory()">Save Category</button><button class="btn" onclick="saResetCategory()">Clear Form</button><button class="btn" onclick="loadSuperCategories()">Refresh</button></div><div id="saCategoryRows"></div></div></details>
+<details class="sa-manage-card sa-accordion" id="saSeriesAccordion"><summary class="sa-accordion-summary"><div class="sa-manage-head"><div><span class="sa-kicker purple">02 · EXAM STRUCTURE</span><h3>Test Series Management</h3><p class="muted small">Add standard or custom series types.</p></div><span class="sa-manage-symbol purple">▤</span></div></summary><div class="sa-accordion-content">
 <input id="saSeriesId" type="hidden"><div class="sa-form-grid"><label>Course / Category<select id="saSeriesCourse"></select></label><label>Series name<input id="saSeriesName" placeholder="Series name" maxlength="100"></label><label>Series type<input id="saSeriesType" list="saSeriesTypeOptions" placeholder="Select or type a new type" maxlength="50"><datalist id="saSeriesTypeOptions"><option value="general"><option value="prelims"><option value="mains"><option value="free_mock"><option value="paper_1"><option value="paper_2"><option value="topic_wise"></datalist></label></div>
-<div class="toolbar"><button class="btn primary" onclick="saSaveSeries()">Save Test Series</button><button class="btn" onclick="saResetSeries()">Clear Form</button><button class="btn" onclick="loadSuperCategories()">Refresh</button></div><div id="saSeriesRows"></div></div><p id="saCategoryMsg" class="muted small" aria-live="polite"></p></section>
+<div class="toolbar"><button class="btn primary" onclick="saSaveSeries()">Save Test Series</button><button class="btn" onclick="saResetSeries()">Clear Form</button><button class="btn" onclick="loadSuperCategories()">Refresh</button></div><div id="saSeriesRows"></div></div></details><p id="saCategoryMsg" class="muted small" aria-live="polite"></p></section>
 <section id="overview" class="panel section"><h2>Activity overview</h2><p class="muted small">Daily new students, test attempts and paid revenue for the selected period (daily series capped to recent 30 days).</p><div id="dailyChart" class="chart"></div><div class="tablewrap"><table id="dailyTable"><thead><tr><th>Date</th><th>New students</th><th>Attempts</th><th>Paid revenue</th></tr></thead><tbody></tbody></table></div></section>
 <section id="studentsTab" class="panel section hidden"><h2>Recent students</h2><p class="muted small">Latest 100 Auth accounts. Passwords and OTPs are never displayed.</p><div class="tablewrap"><table><thead><tr><th>Name</th><th>Email</th><th>Registered</th><th>Last login</th></tr></thead><tbody id="studentRows"></tbody></table></div></section>
 <section id="purchasesTab" class="panel section hidden"><h2>Purchases</h2><div class="tablewrap"><table><thead><tr><th>Date</th><th>Student</th><th>Course</th><th>Package</th><th>Amount</th><th>Status</th></tr></thead><tbody id="purchaseRows"></tbody></table></div></section>
@@ -668,6 +687,17 @@ async function loadAuditLogs(){
 getStudentColumnVisibility();
 sb.auth.onAuthStateChange((event,session)=>{if(event==='PASSWORD_RECOVERY'){showRecovery();return}if(session && event==='SIGNED_IN')gate()});
 (async()=>{const params=new URLSearchParams(location.search);if(params.get('mode')==='recovery'){const {data}=await sb.auth.getSession();if(data.session){showRecovery();return}}await gate()})();
+
+document.addEventListener('DOMContentLoaded', () => {
+  const parentAccordions = [...document.querySelectorAll('#categoriesTab > details.sa-accordion')];
+  parentAccordions.forEach(item => item.addEventListener('toggle', () => {
+    if (!item.open) {
+      item.querySelectorAll('details.sa-nested-accordion').forEach(nested => nested.open = false);
+      return;
+    }
+    parentAccordions.forEach(other => { if (other !== item) other.open = false; });
+  }));
+});
 </script></body></html>
 
 <style id="sa-home-card-settings-css">.sa-home-card-settings{margin:14px 0;padding:14px;border:1px solid #dbe5f4;border-radius:14px;background:#f8fbff}.sa-home-card-settings h4{margin:0 0 12px;color:#173b82}.sa-home-card-settings textarea{width:100%;min-height:72px;padding:9px;border:1px solid #cbd5e1;border-radius:9px;font:inherit}.sa-home-card-settings input[type=color]{min-height:42px}.sa-home-card-settings img{display:block;max-width:150px;max-height:100px;object-fit:contain;margin-top:7px}.sa-home-visible{display:flex;gap:9px;align-items:center;margin-top:12px;font-weight:700}.sa-home-visible input{width:auto}</style>
