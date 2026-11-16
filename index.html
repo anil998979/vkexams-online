@@ -14263,3 +14263,103 @@ body:has(#examPage.active) > footer{
 <style id="vk-homepage-card-management-css">
 #vkCategoryManager .vk-homecard-settings{margin:16px 0;padding:16px;border:1px solid #dbe5f4;border-radius:14px;background:#f8fbff}#vkCategoryManager .vk-homecard-settings h3{margin:0 0 12px;color:#173b82}#vkCategoryManager .vk-homecard-settings textarea{width:100%;min-height:78px;padding:10px;border:1px solid #cbd5e1;border-radius:10px;font:inherit}#vkCategoryManager .vk-homecard-settings input[type=color]{min-height:46px;padding:4px}#vkCategoryManager .vk-homecard-settings img{display:block;max-width:150px;max-height:100px;object-fit:contain;margin-top:8px;border-radius:8px}#vkCategoryManager .vk-home-visible-toggle{display:flex;align-items:center;gap:9px;margin-top:12px;font-weight:700}#vkCategoryManager .vk-home-visible-toggle input{width:auto;min-height:auto}#home .vk-dynamic-exam-card{position:relative;overflow:hidden;background:linear-gradient(145deg,var(--vk-card-color),color-mix(in srgb,var(--vk-card-color),#101a45 25%));color:#fff;min-height:330px;padding:22px;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;cursor:pointer}#home .vk-dynamic-exam-card h3{position:relative;z-index:2;color:#fff;margin:16px 0 8px;font-size:30px}#home .vk-dynamic-exam-card p{position:relative;z-index:2;color:#fff;max-width:85%;line-height:1.5}#home .vk-dynamic-card-icon{position:relative;z-index:2;font-size:42px;min-height:52px}#home .vk-home-dynamic-icon{width:48px;height:48px;object-fit:contain}#home .vk-home-dynamic-image{position:absolute;right:8px;bottom:58px;width:46%;height:48%;object-fit:contain;opacity:.9;pointer-events:none}#home .vk-dynamic-exam-card .vk-card-button{margin-top:auto;z-index:3}#home .vk-home-empty{grid-column:1/-1;padding:36px;text-align:center;border:1px dashed #cbd5e1;border-radius:16px;color:#64748b;background:#fff}
 </style>
+
+
+<style id="vk-admin-heading-visual-refresh">
+/* Clear visual hierarchy for Admin > Category & Test Series Management */
+#vkCategoryManager .vk-management-card{
+  overflow:hidden;
+}
+#vkCategoryManager .vk-management-heading{
+  align-items:flex-start;
+  padding:0 0 15px;
+  margin:0 0 20px;
+  border-bottom:1px solid #e5eaf4;
+}
+#vkCategoryManager .vk-management-heading h2{
+  display:inline-flex;
+  align-items:center;
+  margin:5px 0 7px;
+  padding:9px 14px;
+  border-left:5px solid #2563eb;
+  border-radius:0 10px 10px 0;
+  background:linear-gradient(90deg,#eaf1ff 0%,#f7f9ff 100%);
+  color:#1746a2;
+  font-size:22px;
+  line-height:1.25;
+  font-weight:850;
+}
+#vkCategoryManager .vk-management-card:nth-child(2) .vk-management-heading h2{
+  border-left-color:#7c3aed;
+  background:linear-gradient(90deg,#f1eaff 0%,#fbf9ff 100%);
+  color:#6426ad;
+}
+#vkCategoryManager .vk-management-kicker{
+  display:inline-block;
+  padding:5px 9px;
+  border-radius:6px;
+  background:#eaf1ff;
+  color:#2856bb;
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:1.1px;
+}
+#vkCategoryManager .vk-management-card:nth-child(2) .vk-management-kicker{
+  background:#f1eaff;
+  color:#7135b7;
+}
+#vkCategoryManager .vk-management-heading p{
+  margin-top:2px;
+  color:#64748b;
+  font-size:13px;
+  line-height:1.5;
+}
+#vkCategoryManager .vk-homecard-settings{
+  border:1px solid #ccebe3;
+  border-radius:14px;
+  background:linear-gradient(135deg,#f0fdfa 0%,#f7fffc 100%);
+}
+#vkCategoryManager .vk-homecard-settings h3{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  margin:0 0 16px;
+  padding:10px 13px;
+  border-left:5px solid #0f9f83;
+  border-radius:0 9px 9px 0;
+  background:#dff7ef;
+  color:#08745f;
+  font-size:17px;
+  font-weight:850;
+}
+#vkCategoryManager .vk-homecard-settings h3:before{
+  content:"▣";
+  font-size:16px;
+  color:#0f9f83;
+}
+#vkCategoryManager .vk-admin-grid > div > label,
+#vkCategoryManager .vk-icon-upload-row label{
+  display:block;
+  margin-bottom:6px;
+  color:#344b70;
+  font-size:13px;
+  font-weight:800;
+}
+#vkCategoryManager input:not([type="checkbox"]):not([type="color"]),
+#vkCategoryManager select,
+#vkCategoryManager textarea{
+  border-color:#cbd7e8;
+}
+#vkCategoryManager input:focus,
+#vkCategoryManager select:focus,
+#vkCategoryManager textarea:focus{
+  outline:none;
+  border-color:#6488e8;
+  box-shadow:0 0 0 3px rgba(59,104,214,.11);
+}
+@media(max-width:640px){
+  #vkCategoryManager .vk-management-heading h2{font-size:19px;padding:8px 11px}
+  #vkCategoryManager .vk-homecard-settings h3{font-size:16px}
+}
+</style>
+
