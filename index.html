@@ -3126,6 +3126,67 @@ body.dark-mode .vk-theme-toggle{background:#243247;color:#f8fafc;border-color:#4
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" defer></script>
+
+<style id="vk-premium-admin-dashboard-v1">
+/* VK Exams Premium Admin Dashboard — visual layer only */
+#vkAdminMockBuilder{background:linear-gradient(180deg,#f4f7ff 0%,#f8faff 46%,#f3f5fb 100%);min-height:100vh;padding-bottom:48px}
+#vkAdminMockBuilder .vk-admin-wrap{max-width:1240px;padding:28px 20px 64px}
+#vkAdminMockBuilder .back{display:inline-flex;align-items:center;gap:8px;padding:9px 14px;border:1px solid #dce5f5;border-radius:12px;background:#fff;color:#315bd8;font-weight:800;box-shadow:0 4px 14px rgba(35,65,130,.06)}
+#vkAdminMockBuilder .exam-header{position:relative;overflow:hidden;border:1px solid rgba(255,255,255,.2);border-radius:24px;padding:28px 30px;background:linear-gradient(120deg,#1749b8 0%,#4d46d8 56%,#773de0 100%);box-shadow:0 18px 42px rgba(61,72,180,.22);color:#fff}
+#vkAdminMockBuilder .exam-header:after{content:"";position:absolute;width:260px;height:260px;right:-65px;top:-130px;border:1px solid rgba(255,255,255,.18);border-radius:50%;box-shadow:0 0 0 28px rgba(255,255,255,.045),0 0 0 58px rgba(255,255,255,.035)}
+#vkAdminMockBuilder .exam-header h1{position:relative;z-index:1;margin:0 0 7px;color:#fff;font-size:clamp(25px,3vw,34px);font-weight:900;letter-spacing:-.6px}
+#vkAdminMockBuilder .exam-header p{position:relative;z-index:1;color:rgba(255,255,255,.88);font-size:14px;margin:0 0 16px}
+#vkAdminMockBuilder .exam-header .vk-admin-actions{position:relative;z-index:1}
+#vkAdminMockBuilder .exam-header .vk-admin-btn{background:#fff;color:#243b91;border-radius:12px;box-shadow:0 6px 16px rgba(11,28,88,.16)}
+#vkAdminMockBuilder .vk-admin-panel,#vkAdminMockBuilder .vk-management-card{position:relative;background:#fff;border:1px solid #e0e8f6;border-radius:22px;padding:24px;margin:20px 0;box-shadow:0 12px 32px rgba(31,54,104,.075);transition:box-shadow .2s ease,border-color .2s ease}
+#vkAdminMockBuilder .vk-admin-panel:hover,#vkAdminMockBuilder .vk-management-card:hover{border-color:#cbd9f2;box-shadow:0 16px 38px rgba(31,54,104,.10)}
+#vkAdminMockBuilder .vk-management-stack{display:grid;grid-template-columns:1fr;gap:20px;margin:20px 0!important}
+#vkAdminMockBuilder .vk-management-stack>.vk-management-card{margin:0}
+#vkCategoryManager .vk-management-heading{align-items:center;padding:0 0 18px;margin:0 0 20px;border-bottom:1px solid #e8edf7}
+#vkCategoryManager .vk-management-heading>div{display:grid;grid-template-columns:max-content 1fr;align-items:center;column-gap:12px;row-gap:6px}
+#vkCategoryManager .vk-management-kicker{display:inline-flex;align-items:center;padding:7px 10px;border-radius:9px;background:#eaf0ff;color:#315bd8;font-size:10px;font-weight:900;letter-spacing:1.15px}
+#vkCategoryManager .vk-management-heading h2{margin:0!important;padding:0!important;background:none!important;color:#172b55!important;font-size:24px!important;font-weight:900;letter-spacing:-.45px}
+#vkCategoryManager .vk-management-heading p{grid-column:1/-1;margin:0!important;color:#71809a;font-size:13px}
+#vkCategoryManager .vk-management-icon{width:50px;height:50px;border-radius:16px;background:linear-gradient(145deg,#e9efff,#dce6ff);color:#315bd8;box-shadow:inset 0 1px 0 #fff}
+#vkCategoryManager .vk-management-icon.purple{background:linear-gradient(145deg,#f1eaff,#e7dcff);color:#7543ce}
+#vkCategoryManager .vk-admin-grid{gap:16px}
+#vkAdminMockBuilder label{display:block;margin-bottom:7px;color:#34466b;font-size:13px;font-weight:800}
+#vkAdminMockBuilder input:not([type=checkbox]):not([type=radio]):not([type=color]),#vkAdminMockBuilder select,#vkAdminMockBuilder textarea{border:1px solid #d4deef;border-radius:12px;background:#fbfcff;color:#172b4d;min-height:45px;padding:11px 13px;box-shadow:inset 0 1px 2px rgba(25,45,85,.025);transition:border-color .18s ease,box-shadow .18s ease,background .18s ease}
+#vkAdminMockBuilder input:focus,#vkAdminMockBuilder select:focus,#vkAdminMockBuilder textarea:focus{outline:none;border-color:#6485ed!important;background:#fff!important;box-shadow:0 0 0 4px rgba(75,108,220,.12)!important}
+#vkAdminMockBuilder input[type=file]{max-width:100%;padding:9px!important;background:#fff!important}
+#vkAdminMockBuilder input[type=color]{height:46px;border:1px solid #d4deef;border-radius:12px;padding:4px;background:#fff}
+#vkCategoryManager .vk-icon-upload-row{margin-top:14px;padding:15px 16px;border:1px dashed #b9c9eb;border-radius:15px;background:linear-gradient(120deg,#f7f9ff,#fbfcff)}
+#vkCategoryManager .vk-homecard-settings{margin:18px 0;padding:18px;border:1px solid #d9e4fa;border-radius:17px;background:linear-gradient(135deg,#f6f8ff 0%,#f5f2ff 100%)}
+#vkCategoryManager .vk-homecard-settings h3{display:flex;align-items:center;gap:10px;margin:0 0 16px!important;padding:12px 14px;border-left:4px solid #7450dc;border-radius:0 11px 11px 0;background:linear-gradient(90deg,#eeeaff,#f8f6ff);color:#5333ad!important;font-size:17px;font-weight:900}
+#vkCategoryManager .vk-homecard-settings h3:before{content:"▣";font-size:15px;color:#7450dc}
+#vkCategoryManager .vk-home-visible-toggle{padding:11px 13px;border:1px solid #dbe5f6;border-radius:11px;background:#fff;color:#263b67;font-size:13px}
+#vkCategoryManager .vk-management-actions{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0 12px}
+#vkAdminMockBuilder .vk-admin-btn,#vkAdminMockBuilder button.vk-admin-btn{min-height:42px;padding:11px 17px;border-radius:12px;font-weight:850;letter-spacing:.05px;box-shadow:0 4px 10px rgba(35,55,100,.07);transition:transform .15s ease,box-shadow .15s ease}
+#vkAdminMockBuilder .vk-admin-btn:hover{transform:translateY(-1px);box-shadow:0 8px 18px rgba(35,55,100,.12)}
+#vkAdminMockBuilder .vk-admin-btn:not(.vk-admin-btn-secondary):not(.vk-admin-btn-danger){background:linear-gradient(120deg,#315fe0,#7046df);color:#fff}
+#vkAdminMockBuilder .vk-admin-btn-secondary{background:#edf1f8;color:#263958;border:1px solid #e1e7f1}
+#vkAdminMockBuilder .vk-admin-btn-danger{background:#fff1f2;color:#c62838;border:1px solid #fecdd3}
+#vkAdminMockBuilder table{width:100%;border-collapse:separate;border-spacing:0;border:1px solid #e0e7f2;border-radius:14px;overflow:hidden;background:#fff}
+#vkAdminMockBuilder table thead th,#vkAdminMockBuilder table th{padding:13px 14px;background:#f2f5fb;color:#314365;font-size:12px;font-weight:900;text-align:left;border-bottom:1px solid #e0e7f2}
+#vkAdminMockBuilder table td{padding:13px 14px;color:#243653;font-size:13px;border-bottom:1px solid #edf1f7}
+#vkAdminMockBuilder table tbody tr:last-child td{border-bottom:0}
+#vkAdminMockBuilder table tbody tr:hover{background:#f8faff}
+#vkAdminMockBuilder .vk-management-status,#vkAdminMockBuilder .vk-admin-hint{color:#71809a}
+#vkAdminMockBuilder #vkCategoryRows,#vkAdminMockBuilder #vkSeriesRows{overflow-x:auto;border-radius:14px}
+#vkAdminMockBuilder .vk-admin-qtop{align-items:center;padding-bottom:14px;border-bottom:1px solid #e8edf7;margin-bottom:16px}
+#vkAdminMockBuilder .vk-admin-panel>h2,#vkAdminMockBuilder #vkAdminBulkImportPanel h2{margin:0 0 18px!important;color:#1b315e;font-size:22px;font-weight:900;letter-spacing:-.35px}
+#vkAdminMockBuilder .vk-admin-question{border:1px solid #e0e8f5;border-radius:16px;background:#fbfcff;box-shadow:0 5px 15px rgba(31,54,104,.04)}
+@media(max-width:760px){
+ #vkAdminMockBuilder .vk-admin-wrap{padding:16px 10px 40px}
+ #vkAdminMockBuilder .exam-header{padding:22px 18px;border-radius:18px}
+ #vkAdminMockBuilder .vk-admin-panel,#vkAdminMockBuilder .vk-management-card{padding:17px;border-radius:17px}
+ #vkCategoryManager .vk-management-heading>div{grid-template-columns:1fr;gap:7px}
+ #vkCategoryManager .vk-management-heading h2{font-size:21px!important}
+ #vkAdminMockBuilder .vk-admin-grid{grid-template-columns:1fr}
+ #vkAdminMockBuilder table{min-width:650px}
+}
+</style>
+
 </head>
 
 
