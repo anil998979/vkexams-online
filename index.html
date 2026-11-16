@@ -8516,20 +8516,49 @@ function vkRenderSeriesRows(){
 }
 function vkResetSeriesFilters(){const f=document.getElementById('vkSeriesFilterCourse'),q=document.getElementById('vkSeriesSearch');if(f)f.value='';if(q)q.value='';vkRenderSeriesRows()}
 async function vkDeleteSeries(id){
-  const s=(window.__vkSeries||[]).find(x=>x.id===id);if(!s)return;
-  const related=(window.__vkSeries||[]).filter(x=>x.course_id===s.course_id);
-  const ids=new Set([id]);
-  // Include nested descendants so the removed parent cannot leave active child series behind.
-  let changed=true;while(changed){changed=false;for(const item of related){if(item.parent_series_id&&ids.has(item.parent_series_id)&&!ids.has(item.id)){ids.add(item.id);changed=true;}}}
+  const s=(window.__vkSeries||[]).find(x=>String(x.id)===String(id));
+  if(!s){alert('Selected Test Series was not found. Refresh the management list and try again.');return;}
+  const related=(window.__vkSeries||[]).filter(x=>String(x.course_id)===String(s.course_id));
+  const ids=new Set([String(id)]);
+  // Include every nested child series. Nothing is hard-deleted, so FK history stays intact.
+  let changed=true;
+  while(changed){
+    changed=false;
+    for(const item of related){
+      if(item.parent_series_id && ids.has(String(item.parent_series_id)) && !ids.has(String(item.id))){
+        ids.add(String(item.id));changed=true;
+      }
+    }
+  }
   const seriesIds=[...ids];
-  if(!confirm(`Remove Test Series “${s.name}” and its ${seriesIds.length-1} child series from the website? All assigned tests will be hidden. Student attempts, results, purchases and history will be preserved.`))return;
   try{
-    const {error:te}=await supabaseClient.from('tests').update({is_active:false}).in('test_series_id',seriesIds);if(te)throw te;
-    const {error:se}=await supabaseClient.from('test_series').update({is_active:false}).in('id',seriesIds);if(se)throw se;
-    if(document.getElementById('vkSeriesId')?.value===id)vkResetSeriesForm();
-    await vkLoadCategoryManager();await vkLoadDeleteManagerData();
-    alert('Selected Test Series has been removed from the website. Student history and purchases are preserved.');
-  }catch(e){alert('Series removal failed. Refresh and verify the archive status. Details: '+(e.message||e));await vkLoadCategoryManager();}
+    // Read assigned tests first, then archive those tests before archiving the series.
+    const {data:assignedTests,error:readError}=await supabaseClient
+      .from('tests').select('id,is_active').in('test_series_id',seriesIds);
+    if(readError)throw readError;
+    const activeTestIds=(assignedTests||[]).filter(t=>t.is_active).map(t=>t.id);
+    const activeSeriesIds=related.filter(x=>seriesIds.includes(String(x.id))&&x.is_active).map(x=>x.id);
+    const totalTests=(assignedTests||[]).length;
+    if(!confirm(`Remove “${s.name}” from the website?\n\n${seriesIds.length} series and ${totalTests} assigned test(s) will be hidden (Free and Paid).\n\nStudent attempts, results, purchases and history will NOT be deleted. This is a reversible archive.`))return;
+
+    if(activeTestIds.length){
+      const {error:updateTestsError}=await supabaseClient.from('tests')
+        .update({is_active:false}).in('id',activeTestIds);
+      if(updateTestsError)throw updateTestsError;
+    }
+    if(activeSeriesIds.length){
+      const {error:updateSeriesError}=await supabaseClient.from('test_series')
+        .update({is_active:false}).in('id',activeSeriesIds);
+      if(updateSeriesError)throw updateSeriesError;
+    }
+    if(document.getElementById('vkSeriesId')?.value===String(id))vkResetSeriesForm();
+    await vkLoadCategoryManager();
+    if(typeof vkLoadDeleteManagerData==='function')await vkLoadDeleteManagerData();
+    alert(`“${s.name}” removed from the website. ${totalTests} assigned test(s) were included. Student attempts, results, purchases and history remain in the database.`);
+  }catch(e){
+    alert('Series removal failed. No student history was intentionally deleted. Check your Supabase permissions and refresh the page. Details: '+(e.message||e));
+    await vkLoadCategoryManager();
+  }
 }
 
 // Content removal is implemented as soft-archive (is_active=false), never a
