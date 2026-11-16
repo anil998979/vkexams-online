@@ -8732,6 +8732,7 @@ async function vkCpLoadPackages(){
       <div class="vk-cp-package-actions">
         <button type="button" onclick="vkCpEditPackage('${vkAdminEscape(p.id)}')">Edit</button>
         <button type="button" class="${p.is_active?'':'primary'}" onclick="vkCpSetPackageStatus('${vkAdminEscape(p.id)}',${!p.is_active})">${p.is_active?'Unpublish':'Publish'}</button>
+        <button type="button" class="vk-delete-btn" onclick="vkCpDeletePackage('${vkAdminEscape(p.id)}')">Delete</button>
       </div></article>`).join('');
     window.__vkCustomPackages=packages;
     window.__vkCustomPackageMappings=mappings||[];
@@ -8776,6 +8777,33 @@ async function vkCpSetPackageStatus(id,active){
     await vkCpLoadPackages();
     vkCpSetStatus(active?'Package published.':'Package unpublished.');
   }catch(e){vkCpSetStatus('Status update failed: '+(e.message||e),true);}
+}
+
+async function vkCpDeletePackage(id){
+  const pkg=(window.__vkCustomPackages||[]).find(x=>x.id===id);
+  if(!pkg){vkCpSetStatus('Package not found. Refresh the package list and try again.',true);return;}
+  const confirmed=confirm(
+    'Permanently delete "'+(pkg.name||'this package')+'"?\\n\\n' +
+    'Deletion is allowed only when no purchase record exists for this package. ' +
+    'Packages with purchase history must be unpublished instead. This action cannot be undone.'
+  );
+  if(!confirmed)return;
+  try{
+    const {data,error}=await supabaseClient.rpc('vk_admin_delete_custom_package',{p_package_id:id});
+    if(error)throw error;
+    await vkCpLoadPackages();
+    const message=(data && typeof data==='object' && data.message)?data.message:'Custom package deleted successfully.';
+    vkCpSetStatus(message);
+    const editingId=document.getElementById('vkCpPackageId')?.value;
+    if(editingId===id){
+      document.getElementById('vkCpPackageId').value='';
+      vkCpSelectedTestIds=new Set();
+      if(typeof vkCpResetForm==='function')vkCpResetForm();
+    }
+  }catch(e){
+    console.error('Custom package delete failed:',e);
+    vkCpSetStatus((e.message||'Package could not be deleted.')+' If students have purchase history, unpublish this package instead.',true);
+  }
 }
 
 async function openAdminMockBuilder(){
