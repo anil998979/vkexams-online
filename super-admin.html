@@ -154,7 +154,25 @@ input:focus,select:focus,textarea:focus{outline:3px solid #dfe7ff;border-color:#
 .sa-nested-accordion[open] .sa-nested-chevron{transform:rotate(180deg)}
 .sa-nested-content{padding:14px 0 0}
 @media(max-width:700px){.sa-accordion-summary{padding:15px}.sa-accordion-content{padding:0 14px 15px}.sa-accordion-summary .sa-manage-head{align-items:flex-start}.sa-accordion-summary:after{right:12px}}
-</style></head>
+</style>
+<style id="sa-dashboard-layout-fixes">
+/* Keep inactive dashboard panels hidden even when management panels use display:grid. */
+#app .section.hidden{display:none!important}
+.report-chart-wrap{margin:14px 0 20px;padding:16px;border:1px solid #e3eaf5;border-radius:14px;background:#fbfcff}
+.report-chart-legend{display:flex;gap:18px;flex-wrap:wrap;margin:0 0 12px;font-size:12px;color:#53617a}
+.report-legend-item{display:inline-flex;align-items:center;gap:7px}
+.report-dot{width:10px;height:10px;border-radius:3px;display:inline-block}
+.report-chart{display:flex;gap:9px;align-items:stretch;overflow-x:auto;min-height:230px;padding:10px 4px 4px}
+.report-day{flex:0 0 48px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:7px;min-height:205px}
+.report-bars{height:170px;display:flex;align-items:flex-end;gap:3px;width:100%;border-bottom:1px solid #dbe3ef}
+.report-bar{flex:1;min-width:8px;border-radius:4px 4px 0 0;min-height:2px}
+.report-bar.students{background:#4567e8}
+.report-bar.attempts{background:#12a594}
+.report-bar.revenue{background:#f0a02b}
+.report-day-label{font-size:10px;color:#64748b;white-space:nowrap;transform:rotate(-35deg);transform-origin:top center;margin-top:3px}
+.report-chart-note{font-size:11px;color:#71809a;margin-top:12px}
+</style>
+</head>
 <body><main class="wrap">
 <header class="top"><div><div class="brand">✦ VK EXAMS <span class="muted" style="font-size:13px">/ SUPER ADMIN</span></div><div class="muted small">Super Admin Control Center · Secure platform management</div></div><div><span id="who" class="muted small"></span> <button class="btn" id="logout" onclick="logout()" hidden>Sign out</button></div></header>
 <section id="loginBox" class="panel login">
@@ -268,7 +286,7 @@ input:focus,select:focus,textarea:focus{outline:3px solid #dfe7ff;border-color:#
   <p class="muted small">Recent administrative actions recorded in the existing admin_logs table.</p>
   <div class="toolbar"><button class="btn" onclick="loadAuditLogs()">Refresh audit logs</button></div>
   <p id="auditMsg" class="small muted" aria-live="polite"></p>
-  <div class="tablewrap"><table><thead><tr><th>Time</th><th>Action</th><th>Table</th><th>Record ID</th><th>Details</th></tr></thead><tbody id="auditRows"></tbody></table></div>
+  <div class="tablewrap"><table><thead><tr><th>Time</th><th>Admin</th><th>Action</th><th>Table</th><th>Record ID</th><th>Details</th></tr></thead><tbody id="auditRows"></tbody></table></div>
 </section>
 
 <section id="categoriesTab" class="panel section hidden sa-management">
@@ -289,7 +307,7 @@ input:focus,select:focus,textarea:focus{outline:3px solid #dfe7ff;border-color:#
 <section id="studentsTab" class="panel section hidden"><h2>Recent students</h2><p class="muted small">Latest 100 Auth accounts. Passwords and OTPs are never displayed.</p><div class="tablewrap"><table><thead><tr><th>Name</th><th>Email</th><th>Registered</th><th>Last login</th></tr></thead><tbody id="studentRows"></tbody></table></div></section>
 <section id="purchasesTab" class="panel section hidden"><h2>Purchases</h2><div class="tablewrap"><table><thead><tr><th>Date</th><th>Student</th><th>Course</th><th>Package</th><th>Amount</th><th>Status</th></tr></thead><tbody id="purchaseRows"></tbody></table></div></section>
 <section id="attemptsTab" class="panel section hidden"><h2>Test attempts</h2><div class="tablewrap"><table><thead><tr><th>Completed</th><th>Student</th><th>Test</th><th>Type</th><th>Score</th><th>%</th></tr></thead><tbody id="attemptRows"></tbody></table></div></section>
-<section id="reportsTab" class="panel section hidden"><h2>Daily / Monthly Reports</h2><p class="muted small">Choose Today, Last 7 days, Last 30 days, This month or All time above. Export the visible table to CSV.</p><div class="tablewrap"><table><thead><tr><th>Date</th><th>New students</th><th>Attempts</th><th>Revenue</th></tr></thead><tbody id="reportRows"></tbody></table></div></section>
+<section id="reportsTab" class="panel section hidden"><h2>Daily / Monthly Reports</h2><p class="muted small">Daily activity for the selected report period. Choose the period above; bars show new students, test attempts and paid revenue.</p><div class="report-chart-wrap"><div class="report-chart-legend"><span class="report-legend-item"><i class="report-dot" style="background:#4567e8"></i>New students</span><span class="report-legend-item"><i class="report-dot" style="background:#12a594"></i>Test attempts</span><span class="report-legend-item"><i class="report-dot" style="background:#f0a02b"></i>Paid revenue</span></div><div id="reportChart" class="report-chart" role="img" aria-label="Daily and monthly activity bar chart"></div><p class="report-chart-note">Each metric is scaled independently so trends remain readable. Hover over a bar to see its exact value.</p></div><div class="tablewrap"><table><thead><tr><th>Date</th><th>New students</th><th>Attempts</th><th>Revenue</th></tr></thead><tbody id="reportRows"></tbody></table></div></section>
 <section id="adsTab" class="panel section hidden"><h2>Advertisement analytics</h2><div class="status">Not connected</div><p style="margin-top:12px">Your website currently includes Google AdSense code and Google Analytics tag. This dashboard does not yet have permission to read AdSense earnings, impressions or clicks. Those metrics require a separate Google OAuth / AdSense reporting API connection. We will not estimate or fabricate them.</p></section>
 <section id="jobsTab" class="panel section hidden">
 <h2>Jobs Management</h2>
@@ -368,6 +386,16 @@ $('studentRows').innerHTML=(d.students||[]).map(x=>`<tr><td>${esc(x.name)}</td><
 $('purchaseRows').innerHTML=(d.purchases||[]).map(x=>`<tr><td>${date(x.starts_at||x.expires_at)}</td><td>${esc(x.email)}</td><td>${esc(x.course)}</td><td>${esc(x.package)}</td><td>${money(x.amount)}</td><td>${esc(x.payment_status)}</td></tr>`).join('');
 $('attemptRows').innerHTML=(d.attempts||[]).map(x=>`<tr><td>${date(x.completed_at)}</td><td>${esc(x.email)}</td><td>${esc(x.test_title)}</td><td>${x.is_free?'Free':'Paid'}</td><td>${esc(x.score)} / ${esc(x.total_marks)}</td><td>${esc(x.percentage)}%</td></tr>`).join('');
 const rows=d.daily||[];$('dailyTable').querySelector('tbody').innerHTML=rows.map(x=>`<tr><td>${esc(x.day)}</td><td>${x.new_students}</td><td>${x.attempts}</td><td>${money(x.revenue)}</td></tr>`).join('');$('reportRows').innerHTML=rows.map(x=>`<tr><td>${esc(x.day)}</td><td>${x.new_students}</td><td>${x.attempts}</td><td>${money(x.revenue)}</td></tr>`).join('');
+const chartRows=rows.slice(-31);
+const maxStudents=Math.max(1,...chartRows.map(x=>Number(x.new_students||0)));
+const maxAttempts=Math.max(1,...chartRows.map(x=>Number(x.attempts||0)));
+const maxRevenue=Math.max(1,...chartRows.map(x=>Number(x.revenue||0)));
+$('reportChart').innerHTML=chartRows.map(x=>{
+ const ns=Number(x.new_students||0), at=Number(x.attempts||0), rv=Number(x.revenue||0);
+ const h1=Math.max(ns?3:0,ns/maxStudents*100),h2=Math.max(at?3:0,at/maxAttempts*100),h3=Math.max(rv?3:0,rv/maxRevenue*100);
+ return `<div class="report-day"><div class="report-bars"><i class="report-bar students" title="${esc(x.day)} · New students: ${ns}" style="height:${h1}%"></i><i class="report-bar attempts" title="${esc(x.day)} · Attempts: ${at}" style="height:${h2}%"></i><i class="report-bar revenue" title="${esc(x.day)} · Revenue: ${money(rv)}" style="height:${h3}%"></i></div><span class="report-day-label">${esc(String(x.day).slice(5))}</span></div>`;
+}).join('')||'<p class="muted small">No report data for this period.</p>';
+
 const max=Math.max(1,...rows.map(x=>Number(x.attempts||0)));$('dailyChart').innerHTML=rows.slice(-14).map(x=>`<div class="bar" title="${esc(x.day)}: ${x.attempts} attempts" style="height:${Math.max(3,Number(x.attempts||0)/max*100)}%"><span>${String(x.day).slice(5)}</span></div>`).join('')}
 function esc(v){return String(v??'—').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function showTab(id,btn){document.querySelectorAll('#app .section').forEach(x=>x.classList.add('hidden'));$(id).classList.remove('hidden');document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));btn.classList.add('active');currentTab=id}
@@ -375,6 +403,7 @@ function saSeriesDisplayName(series, courseName){
   if(courseName === "APPSC" && String(series?.name||"").trim().toLowerCase() === "prelims") return "Screening Test";
   return series?.name || "";
 }
+async function logSuperAdminAction(action,tableName=null,recordId=null,details={}){try{const {error}=await sb.rpc('vk_super_admin_log_action',{p_action:action,p_table_name:tableName,p_record_id:recordId==null?null:String(recordId),p_details:details});if(error)console.warn('Audit log write failed:',error.message)}catch(e){console.warn('Audit log write failed:',e)}}
 function saIconMarkup(icon){const v=String(icon||'').trim();return /^https?:\/\//i.test(v)?`<img src="${esc(v)}" alt="">`:esc(v||'—')}
 function saResetCategory(){$('saCatId').value='';$('saCatName').value='';$('saCatSlug').value='';$('saCatIcon').value='';$('saCatOrder').value='10';$('saCatIconFile').value='';$('saHomeCardDescription').value='';$('saHomeCardColor').value='#2563eb';$('saHomeCardVisible').checked=false;$('saHomeCardImage').value='';['saCatIconPreview','saHomeCardImagePreview'].forEach(id=>{$(id).hidden=true;$(id).removeAttribute('src')})}
 function saResetSeries(){$('saSeriesId').value='';$('saSeriesName').value='';$('saSeriesType').value=''}
@@ -383,14 +412,14 @@ async function loadSuperCategories(){const msg=$('saCategoryMsg');msg.textConten
 function saEditCategory(id){const c=window.saCourses.find(x=>x.id===id);if(!c)return;$('saCatId').value=c.id;$('saCatName').value=c.name;$('saCatSlug').value=c.slug;$('saCatIcon').value=c.icon||'';$('saCatOrder').value=c.display_order??10;$('saHomeCardDescription').value=c.homepage_description||'';$('saHomeCardColor').value=c.homepage_color||'#2563eb';$('saHomeCardVisible').checked=!!c.homepage_visible;const p=$('saCatIconPreview');if(/^https?:\/\//i.test(c.icon||'')){p.src=c.icon;p.hidden=false}else p.hidden=true;const hp=$('saHomeCardImagePreview');if(c.homepage_image_url){hp.src=c.homepage_image_url;hp.hidden=false}else hp.hidden=true}
 async function saUploadIcon(file){if(!file)return null;if(!['image/png','image/jpeg','image/webp'].includes(file.type)||file.size>2*1024*1024){alert('Choose PNG/JPG/WEBP up to 2 MB.');return null}const ext=file.type==='image/png'?'png':file.type==='image/webp'?'webp':'jpg';const path='categories/'+(crypto.randomUUID?crypto.randomUUID():Date.now()+'-'+Math.random().toString(36).slice(2))+'.'+ext;const {error}=await sb.storage.from('vk-category-icons').upload(path,file,{upsert:false,contentType:file.type});if(error){alert('Icon upload failed: '+error.message);return null}return sb.storage.from('vk-category-icons').getPublicUrl(path).data.publicUrl}
 async function saUploadHomepageImage(file){if(!file)return null;if(!['image/png','image/jpeg','image/webp'].includes(file.type)||file.size>2*1024*1024){alert('Choose PNG/JPG/WEBP up to 2 MB.');return null}const ext=file.type==='image/png'?'png':file.type==='image/webp'?'webp':'jpg';const path='homepage-cards/'+(crypto.randomUUID?crypto.randomUUID():Date.now()+'-'+Math.random().toString(36).slice(2))+'.'+ext;const {error}=await sb.storage.from('vk-category-icons').upload(path,file,{upsert:false,contentType:file.type});if(error){alert('Homepage image upload failed: '+error.message);return null}return sb.storage.from('vk-category-icons').getPublicUrl(path).data.publicUrl}
-async function saToggleHomepageCard(id,visible){const {error}=await sb.from('courses').update({homepage_visible:visible}).eq('id',id);if(error){alert(error.message);return}await loadSuperCategories()}
-async function saSaveCategory(){const id=$('saCatId').value,name=$('saCatName').value.trim(),slug=$('saCatSlug').value.trim().toLowerCase();if(!name||!slug){alert('Name and slug required');return}let icon=$('saCatIcon').value.trim()||null;const iconFile=$('saCatIconFile').files[0];if(iconFile){icon=await saUploadIcon(iconFile);if(!icon)return}let homepage_image_url=(window.saCourses||[]).find(c=>c.id===id)?.homepage_image_url||null;const cardFile=$('saHomeCardImage').files[0];if(cardFile){homepage_image_url=await saUploadHomepageImage(cardFile);if(!homepage_image_url)return}const row={name,slug,icon,display_order:Number($('saCatOrder').value||0),homepage_description:$('saHomeCardDescription').value.trim()||null,homepage_color:$('saHomeCardColor').value||'#2563eb',homepage_image_url,homepage_visible:$('saHomeCardVisible').checked,homepage_display_order:Number($('saCatOrder').value||0)};if(!id)row.is_active=true;const {error}=id?await sb.from('courses').update(row).eq('id',id):await sb.from('courses').insert(row);if(error){alert(error.message);return}saResetCategory();await loadSuperCategories()}
-async function saToggleCategory(id,v){const {error}=await sb.from('courses').update({is_active:v}).eq('id',id);if(error)alert(error.message);else await loadSuperCategories()}
-async function saDeleteCategory(id){const c=(window.saCourses||[]).find(x=>x.id===id);if(!c)return;const linked=(window.saSeries||[]).filter(s=>s.course_id===id);if(linked.length){alert('This category has '+linked.length+' linked test series. Move/delete those series first. Existing test/student history is protected.');return}if(!confirm('Delete category “'+c.name+'”? This cannot be undone.'))return;const {error}=await sb.from('courses').delete().eq('id',id);if(error){alert('Delete blocked. Related records may exist; history was preserved. '+error.message);return}saResetCategory();await loadSuperCategories()}
+async function saToggleHomepageCard(id,visible){const {error}=await sb.from('courses').update({homepage_visible:visible}).eq('id',id);if(error){alert(error.message);return}await logSuperAdminAction('homepage_visibility_changed','courses',id,{homepage_visible:visible});await loadSuperCategories()}
+async function saSaveCategory(){const id=$('saCatId').value,name=$('saCatName').value.trim(),slug=$('saCatSlug').value.trim().toLowerCase();if(!name||!slug){alert('Name and slug required');return}let icon=$('saCatIcon').value.trim()||null;const iconFile=$('saCatIconFile').files[0];if(iconFile){icon=await saUploadIcon(iconFile);if(!icon)return}let homepage_image_url=(window.saCourses||[]).find(c=>c.id===id)?.homepage_image_url||null;const cardFile=$('saHomeCardImage').files[0];if(cardFile){homepage_image_url=await saUploadHomepageImage(cardFile);if(!homepage_image_url)return}const row={name,slug,icon,display_order:Number($('saCatOrder').value||0),homepage_description:$('saHomeCardDescription').value.trim()||null,homepage_color:$('saHomeCardColor').value||'#2563eb',homepage_image_url,homepage_visible:$('saHomeCardVisible').checked,homepage_display_order:Number($('saCatOrder').value||0)};if(!id)row.is_active=true;const {error}=id?await sb.from('courses').update(row).eq('id',id):await sb.from('courses').insert(row);if(error){alert(error.message);return}await logSuperAdminAction(id?'category_updated':'category_created','courses',id||null,{name,slug});saResetCategory();await loadSuperCategories()}
+async function saToggleCategory(id,v){const {error}=await sb.from('courses').update({is_active:v}).eq('id',id);if(error)alert(error.message);else{await logSuperAdminAction(v?'category_activated':'category_disabled','courses',id,{active:v});await loadSuperCategories()}}
+async function saDeleteCategory(id){const c=(window.saCourses||[]).find(x=>x.id===id);if(!c)return;const linked=(window.saSeries||[]).filter(s=>s.course_id===id);if(linked.length){alert('This category has '+linked.length+' linked test series. Move/delete those series first. Existing test/student history is protected.');return}if(!confirm('Delete category “'+c.name+'”? This cannot be undone.'))return;const {error}=await sb.from('courses').delete().eq('id',id);if(error){alert('Delete blocked. Related records may exist; history was preserved. '+error.message);return}await logSuperAdminAction('category_deleted','courses',id,{name:c.name});saResetCategory();await loadSuperCategories()}
 function saEditSeries(id){const s=window.saSeries.find(x=>x.id===id);if(!s)return;$('saSeriesId').value=s.id;$('saSeriesCourse').value=s.course_id;$('saSeriesName').value=s.name;$('saSeriesType').value=s.series_type}
-async function saSaveSeries(){const id=$('saSeriesId').value,course_id=$('saSeriesCourse').value,name=$('saSeriesName').value.trim(),series_type=$('saSeriesType').value.trim().toLowerCase().replace(/\s+/g,'_');if(!course_id||!name||!series_type){alert('Course, name and type required');return}const row={course_id,name,series_type};if(!id)row.is_active=true;const {error}=id?await sb.from('test_series').update(row).eq('id',id):await sb.from('test_series').insert(row);if(error){alert(error.message);return}saResetSeries();await loadSuperCategories()}
-async function saToggleSeries(id,v){const {error}=await sb.from('test_series').update({is_active:v}).eq('id',id);if(error)alert(error.message);else await loadSuperCategories()}
-async function saDeleteSeries(id){const s=(window.saSeries||[]).find(x=>x.id===id);if(!s)return;if(!confirm('Delete test series “'+s.name+'”? If tests or attempts are linked, database constraints should block deletion and preserve them.'))return;const {error}=await sb.from('test_series').delete().eq('id',id);if(error){alert('Delete blocked. Related tests/records may exist; history was preserved. '+error.message);return}saResetSeries();await loadSuperCategories()}
+async function saSaveSeries(){const id=$('saSeriesId').value,course_id=$('saSeriesCourse').value,name=$('saSeriesName').value.trim(),series_type=$('saSeriesType').value.trim().toLowerCase().replace(/\s+/g,'_');if(!course_id||!name||!series_type){alert('Course, name and type required');return}const row={course_id,name,series_type};if(!id)row.is_active=true;const {error}=id?await sb.from('test_series').update(row).eq('id',id):await sb.from('test_series').insert(row);if(error){alert(error.message);return}await logSuperAdminAction(id?'test_series_updated':'test_series_created','test_series',id||null,{course_id,name,series_type});saResetSeries();await loadSuperCategories()}
+async function saToggleSeries(id,v){const {error}=await sb.from('test_series').update({is_active:v}).eq('id',id);if(error)alert(error.message);else{await logSuperAdminAction(v?'test_series_activated':'test_series_disabled','test_series',id,{active:v});await loadSuperCategories()}}
+async function saDeleteSeries(id){const s=(window.saSeries||[]).find(x=>x.id===id);if(!s)return;if(!confirm('Delete test series “'+s.name+'”? If tests or attempts are linked, database constraints should block deletion and preserve them.'))return;const {error}=await sb.from('test_series').delete().eq('id',id);if(error){alert('Delete blocked. Related tests/records may exist; history was preserved. '+error.message);return}await logSuperAdminAction('test_series_deleted','test_series',id,{name:s.name});saResetSeries();await loadSuperCategories()}
 document.addEventListener('change',e=>{if(e.target&&e.target.id==='saCatIconFile'){const f=e.target.files&&e.target.files[0],p=$('saCatIconPreview');if(!f){p.hidden=true;return}if(!['image/png','image/jpeg','image/webp'].includes(f.type)||f.size>2*1024*1024){alert('Choose PNG/JPG/WEBP up to 2 MB.');e.target.value='';p.hidden=true;return}p.src=URL.createObjectURL(f);p.hidden=false}});
 document.addEventListener('change',e=>{if(e.target&&e.target.id==='saHomeCardImage'){const f=e.target.files&&e.target.files[0],p=$('saHomeCardImagePreview');if(!f){p.hidden=true;return}if(!['image/png','image/jpeg','image/webp'].includes(f.type)||f.size>2*1024*1024){alert('Choose PNG/JPG/WEBP up to 2 MB.');e.target.value='';p.hidden=true;return}p.src=URL.createObjectURL(f);p.hidden=false}});
 
@@ -442,9 +471,9 @@ async function saveAdminJob(){
  const id=$('jobId').value;$('jobFormMsg').textContent='Saving…';
  const result=id?await sb.from('jobs').update(row).eq('id',id):await sb.from('jobs').insert(row);
  if(result.error){$('jobFormMsg').textContent='Save failed: '+result.error.message;return}
- $('jobFormMsg').textContent='Saved successfully.';await loadAdminJobs();$('jobForm').classList.add('hidden');
+ $('jobFormMsg').textContent='Saved successfully.';await logSuperAdminAction(id?'job_updated':'job_created','jobs',id||null,{title,organization});await loadAdminJobs();$('jobForm').classList.add('hidden');
 }
-async function deleteAdminJob(id){const j=adminJobs.find(x=>x.id===id);if(!j||!confirm('Delete job notification: '+j.title+'?'))return;const {error}=await sb.from('jobs').delete().eq('id',id);if(error){alert('Delete failed: '+error.message);return}await loadAdminJobs()}
+async function deleteAdminJob(id){const j=adminJobs.find(x=>x.id===id);if(!j||!confirm('Delete job notification: '+j.title+'?'))return;const {error}=await sb.from('jobs').delete().eq('id',id);if(error){alert('Delete failed: '+error.message);return}await logSuperAdminAction('job_deleted','jobs',id,{title:j.title});await loadAdminJobs()}
 function exportCurrent(){let table=$(currentTab).querySelector('table');if(!table){alert('No table to export');return}let rows=[...table.querySelectorAll('tr')].map(r=>[...r.children].map(c=>'"'+c.innerText.replace(/"/g,'""')+'"').join(',')).join('\n');let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([rows],{type:'text/csv;charset=utf-8'}));a.download='vk-exams-'+currentTab+'.csv';a.click();URL.revokeObjectURL(a.href)}
 
 let managedStudents=[];
@@ -681,11 +710,11 @@ async function saveGlobalEmail(){
 
 async function loadAuditLogs(){
   $('auditMsg').textContent='Loading recent audit records…';
-  const {data,error}=await sb.from('admin_logs')
-    .select('id,action,table_name,record_id,details,created_at')
+  const {data,error}=await sb.from('vk_super_admin_audit_logs')
+    .select('id,action,table_name,record_id,details,created_at,actor_email')
     .order('created_at',{ascending:false}).limit(200);
   if(error){$('auditMsg').textContent='Could not load audit logs: '+error.message;return}
-  $('auditRows').innerHTML=(data||[]).map(x=>`<tr><td>${date(x.created_at)}</td><td>${esc(x.action)}</td><td>${esc(x.table_name||'—')}</td><td>${esc(x.record_id||'—')}</td><td title="${esc(JSON.stringify(x.details||{}))}">${esc(JSON.stringify(x.details||{}).slice(0,120))}</td></tr>`).join('')||'<tr><td colspan="5">No audit records found.</td></tr>';
+  $('auditRows').innerHTML=(data||[]).map(x=>`<tr><td>${date(x.created_at)}</td><td>${esc(x.actor_email||'—')}</td><td>${esc(x.action)}</td><td>${esc(x.table_name||'—')}</td><td>${esc(x.record_id||'—')}</td><td title="${esc(JSON.stringify(x.details||{}))}">${esc(JSON.stringify(x.details||{}).slice(0,120))}</td></tr>`).join('')||'<tr><td colspan="6">No audit records found yet. New Super Admin actions will be recorded here.</td></tr>';
   $('auditMsg').textContent=`Showing ${(data||[]).length} recent record(s).`;
 }
 
