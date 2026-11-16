@@ -5016,6 +5016,10 @@ function showPage(
     }
 
     if(page === "home"){
+        // Refresh admin-controlled cards on first load and every return to Home.
+        if(typeof vkLoadHomepageCards === "function"){
+            vkLoadHomepageCards();
+        }
         requestAnimationFrame(function(){
             initializeVkHomeAd();
         });
@@ -5047,7 +5051,6 @@ function showPage(
 
 function showHome(){
     showPage("home");
-    vkLoadHomepageCards();
 }
 
 
@@ -8430,11 +8433,27 @@ async function vkLoadHomepageCards(){
   if(!rows.length){grid.innerHTML='<div class="vk-home-empty">Exam categories will appear here when enabled by the administrator.</div>';return;}
   const safe=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   grid.innerHTML=rows.map(c=>{
-    const color=/^#[0-9a-f]{6}$/i.test(c.homepage_color||'')?c.homepage_color:'#2563eb';
-    const name=safe(c.name);
-    const img=c.homepage_image_url?`<img class="vk-home-dynamic-image" src="${safe(c.homepage_image_url)}" alt="">`:'';
+    const rawName=String(c.name||'').trim();
+    const name=safe(rawName);
+    const description=safe(c.homepage_description||'Explore exam preparation, mock tests and study materials.');
     const icon=/^https?:\/\//i.test(c.icon||'')?`<img class="vk-home-dynamic-icon" src="${safe(c.icon)}" alt="">`:safe(c.icon||'🎓');
-    return `<article class="vk-exam-card vk-dynamic-exam-card" style="--vk-card-color:${color}" role="button" tabindex="0" data-course="${name}" onclick="openCourse(this.dataset.course)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openCourse(this.dataset.course)}"><div class="vk-dynamic-card-icon">${icon}</div>${img}<h3>${name}</h3><p>${safe(c.homepage_description||'Explore exam preparation, mock tests and study materials.')}</p><button class="vk-card-button" type="button" onclick="event.stopPropagation();openCourse(this.closest('[data-course]').dataset.course)">Explore ${name} <b>➜</b></button></article>`;
+    const image=c.homepage_image_url?`<img class="vk-home-dynamic-image" src="${safe(c.homepage_image_url)}" alt="">`:'';
+    const open=`role="button" tabindex="0" data-course="${name}" onclick="openCourse(this.dataset.course)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openCourse(this.dataset.course)}"`;
+    const action=`<button class="vk-card-button" type="button" onclick="event.stopPropagation();openCourse(this.closest('[data-course]').dataset.course)">Explore ${name} <b>➜</b></button>`;
+
+    // Preserve the established premium layouts for the current core categories.
+    if(rawName==='APPSC'){
+      return `<article class="vk-exam-card vk-appsc-card" ${open}><div class="vk-card-top"><span class="vk-card-emblem">${icon}</span></div>${image}<div class="vk-card-art vk-appsc-art">🏢</div><h3>${name}</h3><p>${description}</p><div class="vk-card-features"><span>☑ Screening Test</span></div>${action}</article>`;
+    }
+    if(rawName==='Endowment Officer'){
+      return `<article class="vk-exam-card vk-endowment-card" ${open}><div class="vk-crown">♛</div><div class="vk-paid-label">★ PAID TEST SERIES</div><div class="vk-card-art vk-temple-art">${icon}</div>${image}<h3>Endowment<br>Officer</h3><p>${description}</p><div class="vk-card-features"><span>▣ Real Exam<br>(CBT Mode)</span><span>▱ Full-Length<br>Tests (150 Q)</span><span>▥ Detailed<br>Analysis</span></div><button class="vk-card-button vk-paid-button" type="button" onclick="event.stopPropagation();openCourse(this.closest('[data-course]').dataset.course)">Start Paid Test Series <b>➜</b></button></article>`;
+    }
+    if(rawName==='High Court'){
+      return `<article class="vk-exam-card vk-court-card" ${open}><div class="vk-card-top"><span class="vk-card-emblem">${icon}</span></div>${image}<div class="vk-card-art vk-court-art">🏛</div><h3>${name}</h3><p>${description}</p><div class="vk-card-features"><span>☑ High Court Exam</span><span>▥ Paid Test Series</span></div>${action}</article>`;
+    }
+
+    const color=/^#[0-9a-f]{6}$/i.test(c.homepage_color||'')?c.homepage_color:'#2563eb';
+    return `<article class="vk-exam-card vk-dynamic-exam-card" style="--vk-card-color:${color}" ${open}><div class="vk-dynamic-card-icon">${icon}</div>${image}<h3>${name}</h3><p>${description}</p>${action}</article>`;
   }).join('');
 }
 async function vkToggleCategory(id,active){const {error}=await supabaseClient.from('courses').update({is_active:active}).eq('id',id);if(error){alert(error.message);return}await vkLoadCategoryManager();await vkLoadHomepageCards()}
