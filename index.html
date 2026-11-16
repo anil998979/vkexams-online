@@ -3121,6 +3121,34 @@ body.dark-mode .vk-theme-toggle{background:#243247;color:#f8fafc;border-color:#4
 #store .vk-store-benefits div:nth-child(3) b{background:#7b32df;}
 @media(max-width:700px){#store .vk-store-hero{min-height:175px;padding:25px 15px;margin-top:12px;}#store .vk-store-hero-art{left:10px;font-size:38px;bottom:12px;opacity:.65;}#store .vk-store-hero-temple{right:10px;font-size:42px;bottom:12px;}#store .vk-store-courses{grid-template-columns:1fr;}#store .vk-course-card{min-height:125px;padding:23px 14px;gap:10px;border-radius:18px;}#store .vk-course-icon{flex-basis:62px;font-size:43px;}#store .vk-course-copy h3{font-size:19px;}#store .vk-course-copy p{font-size:13px;}#store .vk-course-card .coming-soon-badge{font-size:11px;padding:7px 9px;}#store .vk-course-action{font-size:11px;padding:10px 9px;}#store .vk-course-features{gap:7px;font-size:10px;}#store .vk-selected-course{align-items:flex-start;flex-direction:column;padding:18px;}#store .vk-selected-course h3{font-size:22px;}#store .vk-offer-hero{padding:17px 9px;}#store .vk-megaphone{font-size:29px;}#store .vk-offer-main strong{font-size:47px;padding:4px 13px;}#store .vk-plan-grid{grid-template-columns:1fr;gap:15px;}#store .vk-plan-top{padding:14px 18px;}#store .vk-plan-body{padding:15px 18px 18px;}#store .vk-new-price{font-size:38px;}#store .vk-store-benefits{grid-template-columns:1fr;gap:5px;padding:12px;}#store .vk-store-benefits div{justify-content:flex-start;padding:8px 15px;}#store .vk-store-benefits div+div{border-left:0;border-top:1px solid #e5e0f7;}#store .vk-limited-offer{margin:23px 0 17px;padding:12px;font-size:19px;}}
 
+
+/* =====================================================
+   CUSTOM PAID TEST PACKAGE ADMIN
+===================================================== */
+.vk-custom-package-panel{margin:18px 0;border:1px solid #dbe4f0;border-radius:16px;background:#fff;padding:22px;box-shadow:0 8px 22px rgba(37,99,235,.06)}
+.vk-custom-package-panel h2{margin:0 0 6px;color:#172033}
+.vk-custom-package-panel .vk-cp-sub{color:#64748b;margin:0 0 18px;font-size:13px}
+.vk-cp-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.vk-cp-field{min-width:0}
+.vk-cp-field label{display:block;font-weight:750;font-size:13px;margin:0 0 6px;color:#334155}
+.vk-cp-field input,.vk-cp-field select,.vk-cp-field textarea{width:100%;padding:11px 12px;border:1px solid #cbd5e1;border-radius:9px;background:#fff;color:#172033}
+.vk-cp-tests{margin-top:16px;border:1px solid #e2e8f0;border-radius:12px;padding:14px;background:#f8fafc}
+.vk-cp-test-toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:10px 0}
+.vk-cp-test-toolbar input{flex:1;min-width:180px;padding:10px;border:1px solid #cbd5e1;border-radius:8px}
+.vk-cp-test-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;max-height:300px;overflow:auto}
+.vk-cp-test-option{display:flex;align-items:flex-start;gap:9px;padding:10px;border:1px solid #e2e8f0;border-radius:9px;background:#fff;font-size:13px}
+.vk-cp-test-option input{width:17px;height:17px;flex:0 0 auto;margin-top:1px}
+.vk-cp-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}
+.vk-cp-status{margin-top:12px;color:#475569;font-size:13px;white-space:pre-line}
+.vk-cp-package-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:18px}
+.vk-cp-package-card{border:1px solid #e2e8f0;border-radius:12px;padding:14px;background:#fff}
+.vk-cp-package-card h3{margin:0 0 6px;font-size:16px;color:#172033}
+.vk-cp-package-meta{color:#64748b;font-size:12px;line-height:1.6}
+.vk-cp-package-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.vk-cp-package-actions button{border:1px solid #cbd5e1;border-radius:8px;background:#fff;padding:8px 11px;font-weight:750;color:#334155}
+.vk-cp-package-actions button.primary{background:#2563eb;color:#fff;border-color:#2563eb}
+@media(max-width:650px){.vk-cp-grid,.vk-cp-test-list,.vk-cp-package-list{grid-template-columns:1fr}.vk-custom-package-panel{padding:15px}}
+
 </style>
 
 
@@ -4008,6 +4036,43 @@ id="solutions">
         </div>
       </section>
     </div>
+
+    <!-- CUSTOM PAID TEST PACKAGES -->
+    <section id="vkCustomPackageManager" class="vk-custom-package-panel">
+      <div class="vk-management-heading">
+        <div><span class="vk-management-kicker">03 · PAID ACCESS</span><h2>Custom Paid Test Packages</h2>
+        <p class="vk-cp-sub">Create packages with selected paid tests and Admin-defined validity.</p></div>
+        <span class="vk-management-icon">₹</span>
+      </div>
+      <input id="vkCpPackageId" type="hidden">
+      <div class="vk-cp-grid">
+        <div class="vk-cp-field"><label for="vkCpName">Package Name</label><input id="vkCpName" maxlength="120" placeholder="ఉదా: Endowment Paper-II Complete Test Pack"></div>
+        <div class="vk-cp-field"><label for="vkCpPrice">Package Price (₹)</label><input id="vkCpPrice" type="number" min="1" step="0.01" placeholder="ఉదా: 99"></div>
+        <div class="vk-cp-field"><label for="vkCpValidity">Validity (Days)</label><input id="vkCpValidity" type="number" min="1" step="1" placeholder="ఉదా: 30"></div>
+        <div class="vk-cp-field"><label for="vkCpCategory">Category</label><select id="vkCpCategory" onchange="vkCpLoadTests()"><option value="">Select Category</option></select></div>
+        <div class="vk-cp-field" style="grid-column:1/-1"><label for="vkCpDescription">Package Description</label><textarea id="vkCpDescription" rows="2" maxlength="500" placeholder="ఈ Packageలో లభించే Tests వివరాలు"></textarea></div>
+      </div>
+      <div class="vk-cp-tests">
+        <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap">
+          <strong>Select Paid Tests</strong><span id="vkCpSelectedCount" class="vk-management-status">0 tests selected</span>
+        </div>
+        <div class="vk-cp-test-toolbar">
+          <input id="vkCpTestSearch" type="search" placeholder="Search test title / series..." oninput="vkCpRenderTests()">
+          <button type="button" class="vk-admin-btn vk-admin-btn-secondary" onclick="vkCpSelectVisible(true)">Select Visible</button>
+          <button type="button" class="vk-admin-btn vk-admin-btn-secondary" onclick="vkCpSelectVisible(false)">Clear Visible</button>
+        </div>
+        <div id="vkCpTestList" class="vk-cp-test-list"><p class="vk-cp-sub">Select a category to load active paid tests.</p></div>
+      </div>
+      <div class="vk-cp-actions">
+        <button type="button" class="vk-admin-btn vk-admin-btn-primary" onclick="vkCpSavePackage()">Save Package</button>
+        <button type="button" class="vk-admin-btn vk-admin-btn-secondary" onclick="vkCpResetForm()">Clear Form</button>
+        <button type="button" class="vk-admin-btn vk-admin-btn-secondary" onclick="vkCpLoadPackages()">Refresh Packages</button>
+      </div>
+      <div id="vkCpStatus" class="vk-cp-status" role="status" aria-live="polite"></div>
+      <h3 style="margin:24px 0 8px">Existing Custom Packages</h3>
+      <div id="vkCpPackageList" class="vk-cp-package-list"><p class="vk-cp-sub">Loading packages...</p></div>
+    </section>
+
     <div class="vk-admin-panel">
       <h2 style="margin-bottom:16px">Test Details</h2>
       <div class="vk-admin-grid">
@@ -8404,6 +8469,182 @@ async function refreshVkAdminAccess(){
     }
 }
 
+
+/* =====================================================
+   VK EXAMS CUSTOM PAID TEST PACKAGE MANAGER
+   Server-side RPC functions perform admin authorization.
+===================================================== */
+let vkCpTestsCache = [];
+let vkCpSelectedTestIds = new Set();
+
+function vkCpSetStatus(message, isError=false){
+  const el=document.getElementById('vkCpStatus');
+  if(el){el.textContent=message||'';el.style.color=isError?'#b42318':'#475569';}
+}
+async function vkCpInit(){
+  if(!vkAdminAuthorized || !supabaseClient) return;
+  const category=document.getElementById('vkCpCategory');
+  if(category){
+    const previous=category.value;
+    category.innerHTML='<option value="">Select Category</option>'+
+      (window.__vkCourses||[]).filter(c=>c.is_active!==false).map(c=>`<option value="${vkAdminEscape(c.id)}">${vkAdminEscape(c.name)}</option>`).join('');
+    if((window.__vkCourses||[]).some(c=>c.id===previous)) category.value=previous;
+  }
+  await vkCpLoadPackages();
+  if(category?.value) await vkCpLoadTests();
+}
+async function vkCpLoadTests(){
+  const categoryId=document.getElementById('vkCpCategory')?.value;
+  const host=document.getElementById('vkCpTestList');
+  if(!host)return;
+  vkCpTestsCache=[];
+  if(!categoryId){host.innerHTML='<p class="vk-cp-sub">Select a category to load active paid tests.</p>';vkCpUpdateCount();return;}
+  host.innerHTML='<p class="vk-cp-sub">Loading paid tests...</p>';
+  try{
+    const {data:series,error:seriesError}=await supabaseClient.from('test_series')
+      .select('id,name').eq('course_id',categoryId).eq('is_active',true);
+    if(seriesError)throw seriesError;
+    const seriesIds=(series||[]).map(x=>x.id);
+    if(!seriesIds.length){host.innerHTML='<p class="vk-cp-sub">No active Test Series found.</p>';return;}
+    const {data:tests,error}=await supabaseClient.from('tests')
+      .select('id,title,test_number,topic_name,topic_test_number,is_free,is_active,test_series_id')
+      .in('test_series_id',seriesIds).eq('is_free',false).eq('is_active',true)
+      .order('test_number',{ascending:true});
+    if(error)throw error;
+    const seriesMap=new Map((series||[]).map(x=>[x.id,x.name]));
+    vkCpTestsCache=(tests||[]).map(t=>({...t,series_name:seriesMap.get(t.test_series_id)||''}));
+    vkCpRenderTests();
+  }catch(e){
+    console.error('Custom package tests load failed:',e);
+    host.innerHTML='<p class="vk-cp-sub">Could not load tests: '+vkAdminEscape(e.message||e)+'</p>';
+  }
+}
+function vkCpRenderTests(){
+  const host=document.getElementById('vkCpTestList');if(!host)return;
+  const term=(document.getElementById('vkCpTestSearch')?.value||'').trim().toLowerCase();
+  const rows=vkCpTestsCache.filter(t=>[t.title,t.topic_name,t.test_number,t.topic_test_number,t.series_name].some(v=>String(v??'').toLowerCase().includes(term)));
+  if(!rows.length){host.innerHTML='<p class="vk-cp-sub">No active paid tests found for this category/search.</p>';vkCpUpdateCount();return;}
+  host.innerHTML=rows.map(t=>{
+    const title=t.title||t.topic_name||('Test '+t.test_number);
+    return `<label class="vk-cp-test-option"><input type="checkbox" class="vk-cp-test-check" value="${vkAdminEscape(t.id)}" ${vkCpSelectedTestIds.has(t.id)?'checked':''} onchange="vkCpToggleTest('${vkAdminEscape(t.id)}',this.checked)"><span><strong>${vkAdminEscape(title)}</strong><br><small>${vkAdminEscape(t.series_name)} · Test ${vkAdminEscape(t.test_number??'')}</small></span></label>`;
+  }).join('');
+  vkCpUpdateCount();
+}
+function vkCpToggleTest(id,checked){if(checked)vkCpSelectedTestIds.add(id);else vkCpSelectedTestIds.delete(id);vkCpUpdateCount();}
+function vkCpSelectVisible(checked){
+  document.querySelectorAll('#vkCpTestList .vk-cp-test-check').forEach(el=>{
+    el.checked=checked;vkCpToggleTest(el.value,checked);
+  });
+}
+function vkCpUpdateCount(){
+  const el=document.getElementById('vkCpSelectedCount');
+  if(el)el.textContent=vkCpSelectedTestIds.size+' tests selected';
+}
+function vkCpResetForm(){
+  ['vkCpPackageId','vkCpName','vkCpPrice','vkCpValidity','vkCpDescription','vkCpTestSearch'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  const category=document.getElementById('vkCpCategory');if(category)category.value='';
+  vkCpSelectedTestIds=new Set();vkCpTestsCache=[];
+  const host=document.getElementById('vkCpTestList');if(host)host.innerHTML='<p class="vk-cp-sub">Select a category to load active paid tests.</p>';
+  vkCpUpdateCount();vkCpSetStatus('');
+}
+async function vkCpSavePackage(){
+  if(!vkAdminAuthorized){vkCpSetStatus('Admin access required.',true);return;}
+  const id=document.getElementById('vkCpPackageId')?.value||null;
+  const name=document.getElementById('vkCpName')?.value.trim();
+  const description=document.getElementById('vkCpDescription')?.value.trim()||'';
+  const price=Number(document.getElementById('vkCpPrice')?.value);
+  const days=Number(document.getElementById('vkCpValidity')?.value);
+  if(!name||!Number.isFinite(price)||price<=0||!Number.isInteger(days)||days<=0){vkCpSetStatus('Enter package name, a valid price and validity in whole days.',true);return;}
+  if(!vkCpSelectedTestIds.size){vkCpSetStatus('Select at least one paid test.',true);return;}
+  const saveBtn=document.querySelector('#vkCustomPackageManager .vk-admin-btn-primary');
+  if(saveBtn){saveBtn.disabled=true;saveBtn.textContent='Saving...';}
+  vkCpSetStatus('Saving package details and test selection...');
+  try{
+    const {data:packageId,error:packageError}=await supabaseClient.rpc('vk_admin_save_custom_package',{
+      p_package_id:id,p_name:name,p_description:description,p_price:price,p_duration_days:days
+    });
+    if(packageError)throw packageError;
+    const {error:testError}=await supabaseClient.rpc('vk_admin_save_package_tests',{
+      p_package_id:packageId,p_test_ids:[...vkCpSelectedTestIds]
+    });
+    if(testError)throw testError;
+    vkCpSetStatus('Package saved as Draft. Review it, then use Publish in the package list.');
+    vkCpResetForm();
+    await vkCpLoadPackages();
+  }catch(e){
+    console.error('Custom package save failed:',e);
+    vkCpSetStatus('Save failed: '+(e.message||e),true);
+  }finally{
+    if(saveBtn){saveBtn.disabled=false;saveBtn.textContent='Save Package';}
+  }
+}
+async function vkCpLoadPackages(){
+  const host=document.getElementById('vkCpPackageList');if(!host||!supabaseClient)return;
+  host.innerHTML='<p class="vk-cp-sub">Loading custom packages...</p>';
+  try{
+    const {data:packages,error}=await supabaseClient.from('packages')
+      .select('id,name,description,price,duration_days,is_active,package_type')
+      .eq('package_type','custom').order('name',{ascending:true});
+    if(error)throw error;
+    if(!packages?.length){host.innerHTML='<p class="vk-cp-sub">No custom packages created yet.</p>';return;}
+    const ids=packages.map(p=>p.id);
+    const {data:mappings,error:mappingError}=await supabaseClient.from('package_tests')
+      .select('package_id,test_id').in('package_id',ids);
+    if(mappingError)throw mappingError;
+    const counts={};(mappings||[]).forEach(m=>counts[m.package_id]=(counts[m.package_id]||0)+1);
+    host.innerHTML=packages.map(p=>`<article class="vk-cp-package-card">
+      <h3>${vkAdminEscape(p.name)}</h3>
+      <div class="vk-cp-package-meta">₹${Number(p.price).toLocaleString('en-IN')} · ${Number(p.duration_days)} days · ${counts[p.id]||0} tests<br>
+      Status: <strong style="color:${p.is_active?'#15803d':'#b45309'}">${p.is_active?'Published':'Draft'}</strong></div>
+      <div class="vk-cp-package-actions">
+        <button type="button" onclick="vkCpEditPackage('${vkAdminEscape(p.id)}')">Edit</button>
+        <button type="button" class="${p.is_active?'':'primary'}" onclick="vkCpSetPackageStatus('${vkAdminEscape(p.id)}',${!p.is_active})">${p.is_active?'Unpublish':'Publish'}</button>
+      </div></article>`).join('');
+    window.__vkCustomPackages=packages;
+    window.__vkCustomPackageMappings=mappings||[];
+  }catch(e){
+    console.error('Custom packages load failed:',e);
+    host.innerHTML='<p class="vk-cp-sub">Could not load custom packages: '+vkAdminEscape(e.message||e)+'</p>';
+  }
+}
+async function vkCpEditPackage(id){
+  const p=(window.__vkCustomPackages||[]).find(x=>x.id===id);if(!p)return;
+  document.getElementById('vkCpPackageId').value=p.id;
+  document.getElementById('vkCpName').value=p.name||'';
+  document.getElementById('vkCpDescription').value=p.description||'';
+  document.getElementById('vkCpPrice').value=p.price??'';
+  document.getElementById('vkCpValidity').value=p.duration_days??'';
+  const mappings=(window.__vkCustomPackageMappings||[]).filter(x=>x.package_id===id);
+  vkCpSelectedTestIds=new Set(mappings.map(x=>x.test_id));
+  let matchedCategory='';
+  if(vkCpSelectedTestIds.size){
+    const {data:selectedTests,error:selectedTestsError}=await supabaseClient
+      .from('tests').select('id,test_series_id').in('id',[...vkCpSelectedTestIds]);
+    if(selectedTestsError)throw selectedTestsError;
+    const selectedSeriesIds=[...new Set((selectedTests||[]).map(t=>t.test_series_id).filter(Boolean))];
+    const {data:selectedSeries,error:selectedSeriesError}=await supabaseClient
+      .from('test_series').select('id,course_id').in('id',selectedSeriesIds);
+    if(selectedSeriesError)throw selectedSeriesError;
+    const categoryIds=[...new Set((selectedSeries||[]).map(x=>x.course_id).filter(Boolean))];
+    if(categoryIds.length===1)matchedCategory=categoryIds[0];
+    else if(categoryIds.length>1)throw new Error('This package contains tests from multiple categories. The current editor supports one category per package; do not save until the package is reviewed.');
+  }
+  if(!matchedCategory && (window.__vkCourses||[]).length===1)matchedCategory=window.__vkCourses[0].id;
+  const category=document.getElementById('vkCpCategory');if(category)category.value=matchedCategory;
+  await vkCpLoadTests();
+  vkCpSetStatus('Editing package. Save changes to update its current test selection. Existing purchase snapshots are not changed.');
+  document.getElementById('vkCustomPackageManager')?.scrollIntoView({behavior:'smooth',block:'start'});
+}
+async function vkCpSetPackageStatus(id,active){
+  if(!confirm(active?'Publish this custom package?':'Unpublish this custom package?'))return;
+  try{
+    const {data,error}=await supabaseClient.rpc('vk_admin_set_custom_package_status',{p_package_id:id,p_is_active:active});
+    if(error)throw error;
+    await vkCpLoadPackages();
+    vkCpSetStatus(active?'Package published.':'Package unpublished.');
+  }catch(e){vkCpSetStatus('Status update failed: '+(e.message||e),true);}
+}
+
 async function openAdminMockBuilder(){
     const allowed = await refreshVkAdminAccess();
     if(!allowed){
@@ -8414,6 +8655,7 @@ async function openAdminMockBuilder(){
     showPage("vkAdminMockBuilder");
     await vkAdminLoadCourses();
     await vkLoadCategoryManager();
+    await vkCpInit();
     vkAdminOnTestTypeChange();
     if(!document.getElementById("vkAdminQuestions").children.length){
         vkAdminAddQuestion();
