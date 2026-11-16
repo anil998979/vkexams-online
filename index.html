@@ -14857,47 +14857,172 @@ document.addEventListener(
 <script id="vk-admin-exclusive-accordion-js">
 (function(){
   function initVkAdminAccordions(){
-    const root=document.getElementById('vkAdminMockBuilder');if(!root||root.dataset.accordionsReady==='1')return;
+    const root=document.getElementById('vkAdminMockBuilder');
+    if(!root||root.dataset.accordionsReady==='1')return;
     root.dataset.accordionsReady='1';
+
     const items=[];
-    // Category Management and Test Series Management are separate accordion items.
-    root.querySelectorAll('#vkCategoryManager > .vk-management-card').forEach((card,index)=>{
-      const heading=card.querySelector(':scope > .vk-management-heading');if(!heading)return;
-      const body=document.createElement('div');body.className='vk-accordion-body';
+    function makeAccordion(panel,heading,kind){
+      if(!panel||!heading||panel.dataset.vkAccordionReady==='1')return;
+      panel.dataset.vkAccordionReady='1';
+
+      const body=document.createElement('div');
+      body.className='vk-accordion-body';
+
+      // Move everything after the heading into the collapsible body.
       while(heading.nextSibling)body.appendChild(heading.nextSibling);
-      const original=heading.querySelector('h2')?.textContent?.trim()||`Management section ${index+1}`;
-      const trigger=document.createElement('button');trigger.type='button';trigger.className='vk-accordion-trigger';trigger.setAttribute('aria-expanded','false');
-      trigger.innerHTML=`<span class="vk-accordion-title">${heading.innerHTML}</span><span class="vk-accordion-arrow" aria-hidden="true">⌄</span>`;
-      heading.replaceChildren(trigger);card.append(heading,body);card.classList.add('vk-accordion-panel');items.push({panel:card,trigger,body,title:original});
+
+      const title=heading.querySelector('h2,h3')?.textContent?.trim()||heading.textContent.trim()||'Section';
+      const trigger=document.createElement('button');
+      trigger.type='button';
+      trigger.className='vk-accordion-trigger';
+      trigger.setAttribute('aria-expanded','false');
+
+      const label=document.createElement('span');
+      label.className='vk-accordion-title';
+      label.innerHTML=heading.innerHTML;
+
+      const arrow=document.createElement('span');
+      arrow.className='vk-accordion-arrow';
+      arrow.setAttribute('aria-hidden','true');
+      arrow.textContent='⌄';
+
+      trigger.append(label,arrow);
+      heading.replaceChildren(trigger);
+      panel.append(heading,body);
+      panel.classList.add('vk-accordion-panel');
+      items.push({panel,trigger,body,title,kind});
+    }
+
+    // Category Management and Test Series Management.
+    root.querySelectorAll('#vkCategoryManager > .vk-management-card').forEach((panel)=>{
+      makeAccordion(panel,panel.querySelector(':scope > .vk-management-heading'),'management');
     });
-    // Remaining major panels (Test Details, Bulk Upload, Questions, Publish) follow the same pattern.
+
+    // Custom Paid Test Packages.
+    const customPanel=root.querySelector('#vkCustomPackageManager');
+    if(customPanel){
+      makeAccordion(customPanel,customPanel.querySelector(':scope > .vk-management-heading'),'custom-package');
+    }
+
+    // Bulk Question Upload panel (its heading is .vk-admin-qtop rather than a direct h2).
+    const bulkPanel=root.querySelector('#vkAdminBulkImportPanel');
+    if(bulkPanel){
+      makeAccordion(bulkPanel,bulkPanel.querySelector(':scope > .vk-admin-qtop'),'bulk-upload');
+    }
+
+    // Other major test-builder panels with a direct heading.
     const wrap=root.querySelector('.vk-admin-wrap');
     if(wrap){
-      [...wrap.children].filter(el=>el.classList?.contains('vk-admin-panel')&&!el.classList.contains('vk-accordion-panel')).forEach((panel,index)=>{
-        const heading=panel.querySelector(':scope > h2, :scope > h3');if(!heading)return;
-        const body=document.createElement('div');body.className='vk-accordion-body';
-        while(heading.nextSibling)body.appendChild(heading.nextSibling);
-        const title=heading.textContent.trim()||`Test setup ${index+1}`;
-        const trigger=document.createElement('button');trigger.type='button';trigger.className='vk-accordion-trigger';trigger.setAttribute('aria-expanded','false');
-        const label=document.createElement('span');label.className='vk-accordion-title';label.textContent=title;
-        const arrow=document.createElement('span');arrow.className='vk-accordion-arrow';arrow.setAttribute('aria-hidden','true');arrow.textContent='⌄';
-        trigger.append(label,arrow);heading.replaceWith(trigger);panel.append(body);panel.classList.add('vk-accordion-panel');items.push({panel,trigger,body,title});
+      [...wrap.children].forEach((panel)=>{
+        if(!panel.classList?.contains('vk-admin-panel')||panel.classList.contains('vk-accordion-panel'))return;
+        const heading=panel.querySelector(':scope > h2, :scope > h3');
+        if(heading)makeAccordion(panel,heading,'test-builder');
       });
     }
-    function closeAll(except){items.forEach(item=>{if(item===except)return;item.body.hidden=true;item.trigger.setAttribute('aria-expanded','false');item.panel.classList.remove('vk-accordion-open')})}
+
+    function closeAll(except){
+      items.forEach(item=>{
+        if(item===except)return;
+        item.body.hidden=true;
+        item.trigger.setAttribute('aria-expanded','false');
+        item.panel.classList.remove('vk-accordion-open');
+      });
+    }
+
     items.forEach(item=>{
       item.body.hidden=true;
       item.trigger.addEventListener('click',()=>{
-        const opening=item.body.hidden;closeAll(item);item.body.hidden=!opening;item.trigger.setAttribute('aria-expanded',String(opening));item.panel.classList.toggle('vk-accordion-open',opening);
+        const opening=item.body.hidden;
+        closeAll(item);
+        item.body.hidden=!opening;
+        item.trigger.setAttribute('aria-expanded',String(opening));
+        item.panel.classList.toggle('vk-accordion-open',opening);
       });
     });
   }
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initVkAdminAccordions,{once:true});else initVkAdminAccordions();
-  // Admin views can be mounted after login/navigation; initialize when the builder is shown.
-  const observer=new MutationObserver(()=>{const root=document.getElementById('vkAdminMockBuilder');if(root&&root.dataset.accordionsReady!=='1')initVkAdminAccordions()});
+
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initVkAdminAccordions,{once:true});
+  else initVkAdminAccordions();
+
+  // Reinitialize if the admin builder is dynamically mounted after navigation.
+  const observer=new MutationObserver(()=>{
+    const root=document.getElementById('vkAdminMockBuilder');
+    if(root&&root.dataset.accordionsReady!=='1')initVkAdminAccordions();
+  });
   observer.observe(document.documentElement,{childList:true,subtree:true});
 })();
 </script>
+
+
+<style id="vk-custom-and-bulk-accordion-style">
+#vkAdminMockBuilder #vkCustomPackageManager.vk-accordion-panel,
+#vkAdminMockBuilder #vkAdminBulkImportPanel.vk-accordion-panel{
+  padding:18px;
+}
+#vkAdminMockBuilder #vkCustomPackageManager .vk-accordion-trigger,
+#vkAdminMockBuilder #vkAdminBulkImportPanel .vk-accordion-trigger{
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  padding:12px 14px;
+  border:0;
+  border-radius:12px;
+  background:#f3f5ff;
+  color:#172b55;
+  text-align:left;
+  cursor:pointer;
+}
+#vkAdminMockBuilder #vkCustomPackageManager .vk-accordion-title,
+#vkAdminMockBuilder #vkAdminBulkImportPanel .vk-accordion-title{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  min-width:0;
+  flex:1;
+}
+#vkAdminMockBuilder #vkCustomPackageManager .vk-accordion-title .vk-management-heading,
+#vkAdminMockBuilder #vkAdminBulkImportPanel .vk-accordion-title .vk-admin-qtop{
+  width:100%;
+  margin:0;
+  padding:0;
+  border:0;
+}
+#vkAdminMockBuilder #vkCustomPackageManager .vk-accordion-title h2,
+#vkAdminMockBuilder #vkAdminBulkImportPanel .vk-accordion-title h2{
+  margin:0!important;
+  font-size:21px;
+  color:#172b55;
+}
+#vkAdminMockBuilder #vkCustomPackageManager .vk-accordion-title p,
+#vkAdminMockBuilder #vkAdminBulkImportPanel .vk-accordion-title p{
+  margin:3px 0 0;
+}
+#vkAdminMockBuilder #vkCustomPackageManager .vk-accordion-arrow,
+#vkAdminMockBuilder #vkAdminBulkImportPanel .vk-accordion-arrow{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  flex:0 0 28px;
+  width:28px;
+  height:28px;
+  border-radius:8px;
+  background:#e7edff;
+  color:#4f46e5;
+  font-size:18px;
+  transition:transform .18s ease;
+}
+#vkAdminMockBuilder #vkCustomPackageManager .vk-accordion-trigger[aria-expanded="true"] .vk-accordion-arrow,
+#vkAdminMockBuilder #vkAdminBulkImportPanel .vk-accordion-trigger[aria-expanded="true"] .vk-accordion-arrow{
+  transform:rotate(180deg);
+}
+#vkAdminMockBuilder #vkCustomPackageManager .vk-accordion-body,
+#vkAdminMockBuilder #vkAdminBulkImportPanel .vk-accordion-body{
+  padding-top:16px;
+}
+</style>
 
 </body>
 
