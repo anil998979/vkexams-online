@@ -3987,6 +3987,25 @@ id="solutions">
           <button type="button" class="vk-admin-btn vk-admin-btn-secondary" onclick="vkResetSeriesFilters()">Clear Filters</button>
         </div>
         <div id="vkSeriesFilterCount" class="vk-management-status" aria-live="polite"></div><div id="vkSeriesRows"></div>
+        <div class="vk-delete-manager" style="margin-top:18px;padding:16px;border:1px solid #f1caca;border-radius:14px;background:#fffafa">
+          <h3 style="margin:0 0 6px;color:#8b2020">Selective Test / Series Removal</h3>
+          <p style="margin:0 0 14px;color:#526581">Select a category and series to view its individual Free and Paid Tests. Removing content hides it from the website; student attempts, results, purchases and history are preserved.</p>
+          <div class="vk-admin-grid">
+            <div><label for="vkDeleteCourse">Category</label><select id="vkDeleteCourse"><option value="">Select category</option></select></div>
+            <div><label for="vkDeleteSeries">Test Series</label><select id="vkDeleteSeries" disabled><option value="">Select category first</option></select></div>
+            <div><label for="vkDeleteTestType">Test type</label><select id="vkDeleteTestType"><option value="all">All Tests</option><option value="free">Free Tests only</option><option value="paid">Paid Tests only</option></select></div>
+            <div><label for="vkDeleteTestSearch">Search Tests</label><input id="vkDeleteTestSearch" type="search" placeholder="Search test title / number…" autocomplete="off"></div>
+          </div>
+          <div class="vk-management-actions" style="margin-top:12px">
+            <button type="button" class="vk-admin-btn vk-admin-btn-secondary" onclick="vkDeleteSelectAllVisible(true)">Select All Visible</button>
+            <button type="button" class="vk-admin-btn vk-admin-btn-secondary" onclick="vkDeleteSelectAllVisible(false)">Clear Selection</button>
+            <button type="button" class="vk-admin-btn" style="background:#b42318" onclick="vkArchiveSelectedTests()">Remove Selected Tests</button>
+            <button type="button" class="vk-admin-btn vk-admin-btn-secondary" onclick="vkArchiveSelectedSeries()">Remove Entire Selected Series</button>
+            <button type="button" class="vk-admin-btn vk-admin-btn-secondary" onclick="vkArchiveSelectedCategory()">Remove Entire Category</button>
+          </div>
+          <div id="vkDeleteTestCount" class="vk-management-status" aria-live="polite"></div>
+          <div id="vkDeleteTestRows"></div>
+        </div>
       </section>
     </div>
     <div class="vk-admin-panel">
@@ -8415,11 +8434,12 @@ async function vkLoadCategoryManager(){
   const [cr,sr]=await Promise.all([supabaseClient.from('courses').select('id,name,slug,description,icon,is_active,display_order,homepage_visible,homepage_description,homepage_color,homepage_image_url,homepage_display_order').order('display_order'),supabaseClient.from('test_series').select('id,course_id,name,series_type,is_active,display_order,parent_series_id').order('display_order')]);
   if(cr.error||sr.error){if(status)status.textContent='Load failed: '+(cr.error||sr.error).message;return}
   window.__vkCourses=cr.data||[];window.__vkSeries=sr.data||[];const esc=vkAdminEscape;
-  document.getElementById('vkCategoryRows').innerHTML='<div class="table-wrap"><table><thead><tr><th>Category</th><th>Slug</th><th>Icon</th><th>Status</th><th>Homepage</th><th>Actions</th></tr></thead><tbody>'+window.__vkCourses.map(c=>`<tr><td>${esc(c.name)}</td><td>${esc(c.slug)}</td><td>${vkCategoryIconMarkup(c.icon)}</td><td>${c.is_active?'<span class="badge-active">Active</span>':'<span class="badge-off">Disabled</span>'}</td><td><button type="button" onclick="vkToggleHomepageCard('${c.id}',${!c.homepage_visible})">${c.homepage_visible?'Hide':'Show'}</button></td><td><button type="button" onclick="vkEditCategory('${c.id}')">Edit</button> <button type="button" onclick="vkToggleCategory('${c.id}',${!c.is_active})">${c.is_active?'Disable':'Enable'}</button> <button type="button" class="vk-delete-btn" onclick="vkDeleteCategory('${c.id}')">Delete</button></td></tr>`).join('')+'</tbody></table></div>';
+  document.getElementById('vkCategoryRows').innerHTML='<div class="table-wrap"><table><thead><tr><th>Category</th><th>Slug</th><th>Icon</th><th>Status</th><th>Homepage</th><th>Actions</th></tr></thead><tbody>'+window.__vkCourses.map(c=>`<tr><td>${esc(c.name)}</td><td>${esc(c.slug)}</td><td>${vkCategoryIconMarkup(c.icon)}</td><td>${c.is_active?'<span class="badge-active">Active</span>':'<span class="badge-off">Disabled</span>'}</td><td><button type="button" onclick="vkToggleHomepageCard('${c.id}',${!c.homepage_visible})">${c.homepage_visible?'Hide':'Show'}</button></td><td><button type="button" onclick="vkEditCategory('${c.id}')">Edit</button> <button type="button" onclick="vkToggleCategory('${c.id}',${!c.is_active})">${c.is_active?'Disable':'Enable'}</button> <button type="button" class="vk-delete-btn" onclick="vkDeleteCategory('${c.id}')">Remove</button></td></tr>`).join('')+'</tbody></table></div>';
   document.getElementById('vkSeriesCourse').innerHTML=window.__vkCourses.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');
   const filter=document.getElementById('vkSeriesFilterCourse');
   if(filter){const previous=filter.value;filter.innerHTML='<option value="">All Categories</option>'+window.__vkCourses.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');filter.value=window.__vkCourses.some(c=>c.id===previous)?previous:'';}
   vkRenderSeriesRows();
+  await vkLoadDeleteManagerData();
   vkSeriesTypeOptions();if(status)status.textContent='Loaded '+window.__vkCourses.length+' categories and '+window.__vkSeries.length+' test series.';
 }
 function vkResetCategoryForm(){['vkCatId','vkCatName','vkCatSlug','vkCatIcon','vkHomeCardDescription'].forEach(id=>document.getElementById(id).value='');document.getElementById('vkCatOrder').value='10';document.getElementById('vkHomeCardColor').value='#2563eb';document.getElementById('vkHomeCardVisible').checked=false;['vkCatIconFile','vkHomeCardImage'].forEach(id=>document.getElementById(id).value='');['vkCatIconPreview','vkHomeCardImagePreview'].forEach(id=>{const p=document.getElementById(id);p.hidden=true;p.removeAttribute('src')})}
@@ -8464,7 +8484,23 @@ async function vkLoadHomepageCards(){
   }).join('');
 }
 async function vkToggleCategory(id,active){const {error}=await supabaseClient.from('courses').update({is_active:active}).eq('id',id);if(error){alert(error.message);return}await vkLoadCategoryManager();await vkLoadHomepageCards()}
-async function vkDeleteCategory(id){const c=(window.__vkCourses||[]).find(x=>x.id===id);if(!c)return;const linked=(window.__vkSeries||[]).filter(s=>s.course_id===id);if(linked.length){alert('ఈ Category‌కు '+linked.length+' Test Series లింక్ అయి ఉన్నాయి. ముందుగా వాటిని వేరే Category‌కు మార్చండి లేదా అవసరమైతే తొలగించండి. Student/Test history రక్షణ కోసం Delete నిలిపివేయబడింది.');return}if(!confirm('Delete category “'+c.name+'”? This cannot be undone.'))return;const {error}=await supabaseClient.from('courses').delete().eq('id',id);if(error){alert('Delete blocked. ఈ Category‌కు ఇతర records లింక్ అయి ఉండవచ్చు. Database history రక్షించబడింది. Details: '+error.message);return}vkResetCategoryForm();await vkLoadCategoryManager();await vkAdminLoadCourses()}
+async function vkDeleteCategory(id){
+  const c=(window.__vkCourses||[]).find(x=>x.id===id);if(!c)return;
+  const linked=(window.__vkSeries||[]).filter(s=>s.course_id===id);
+  const count=linked.length;
+  if(!confirm(`Remove entire category “${c.name}” from the website? This will hide ${count} series and all tests under them. Student attempts, results, purchases and history will be preserved. This is a reversible archive, not a hard delete.`))return;
+  try{
+    const seriesIds=linked.map(x=>x.id);
+    if(seriesIds.length){
+      const {error:te}=await supabaseClient.from('tests').update({is_active:false}).in('test_series_id',seriesIds);if(te)throw te;
+      const {error:se}=await supabaseClient.from('test_series').update({is_active:false}).eq('course_id',id);if(se)throw se;
+    }
+    const {error:ce}=await supabaseClient.from('courses').update({is_active:false,homepage_visible:false}).eq('id',id);if(ce)throw ce;
+    if(document.getElementById('vkCatId')?.value===id)vkResetCategoryForm();
+    await vkLoadCategoryManager();await vkAdminLoadCourses();if(typeof vkLoadHomepageCards==='function')await vkLoadHomepageCards();
+    alert(`Category “${c.name}” and its ${count} series have been removed from the website. Student history and purchases remain intact.`);
+  }catch(e){alert('Category removal could not be completed. Some earlier archive steps may have succeeded; refresh management and check status. Details: '+(e.message||e));await vkLoadCategoryManager();}
+}
 function vkEditSeries(id){const s=(window.__vkSeries||[]).find(x=>x.id===id);if(!s)return;document.getElementById('vkSeriesId').value=s.id;document.getElementById('vkSeriesCourse').value=s.course_id;document.getElementById('vkSeriesName').value=s.name;document.getElementById('vkSeriesType').value=s.series_type||'general'}
 async function vkSaveSeries(){const id=document.getElementById('vkSeriesId').value,course_id=document.getElementById('vkSeriesCourse').value,name=document.getElementById('vkSeriesName').value.trim(),series_type=document.getElementById('vkSeriesType').value.trim().toLowerCase().replace(/\s+/g,'_');if(!course_id||!name||!series_type){alert('Course, series name and series type are required.');return}const row={course_id,name,series_type};if(!id)row.is_active=true;const q=id?supabaseClient.from('test_series').update(row).eq('id',id):supabaseClient.from('test_series').insert(row);const {error}=await q;if(error){alert('Save failed: '+error.message);return}vkResetSeriesForm();await vkLoadCategoryManager()}
 async function vkToggleSeries(id,active){const {error}=await supabaseClient.from('test_series').update({is_active:active}).eq('id',id);if(error){alert(error.message);return}await vkLoadCategoryManager()}
@@ -8476,26 +8512,76 @@ function vkRenderSeriesRows(){
   const filtered=series.filter(s=>{const courseName=names.get(s.course_id)||'';const title=vkSeriesDisplayName(s,courseName);const matchesCategory=!categoryId||s.course_id===categoryId;const matchesText=!term||[courseName,title,s.series_type||''].some(v=>String(v).toLowerCase().includes(term));return matchesCategory&&matchesText;});
   const count=document.getElementById('vkSeriesFilterCount');if(count)count.textContent=`Showing ${filtered.length} of ${series.length} test series`;
   if(!filtered.length){host.innerHTML='<div class="vk-empty-state" style="padding:22px;text-align:center">No matching test series found.</div>';return;}
-  host.innerHTML='<div class="table-wrap"><table><thead><tr><th>Course</th><th>Series</th><th>Type</th><th>Status</th><th>Actions</th></tr></thead><tbody>'+filtered.map(s=>`<tr><td>${vkAdminEscape(names.get(s.course_id)||'')}</td><td>${vkAdminEscape(vkSeriesDisplayName(s,names.get(s.course_id)||''))}</td><td>${vkAdminEscape(s.series_type||'')}</td><td>${s.is_active?'<span class="badge-active">Active</span>':'<span class="badge-off">Disabled</span>'}</td><td><button type="button" onclick="vkEditSeries('${s.id}')">Edit</button> <button type="button" onclick="vkToggleSeries('${s.id}',${!s.is_active})">${s.is_active?'Disable':'Enable'}</button> <button type="button" class="vk-delete-btn" onclick="vkDeleteSeries('${s.id}')">Delete</button></td></tr>`).join('')+'</tbody></table></div>';
+  host.innerHTML='<div class="table-wrap"><table><thead><tr><th>Course</th><th>Series</th><th>Type</th><th>Status</th><th>Actions</th></tr></thead><tbody>'+filtered.map(s=>`<tr><td>${vkAdminEscape(names.get(s.course_id)||'')}</td><td>${vkAdminEscape(vkSeriesDisplayName(s,names.get(s.course_id)||''))}</td><td>${vkAdminEscape(s.series_type||'')}</td><td>${s.is_active?'<span class="badge-active">Active</span>':'<span class="badge-off">Disabled</span>'}</td><td><button type="button" onclick="vkEditSeries('${s.id}')">Edit</button> <button type="button" onclick="vkToggleSeries('${s.id}',${!s.is_active})">${s.is_active?'Disable':'Enable'}</button> <button type="button" class="vk-delete-btn" onclick="vkDeleteSeries('${s.id}')">Remove</button></td></tr>`).join('')+'</tbody></table></div>';
 }
 function vkResetSeriesFilters(){const f=document.getElementById('vkSeriesFilterCourse'),q=document.getElementById('vkSeriesSearch');if(f)f.value='';if(q)q.value='';vkRenderSeriesRows()}
 async function vkDeleteSeries(id){
   const s=(window.__vkSeries||[]).find(x=>x.id===id);if(!s)return;
-  const children=(window.__vkSeries||[]).filter(x=>x.parent_series_id===id);
-  const childNote=children.length?`\n\n${children.length} child series will be kept and detached from this parent. Their tests and student history will not be deleted.`:'';
-  if(!confirm(`Delete Test Series “${s.name}”?${childNote}\n\nTests directly assigned to this series will block deletion; no tests, attempts or results will be deleted.`))return;
-  // Directly assigned tests must be moved to another series first. Never cascade-delete test history.
-  const {data:directTests,error:checkError}=await supabaseClient.from('tests').select('id').eq('test_series_id',id).limit(1);
-  if(checkError){alert('Could not verify linked tests. Nothing was changed. Details: '+checkError.message);return;}
-  if((directTests||[]).length){alert('ఈ Test Series‌కు నేరుగా Tests లింక్ అయి ఉన్నాయి. వాటిని ముందుగా సరైన మరో Test Series‌కు మార్చాలి. Student Attempts/Results రక్షణ కోసం ఈ Series‌ను Delete చేయలేదు.');return;}
-  let detached=false;
-  if(children.length){const {error:detachError}=await supabaseClient.from('test_series').update({parent_series_id:null}).eq('parent_series_id',id);if(detachError){alert('Child series links could not be safely detached. Nothing was deleted. Details: '+detachError.message);return;}detached=true;}
-  const {error}=await supabaseClient.from('test_series').delete().eq('id',id);
-  if(error){if(detached){const {error:restoreError}=await supabaseClient.from('test_series').update({parent_series_id:id}).in('id',children.map(x=>x.id));if(restoreError)alert('Delete failed and automatic link restore also failed. Please do not make further changes; contact support. Restore details: '+restoreError.message);}
-    alert('Delete blocked. Student/Test history has been preserved. '+error.message);return;}
-  if(document.getElementById('vkSeriesId')?.value===id)vkResetSeriesForm();
-  await vkLoadCategoryManager();
+  const related=(window.__vkSeries||[]).filter(x=>x.course_id===s.course_id);
+  const ids=new Set([id]);
+  // Include nested descendants so the removed parent cannot leave active child series behind.
+  let changed=true;while(changed){changed=false;for(const item of related){if(item.parent_series_id&&ids.has(item.parent_series_id)&&!ids.has(item.id)){ids.add(item.id);changed=true;}}}
+  const seriesIds=[...ids];
+  if(!confirm(`Remove Test Series “${s.name}” and its ${seriesIds.length-1} child series from the website? All assigned tests will be hidden. Student attempts, results, purchases and history will be preserved.`))return;
+  try{
+    const {error:te}=await supabaseClient.from('tests').update({is_active:false}).in('test_series_id',seriesIds);if(te)throw te;
+    const {error:se}=await supabaseClient.from('test_series').update({is_active:false}).in('id',seriesIds);if(se)throw se;
+    if(document.getElementById('vkSeriesId')?.value===id)vkResetSeriesForm();
+    await vkLoadCategoryManager();await vkLoadDeleteManagerData();
+    alert('Selected Test Series has been removed from the website. Student history and purchases are preserved.');
+  }catch(e){alert('Series removal failed. Refresh and verify the archive status. Details: '+(e.message||e));await vkLoadCategoryManager();}
 }
+
+// Content removal is implemented as soft-archive (is_active=false), never a
+// cascading SQL DELETE. This keeps test IDs referenced by attempts/results/purchases.
+let vkDeleteManagerTests=[];
+async function vkLoadDeleteManagerData(){
+  const courseSel=document.getElementById('vkDeleteCourse');if(!courseSel)return;
+  const previous=courseSel.value;courseSel.innerHTML='<option value="">Select category</option>'+(window.__vkCourses||[]).map(c=>`<option value="${vkAdminEscape(c.id)}">${vkAdminEscape(c.name)}</option>`).join('');
+  if((window.__vkCourses||[]).some(c=>c.id===previous))courseSel.value=previous;
+  await vkLoadDeleteSeriesOptions();
+}
+async function vkLoadDeleteSeriesOptions(){
+  const courseId=document.getElementById('vkDeleteCourse')?.value,sel=document.getElementById('vkDeleteSeries');if(!sel)return;
+  const rows=(window.__vkSeries||[]).filter(s=>s.course_id===courseId);
+  sel.disabled=!courseId;sel.innerHTML=courseId?'<option value="">All series in category</option>'+rows.map(s=>`<option value="${vkAdminEscape(s.id)}">${vkAdminEscape(s.name)}${s.is_active?'':' (Removed)'}</option>`).join(''):'<option value="">Select category first</option>';
+  await vkLoadDeleteTests();
+}
+async function vkLoadDeleteTests(){
+  const courseId=document.getElementById('vkDeleteCourse')?.value,seriesId=document.getElementById('vkDeleteSeries')?.value,host=document.getElementById('vkDeleteTestRows');if(!host)return;
+  if(!courseId){vkDeleteManagerTests=[];host.innerHTML='<p>Select a category to view its tests.</p>';return;}
+  const series=(window.__vkSeries||[]).filter(s=>s.course_id===courseId&&(!seriesId||s.id===seriesId));const ids=series.map(s=>s.id);
+  if(!ids.length){vkDeleteManagerTests=[];host.innerHTML='<p>No Test Series found in this category.</p>';return;}
+  host.innerHTML='<p>Loading tests…</p>';
+  try{
+    const {data,error}=await supabaseClient.from('tests').select('id,title,test_number,topic_name,topic_test_number,is_free,is_active,test_series_id').in('test_series_id',ids).order('test_number',{ascending:true});if(error)throw error;
+    vkDeleteManagerTests=data||[];vkRenderDeleteTests();
+  }catch(e){host.innerHTML='<p class="vk-management-status">Could not load tests: '+vkAdminEscape(e.message||e)+'</p>';}
+}
+function vkRenderDeleteTests(){
+  const host=document.getElementById('vkDeleteTestRows');if(!host)return;
+  const type=document.getElementById('vkDeleteTestType')?.value||'all',term=(document.getElementById('vkDeleteTestSearch')?.value||'').trim().toLowerCase();
+  const seriesMap=new Map((window.__vkSeries||[]).map(s=>[s.id,s.name]));
+  const rows=vkDeleteManagerTests.filter(t=>(type==='all'||(type==='free'?t.is_free:!t.is_free))&&(!term||[t.title,t.topic_name,t.test_number,t.topic_test_number,seriesMap.get(t.test_series_id)].some(v=>String(v??'').toLowerCase().includes(term))));
+  const count=document.getElementById('vkDeleteTestCount');if(count)count.textContent=`Showing ${rows.length} tests · ${rows.filter(t=>t.is_active).length} currently visible · ${vkDeleteManagerTests.length} total in selected scope`;
+  if(!rows.length){host.innerHTML='<div class="vk-empty-state" style="padding:18px;text-align:center">No matching tests found.</div>';return;}
+  host.innerHTML='<div class="table-wrap"><table style="min-width:700px"><thead><tr><th>Select</th><th>Test</th><th>Series</th><th>Type</th><th>Status</th></tr></thead><tbody>'+rows.map(t=>`<tr><td><input class="vk-delete-test-check" type="checkbox" value="${vkAdminEscape(t.id)}" style="width:18px;min-height:18px"></td><td>${vkAdminEscape(t.title||t.topic_name||('Test '+t.test_number))}</td><td>${vkAdminEscape(seriesMap.get(t.test_series_id)||'')}</td><td>${t.is_free?'Free':'Paid'}</td><td>${t.is_active?'<span class="badge-active">Visible</span>':'<span class="badge-off">Removed</span>'}</td></tr>`).join('')+'</tbody></table></div>';
+}
+function vkDeleteSelectAllVisible(checked){document.querySelectorAll('#vkDeleteTestRows .vk-delete-test-check').forEach(x=>x.checked=checked)}
+async function vkArchiveSelectedTests(){
+  const ids=[...document.querySelectorAll('#vkDeleteTestRows .vk-delete-test-check:checked')].map(x=>x.value);if(!ids.length){alert('Select at least one test.');return;}
+  const selected=vkDeleteManagerTests.filter(t=>ids.includes(String(t.id))&&t.is_active);if(!selected.length){alert('Selected tests are already removed from the website.');return;}
+  if(!confirm(`Remove ${selected.length} selected test(s) from the website? Attempts, results, purchases and history will remain unchanged.`))return;
+  const {error}=await supabaseClient.from('tests').update({is_active:false}).in('id',selected.map(t=>t.id));if(error){alert('Could not remove selected tests: '+error.message);return;}await vkLoadDeleteTests();
+}
+async function vkArchiveSelectedSeries(){
+  const courseId=document.getElementById('vkDeleteCourse')?.value,seriesId=document.getElementById('vkDeleteSeries')?.value;if(!courseId||!seriesId){alert('Select one Test Series first.');return;}
+  await vkDeleteSeries(seriesId);
+}
+async function vkArchiveSelectedCategory(){const id=document.getElementById('vkDeleteCourse')?.value;if(!id){alert('Select a category first.');return;}await vkDeleteCategory(id)}
+
+document.addEventListener('change',e=>{if(e.target&&e.target.id==='vkDeleteCourse')vkLoadDeleteSeriesOptions();if(e.target&&e.target.id==='vkDeleteSeries')vkLoadDeleteTests();if(e.target&&e.target.id==='vkDeleteTestType')vkRenderDeleteTests()});
+document.addEventListener('input',e=>{if(e.target&&e.target.id==='vkDeleteTestSearch')vkRenderDeleteTests()});
 document.addEventListener('change',e=>{if(e.target&&e.target.id==='vkSeriesFilterCourse')vkRenderSeriesRows()});
 document.addEventListener('input',e=>{if(e.target&&e.target.id==='vkSeriesSearch')vkRenderSeriesRows()});
 document.addEventListener('change',e=>{if(e.target&&e.target.id==='vkCatIconFile'){const f=e.target.files&&e.target.files[0],p=document.getElementById('vkCatIconPreview');if(!f){p.hidden=true;return}if(!['image/png','image/jpeg','image/webp'].includes(f.type)||f.size>2*1024*1024){alert('Choose PNG/JPG/WEBP up to 2 MB.');e.target.value='';p.hidden=true;return}p.src=URL.createObjectURL(f);p.hidden=false}});
