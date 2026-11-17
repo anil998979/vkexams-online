@@ -6113,16 +6113,14 @@ function backFromSyllabus(){
    TEST SERIES
 ===================================================== */
 
-function openTestSeries(addHistory = true){
+async function openTestSeries(addHistory = true){
 
     const activePage = document.querySelector(".page.active")?.id;
 
     /*
        Capture the page that opened Test Series only during a
-       forward navigation. When returning from the Paper/Test List
-       with openTestSeries(false), do not overwrite the original
-       parent page with "papers" — that caused the Back navigation
-       loop between Test Series and the Paper/Test List.
+       forward navigation. Returning from the Paper/Test List must
+       preserve the original parent page.
     */
     if(
         addHistory &&
@@ -6133,98 +6131,28 @@ function openTestSeries(addHistory = true){
         testSeriesReturnPage = activePage;
     }
 
-    $("seriesTitle").textContent =
-        currentCourse === "APPSC" && currentGroup
-        ? "APPSC " + currentGroup + " – Test Series"
-        : currentCourse + " – Test Series";
-
+    const title = $("seriesTitle");
     const list = $("testSeriesOptions");
 
-    if(currentCourse === "APPSC" && currentGroup){
-
-        list.innerHTML = `
-
-            <div class="choice-card" onclick="openPaper('Prelims')">
-                <div class="big-icon">📘</div>
-                <h2>Prelims</h2>
-                <p>Preliminary Examination Tests</p>
-            </div>
-
-            <div class="choice-card" onclick="openPaper('Mains')">
-                <div class="big-icon">📕</div>
-                <h2>Mains</h2>
-                <p>Main Examination Tests</p>
-            </div>
-
-        `;
-
-    }
-    else if(currentCourse === "APPSC"){
-
-        list.innerHTML = `
-            <div class="choice-card" onclick="openPaper('Screening Test')">
-                <div class="big-icon">📘</div>
-                <h2>Screening Test</h2>
-                <p>APPSC Screening Test Paid Series</p>
-            </div>
-        `;
-
-    }
-    else if(currentCourse === "High Court"){
-
-        list.innerHTML = `
-            <div class="choice-card" onclick="openPaper('Test Series')">
-                <div class="big-icon">⚖️</div>
-                <h2>High Court Exam</h2>
-                <p>Single Test Series</p>
-            </div>
-        `;
-
-    }
-    else if(currentCourse === "Endowment Officer"){
-
-        list.innerHTML = `
-            <div class="choice-card" onclick="openPaper('Paper 1')">
-                <div class="big-icon">📘</div>
-                <h2>Paper 1</h2>
-                <p>Endowment Officer Paper 1</p>
-            </div>
-
-            <div class="choice-card" onclick="openPaper('Paper 2')">
-                <div class="big-icon">📕</div>
-                <h2>Paper 2</h2>
-                <p>Endowment Officer Paper 2</p>
-            </div>
-        `;
-
-    }
-    else{
-
-        list.innerHTML = `
-            <div class="choice-card" onclick="openPaper('Prelims')">
-                <div class="big-icon">📘</div>
-                <h2>Prelims</h2>
-                <p>Preliminary Examination Tests</p>
-            </div>
-
-            <div class="choice-card" onclick="openPaper('Mains')">
-                <div class="big-icon">📕</div>
-                <h2>Mains</h2>
-                <p>Main Examination Tests</p>
-            </div>
-        `;
-
+    if(title){
+        title.textContent =
+            currentCourse === "APPSC" && currentGroup
+            ? "APPSC " + currentGroup + " – Test Series"
+            : currentCourse + " – Test Series";
     }
 
     showPage("testseries", false);
 
+    if(list){
+        list.innerHTML = `
+            <div class="vk-home-empty" style="grid-column:1/-1">
+                Loading available test series…
+            </div>`;
+    }
+
     if(addHistory){
         vkPushContextRoute("testseries", {course: currentCourse, group: currentGroup});
     }else{
-        // Keep the URL aligned with the page being displayed.
-        // When returning from the Test List without adding a new history
-        // entry, replace the stale #papers route so refresh restores
-        // the Screening Test selection page.
         const query = new URLSearchParams();
         if(currentCourse) query.set("course", currentCourse);
         if(currentGroup) query.set("group", currentGroup);
@@ -6237,6 +6165,88 @@ function openTestSeries(addHistory = true){
         );
     }
 
+    /*
+       Test Series are managed in Admin > Category & Test Series Management.
+       Never generate built-in Prelims, Mains, Paper 1, Paper 2 or other
+       default cards here. Show only active top-level series saved for
+       the selected course/category.
+    */
+    try{
+        if(!supabaseClient) throw new Error("Supabase client is not ready.");
+
+        const {data: courseRow, error: courseError} = await supabaseClient
+            .from("courses")
+            .select("id")
+            .eq("name", currentCourse)
+            .maybeSingle();
+
+        if(courseError) throw courseError;
+        if(!courseRow) throw new Error("Selected category was not found.");
+
+        const {data: seriesRows, error: seriesError} = await supabaseClient
+            .from("test_series")
+            .select("id,name,series_type,display_order,parent_series_id")
+            .eq("course_id", courseRow.id)
+            .eq("is_active", true)
+            .is("parent_series_id", null)
+            .order("display_order", {ascending:true})
+            .order("name", {ascending:true});
+
+        if(seriesError) throw seriesError;
+
+        const rows = seriesRows || [];
+        if(!list) return;
+
+        if(!rows.length){
+            list.innerHTML = `
+                <div class="vk-home-empty" style="grid-column:1/-1">
+                    No active test series available in this category yet.
+                    Please check back later.
+                </div>`;
+            return;
+        }
+
+        const escapeAttr = value => String(value ?? "").replace(/[&<>"']/g, ch => ({
+            "&":"&amp;",
+            "<":"&lt;",
+            ">":"&gt;",
+            '"':"&quot;",
+            "'":"&#39;"
+        }[ch]));
+
+        list.innerHTML = rows.map(series => {
+            const name = escapeAttr(series.name);
+            const type = String(series.series_type || "").toLowerCase();
+            const icon = type.includes("paper_1") || type.includes("prelims")
+                ? "📘"
+                : type.includes("paper_2") || type.includes("mains")
+                    ? "📕"
+                    : type.includes("topic")
+                        ? "📚"
+                        : "🎯";
+
+            return `
+                <div class="choice-card"
+                     role="button"
+                     tabindex="0"
+                     data-series-name="${name}"
+                     onclick="openPaper(this.dataset.seriesName)"
+                     onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openPaper(this.dataset.seriesName)}">
+                    <div class="big-icon">${icon}</div>
+                    <h2>${name}</h2>
+                    <p>Practice tests in this series</p>
+                </div>`;
+        }).join("");
+
+    }catch(error){
+        console.error("Test Series loading failed:", error);
+        if(list){
+            list.innerHTML = `
+                <div class="vk-home-empty" style="grid-column:1/-1">
+                    Test Series could not be loaded. Please refresh and try again.
+                </div>`;
+        }
+    }
 }
 
 
@@ -6475,13 +6485,9 @@ if (isLoggedIn() && supabaseClient) {
             .from("test_series")
             .select("id")
             .eq("course_id", courseForTests.id)
-            .eq("name", databaseSeriesName);
-
-        // Direct APPSC series are the existing top-level series, not the
-        // legacy Group 2 / Group 4 child series.
-        if (currentCourse === "APPSC" && !currentGroup) {
-            seriesQuery = seriesQuery.is("parent_series_id", null);
-        }
+            .eq("name", databaseSeriesName)
+            .eq("is_active", true)
+            .is("parent_series_id", null);
 
         const { data: seriesForTests, error: seriesForTestsError } =
             await seriesQuery.maybeSingle();
