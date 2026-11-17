@@ -8835,6 +8835,17 @@ function vkSeriesDisplayName(series, courseName){
 }
 
 function vkCategoryIconMarkup(icon){const v=String(icon||'').trim();if(/^https?:\/\//i.test(v))return `<img class="vk-category-thumb" src="${vkAdminEscape(v)}" alt="">`;return vkAdminEscape(v||'—')}
+window.__vkShowArchivedCategories = window.__vkShowArchivedCategories === true;
+function vkRenderCategoryRows(){
+  const host=document.getElementById('vkCategoryRows');if(!host)return;
+  const all=window.__vkCourses||[];
+  const active=all.filter(c=>c.is_active===true);
+  const archived=all.filter(c=>c.is_active!==true);
+  const shown=window.__vkShowArchivedCategories?all:active;
+  const esc=vkAdminEscape;
+  host.innerHTML=`<div class="vk-management-actions" style="justify-content:space-between;align-items:center"><span class="vk-management-status">${active.length} active categor${active.length===1?'y':'ies'}${archived.length?` · ${archived.length} archived`:''}</span><button type="button" class="vk-admin-btn vk-admin-btn-secondary" onclick="vkToggleArchivedCategories()">${window.__vkShowArchivedCategories?'Hide Archived':'Show Archived'}${archived.length?` (${archived.length})`:''}</button></div>`+(shown.length?'<div class="table-wrap"><table><thead><tr><th>Category</th><th>Slug</th><th>Icon</th><th>Status</th><th>Homepage</th><th>Actions</th></tr></thead><tbody>'+shown.map(c=>`<tr><td>${esc(c.name)}</td><td>${esc(c.slug)}</td><td>${vkCategoryIconMarkup(c.icon)}</td><td>${c.is_active?'<span class="badge-active">Active</span>':'<span class="badge-off">Archived</span>'}</td><td>${c.is_active?`<button type="button" onclick="vkToggleHomepageCard('${c.id}',${!c.homepage_visible})">${c.homepage_visible?'Hide':'Show'}</button>`:'—'}</td><td><button type="button" onclick="vkEditCategory('${c.id}')">Edit</button> <button type="button" onclick="vkToggleCategory('${c.id}',${!c.is_active})">${c.is_active?'Disable':'Restore'}</button> ${c.is_active?`<button type="button" class="vk-delete-btn" onclick="vkDeleteCategory('${c.id}')">Remove</button>`:''}</td></tr>`).join('')+'</tbody></table></div>':'<p class="vk-management-status">No active categories. Use Show Archived to view archived categories.</p>');
+}
+function vkToggleArchivedCategories(){window.__vkShowArchivedCategories=!window.__vkShowArchivedCategories;vkRenderCategoryRows()}
 function vkResetSeriesForm(){['vkSeriesId','vkSeriesName','vkSeriesType'].forEach(id=>document.getElementById(id).value='')}
 function vkSeriesTypeOptions(){const known=['general','prelims','mains','free_mock','paper_1','paper_2','topic_wise'];const custom=(window.__vkSeries||[]).map(x=>x.series_type).filter(Boolean);const values=[...new Set([...known,...custom])];const dl=document.getElementById('vkSeriesTypeOptions');if(dl)dl.innerHTML=values.map(v=>`<option value="${vkAdminEscape(v)}"></option>`).join('')}
 async function vkLoadCategoryManager(){
@@ -8843,7 +8854,7 @@ async function vkLoadCategoryManager(){
   const [cr,sr]=await Promise.all([supabaseClient.from('courses').select('id,name,slug,description,icon,is_active,display_order,homepage_visible,homepage_description,homepage_color,homepage_image_url,homepage_display_order').order('display_order'),supabaseClient.from('test_series').select('id,course_id,name,series_type,is_active,display_order,parent_series_id').order('display_order')]);
   if(cr.error||sr.error){if(status)status.textContent='Load failed: '+(cr.error||sr.error).message;return}
   window.__vkCourses=cr.data||[];window.__vkSeries=sr.data||[];const esc=vkAdminEscape;
-  document.getElementById('vkCategoryRows').innerHTML='<div class="table-wrap"><table><thead><tr><th>Category</th><th>Slug</th><th>Icon</th><th>Status</th><th>Homepage</th><th>Actions</th></tr></thead><tbody>'+window.__vkCourses.map(c=>`<tr><td>${esc(c.name)}</td><td>${esc(c.slug)}</td><td>${vkCategoryIconMarkup(c.icon)}</td><td>${c.is_active?'<span class="badge-active">Active</span>':'<span class="badge-off">Disabled</span>'}</td><td><button type="button" onclick="vkToggleHomepageCard('${c.id}',${!c.homepage_visible})">${c.homepage_visible?'Hide':'Show'}</button></td><td><button type="button" onclick="vkEditCategory('${c.id}')">Edit</button> <button type="button" onclick="vkToggleCategory('${c.id}',${!c.is_active})">${c.is_active?'Disable':'Enable'}</button> <button type="button" class="vk-delete-btn" onclick="vkDeleteCategory('${c.id}')">Remove</button></td></tr>`).join('')+'</tbody></table></div>';
+  vkRenderCategoryRows();
   document.getElementById('vkSeriesCourse').innerHTML=window.__vkCourses.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');
   const filter=document.getElementById('vkSeriesFilterCourse');
   if(filter){const previous=filter.value;filter.innerHTML='<option value="">All Categories</option>'+window.__vkCourses.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');filter.value=window.__vkCourses.some(c=>c.id===previous)?previous:'';}
