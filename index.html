@@ -3395,9 +3395,9 @@ Select an examination and start your preparation.
   <article class="vk-topic-package-home-card" onclick="vkTopicOpenPackage()" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();vkTopicOpenPackage()}">
     <div class="vk-topic-package-lock" id="vkTopicHomeLock">🔒</div>
     <div class="vk-topic-package-home-copy"><span class="vk-topic-package-kicker">ENDOWMENT OFFICER · COMPLETE PREPARATION</span>
-      <h3>Complete Topic-wise Test Packages</h3>
-      <p>APPSC · Endowment Officer · High Court — Topic-wise mock test practice</p>
-      <div class="vk-topic-package-highlights"><span>3 Exam Categories</span><span>25 Questions per Test</span><span>Instant Results</span></div>
+      <h3>Complete Topic-wise Test Package</h3>
+      <p>Paper-I &amp; Paper-II · Topic-wise practice · Real CBT experience</p>
+      <div class="vk-topic-package-highlights"><span>25 Questions per Test</span><span>5 Days Validity</span><span>Instant Results</span></div>
     </div>
     <div class="vk-topic-package-home-price"><strong id="vkTopicHomePrice">₹29</strong><small>Only</small><button type="button" onclick="event.stopPropagation();vkTopicOpenPackage()">Explore Package&nbsp; →</button></div>
   </article>
@@ -3745,7 +3745,7 @@ class="test-list">
         <button type="button" class="hall-tool" onclick="toggleQuestionPalette()">▤ <span id="paletteToggleText">Hide Palette</span></button>
         <button type="button" class="hall-tool" onclick="toggleExamPause()" id="pauseExamButton">Ⅱ Pause</button>
         <div class="hall-timer"><small>TIME LEFT</small><strong id="timer">15:00</strong></div>
-        <button type="button" class="hall-submit" onclick="confirmSubmitExam()">Submit</button>
+        <button type="button" class="hall-submit" onclick="submitExam()">Submit</button>
       </div>
     </header>
 
@@ -3801,7 +3801,7 @@ class="test-list">
           <span><i class="legend-review"></i> Marked for review</span>
           <span><i class="legend-empty"></i> Not answered</span>
         </div>
-        <button type="button" class="navigator-submit" onclick="confirmSubmitExam()">Submit Test</button>
+        <button type="button" class="navigator-submit" onclick="submitExam()">Submit / Finish test</button>
       </aside>
     </div>
 
@@ -4028,70 +4028,7 @@ id="solutions">
       <div class="vk-admin-actions"><button type="button" class="vk-admin-btn vk-admin-btn-secondary" onclick="openAdminStudyMaterials()">📚 Manage Study Materials</button></div>
     </div>
 
-    <div id="vkCategoryManager" class="vk-management-stack" style="margin:16px 0">
-      <section class="vk-admin-panel vk-management-card">
-        <div class="vk-management-heading"><div><span class="vk-management-kicker">01 · COURSE SETUP</span><h2>Category Management</h2><p>Create and organize the main exam categories.</p></div><span class="vk-management-icon">▦</span></div>
-        <div class="vk-admin-grid">
-          <div><label>Category name</label><input id="vkCatName" maxlength="100" placeholder="ఉదా: APPSC"></div>
-          <div><label>Slug</label><input id="vkCatSlug" maxlength="100" placeholder="ఉదా: appsc"></div>
-          <div><label>Icon / Emoji</label><input id="vkCatIcon" maxlength="500" placeholder="🏛️ లేదా image upload URL"></div>
-          <div><label>Display order</label><input id="vkCatOrder" type="number" min="0" value="10"></div>
-        </div>
-        <div class="vk-icon-upload-row"><div><label for="vkCatIconFile">Upload category icon</label><input id="vkCatIconFile" type="file" accept="image/png,image/jpeg,image/webp"><small>PNG, JPG, WEBP · Maximum 2 MB</small></div><img id="vkCatIconPreview" alt="Category icon preview" hidden></div>
-        <div class="vk-homecard-settings"><h3>Homepage Card Settings</h3><div class="vk-admin-grid"><div><label for="vkHomeCardDescription">Card Description</label><textarea id="vkHomeCardDescription" maxlength="220" placeholder="Short description shown on the Home Page"></textarea></div><div><label for="vkHomeCardColor">Card Theme Color</label><input id="vkHomeCardColor" type="color" value="#2563eb"></div><div><label for="vkHomeCardImage">Card Image</label><input id="vkHomeCardImage" type="file" accept="image/png,image/jpeg,image/webp"><small>PNG, JPG, WEBP · Maximum 2 MB</small><img id="vkHomeCardImagePreview" alt="Homepage card image preview" hidden></div></div><label class="vk-home-visible-toggle"><input id="vkHomeCardVisible" type="checkbox"> Show this category on the Home Page (Admin must enable manually)</label></div>
-        <input id="vkCatId" type="hidden">
-        <div class="vk-management-actions"><button type="button" class="vk-admin-btn" onclick="vkSaveCategory()">Save Category</button><button type="button" class="vk-admin-btn vk-admin-btn-secondary" onclick="vkResetCategoryForm()">Clear Form</button><button type="button" class="vk-admin-btn vk-admin-btn-secondary" onclick="vkLoadCategoryManager()">Refresh</button></div>
-        <div id="vkCategoryStatus" class="vk-management-status" role="status"></div><div id="vkCategoryRows"></div>
-      </section>
-      <section class="vk-admin-panel vk-management-card">
-        <div class="vk-management-heading"><div><span class="vk-management-kicker">02 · EXAM STRUCTURE</span><h2>Test Series / Card Management</h2><p>Add, edit, order, enable or hide any card under any active category. New cards appear from the database; no code edit is required.</p></div><span class="vk-management-icon purple">▤</span></div>
-        <div class="vk-admin-grid"><div><label>Course / Category</label><select id="vkSeriesCourse"></select></div><div><label>Card / Test Series name</label><input id="vkSeriesName" maxlength="100" placeholder="Example: Paper 1 / Group 2 / Free Mock Tests"></div><div><label>Series type</label><input id="vkSeriesType" list="vkSeriesTypeOptions" maxlength="50" placeholder="Select or type a new type"><datalist id="vkSeriesTypeOptions"><option value="general"><option value="prelims"><option value="mains"><option value="free_mock"><option value="paper_1"><option value="paper_2"><option value="topic_wise"></datalist></div><div><label>Display order</label><input id="vkSeriesOrder" type="number" min="0" value="10"></div></div>
-        <input id="vkSeriesId" type="hidden"><div class="vk-management-actions"><button type="button" class="vk-admin-btn" onclick="vkSaveSeries()">Save Test Series</button><button type="button" class="vk-admin-btn vk-admin-btn-secondary" onclick="vkResetSeriesForm()">Clear Form</button><button type="button" class="vk-admin-btn vk-admin-btn-secondary" onclick="vkLoadCategoryManager()">Refresh</button></div>
-        <div class="vk-series-filter-bar" aria-label="Filter test series">
-          <div><label for="vkSeriesFilterCourse">Filter by Course / Category</label><select id="vkSeriesFilterCourse"><option value="">All Categories</option></select></div>
-          <div><label for="vkSeriesSearch">Search Test Series</label><input id="vkSeriesSearch" type="search" placeholder="Type series name or type…" autocomplete="off"></div>
-          <button type="button" class="vk-admin-btn vk-admin-btn-secondary" onclick="vkResetSeriesFilters()">Clear Filters</button>
-        </div>
-        <div id="vkSeriesFilterCount" class="vk-management-status" aria-live="polite"></div><div id="vkSeriesRows"></div>
-        <div class="vk-delete-manager" style="margin-top:18px;padding:16px;border:1px solid #f1caca;border-radius:14px;background:#fffafa">
-          <h3 style="margin:0 0 6px;color:#8b2020">Selective Test / Series Removal</h3>
-          <p style="margin:0 0 14px;color:#526581">Select a category and series to view its individual Free and Paid Tests. Removing content hides it from the website; student attempts, results, purchases and history are preserved.</p>
-          <div class="vk-admin-grid">
-            <div><label for="vkDeleteCourse">Category</label><select id="vkDeleteCourse"><option value="">Select category</option></select></div>
-            <div><label for="vkDeleteSeries">Test Series</label><select id="vkDeleteSeries" disabled><option value="">Select category first</option></select></div>
-            <div><label for="vkDeleteTestType">Test type</label><select id="vkDeleteTestType"><option value="all">All Tests</option><option value="free">Free Tests only</option><option value="paid">Paid Tests only</option></select></div>
-            <div><label for="vkDeleteTestSearch">Search Tests</label><input id="vkDeleteTestSearch" type="search" placeholder="Search test title / number…" autocomplete="off"></div>
-          </div>
-          <div class="vk-management-actions" style="margin-top:12px">
-            <button type="button" class="vk-admin-btn vk-admin-btn-secondary" onclick="vkDeleteSelectAllVisible(true)">Select All Visible</button>
-            <button type="button" class="vk-admin-btn vk-admin-btn-secondary" onclick="vkDeleteSelectAllVisible(false)">Clear Selection</button>
-            <button type="button" class="vk-admin-btn" style="background:#b42318" onclick="vkArchiveSelectedTests()">Hide Selected Tests</button>
-            <button type="button" class="vk-admin-btn vk-admin-btn-secondary" onclick="vkArchiveSelectedSeries()">Hide Entire Selected Series</button>
-            <button type="button" class="vk-admin-btn vk-admin-btn-secondary" onclick="vkArchiveSelectedCategory()">Hide Entire Category</button>
-          </div>
-          <div id="vkDeleteTestCount" class="vk-management-status" aria-live="polite"></div>
-          <div id="vkDeleteTestRows"></div>
-        </div>
-      </section>
-    </div>
 
-    <!-- TOPIC-WISE INDEPENDENT TEST BUILDER: additive; legacy Free/Paid flow remains unchanged -->
-    <section class="vk-admin-panel vk-management-card" id="vkTopicWiseDraftBuilder" style="margin:16px 0;border:1px solid #d8e2f0;border-radius:16px;padding:18px;background:#fff">
-      <div class="vk-management-heading"><div><span class="vk-management-kicker">03 · ENDOWMENT TOPIC-WISE</span><h2>Topic-wise Draft Test Builder</h2><p>Create tests under the existing Endowment Paper-I / Paper-II topic structure. Tests remain inactive until separately validated.</p></div><span class="vk-management-icon purple">📝</span></div>
-      <div class="vk-admin-grid">
-        <div class="vk-admin-field"><label for="vkTopicWisePackage">Independent Package</label><select id="vkTopicWisePackage"><option value="d215d986-263c-404c-aa2c-6f1aba65f1bf">Endowment Topic-wise Package (₹29)</option></select></div>
-        <div class="vk-admin-field"><label for="vkTopicWisePaper">Paper</label><select id="vkTopicWisePaper" onchange="vkTopicWiseLoadTopics()"><option value="">Loading papers…</option></select></div>
-        <div class="vk-admin-field"><label for="vkTopicWiseTopic">Topic</label><select id="vkTopicWiseTopic" onchange="vkTopicWiseLoadTests()"><option value="">Select Paper first</option></select></div>
-        <div class="vk-admin-field"><label for="vkTopicWiseExistingTest">Existing Tests in Topic</label><select id="vkTopicWiseExistingTest"><option value="">Select a topic first</option></select></div>
-        <div class="vk-admin-field"><label for="vkTopicWiseTestName">New Test Name</label><input id="vkTopicWiseTestName" maxlength="150" placeholder="Example: Hindu Festivals - Sample Test 2"></div>
-        <div class="vk-admin-field"><label for="vkTopicWiseDuration">Duration (minutes)</label><input id="vkTopicWiseDuration" type="number" min="1" max="300" value="10"></div>
-        <div class="vk-admin-field"><label for="vkTopicWiseMarks">Total Marks</label><input id="vkTopicWiseMarks" type="number" min="1" max="500" value="5"></div>
-        <div class="vk-admin-field"><label for="vkTopicWiseNegative">Negative Marks</label><input id="vkTopicWiseNegative" type="number" min="0" max="5" step="0.01" value="0"></div>
-      </div>
-      <div class="vk-admin-actions" style="margin-top:12px"><button type="button" class="vk-admin-btn vk-admin-btn-secondary" onclick="vkTopicWiseRefresh()">Refresh Paper / Topic Data</button><button type="button" class="vk-admin-btn vk-admin-btn-secondary" onclick="vkTopicWiseInspectSelected()">Inspect Selected Test</button></div>
-      <p class="vk-admin-hint">Use the shared Questions editor below to enter questions, four options, correct answer and explanation. This builder creates a new inactive test only; it does not edit existing tests or change package/payment settings.</p>
-      <div id="vkTopicWiseStatus" class="vk-management-status" role="status" aria-live="polite"></div>
-    </section>
 
     <!-- CUSTOM PAID TEST PACKAGES -->
     
@@ -4916,20 +4853,8 @@ aria-live="polite">
 
 <div id="vkTopicPackagePage" class="page vk-topic-package-page">
   <div class="container"><button class="vk-topic-back" type="button" onclick="vkTopicGoBack()">← Back</button>
-    <section id="vkTopicCourseChooser" class="vk-topic-course-chooser">
-      <div class="vk-topic-chooser-heading"><span>VK EXAMS · TOPIC-WISE MOCK TESTS</span><h1>Choose Your Exam</h1><p>ప్రతి టెస్ట్‌లో 25 ప్రశ్నలు · Topic-wise practice · Real-time CBT experience</p></div>
-      <div class="vk-topic-course-grid">
-        <article class="vk-topic-course-card vk-topic-appsc" role="button" tabindex="0" onclick="vkTopicSelectCourse('APPSC')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();vkTopicSelectCourse('APPSC')}"><div class="vk-topic-course-art">🏛️</div><span class="vk-topic-course-tag">SCREENING TEST · TOPIC-WISE</span><h2>APPSC</h2><p>APPSC Group-II మరియు సంబంధిత సిలబస్ అంశాలపై టాపిక్ వారీగా ప్రాక్టీస్ చేయండి. ప్రతి మాక్ టెస్ట్‌లో 25 ప్రశ్నలు.</p><div class="vk-topic-course-bottom"><strong>₹29</strong><small>ప్యాకేజ్ ధర</small><b>Explore APPSC →</b></div></article>
-        <article class="vk-topic-course-card vk-topic-endow" role="button" tabindex="0" onclick="vkTopicSelectCourse('Endowment Officer')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();vkTopicSelectCourse('Endowment Officer')}"><div class="vk-topic-course-art">🛕</div><span class="vk-topic-course-tag">PAPER-I &amp; PAPER-II</span><h2>Endowment Officer</h2><p>Endowment Officer Paper-I, Paper-II సిలబస్‌లోని ప్రతి అంశంపై టాపిక్ వైజ్ మాక్ టెస్టులు. ప్రతి టెస్ట్‌లో 25 ప్రశ్నలు.</p><div class="vk-topic-course-bottom"><strong>₹29</strong><small>5 రోజుల ప్యాకేజ్</small><b>Explore Endowment →</b></div></article>
-        <article class="vk-topic-course-card vk-topic-court" role="button" tabindex="0" onclick="vkTopicSelectCourse('High Court')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();vkTopicSelectCourse('High Court')}"><div class="vk-topic-course-art">⚖️</div><span class="vk-topic-course-tag">AP HIGH COURT RECRUITMENT</span><h2>High Court</h2><p>ఆంధ్రప్రదేశ్ హైకోర్టు రిక్రూట్‌మెంట్ పరీక్షల సిలబస్ ఆధారంగా టాపిక్ వారీ ప్రాక్టీస్ మరియు మాక్ టెస్టులు.</p><div class="vk-topic-course-bottom"><strong>Explore</strong><small>High Court Tests</small><b>Explore High Court →</b></div></article>
-      </div>
-      <div class="vk-topic-chooser-note">అన్ని మాక్ టెస్టులు పరీక్షా విధానానికి అనుగుణంగా రూపొందించబడతాయి. ప్రతి టెస్ట్‌లో 25 ప్రశ్నలు ఉంటాయి.</div>
-    </section>
-    <section id="vkTopicSelectedPackage" hidden>
-      <button class="vk-topic-change-course" type="button" onclick="vkTopicBackToCourses()">← అన్ని కోర్సులు</button>
-      <div class="vk-topic-page-hero"><span>VK EXAMS · TOPIC-WISE MOCK TESTS</span><h1 id="vkipStudentName">Complete Topic-wise Test Package</h1><p id="vkipStudentDescription">Topic-wise mock tests</p><div class="vk-topic-page-price" id="vkipStudentPrice">₹29 <small>· 5 Days Validity</small></div><div id="vkTopicAccessStatus" class="vk-topic-access-status">Package access status</div><button id="vkTopicBuyButton" type="button" onclick="vkipStartPurchase()">Buy Package</button></div>
-      <div id="vkTopicCountdown" class="vk-topic-countdown" hidden></div><div id="vkTopicPaperArea" class="vk-topic-paper-grid"><p class="vk-topic-loading">Loading packages…</p></div><div id="vkTopicMessage" class="vk-topic-message" role="status"></div>
-    </section>
+    <div class="vk-topic-page-hero"><span>🛕 VK EXAMS · INDEPENDENT PACKAGE</span><h1 id="vkipStudentName">Complete Topic-wise Test Package</h1><p id="vkipStudentDescription">Paper-I &amp; Paper-II topic-wise mock tests</p><div class="vk-topic-page-price" id="vkipStudentPrice">₹29 <small>· 5 Days Validity</small></div><div id="vkTopicAccessStatus" class="vk-topic-access-status">Package access status</div><button id="vkTopicBuyButton" type="button" onclick="vkipStartPurchase()">Buy Package</button></div>
+    <div id="vkTopicCountdown" class="vk-topic-countdown" hidden></div><div id="vkTopicPaperArea" class="vk-topic-paper-grid"><p class="vk-topic-loading">Loading packages…</p></div><div id="vkTopicMessage" class="vk-topic-message" role="status"></div>
   </div>
 </div>
 
@@ -8844,8 +8769,6 @@ async function openAdminMockBuilder(){
     }
     showPage("vkAdminMockBuilder");
     await vkAdminLoadCourses();
-    if(document.getElementById("vkTopicWiseDraftBuilder")) await vkTopicWiseRefresh();
-    await vkLoadCategoryManager();
     await vkCpInit();
     vkAdminOnTestTypeChange();
     if(!document.getElementById("vkAdminQuestions").children.length){
@@ -13331,7 +13254,7 @@ function renderQuestion(){
     const previousButton=$("questionPreviousButton");
     const nextButton=$("questionNextButton");
     if(previousButton) previousButton.disabled=currentQuestionIndex===0;
-    if(nextButton) nextButton.textContent=currentQuestionIndex===total-1?"Submit Test →":"Save & Next →";
+    if(nextButton) nextButton.textContent=currentQuestionIndex===total-1?"Finish Test →":"Save & Next →";
     const englishButton=$("languageEnglishButton");
     const teluguButton=$("languageTeluguButton");
     if(englishButton) englishButton.classList.toggle("active",examLanguage==="en");
@@ -13439,15 +13362,20 @@ function nextQuestion(){
         return;
     }
 
-    // Last question: ask for confirmation, then submit immediately.
-    confirmSubmitExam();
+    // LAST QUESTION
+    const popup =
+        document.getElementById(
+            "lastQuestionPopup"
+        );
 
-}
+    if(popup){
 
-function confirmSubmitExam(){
-    if(!examQuestions.length) return;
-    const confirmed = window.confirm("Are you sure you want to submit?");
-    if(confirmed) submitExam();
+        popup.classList.add("active");
+
+        popup.style.display = "flex";
+
+    }
+
 }
 
 function closeLastQuestionPopup(){
@@ -15451,21 +15379,7 @@ const vkipEsc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>
 let vkipCurrentPackage=null, vkipStructure=[], vkipActivePurchase=null;
 function vkipMsg(s,bad=false){const e=document.getElementById('vkipStatus');if(e){e.textContent=s;e.style.color=bad?'#b42318':'#166534';}}
 function vkipStudentMsg(s,bad=false){const e=document.getElementById('vkTopicMessage');if(e){e.textContent=s;e.style.color=bad?'#b42318':'#166534';}}
-function vkTopicOpenPackage(){showPage('vkTopicPackagePage');vkPushContextRoute('vkTopicPackagePage');vkTopicBackToCourses();}
-function vkTopicBackToCourses(){const chooser=document.getElementById('vkTopicCourseChooser');const selected=document.getElementById('vkTopicSelectedPackage');if(chooser)chooser.hidden=false;if(selected)selected.hidden=true;}
-function vkTopicSelectCourse(course){
-  const chooser=document.getElementById('vkTopicCourseChooser');const selected=document.getElementById('vkTopicSelectedPackage');
-  if(chooser)chooser.hidden=true;if(selected)selected.hidden=false;
-  if(course==='Endowment Officer'){vkipLoadStudentPackages();return;}
-  const title=document.getElementById('vkipStudentName');const desc=document.getElementById('vkipStudentDescription');const price=document.getElementById('vkipStudentPrice');const status=document.getElementById('vkTopicAccessStatus');const buy=document.getElementById('vkTopicBuyButton');const host=document.getElementById('vkTopicPaperArea');const message=document.getElementById('vkTopicMessage');
-  if(title)title.textContent=course+' · Topic-wise Mock Tests';
-  if(desc)desc.textContent=course==='APPSC'?'APPSC సిలబస్ ఆధారంగా టాపిక్ వారీ మాక్ టెస్టులు. ప్రతి టెస్ట్‌లో 25 ప్రశ్నలు.':'Andhra Pradesh High Court recruitment syllabus ఆధారంగా టాపిక్ వారీ మాక్ టెస్టులు.';
-  if(price)price.innerHTML=course==='APPSC'?'₹29 <small>· Package price</small>':'Topic-wise Practice <small>· High Court</small>';
-  if(status)status.textContent=course==='APPSC'?'APPSC ప్యాకేజ్ కార్డ్ సిద్ధంగా ఉంది':'High Court కోర్సు ఎంపికైంది';
-  if(buy){buy.disabled=true;buy.textContent='Package setup pending';buy.onclick=null;}
-  if(host)host.innerHTML='<div class="vk-topic-coming"><div>📚</div><h2>'+course+' Topic-wise Tests</h2><p>ఈ కోర్సుకు సంబంధించిన ప్యాకేజ్, టాపిక్స్ మరియు 25 ప్రశ్నల టెస్టులను Admin Panelలో సృష్టించి Publish చేసిన తర్వాత ఇక్కడ కనిపిస్తాయి.</p><strong>ప్రస్తుతం ఈ కోర్సుకు కొనుగోలు ప్రారంభించలేదు.</strong></div>';
-  if(message)message.textContent='';
-}
+function vkTopicOpenPackage(){showPage('vkTopicPackagePage');vkPushContextRoute('vkTopicPackagePage');vkipLoadStudentPackages();}
 function vkTopicGoBack(){if(history.state?.vkPage)history.back();else showHome();}
 function vkipNewPackage(){document.getElementById('vkipPackageId').value='';document.getElementById('vkipSelectedPackage').value='';document.getElementById('vkipPackageName').value='';document.getElementById('vkipPackagePrice').value='29';document.getElementById('vkipPackageDays').value='5';document.getElementById('vkipPackageDesc').value='';document.getElementById('vkipStructure').innerHTML='Save the new package, then select it to add Papers, Topics and Tests.';document.getElementById('vkipTestTopic').innerHTML='<option value="">Select package first</option>';document.getElementById('vkipQuestionTest').innerHTML='<option value="">Select a test</option>';vkipMsg('New package form ready.');}
 async function vkipSavePackage(){try{if(!supabaseClient)throw Error('Supabase is not ready.');if(!vkAdminAuthorized)throw Error('Admin authorization required.');const id=document.getElementById('vkipPackageId').value;const row={name:document.getElementById('vkipPackageName').value.trim(),description:document.getElementById('vkipPackageDesc').value.trim(),price:Number(document.getElementById('vkipPackagePrice').value),duration_days:Number(document.getElementById('vkipPackageDays').value),updated_at:new Date().toISOString()};if(!row.name||!(row.price>0)||!(Number.isInteger(row.duration_days)&&row.duration_days>0))throw Error('Enter package name, valid price and validity.');let q=id?await supabaseClient.from('vk_independent_packages').update(row).eq('id',id).select('id').single():await supabaseClient.from('vk_independent_packages').insert(row).select('id').single();if(q.error)throw q.error;document.getElementById('vkipPackageId').value=q.data.id;vkipMsg('Package saved as Draft. Add Papers, Topics and Tests, then publish when ready.');await vkipLoadPackages();document.getElementById('vkipSelectedPackage').value=q.data.id;await vkipLoadStructure();}catch(e){vkipMsg('Save failed: '+(e.message||e),true);}}
@@ -16088,8 +16002,6 @@ body:has(#examPage.active) > footer{
 .vk-topic-package-home-card:before{content:'ॐ';position:absolute;right:25%;top:-44px;font-size:180px;opacity:.08;pointer-events:none}
 .vk-topic-package-lock{font-size:42px;flex:0 0 auto;z-index:1}.vk-topic-package-home-copy{flex:1;z-index:1}.vk-topic-package-kicker{font-size:11px;letter-spacing:1.5px;font-weight:900;color:#ffe5ad}.vk-topic-package-home-copy h3{font-size:clamp(21px,3vw,30px);margin:7px 0;color:#fff}.vk-topic-package-home-copy p{margin:0 0 12px;color:#fff2df}.vk-topic-package-highlights{display:flex;gap:8px;flex-wrap:wrap}.vk-topic-package-highlights span{font-size:12px;font-weight:800;padding:6px 10px;border:1px solid #ffffff55;border-radius:30px;background:#ffffff17}.vk-topic-package-home-price{z-index:1;display:flex;flex-direction:column;align-items:center;min-width:130px}.vk-topic-package-home-price strong{font-size:32px}.vk-topic-package-home-price small{font-weight:800;margin-top:-5px}.vk-topic-package-home-price button,.vk-topic-page-hero button{border:0;border-radius:10px;background:#fff;color:#792d23;font-weight:900;padding:11px 15px;margin-top:12px;cursor:pointer}
 .vk-topic-package-page{padding:24px 0 55px;min-height:65vh}.vk-topic-back{border:1px solid #d6dce7;background:#fff;border-radius:9px;padding:9px 14px;font-weight:800;cursor:pointer}.vk-topic-page-hero{text-align:center;margin:18px auto 24px;padding:28px 18px;border-radius:20px;background:linear-gradient(135deg,#fff8eb,#fff 60%,#f8e8dc);border:1px solid #f0d7b4}.vk-topic-page-hero>span{font-size:11px;letter-spacing:1px;font-weight:900;color:#98512d}.vk-topic-page-hero h1{font-size:clamp(24px,4vw,36px);color:#58271f;margin:9px 0}.vk-topic-page-hero p{margin:0;color:#586579}.vk-topic-page-price{font-size:29px;font-weight:900;color:#8a3828;margin:10px}.vk-topic-page-price small{font-size:14px}.vk-topic-access-status{font-weight:800;color:#536174}.vk-topic-page-hero button{background:#8b3428;color:white;padding:13px 24px;font-size:15px}.vk-topic-countdown{margin:12px auto;padding:12px 16px;border-radius:12px;background:#ecfdf3;color:#166534;font-weight:900;text-align:center;max-width:600px}.vk-topic-paper-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.vk-topic-paper-card{background:#fff;border:1px solid #e1e6ef;border-radius:16px;padding:18px;box-shadow:0 5px 18px #1c31500c}.vk-topic-paper-card h2{margin:0 0 14px;color:#743026}.vk-topic-topic{border:1px solid #e8edf4;border-radius:12px;margin:10px 0;overflow:hidden}.vk-topic-topic-head{padding:12px 14px;background:#f8fafc;font-weight:900;color:#24364d}.vk-topic-test-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 14px;border-top:1px solid #edf0f5}.vk-topic-test-row button{border:0;border-radius:8px;background:#174e83;color:white;padding:8px 12px;font-weight:800;cursor:pointer}.vk-topic-test-row button:disabled{background:#9ca3af;cursor:not-allowed}.vk-topic-loading,.vk-topic-message{text-align:center;color:#64748b;padding:16px}.vk-topic-message{color:#b42318}.vk-topic-admin-panel{margin:22px 0;padding:22px;border:1px solid #dce4ef;border-radius:18px;background:#fff}.vk-topic-admin-form{display:grid;grid-template-columns:2fr 1fr 1fr;gap:12px}.vk-topic-admin-form label,.vk-topic-admin-add-row label{display:block;font-size:13px;font-weight:800;margin-bottom:5px;color:#344b70}.vk-topic-admin-form input,.vk-topic-admin-form textarea,.vk-topic-admin-add-row input,.vk-topic-admin-add-row select{width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:9px}.vk-topic-admin-wide{grid-column:1/-1}.vk-topic-admin-actions,.vk-topic-admin-add-row{display:flex;gap:10px;align-items:end;flex-wrap:wrap;margin-top:14px}.vk-topic-admin-actions button,.vk-topic-admin-add-row button{border:0;border-radius:9px;background:#1e5790;color:white;padding:10px 15px;font-weight:800;cursor:pointer}.vk-topic-admin-actions button.secondary{background:#eef2f7;color:#334155}.vk-topic-admin-add-row>div{flex:1;min-width:170px}.vk-topic-admin-status{margin:12px 0;color:#475569;font-size:13px}.vk-topic-admin-paper{border:1px solid #dbe4ef;border-radius:12px;margin:14px 0;padding:14px}.vk-topic-admin-paper h3{margin:0 0 10px;color:#743026}.vk-topic-admin-topic{padding:10px;margin:8px 0;background:#f8fafc;border-radius:9px}.vk-topic-admin-topic button{margin:5px 4px 0 0;border:0;border-radius:7px;padding:6px 9px;background:#e2e8f0;cursor:pointer}.vk-topic-admin-test{font-size:13px;padding:6px 0;color:#334155}
-.vk-topic-course-chooser{padding:18px 0 34px}.vk-topic-chooser-heading{text-align:center;padding:24px 16px 20px}.vk-topic-chooser-heading>span{font-size:11px;font-weight:900;letter-spacing:1.5px;color:#5265ce}.vk-topic-chooser-heading h1{font-size:clamp(26px,4vw,38px);margin:8px 0;color:#15264b}.vk-topic-chooser-heading p{color:#64748b;margin:0}.vk-topic-course-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}.vk-topic-course-card{position:relative;overflow:hidden;min-height:310px;border-radius:22px;padding:22px;color:#fff;cursor:pointer;box-shadow:0 12px 28px #15264b24;border:2px solid #ffffff80;transition:transform .18s,box-shadow .18s}.vk-topic-course-card:hover{transform:translateY(-4px);box-shadow:0 18px 34px #15264b35}.vk-topic-appsc{background:linear-gradient(145deg,#0879d8,#183db5 72%,#4826a8)}.vk-topic-endow{background:linear-gradient(145deg,#ffca55,#ed8a23 48%,#9d342c);color:#45221c}.vk-topic-court{background:linear-gradient(145deg,#8b22e5,#4922b8 60%,#152c83)}.vk-topic-course-art{font-size:44px;filter:drop-shadow(0 5px 5px #0003);margin-bottom:10px}.vk-topic-course-tag{display:inline-block;font-size:10px;font-weight:900;letter-spacing:.7px;padding:6px 9px;border-radius:20px;background:#ffffff25;border:1px solid #ffffff55}.vk-topic-course-card h2{font-size:25px;margin:12px 0 8px;color:inherit}.vk-topic-course-card p{font-size:14px;line-height:1.65;min-height:74px;color:inherit;opacity:.94}.vk-topic-course-bottom{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:0 9px;margin-top:16px;padding-top:14px;border-top:1px solid #ffffff55}.vk-topic-course-bottom strong{font-size:27px;grid-row:span 2}.vk-topic-course-bottom small{font-size:11px;align-self:end}.vk-topic-course-bottom b{grid-column:1/-1;margin-top:12px;padding:11px 13px;text-align:center;background:#ffffffed;color:#24345c;border-radius:12px;font-size:13px}.vk-topic-endow .vk-topic-course-bottom b{color:#8d3425}.vk-topic-chooser-note{text-align:center;color:#64748b;font-size:13px;margin:18px auto 0}.vk-topic-change-course{border:1px solid #d6dce7;background:#fff;border-radius:9px;padding:9px 14px;font-weight:800;cursor:pointer;margin-top:12px}.vk-topic-coming{grid-column:1/-1;background:#fff;border:1px solid #dce5f1;border-radius:18px;padding:28px;text-align:center;box-shadow:0 8px 24px #1e3a5f0d}.vk-topic-coming>div{font-size:40px}.vk-topic-coming h2{color:#20365d}.vk-topic-coming p{color:#64748b;line-height:1.7}.vk-topic-coming strong{color:#b45309}@media(max-width:760px){.vk-topic-course-grid{grid-template-columns:1fr;gap:14px}.vk-topic-course-card{min-height:0;padding:20px}.vk-topic-course-card p{min-height:0}.vk-topic-course-art{font-size:38px}.vk-topic-chooser-heading{padding:18px 8px}}
-
 @media(max-width:700px){.vk-topic-package-home-card{align-items:flex-start;padding:18px;gap:12px}.vk-topic-package-lock{font-size:30px}.vk-topic-package-home-price{min-width:90px}.vk-topic-package-home-price strong{font-size:25px}.vk-topic-package-home-price button{font-size:11px;padding:9px 8px}.vk-topic-package-highlights span{font-size:10px}.vk-topic-paper-grid{grid-template-columns:1fr}.vk-topic-admin-form{grid-template-columns:1fr 1fr}.vk-topic-admin-form>div:first-child,.vk-topic-admin-wide{grid-column:1/-1}}
 </style>
 
