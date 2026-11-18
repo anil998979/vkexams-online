@@ -4186,6 +4186,14 @@ id="solutions">
             <option value="edit">Edit Existing Paid Test</option>
           </select>
         </div>
+        <div class="vk-admin-field" id="vkTopicTestPackageWrap" style="display:none;grid-column:1/-1">
+          <label for="vkTopicTestPackage">Add this Paid Test to Topic-wise Package</label>
+          <div class="vk-admin-grid" style="grid-template-columns:1fr 1fr;gap:12px">
+            <select id="vkTopicTestPackage" onchange="vkTopicTestLoadTopics()"><option value="">Do not add to a package</option></select>
+            <select id="vkTopicTestPackageTopic" disabled><option value="">Select package first</option></select>
+          </div>
+          <p class="vk-admin-hint">When a package and topic are selected, the newly published Paid Test is automatically added to that topic and the package's test list. Existing test builder and Excel upload remain unchanged.</p>
+        </div>
         <div class="vk-admin-field" id="vkAdminExistingTestWrap" style="display:none">
           <label for="vkAdminExistingTest">Select Existing Paid Test</label>
           <select id="vkAdminExistingTest" onchange="vkAdminLoadPaidTestForEdit()">
@@ -9167,6 +9175,9 @@ function vkAdminOnTestTypeChange(){
     if(paperWrap) vkAdminUpdatePaidSeriesControl();
     const paidModeWrap=document.getElementById("vkAdminPaidModeWrap");
     if(paidModeWrap) paidModeWrap.style.display=paid?"block":"none";
+    const topicPackageWrap=document.getElementById("vkTopicTestPackageWrap");
+    if(topicPackageWrap) topicPackageWrap.style.display=paid?"block":"none";
+    if(paid && typeof vkTopicTestLoadPackages==='function') vkTopicTestLoadPackages();
     const freeModeWrap=document.getElementById("vkAdminFreeModeWrap");
     if(freeModeWrap) freeModeWrap.style.display=paid?"none":"block";
     if(hint) hint.textContent=paid
@@ -9719,6 +9730,13 @@ if(!isPaid && freeMode === "edit" && !freeEditTopicName){
         const {data,error} = await supabaseClient.rpc(rpcName,rpcArgs);
         if(error) throw error;
         const result = Array.isArray(data) ? data[0] : data;
+        if(isPaid && paidMode!=="edit" && result?.test_id){
+            const selectedPackage=document.getElementById("vkTopicTestPackage")?.value||"";
+            const selectedTopic=document.getElementById("vkTopicTestPackageTopic")?.value||"";
+            if(selectedPackage && selectedTopic){
+                await vkTopicTestAssignNewTest(selectedPackage,selectedTopic,result.test_id);
+            }
+        }
         const title = result?.title || (isPaid ? paperName + " - Test" : topicName + " - Test");
         const number = isPaid ? result?.website_test_number : result?.topic_test_number;
         if(isPaid && paidMode==="edit"){
@@ -15334,6 +15352,24 @@ document.addEventListener(
 
 
 <script>
+/* Link newly-created Paid Tests to the selected topic-wise package. */
+let vkTopicTestPackageCache=[];
+async function vkTopicTestLoadPackages(){
+ const pkgSel=document.getElementById('vkTopicTestPackage');if(!pkgSel||!supabaseClient)return;
+ const keep=pkgSel.value;
+ try{const {data,error}=await supabaseClient.from('packages').select('id,name,is_active').eq('package_type','custom').order('created_at',{ascending:false});if(error)throw error;vkTopicTestPackageCache=(data||[]);pkgSel.innerHTML='<option value="">Do not add to a package</option>'+vkTopicTestPackageCache.map(p=>`<option value="${p.id}">${vkTopicEsc(p.name)}${p.is_active?' · Published':' · Draft'}</option>`).join('');if(keep&&vkTopicTestPackageCache.some(p=>p.id===keep))pkgSel.value=keep;await vkTopicTestLoadTopics();}catch(e){console.warn('Topic package list could not load:',e.message||e);}
+}
+async function vkTopicTestLoadTopics(){
+ const pkgId=document.getElementById('vkTopicTestPackage')?.value||'';const topicSel=document.getElementById('vkTopicTestPackageTopic');if(!topicSel)return;
+ if(!pkgId){topicSel.innerHTML='<option value="">Select package first</option>';topicSel.disabled=true;return;}
+ try{const {data:papers,error:pe}=await supabaseClient.from('package_papers').select('id,name,display_order').eq('package_id',pkgId).eq('is_active',true).order('display_order');if(pe)throw pe;const pids=(papers||[]).map(p=>p.id);let topics=[];if(pids.length){const r=await supabaseClient.from('package_topics').select('id,paper_id,name,display_order').in('paper_id',pids).eq('is_active',true).order('display_order');if(r.error)throw r.error;topics=r.data||[];}topicSel.innerHTML='<option value="">Select topic</option>'+topics.map(t=>{const paper=papers.find(p=>p.id===t.paper_id);return `<option value="${t.id}">${vkTopicEsc(paper?.name||'Paper')} · ${vkTopicEsc(t.name)}</option>`;}).join('');topicSel.disabled=false;if(!topics.length)topicSel.innerHTML='<option value="">No topics found — create a topic above</option>';}catch(e){topicSel.innerHTML='<option value="">Could not load topics</option>';topicSel.disabled=true;console.error(e);}
+}
+async function vkTopicTestAssignNewTest(packageId,topicId,testId){
+ const {data:exists,error:ee}=await supabaseClient.from('package_topic_tests').select('id').eq('topic_id',topicId).eq('test_id',testId).maybeSingle();if(ee)throw ee;
+ if(!exists){const a=await supabaseClient.from('package_topic_tests').insert({topic_id:topicId,test_id:testId,display_order:1,is_active:true});if(a.error)throw a.error;}
+ const m=await supabaseClient.from('package_tests').upsert({package_id:packageId,test_id:testId},{onConflict:'package_id,test_id',ignoreDuplicates:true});if(m.error)throw m.error;
+ }
+
 /* Complete Topic-wise Package UI. Requires package_papers, package_topics and package_topic_tests migration. */
 let vkTopicPackage=null, vkTopicPackagePurchase=null, vkTopicStructure=[];
 const vkTopicEsc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -15421,7 +15457,7 @@ function vkTopicAdminPreview(){vkTopicOpenPackage();}
 document.addEventListener('change',e=>{if(e.target?.id==='vkTopicAdminAssignTopic')vkTopicAdminLoadTests();});
 // Hook into the existing admin entry point without replacing its established setup.
 const vkTopicOriginalAdminInit=window.openAdminMockBuilder;
-if(typeof vkTopicOriginalAdminInit==='function'){window.openAdminMockBuilder=async function(){await vkTopicOriginalAdminInit.apply(this,arguments);if(vkAdminAuthorized)await vkTopicAdminLoad();};}
+if(typeof vkTopicOriginalAdminInit==='function'){window.openAdminMockBuilder=async function(){await vkTopicOriginalAdminInit.apply(this,arguments);if(vkAdminAuthorized){await vkTopicAdminLoad();await vkTopicTestLoadPackages();}};}
 // When a student returns from CBT, return to the topic package instead of a generic list.
 window.addEventListener('pageshow',()=>{if(location.hash.startsWith('#vkTopicPackagePage'))vkTopicLoadStudent();});
 </script>
