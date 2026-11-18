@@ -3232,6 +3232,7 @@ body.dark-mode .vk-theme-toggle{background:#243247;color:#f8fafc;border-color:#4
 }
 </style>
 
+<!-- VK Exams Admin cleanup: obsolete Custom Paid Test Packages and Independent Product admin panels removed. -->
 </head>
 
 
@@ -4075,107 +4076,9 @@ id="solutions">
     </div>
 
     <!-- CUSTOM PAID TEST PACKAGES -->
-    <section id="vkCustomPackageManager" class="vk-custom-package-panel">
-      <div class="vk-management-heading">
-        <div><span class="vk-management-kicker">03 · PAID ACCESS</span><h2>Custom Paid Test Packages</h2>
-        <p class="vk-cp-sub">Create packages with selected paid tests and Admin-defined validity.</p></div>
-        <span class="vk-management-icon">₹</span>
-      </div>
-      <input id="vkCpPackageId" type="hidden">
-      <div class="vk-cp-grid">
-        <div class="vk-cp-field"><label for="vkCpName">Package Name</label><input id="vkCpName" maxlength="120" placeholder="ఉదా: Endowment Paper-II Complete Test Pack"></div>
-        <div class="vk-cp-field"><label for="vkCpPrice">Package Price (₹)</label><input id="vkCpPrice" type="number" min="1" step="0.01" placeholder="ఉదా: 99"></div>
-        <div class="vk-cp-field"><label for="vkCpValidity">Validity (Days)</label><input id="vkCpValidity" type="number" min="1" step="1" placeholder="ఉదా: 30"></div>
-        <div class="vk-cp-field"><label for="vkCpCategory">Category</label><select id="vkCpCategory" onchange="vkCpLoadTests()"><option value="">Select Category</option></select></div>
-        <div class="vk-cp-field" style="grid-column:1/-1"><label for="vkCpDescription">Package Description</label><textarea id="vkCpDescription" rows="2" maxlength="500" placeholder="ఈ Packageలో లభించే Tests వివరాలు"></textarea></div>
-      </div>
-      <div class="vk-cp-tests">
-        <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap">
-          <strong>Select Paid Tests</strong><span id="vkCpSelectedCount" class="vk-management-status">0 tests selected</span>
-        </div>
-        <div class="vk-cp-test-toolbar">
-          <input id="vkCpTestSearch" type="search" placeholder="Search test title / series..." oninput="vkCpRenderTests()">
-          <button type="button" class="vk-admin-btn vk-admin-btn-secondary" onclick="vkCpSelectVisible(true)">Select Visible</button>
-          <button type="button" class="vk-admin-btn vk-admin-btn-secondary" onclick="vkCpSelectVisible(false)">Clear Visible</button>
-        </div>
-        <div id="vkCpTestList" class="vk-cp-test-list"><p class="vk-cp-sub">Select a category to load active paid tests.</p></div>
-      </div>
-      <div class="vk-cp-actions">
-        <button type="button" class="vk-admin-btn vk-admin-btn-primary" onclick="vkCpSavePackage()">Save Package</button>
-        <button type="button" class="vk-admin-btn vk-admin-btn-secondary" onclick="vkCpResetForm()">Clear Form</button>
-        <button type="button" class="vk-admin-btn vk-admin-btn-secondary" onclick="vkCpLoadPackages()">Refresh Packages</button>
-      </div>
-      <div id="vkCpStatus" class="vk-cp-status" role="status" aria-live="polite"></div>
-      <h3 style="margin:24px 0 8px">Existing Custom Packages</h3>
-      <div id="vkCpPackageList" class="vk-cp-package-list"><p class="vk-cp-sub">Loading packages...</p></div>
-    </section>
+    
 
-    <section id="vkIndependentPackageAdmin" class="vk-topic-admin-panel vk-independent-manager">
-      <div class="vk-management-heading">
-        <div>
-          <span class="vk-management-kicker">04 · INDEPENDENT PRODUCT</span>
-          <h2>Independent Package – Test Manager</h2>
-          <p>ఒకే చోట Package, Paper, Topic, Test మరియు Questions Import నిర్వహించండి. ఇది Free Mock Tests / Existing Paid Test Series‌కు వేరు.</p>
-        </div>
-        <span class="vk-management-icon">🛕</span>
-      </div>
-
-      <div class="vkip-manager-section">
-        <div class="vkip-section-title"><span>1</span><div><strong>Package Management</strong><small>Admin‌కు Draft మరియు Published Packages రెండూ ఇక్కడ కనిపిస్తాయి.</small></div></div>
-        <input id="vkipPackageId" type="hidden">
-        <div class="vk-topic-admin-form">
-          <div><label for="vkipPackageName">Package Name</label><input id="vkipPackageName" value="Complete Topic-wise Test Package" maxlength="120"></div>
-          <div><label for="vkipPackagePrice">Price (₹)</label><input id="vkipPackagePrice" type="number" min="1" step="0.01" value="29"></div>
-          <div><label for="vkipPackageDays">Validity (Days)</label><input id="vkipPackageDays" type="number" min="1" step="1" value="5"></div>
-          <div class="vk-topic-admin-wide"><label for="vkipPackageDesc">Description</label><textarea id="vkipPackageDesc" rows="2">Paper-I and Paper-II topic-wise mock tests. Each test contains 25 questions.</textarea></div>
-        </div>
-        <div class="vk-topic-admin-actions">
-          <button type="button" onclick="vkipSavePackage()">Save Package</button>
-          <button type="button" class="secondary" onclick="vkipNewPackage()">New Package</button>
-          <button type="button" class="secondary" onclick="vkipLoadPackages()">Refresh</button>
-        </div>
-        <div id="vkipStatus" class="vk-topic-admin-status" role="status" aria-live="polite"></div>
-        <div id="vkipPackages" class="vkip-admin-package-list"><p>Loading packages…</p></div>
-      </div>
-
-      <details class="vkip-manager-section vkip-step-accordion">
-        <summary class="vkip-section-title"><span>2</span><div><strong>Select Package & Build Structure</strong><small>ముందుగా Package ఎంచుకోండి. తర్వాత Paper, Topic, Test క్రమంలో సృష్టించండి.</small></div></summary>
-        <div class="vkip-workflow-grid">
-          <div class="vkip-field vkip-full"><label for="vkipSelectedPackage">Selected Package</label><select id="vkipSelectedPackage" onchange="vkipLoadStructure()"><option value="">Select a package</option></select></div>
-          <div class="vkip-field"><label for="vkipPaper">Paper</label><select id="vkipPaper"><option>Paper-I</option><option>Paper-II</option></select></div>
-          <div class="vkip-field"><label for="vkipTopicName">New Topic Name</label><input id="vkipTopicName" placeholder="ఉదా: Ramayanam"></div>
-          <div class="vkip-field"><label for="vkipTopicOrder">Display Order</label><input id="vkipTopicOrder" type="number" min="1" value="1"></div>
-          <div class="vkip-field vkip-action-field"><label>&nbsp;</label><button type="button" onclick="vkipAddTopic()">+ Add Topic</button></div>
-        </div>
-      </details>
-
-      <details class="vkip-manager-section vkip-step-accordion">
-        <summary class="vkip-section-title"><span>3</span><div><strong>Create Test</strong><small>ఎంచుకున్న Topic కింద Test సృష్టించండి. సృష్టించిన వెంటనే అదే Test Questions Upload‌కు Select అవుతుంది.</small></div></summary>
-        <div class="vkip-workflow-grid vkip-test-grid">
-          <div class="vkip-field vkip-full"><label for="vkipTestTopic">Topic for this Test</label><select id="vkipTestTopic"><option value="">ముందుగా Package ఎంచుకోండి</option></select></div>
-          <div class="vkip-field"><label for="vkipTestName">Test Name</label><input id="vkipTestName" placeholder="ఉదా: Ramayanam - Test 1"></div>
-          <div class="vkip-field"><label for="vkipTestDuration">Duration (Minutes)</label><input id="vkipTestDuration" type="number" min="1" value="25"></div>
-          <div class="vkip-field"><label for="vkipTestMarks">Total Marks</label><input id="vkipTestMarks" type="number" min="1" value="25"></div>
-          <div class="vkip-field"><label for="vkipTestNegative">Negative Marks</label><input id="vkipTestNegative" type="number" min="0" step="0.0001" value="0.3333"></div>
-          <div class="vkip-field vkip-action-field"><label>&nbsp;</label><button type="button" onclick="vkipCreateTest()">Create Test</button></div>
-        </div>
-      </details>
-
-      <div class="vkip-manager-section vkip-upload-section">
-        <div class="vkip-section-title"><span>4</span><div><strong>Use Existing Bulk Question Upload</strong><small>ఇప్పటికే ఉన్న Admin Bulk Upload Excel/CSV/JSON Preview విధానాన్నే ఉపయోగించండి. Target Test మాత్రమే Independent Package‌లో Save అవుతుంది.</small></div></div>
-        <div class="vkip-workflow-grid">
-          <div class="vkip-field vkip-full"><label for="vkipQuestionTest">Choose Exact Independent Test</label><select id="vkipQuestionTest"><option value="">Select a test</option></select></div>
-          <div class="vkip-field vkip-full"><button type="button" onclick="vkipOpenSharedBulkUpload()">Open Existing Bulk Question Upload</button></div>
-        </div>
-        <p class="vk-admin-hint">ముందుగా Test ఎంచుకోండి. తర్వాత క్రింద ఉన్న Bulk Question Upload‌లో Excel/CSV లేదా JSON Preview చేసి Apply చేయండి. 25 Questions + Answer Keys Independent tables‌లోనే Save అవుతాయి.</p>
-        <div id="vkipSharedUploadStatus" class="vkip-admin-status" role="status" aria-live="polite"></div>
-      </div>
-
-      <details class="vkip-manager-section vkip-structure-accordion">
-        <summary class="vkip-section-title"><span>5</span><div><strong>Package Structure & Test Status</strong><small>Paper లేదా Topic‌ను తెరిస్తే దాని Tests మాత్రమే కనిపిస్తాయి.</small></div></summary>
-        <div id="vkipStructure" class="vk-topic-admin-structure">Select a package to load its Papers, Topics and Tests.</div>
-      </details>
-    </section>
+    
 
     <details class="vk-admin-panel vk-admin-accordion">
       <summary class="vk-admin-accordion-title">Test Details</summary>
@@ -4237,14 +4140,7 @@ id="solutions">
             <option value="edit">Edit Existing Paid Test</option>
           </select>
         </div>
-        <div class="vk-admin-field" id="vkTopicTestPackageWrap" style="display:none;grid-column:1/-1">
-          <label for="vkTopicTestPackage">Add this Paid Test to Topic-wise Package</label>
-          <div class="vk-admin-grid" style="grid-template-columns:1fr 1fr;gap:12px">
-            <select id="vkTopicTestPackage" onchange="vkTopicTestLoadTopics()"><option value="">Do not add to a package</option></select>
-            <select id="vkTopicTestPackageTopic" disabled><option value="">Select package first</option></select>
-          </div>
-          <p class="vk-admin-hint">When a package and topic are selected, the newly published Paid Test is automatically added to that topic and the package's test list. Existing test builder and Excel upload remain unchanged.</p>
-        </div>
+        
         <div class="vk-admin-field" id="vkAdminExistingTestWrap" style="display:none">
           <label for="vkAdminExistingTest">Select Existing Paid Test</label>
           <select id="vkAdminExistingTest" onchange="vkAdminLoadPaidTestForEdit()">
@@ -9225,9 +9121,6 @@ function vkAdminOnTestTypeChange(){
     if(paperWrap) vkAdminUpdatePaidSeriesControl();
     const paidModeWrap=document.getElementById("vkAdminPaidModeWrap");
     if(paidModeWrap) paidModeWrap.style.display=paid?"block":"none";
-    const topicPackageWrap=document.getElementById("vkTopicTestPackageWrap");
-    if(topicPackageWrap) topicPackageWrap.style.display=paid?"block":"none";
-    if(paid && typeof vkTopicTestLoadPackages==='function') vkTopicTestLoadPackages();
     const freeModeWrap=document.getElementById("vkAdminFreeModeWrap");
     if(freeModeWrap) freeModeWrap.style.display=paid?"none":"block";
     if(hint) hint.textContent=paid
@@ -9780,13 +9673,6 @@ if(!isPaid && freeMode === "edit" && !freeEditTopicName){
         const {data,error} = await supabaseClient.rpc(rpcName,rpcArgs);
         if(error) throw error;
         const result = Array.isArray(data) ? data[0] : data;
-        if(isPaid && paidMode!=="edit" && result?.test_id){
-            const selectedPackage=document.getElementById("vkTopicTestPackage")?.value||"";
-            const selectedTopic=document.getElementById("vkTopicTestPackageTopic")?.value||"";
-            if(selectedPackage && selectedTopic){
-                await vkTopicTestAssignNewTest(selectedPackage,selectedTopic,result.test_id);
-            }
-        }
         const title = result?.title || (isPaid ? paperName + " - Test" : topicName + " - Test");
         const number = isPaid ? result?.website_test_number : result?.topic_test_number;
         if(isPaid && paidMode==="edit"){
@@ -15723,8 +15609,8 @@ async function vkipLoadStudentPackages(){
     }
     const unlocked=!!vkipActivePurchase;
     document.getElementById('vkTopicAccessStatus').textContent=unlocked?'🔓 Package Unlocked':'🔒 Package Locked';
-    buy.disabled=false;buy.textContent=unlocked?'Start Your Exam':'Buy Package';
-    buy.title=unlocked?'Open Paper-I and Paper-II topics and start your exam':'Purchase this package securely using Razorpay';
+    buy.disabled=false;buy.textContent=unlocked?'Start Learning':'Buy Package';
+    buy.title=unlocked?'Open Paper-I and Paper-II topics':'Purchase this package securely using Razorpay';
     buy.onclick=unlocked?()=>vkipShowLearningStructure():()=>vkipStartPurchase();
 
     const {data:papers,error:pe}=await supabaseClient.from('vk_independent_papers')
@@ -15885,8 +15771,6 @@ async function startIndependentTest(testId){
 }
 async function vkTopicLoadStudent(){return vkipLoadStudentPackages();}
 // Initialize only after the existing Super Admin gate has completed.
-const vkipOriginalAdminInit=window.openAdminMockBuilder;
-if(typeof vkipOriginalAdminInit==='function'){window.openAdminMockBuilder=async function(){await vkipOriginalAdminInit.apply(this,arguments);if(vkAdminAuthorized){await vkipLoadPackages();}};}
 </script>
 
 </body>
