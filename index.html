@@ -3390,6 +3390,18 @@ Select an examination and start your preparation.
   </article>
 </div>
 
+<div class="vk-topic-package-home-wrap">
+  <article class="vk-topic-package-home-card" onclick="vkTopicOpenPackage()" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();vkTopicOpenPackage()}">
+    <div class="vk-topic-package-lock" id="vkTopicHomeLock">🔒</div>
+    <div class="vk-topic-package-home-copy"><span class="vk-topic-package-kicker">ENDOWMENT OFFICER · COMPLETE PREPARATION</span>
+      <h3>Complete Topic-wise Test Package</h3>
+      <p>Paper-I &amp; Paper-II · Topic-wise practice · Real CBT experience</p>
+      <div class="vk-topic-package-highlights"><span>25 Questions per Test</span><span>5 Days Validity</span><span>Instant Results</span></div>
+    </div>
+    <div class="vk-topic-package-home-price"><strong id="vkTopicHomePrice">₹29</strong><small>Only</small><button type="button" onclick="event.stopPropagation();vkTopicOpenPackage()">Explore Package&nbsp; →</button></div>
+  </article>
+</div>
+
 <!-- VK Exams responsive AdSense display unit: placed above Why VK Exams -->
 <div class="home-ad-container">
     <div class="home-ad-label">Advertisement</div>
@@ -4096,6 +4108,22 @@ id="solutions">
       <div id="vkCpStatus" class="vk-cp-status" role="status" aria-live="polite"></div>
       <h3 style="margin:24px 0 8px">Existing Custom Packages</h3>
       <div id="vkCpPackageList" class="vk-cp-package-list"><p class="vk-cp-sub">Loading packages...</p></div>
+    </section>
+
+    <section id="vkTopicPackageAdmin" class="vk-topic-admin-panel">
+      <div class="vk-management-heading"><div><span class="vk-management-kicker">04 · TOPIC-WISE PACKAGE</span><h2>Complete Topic-wise Test Package</h2><p>Create Paper-I / Paper-II, add unlimited topics and assign existing paid tests individually. Existing test builder and Excel upload remain unchanged.</p></div><span class="vk-management-icon">🛕</span></div>
+      <div class="vk-topic-admin-form">
+        <input id="vkTopicAdminPackageId" type="hidden">
+        <div><label>Package Name</label><input id="vkTopicAdminName" value="Complete Topic-wise Test Package" maxlength="120"></div>
+        <div><label>Price (₹)</label><input id="vkTopicAdminPrice" type="number" min="1" step="1" value="29"></div>
+        <div><label>Validity (Days)</label><input id="vkTopicAdminDays" type="number" min="1" step="1" value="5"></div>
+        <div class="vk-topic-admin-wide"><label>Description</label><textarea id="vkTopicAdminDescription" rows="2">Paper-I and Paper-II topic-wise mock tests. Each test contains 25 questions.</textarea></div>
+      </div>
+      <div class="vk-topic-admin-actions"><button type="button" onclick="vkTopicAdminSavePackage()">Save Package Details</button><button type="button" class="secondary" onclick="vkTopicAdminLoad()">Refresh Structure</button><button type="button" class="secondary" onclick="vkTopicAdminPreview()">Preview Student View</button></div>
+      <div class="vk-topic-admin-add-row"><div><label>Paper</label><select id="vkTopicAdminPaper"><option value="Paper-I">Paper-I</option><option value="Paper-II">Paper-II</option></select></div><div><label>Topic Name</label><input id="vkTopicAdminTopicName" placeholder="e.g. Ramayanam"></div><div><label>Display Order</label><input id="vkTopicAdminTopicOrder" type="number" min="1" value="1"></div><button type="button" onclick="vkTopicAdminAddTopic()">+ Add Topic</button></div>
+      <div class="vk-topic-admin-add-row"><div class="vk-topic-admin-wide"><label>Choose Topic to assign an existing paid test</label><select id="vkTopicAdminAssignTopic"><option value="">Select topic</option></select></div><div class="vk-topic-admin-wide"><label>Existing Test</label><select id="vkTopicAdminTest"><option value="">Load tests after selecting topic</option></select></div><button type="button" onclick="vkTopicAdminAssignTest()">Assign Test</button></div>
+      <div id="vkTopicAdminStatus" class="vk-topic-admin-status" role="status"></div>
+      <div id="vkTopicAdminStructure" class="vk-topic-admin-structure">Save package details to load the Paper / Topic structure.</div>
     </section>
 
     <div class="vk-admin-panel">
@@ -4911,6 +4939,16 @@ aria-live="polite">
 <!-- =====================================================
      FOOTER
 ===================================================== -->
+
+<div id="vkTopicPackagePage" class="page vk-topic-package-page">
+  <div class="container">
+    <button class="vk-topic-back" type="button" onclick="vkTopicGoBack()">← Back</button>
+    <div class="vk-topic-page-hero"><span>🛕 VK EXAMS · ENDOWMENT OFFICER</span><h1>Complete Topic-wise Test Package</h1><p>Paper-I &amp; Paper-II | 25 Questions per Test</p><div class="vk-topic-page-price">₹29 <small>· 5 Days Validity</small></div><div id="vkTopicAccessStatus" class="vk-topic-access-status">Checking package access…</div><button id="vkTopicBuyButton" type="button" onclick="vkTopicBuyPackage()">Unlock Complete Package · ₹29</button></div>
+    <div id="vkTopicCountdown" class="vk-topic-countdown" hidden></div>
+    <div id="vkTopicPaperArea" class="vk-topic-paper-grid"><p class="vk-topic-loading">Loading package structure…</p></div>
+    <div id="vkTopicMessage" class="vk-topic-message" role="status"></div>
+  </div>
+</div>
 
 <footer>
 
@@ -15294,6 +15332,100 @@ document.addEventListener(
 }
 </style>
 
+
+<script>
+/* Complete Topic-wise Package UI. Requires package_papers, package_topics and package_topic_tests migration. */
+let vkTopicPackage=null, vkTopicPackagePurchase=null, vkTopicStructure=[];
+const vkTopicEsc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function vkTopicSetMessage(msg,isError=false){const el=document.getElementById('vkTopicMessage');if(el){el.textContent=msg||'';el.style.color=isError?'#b42318':'#166534';}}
+function vkTopicAdminStatus(msg,isError=false){const el=document.getElementById('vkTopicAdminStatus');if(el){el.textContent=msg||'';el.style.color=isError?'#b42318':'#475569';}}
+function vkTopicOpenPackage(){showPage('vkTopicPackagePage');vkPushContextRoute('vkTopicPackagePage');vkTopicLoadStudent();}
+function vkTopicGoBack(){if(history.state?.vkPage){history.back();}else showHome();}
+async function vkTopicFindPackage(){
+ const {data,error}=await supabaseClient.from('packages').select('id,name,description,price,duration_days,is_active,package_type').eq('name','Complete Topic-wise Test Package').eq('package_type','custom').order('created_at',{ascending:false}).limit(1);
+ if(error)throw error;vkTopicPackage=(data||[]).find(p=>p.is_active===true)||null;return vkTopicPackage;
+}
+async function vkTopicLoadStudent(){
+ const host=document.getElementById('vkTopicPaperArea');if(!host||!supabaseClient)return;
+ host.innerHTML='<p class="vk-topic-loading">Loading package structure…</p>';vkTopicSetMessage('');
+ try{
+  const pkg=await vkTopicFindPackage();
+  if(!pkg){host.innerHTML='<p class="vk-topic-loading">Package is not published yet. Please check again later.</p>';document.getElementById('vkTopicBuyButton').disabled=true;return;}
+  document.getElementById('vkTopicBuyButton').disabled=false;
+  document.getElementById('vkTopicHomePrice').textContent='₹'+Number(pkg.price).toLocaleString('en-IN');
+  document.querySelector('.vk-topic-page-price').innerHTML='₹'+Number(pkg.price).toLocaleString('en-IN')+' <small>· '+Number(pkg.duration_days)+' Days Validity</small>';
+  const {data:papers,error:pe}=await supabaseClient.from('package_papers').select('id,package_id,name,display_order,is_active').eq('package_id',pkg.id).eq('is_active',true).order('display_order');if(pe)throw pe;
+  const paperIds=(papers||[]).map(x=>x.id);
+  let topics=[],assignments=[],tests=[];
+  if(paperIds.length){const r=await supabaseClient.from('package_topics').select('id,paper_id,name,display_order,is_active').in('paper_id',paperIds).eq('is_active',true).order('display_order');if(r.error)throw r.error;topics=r.data||[];}
+  const topicIds=topics.map(x=>x.id);
+  if(topicIds.length){const r=await supabaseClient.from('package_topic_tests').select('id,topic_id,test_id,display_order,is_active').in('topic_id',topicIds).eq('is_active',true).order('display_order');if(r.error)throw r.error;assignments=r.data||[];}
+  const testIds=[...new Set(assignments.map(x=>x.test_id))];
+  if(testIds.length){const r=await supabaseClient.from('tests').select('id,title,test_number,is_active,test_series_id').in('id',testIds);if(r.error)throw r.error;tests=r.data||[];}
+  const testMap=new Map(tests.map(t=>[t.id,t]));
+  vkTopicStructure=(papers||[]).map(p=>({...p,topics:topics.filter(t=>t.paper_id===p.id).map(t=>({...t,tests:assignments.filter(a=>a.topic_id===t.id).map(a=>({...a,test:testMap.get(a.test_id)})).filter(a=>a.test?.is_active!==false)}))}));
+  const {data:userData}=await supabaseClient.auth.getUser();vkTopicPackagePurchase=null;
+  if(userData?.user){const now=new Date().toISOString();const r=await supabaseClient.from('purchases').select('id,starts_at,expires_at,payment_status,package_id').eq('user_id',userData.user.id).eq('package_id',pkg.id).eq('payment_status','paid').gt('expires_at',now).order('expires_at',{ascending:false}).limit(1);if(r.error)throw r.error;vkTopicPackagePurchase=(r.data||[])[0]||null;}
+  const unlocked=!!vkTopicPackagePurchase;
+  document.getElementById('vkTopicAccessStatus').textContent=unlocked?'✓ Package Unlocked':'🔒 Package Locked';
+  document.getElementById('vkTopicHomeLock').textContent=unlocked?'🔓':'🔒';
+  document.getElementById('vkTopicBuyButton').style.display=unlocked?'none':'inline-block';
+  const countdown=document.getElementById('vkTopicCountdown');countdown.hidden=!unlocked;
+  if(unlocked){const expiry=new Date(vkTopicPackagePurchase.expires_at);const remaining=Math.max(0,expiry-Date.now());const days=Math.floor(remaining/86400000),hours=Math.floor((remaining%86400000)/3600000),mins=Math.floor((remaining%3600000)/60000);countdown.textContent=`Access active · ${days} days ${hours} hours ${mins} minutes remaining · Expires ${expiry.toLocaleString('en-IN')}`;}
+  host.innerHTML=vkTopicStructure.length?vkTopicStructure.map(p=>`<section class="vk-topic-paper-card"><h2>${vkTopicEsc(p.name)}</h2>${p.topics.map(t=>`<div class="vk-topic-topic"><div class="vk-topic-topic-head">${vkTopicEsc(t.name)}</div>${t.tests.length?t.tests.map((a,i)=>`<div class="vk-topic-test-row"><span>${vkTopicEsc(a.test.title||('Test '+a.test.test_number))}</span><button ${unlocked?'':'disabled'} onclick="vkTopicStartTest('${vkTopicEsc(a.test.id)}')">${unlocked?'Start Test':'Locked'}</button></div>`).join(''):'<div class="vk-topic-test-row">Tests will be added soon.</div>'}</div>`).join('')}</section>`).join(''):'<p class="vk-topic-loading">Paper / Topic structure has not been added yet.</p>';
+ }catch(e){console.error('Topic package load failed',e);host.innerHTML='<p class="vk-topic-loading">Could not load package. '+vkTopicEsc(e.message||e)+'</p>';}
+}
+async function vkTopicBuyPackage(){
+ try{if(!isLoggedIn()){openLogin();toast('Please login/register before purchasing.');return;}const pkg=vkTopicPackage||await vkTopicFindPackage();if(!pkg)throw new Error('Package is not published.');
+  const {data:course,error}=await supabaseClient.from('courses').select('id').eq('name','Endowment Officer').single();if(error)throw error;
+  selectedStoreCourse='Endowment Officer';
+  await buyPlan(pkg.id,Number(pkg.price),Number(pkg.duration_days),'Complete Topic-wise Test Package');
+ }catch(e){console.error(e);vkTopicSetMessage(e.message||'Purchase could not be started.',true);}
+}
+async function vkTopicStartTest(testId){
+ if(!vkTopicPackagePurchase){vkTopicSetMessage('Active package access is required to start this test.',true);return;}
+ try{
+  const {data:test,error}=await supabaseClient.from('tests').select('id,test_number,test_series_id').eq('id',testId).single();if(error)throw error;
+  const {data:series,error:se}=await supabaseClient.from('test_series').select('id,course_id,name').eq('id',test.test_series_id).single();if(se)throw se;
+  const {data:course,error:ce}=await supabaseClient.from('courses').select('name').eq('id',series.course_id).single();if(ce)throw ce;
+  currentCourse=course.name;currentGroup=series.name;currentTestNumber=Number(test.test_number);
+  window.vkTopicTargetTestId=test.id;window.vkTopicPackageReturn=true;
+  await startPaidTest(Number(test.test_number));
+ }catch(e){console.error(e);vkTopicSetMessage('Test could not be opened: '+(e.message||e),true);}
+}
+async function vkTopicAdminSavePackage(){
+ if(!vkAdminAuthorized||!supabaseClient){vkTopicAdminStatus('Admin authorization required.',true);return;}
+ const id=document.getElementById('vkTopicAdminPackageId').value||null;
+ const row={name:document.getElementById('vkTopicAdminName').value.trim(),description:document.getElementById('vkTopicAdminDescription').value.trim(),price:Number(document.getElementById('vkTopicAdminPrice').value),duration_days:Number(document.getElementById('vkTopicAdminDays').value),package_type:'custom',is_active:false};
+ if(!row.name||!Number.isFinite(row.price)||row.price<=0||!Number.isInteger(row.duration_days)||row.duration_days<1){vkTopicAdminStatus('Enter a package name, valid price and validity.',true);return;}
+ try{let q=id?await supabaseClient.from('packages').update(row).eq('id',id).select('id').single():await supabaseClient.from('packages').insert(row).select('id').single();if(q.error)throw q.error;document.getElementById('vkTopicAdminPackageId').value=q.data.id;vkTopicPackage={...row,id:q.data.id};vkTopicAdminStatus('Package details saved as Draft. Add papers/topics and assign tests, then publish from existing package controls or the database admin workflow.');await vkTopicAdminLoad();}catch(e){vkTopicAdminStatus('Save failed: '+(e.message||e),true);}
+}
+async function vkTopicAdminGetPackage(){let id=document.getElementById('vkTopicAdminPackageId').value;if(id){const {data,error}=await supabaseClient.from('packages').select('*').eq('id',id).single();if(error)throw error;return data;}const {data,error}=await supabaseClient.from('packages').select('*').eq('name','Complete Topic-wise Test Package').eq('package_type','custom').order('created_at',{ascending:false}).limit(1);if(error)throw error;return (data||[])[0]||null;}
+async function vkTopicAdminLoad(){
+ if(!vkAdminAuthorized||!supabaseClient)return;
+ try{const pkg=await vkTopicAdminGetPackage();if(!pkg){vkTopicAdminStatus('Save package details first.');return;}document.getElementById('vkTopicAdminPackageId').value=pkg.id;document.getElementById('vkTopicAdminName').value=pkg.name||'';document.getElementById('vkTopicAdminPrice').value=pkg.price??29;document.getElementById('vkTopicAdminDays').value=pkg.duration_days??5;document.getElementById('vkTopicAdminDescription').value=pkg.description||'';
+  const {data:papers,error}=await supabaseClient.from('package_papers').select('id,package_id,name,display_order,is_active').eq('package_id',pkg.id).order('display_order');if(error)throw error;const pids=(papers||[]).map(x=>x.id);let topics=[];if(pids.length){const r=await supabaseClient.from('package_topics').select('id,paper_id,name,display_order,is_active').in('paper_id',pids).order('display_order');if(r.error)throw r.error;topics=r.data||[];}let assigns=[];const tids=topics.map(x=>x.id);if(tids.length){const r=await supabaseClient.from('package_topic_tests').select('id,topic_id,test_id,display_order,is_active').in('topic_id',tids).order('display_order');if(r.error)throw r.error;assigns=r.data||[];}const testIds=[...new Set(assigns.map(x=>x.test_id))];let tests=[];if(testIds.length){const r=await supabaseClient.from('tests').select('id,title,test_number').in('id',testIds);if(r.error)throw r.error;tests=r.data||[];}const tm=new Map(tests.map(t=>[t.id,t]));vkTopicStructure=(papers||[]).map(p=>({...p,topics:topics.filter(t=>t.paper_id===p.id).map(t=>({...t,tests:assigns.filter(a=>a.topic_id===t.id).map(a=>({...a,test:tm.get(a.test_id)}))}))}));
+  const select=document.getElementById('vkTopicAdminAssignTopic');select.innerHTML='<option value="">Select topic</option>'+topics.map(t=>`<option value="${t.id}">${vkTopicEsc((papers||[]).find(p=>p.id===t.paper_id)?.name)} · ${vkTopicEsc(t.name)}</option>`).join('');
+  document.getElementById('vkTopicAdminStructure').innerHTML=vkTopicStructure.map(p=>`<div class="vk-topic-admin-paper"><h3>${vkTopicEsc(p.name)}</h3>${p.topics.map(t=>`<div class="vk-topic-admin-topic"><strong>${vkTopicEsc(t.name)}</strong> <button onclick="vkTopicAdminDeleteTopic('${t.id}')">Remove Topic</button>${t.tests.map(a=>`<div class="vk-topic-admin-test">• ${vkTopicEsc(a.test?.title||'Test')} <button onclick="vkTopicAdminUnassign('${a.id}','${a.test_id}')">Unassign</button></div>`).join('')}</div>`).join('')}</div>`).join('')||'No papers/topics created yet.';
+  vkTopicAdminStatus('Loaded '+papers.length+' papers and '+topics.length+' topics.');await vkTopicAdminLoadTests();
+ }catch(e){vkTopicAdminStatus('Could not load structure: '+(e.message||e),true);}
+}
+async function vkTopicAdminAddTopic(){
+ try{const pkg=await vkTopicAdminGetPackage();if(!pkg)throw new Error('Save package details first.');const paperName=document.getElementById('vkTopicAdminPaper').value;let {data:paper,error}=await supabaseClient.from('package_papers').select('id').eq('package_id',pkg.id).eq('name',paperName).maybeSingle();if(error)throw error;if(!paper){const r=await supabaseClient.from('package_papers').insert({package_id:pkg.id,name:paperName,display_order:paperName==='Paper-I'?1:2,is_active:true}).select('id').single();if(r.error)throw r.error;paper=r.data;}const name=document.getElementById('vkTopicAdminTopicName').value.trim();if(!name)throw new Error('Enter topic name.');const r=await supabaseClient.from('package_topics').insert({paper_id:paper.id,name,display_order:Number(document.getElementById('vkTopicAdminTopicOrder').value||1),is_active:true});if(r.error)throw r.error;document.getElementById('vkTopicAdminTopicName').value='';await vkTopicAdminLoad();}catch(e){vkTopicAdminStatus('Add topic failed: '+(e.message||e),true);}
+}
+async function vkTopicAdminLoadTests(){const topicId=document.getElementById('vkTopicAdminAssignTopic').value;const select=document.getElementById('vkTopicAdminTest');if(!topicId){select.innerHTML='<option value="">Select topic first</option>';return;}try{const {data:series,error:se}=await supabaseClient.from('test_series').select('id,name').eq('is_active',true);if(se)throw se;const ids=(series||[]).map(s=>s.id);if(!ids.length)return;const {data,error}=await supabaseClient.from('tests').select('id,title,test_number,test_series_id,is_free,is_active').in('test_series_id',ids).eq('is_free',false).eq('is_active',true).order('test_number');if(error)throw error;select.innerHTML='<option value="">Select existing paid test</option>'+(data||[]).map(t=>`<option value="${t.id}">${vkTopicEsc(t.title||'Test')} · #${t.test_number}</option>`).join('');}catch(e){vkTopicAdminStatus('Could not load tests: '+(e.message||e),true);}}
+async function vkTopicAdminAssignTest(){try{const topicId=document.getElementById('vkTopicAdminAssignTopic').value,testId=document.getElementById('vkTopicAdminTest').value;if(!topicId||!testId)throw new Error('Select a topic and a test.');const {data:exists,error:ee}=await supabaseClient.from('package_topic_tests').select('id').eq('topic_id',topicId).eq('test_id',testId).maybeSingle();if(ee)throw ee;if(exists)throw new Error('This test is already assigned to this topic.');const r=await supabaseClient.from('package_topic_tests').insert({topic_id:topicId,test_id:testId,display_order:1,is_active:true});if(r.error)throw r.error;const {data:topic,error:te}=await supabaseClient.from('package_topics').select('paper_id').eq('id',topicId).single();if(te)throw te;const {data:paper,error:pe}=await supabaseClient.from('package_papers').select('package_id').eq('id',topic.paper_id).single();if(pe)throw pe;const {error:mapError}=await supabaseClient.from('package_tests').upsert({package_id:paper.package_id,test_id:testId},{onConflict:'package_id,test_id',ignoreDuplicates:true});if(mapError)throw mapError;await vkTopicAdminLoad();}catch(e){vkTopicAdminStatus('Assignment failed: '+(e.message||e),true);}}
+async function vkTopicAdminUnassign(assignmentId,testId){if(!confirm('Remove this test from the topic?'))return;try{const {error}=await supabaseClient.from('package_topic_tests').delete().eq('id',assignmentId);if(error)throw error;const pkg=await vkTopicAdminGetPackage();const {data:other,error:oe}=await supabaseClient.from('package_topic_tests').select('id').eq('test_id',testId).eq('is_active',true);if(oe)throw oe;const stillUsed=(other||[]).length>0;if(!stillUsed&&pkg){const {error:me}=await supabaseClient.from('package_tests').delete().eq('package_id',pkg.id).eq('test_id',testId);if(me)throw me;}await vkTopicAdminLoad();}catch(e){vkTopicAdminStatus('Unassign failed: '+(e.message||e),true);}}
+async function vkTopicAdminDeleteTopic(id){if(!confirm('Remove this topic and its assignments? Student purchase history and attempts are not deleted.'))return;try{const {error}=await supabaseClient.from('package_topics').update({is_active:false}).eq('id',id);if(error)throw error;await vkTopicAdminLoad();}catch(e){vkTopicAdminStatus('Could not remove topic: '+(e.message||e),true);}}
+function vkTopicAdminPreview(){vkTopicOpenPackage();}
+document.addEventListener('change',e=>{if(e.target?.id==='vkTopicAdminAssignTopic')vkTopicAdminLoadTests();});
+// Hook into the existing admin entry point without replacing its established setup.
+const vkTopicOriginalAdminInit=window.openAdminMockBuilder;
+if(typeof vkTopicOriginalAdminInit==='function'){window.openAdminMockBuilder=async function(){await vkTopicOriginalAdminInit.apply(this,arguments);if(vkAdminAuthorized)await vkTopicAdminLoad();};}
+// When a student returns from CBT, return to the topic package instead of a generic list.
+window.addEventListener('pageshow',()=>{if(location.hash.startsWith('#vkTopicPackagePage'))vkTopicLoadStudent();});
+</script>
+
 </body>
 
 </html>
@@ -15454,5 +15586,13 @@ body:has(#examPage.active) > footer{
   #vkCategoryManager .vk-management-heading h2{font-size:19px;padding:8px 11px}
   #vkCategoryManager .vk-homecard-settings h3{font-size:16px}
 }
+
+/* Complete Topic-wise Package */
+.vk-topic-package-home-wrap{max-width:1120px;margin:26px auto 34px;padding:0 12px}
+.vk-topic-package-home-card{position:relative;display:flex;align-items:center;justify-content:space-between;gap:22px;padding:25px 30px;border-radius:22px;overflow:hidden;cursor:pointer;color:#fff;background:linear-gradient(115deg,#56221d 0%,#8e3526 48%,#d18a35 100%);box-shadow:0 14px 34px rgba(104,43,29,.20);border:1px solid rgba(255,255,255,.3)}
+.vk-topic-package-home-card:before{content:'ॐ';position:absolute;right:25%;top:-44px;font-size:180px;opacity:.08;pointer-events:none}
+.vk-topic-package-lock{font-size:42px;flex:0 0 auto;z-index:1}.vk-topic-package-home-copy{flex:1;z-index:1}.vk-topic-package-kicker{font-size:11px;letter-spacing:1.5px;font-weight:900;color:#ffe5ad}.vk-topic-package-home-copy h3{font-size:clamp(21px,3vw,30px);margin:7px 0;color:#fff}.vk-topic-package-home-copy p{margin:0 0 12px;color:#fff2df}.vk-topic-package-highlights{display:flex;gap:8px;flex-wrap:wrap}.vk-topic-package-highlights span{font-size:12px;font-weight:800;padding:6px 10px;border:1px solid #ffffff55;border-radius:30px;background:#ffffff17}.vk-topic-package-home-price{z-index:1;display:flex;flex-direction:column;align-items:center;min-width:130px}.vk-topic-package-home-price strong{font-size:32px}.vk-topic-package-home-price small{font-weight:800;margin-top:-5px}.vk-topic-package-home-price button,.vk-topic-page-hero button{border:0;border-radius:10px;background:#fff;color:#792d23;font-weight:900;padding:11px 15px;margin-top:12px;cursor:pointer}
+.vk-topic-package-page{padding:24px 0 55px;min-height:65vh}.vk-topic-back{border:1px solid #d6dce7;background:#fff;border-radius:9px;padding:9px 14px;font-weight:800;cursor:pointer}.vk-topic-page-hero{text-align:center;margin:18px auto 24px;padding:28px 18px;border-radius:20px;background:linear-gradient(135deg,#fff8eb,#fff 60%,#f8e8dc);border:1px solid #f0d7b4}.vk-topic-page-hero>span{font-size:11px;letter-spacing:1px;font-weight:900;color:#98512d}.vk-topic-page-hero h1{font-size:clamp(24px,4vw,36px);color:#58271f;margin:9px 0}.vk-topic-page-hero p{margin:0;color:#586579}.vk-topic-page-price{font-size:29px;font-weight:900;color:#8a3828;margin:10px}.vk-topic-page-price small{font-size:14px}.vk-topic-access-status{font-weight:800;color:#536174}.vk-topic-page-hero button{background:#8b3428;color:white;padding:13px 24px;font-size:15px}.vk-topic-countdown{margin:12px auto;padding:12px 16px;border-radius:12px;background:#ecfdf3;color:#166534;font-weight:900;text-align:center;max-width:600px}.vk-topic-paper-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.vk-topic-paper-card{background:#fff;border:1px solid #e1e6ef;border-radius:16px;padding:18px;box-shadow:0 5px 18px #1c31500c}.vk-topic-paper-card h2{margin:0 0 14px;color:#743026}.vk-topic-topic{border:1px solid #e8edf4;border-radius:12px;margin:10px 0;overflow:hidden}.vk-topic-topic-head{padding:12px 14px;background:#f8fafc;font-weight:900;color:#24364d}.vk-topic-test-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 14px;border-top:1px solid #edf0f5}.vk-topic-test-row button{border:0;border-radius:8px;background:#174e83;color:white;padding:8px 12px;font-weight:800;cursor:pointer}.vk-topic-test-row button:disabled{background:#9ca3af;cursor:not-allowed}.vk-topic-loading,.vk-topic-message{text-align:center;color:#64748b;padding:16px}.vk-topic-message{color:#b42318}.vk-topic-admin-panel{margin:22px 0;padding:22px;border:1px solid #dce4ef;border-radius:18px;background:#fff}.vk-topic-admin-form{display:grid;grid-template-columns:2fr 1fr 1fr;gap:12px}.vk-topic-admin-form label,.vk-topic-admin-add-row label{display:block;font-size:13px;font-weight:800;margin-bottom:5px;color:#344b70}.vk-topic-admin-form input,.vk-topic-admin-form textarea,.vk-topic-admin-add-row input,.vk-topic-admin-add-row select{width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:9px}.vk-topic-admin-wide{grid-column:1/-1}.vk-topic-admin-actions,.vk-topic-admin-add-row{display:flex;gap:10px;align-items:end;flex-wrap:wrap;margin-top:14px}.vk-topic-admin-actions button,.vk-topic-admin-add-row button{border:0;border-radius:9px;background:#1e5790;color:white;padding:10px 15px;font-weight:800;cursor:pointer}.vk-topic-admin-actions button.secondary{background:#eef2f7;color:#334155}.vk-topic-admin-add-row>div{flex:1;min-width:170px}.vk-topic-admin-status{margin:12px 0;color:#475569;font-size:13px}.vk-topic-admin-paper{border:1px solid #dbe4ef;border-radius:12px;margin:14px 0;padding:14px}.vk-topic-admin-paper h3{margin:0 0 10px;color:#743026}.vk-topic-admin-topic{padding:10px;margin:8px 0;background:#f8fafc;border-radius:9px}.vk-topic-admin-topic button{margin:5px 4px 0 0;border:0;border-radius:7px;padding:6px 9px;background:#e2e8f0;cursor:pointer}.vk-topic-admin-test{font-size:13px;padding:6px 0;color:#334155}
+@media(max-width:700px){.vk-topic-package-home-card{align-items:flex-start;padding:18px;gap:12px}.vk-topic-package-lock{font-size:30px}.vk-topic-package-home-price{min-width:90px}.vk-topic-package-home-price strong{font-size:25px}.vk-topic-package-home-price button{font-size:11px;padding:9px 8px}.vk-topic-package-highlights span{font-size:10px}.vk-topic-paper-grid{grid-template-columns:1fr}.vk-topic-admin-form{grid-template-columns:1fr 1fr}.vk-topic-admin-form>div:first-child,.vk-topic-admin-wide{grid-column:1/-1}}
 </style>
 
