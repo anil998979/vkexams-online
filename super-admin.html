@@ -174,10 +174,6 @@ input:focus,select:focus,textarea:focus{outline:3px solid #dfe7ff;border-color:#
 </style>
 </head>
 <body><main class="wrap">
-<section class="panel section" style="border-left:4px solid #e99a25;margin-bottom:16px">
-<h2>Test Builder Integration Status</h2>
-<p class="muted">The supplied source files contain the legacy Test Builder tightly coupled to the student-site JavaScript and authorization helpers. It has not yet been migrated into this Super Admin page. Do not use this page as the completed Test Builder release until that integration is finished and verified.</p>
-</section>
 <header class="top"><div><div class="brand">✦ VK EXAMS <span class="muted" style="font-size:13px">/ SUPER ADMIN</span></div><div class="muted small">Super Admin Control Center · Secure platform management</div></div><div><span id="who" class="muted small"></span> <button class="btn" id="logout" onclick="logout()" hidden>Sign out</button></div></header>
 <section id="loginBox" class="panel login">
 <h2>Super Admin Login</h2>
@@ -219,8 +215,6 @@ input:focus,select:focus,textarea:focus{outline:3px solid #dfe7ff;border-color:#
 <button onclick="showTab('adsTab',this)">Ad Analytics</button>
 <button onclick="showTab('cleanupTab',this)">Test Data Cleanup</button>
 <button onclick="showTab('jobsTab',this);loadAdminJobs()">Jobs Management</button>
-<button onclick="showTab('categoriesTab',this);loadSuperCategories()">▦ Category Management</button>
-<button onclick="showTab('seriesTab',this);loadSuperCategories()">▤ Test Series Management</button>
 </aside><div>
 
 <section id="studentManageTab" class="panel section hidden">
@@ -293,20 +287,6 @@ input:focus,select:focus,textarea:focus{outline:3px solid #dfe7ff;border-color:#
   <div class="tablewrap"><table><thead><tr><th>Time</th><th>Admin</th><th>Action</th><th>Table</th><th>Record ID</th><th>Details</th></tr></thead><tbody id="auditRows"></tbody></table></div>
 </section>
 
-<section id="categoriesTab" class="panel section hidden sa-management">
-<h2>Category Management</h2><p class="muted small">Create categories, update icons and control visibility. Homepage card settings are available inside this section.</p>
-<div class="sa-manage-card sa-accordion-content">
-<div class="sa-form-grid"><input id="saCatId" type="hidden"><label>Category name<input id="saCatName" placeholder="Category name" maxlength="100"></label><label>Slug<input id="saCatSlug" placeholder="slug" maxlength="100"></label><label>Icon / Emoji<input id="saCatIcon" placeholder="🏛️ or image URL" maxlength="500"></label><label>Display order<input id="saCatOrder" type="number" value="10"></label></div>
-<div class="sa-upload-row"><label>Upload icon (PNG/JPG/WEBP, max 2 MB)<input id="saCatIconFile" type="file" accept="image/png,image/jpeg,image/webp"></label><img id="saCatIconPreview" alt="Icon preview" hidden></div>
-<details class="sa-home-card-settings sa-nested-accordion" id="saHomepageSettingsAccordion"><summary class="sa-nested-summary"><span>Homepage Card Settings</span><span class="sa-nested-chevron" aria-hidden="true">⌄</span></summary><div class="sa-nested-content"><div class="sa-form-grid"><label>Card description<textarea id="saHomeCardDescription" maxlength="220" placeholder="Description shown on Home Page"></textarea></label><label>Card theme color<input id="saHomeCardColor" type="color" value="#2563eb"></label><label>Card image (PNG/JPG/WEBP, max 2 MB)<input id="saHomeCardImage" type="file" accept="image/png,image/jpeg,image/webp"><img id="saHomeCardImagePreview" alt="Homepage image preview" hidden></label></div><label class="sa-home-visible"><input id="saHomeCardVisible" type="checkbox"> Show this category on Home Page (manual enable)</label></div></details>
-<div class="toolbar"><button class="btn primary" onclick="saSaveCategory()">Save Category</button><button class="btn" onclick="saResetCategory()">Clear Form</button><button class="btn" onclick="loadSuperCategories()">Refresh</button></div><div id="saCategoryRows"></div></div>
-</section>
-<section id="seriesTab" class="panel section hidden sa-management">
-<h2>Test Series Management</h2><p class="muted small">Add standard or custom series types under the selected category.</p>
-<div class="sa-manage-card sa-accordion-content">
-<input id="saSeriesId" type="hidden"><div class="sa-form-grid"><label>Course / Category<select id="saSeriesCourse"></select></label><label>Series name<input id="saSeriesName" placeholder="Series name" maxlength="100"></label><label>Series type<input id="saSeriesType" list="saSeriesTypeOptions" placeholder="Select or type a new type" maxlength="50"><datalist id="saSeriesTypeOptions"><option value="general"><option value="prelims"><option value="mains"><option value="free_mock"><option value="paper_1"><option value="paper_2"><option value="topic_wise"></datalist></label></div>
-<div class="toolbar"><button class="btn primary" onclick="saSaveSeries()">Save Test Series</button><button class="btn" onclick="saResetSeries()">Clear Form</button><button class="btn" onclick="loadSuperCategories()">Refresh</button></div><div id="saSeriesRows"></div></div>
-</section>
 <section id="overview" class="panel section"><h2>Activity overview</h2><p class="muted small">Daily new students, test attempts and paid revenue for the selected period (daily series capped to recent 30 days).</p><div id="dailyChart" class="chart"></div><div class="tablewrap"><table id="dailyTable"><thead><tr><th>Date</th><th>New students</th><th>Attempts</th><th>Paid revenue</th></tr></thead><tbody></tbody></table></div></section>
 <section id="studentsTab" class="panel section hidden"><h2>Recent students</h2><p class="muted small">Latest 100 Auth accounts. Passwords and OTPs are never displayed.</p><div class="tablewrap"><table><thead><tr><th>Name</th><th>Email</th><th>Registered</th><th>Last login</th></tr></thead><tbody id="studentRows"></tbody></table></div></section>
 <section id="purchasesTab" class="panel section hidden"><h2>Purchases</h2><div class="tablewrap"><table><thead><tr><th>Date</th><th>Student</th><th>Course</th><th>Package</th><th>Amount</th><th>Status</th></tr></thead><tbody id="purchaseRows"></tbody></table></div></section>
