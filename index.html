@@ -15371,20 +15371,142 @@ const vkipEsc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>
 let vkipCurrentPackage=null, vkipStructure=[], vkipActivePurchase=null;
 function vkipMsg(s,bad=false){const e=document.getElementById('vkipStatus');if(e){e.textContent=s;e.style.color=bad?'#b42318':'#166534';}}
 function vkipStudentMsg(s,bad=false){const e=document.getElementById('vkTopicMessage');if(e){e.textContent=s;e.style.color=bad?'#b42318':'#166534';}}
-function vkTopicOpenPackage(){showPage('vkTopicPackagePage');vkPushContextRoute('vkTopicPackagePage');vkipLoadStudentPackages();}
+function vkTopicOpenPackage(){showPage('vkTopicPackagePage');vkipLoadStudentPackages();}
 function vkTopicGoBack(){if(history.state?.vkPage)history.back();else showHome();}
 function vkipNewPackage(){['vkipPackageId'].forEach(id=>document.getElementById(id).value='');document.getElementById('vkipPackageName').value='';document.getElementById('vkipPackagePrice').value='29';document.getElementById('vkipPackageDays').value='5';document.getElementById('vkipPackageDesc').value='';vkipMsg('New package form ready.');}
 async function vkipSavePackage(){try{if(!supabaseClient)throw Error('Supabase is not ready.');if(!vkAdminAuthorized)throw Error('Admin authorization required.');const id=document.getElementById('vkipPackageId').value;const row={name:document.getElementById('vkipPackageName').value.trim(),description:document.getElementById('vkipPackageDesc').value.trim(),price:Number(document.getElementById('vkipPackagePrice').value),duration_days:Number(document.getElementById('vkipPackageDays').value),updated_at:new Date().toISOString()};if(!row.name||!(row.price>0)||!(Number.isInteger(row.duration_days)&&row.duration_days>0))throw Error('Enter package name, valid price and validity.');let q=id?await supabaseClient.from('vk_independent_packages').update(row).eq('id',id).select('id').single():await supabaseClient.from('vk_independent_packages').insert(row).select('id').single();if(q.error)throw q.error;document.getElementById('vkipPackageId').value=q.data.id;vkipMsg('Package saved as Draft. Add Papers, Topics and Tests, then publish when ready.');await vkipLoadPackages();document.getElementById('vkipSelectedPackage').value=q.data.id;await vkipLoadStructure();}catch(e){vkipMsg('Save failed: '+(e.message||e),true);}}
 async function vkipLoadPackages(){if(!supabaseClient)return;try{const {data,error}=await supabaseClient.from('vk_independent_packages').select('id,name,price,duration_days,is_published,is_archived').eq('is_archived',false).order('created_at',{ascending:false});if(error)throw error;const sel=document.getElementById('vkipSelectedPackage');const keep=sel.value;sel.innerHTML='<option value="">Select a package</option>'+(data||[]).map(p=>`<option value="${p.id}">${vkipEsc(p.name)} · ₹${p.price} · ${p.is_published?'Published':'Draft'}</option>`).join('');if(keep)sel.value=keep;document.getElementById('vkipPackages').innerHTML=(data||[]).map(p=>`<div class="vk-cp-package-card"><h3>${vkipEsc(p.name)}</h3><div class="vk-cp-package-meta">₹${p.price} · ${p.duration_days} days · ${p.is_published?'Published':'Draft'}</div><div class="vk-cp-package-actions"><button onclick="vkipEditPackage('${p.id}')">Edit</button><button onclick="vkipTogglePublish('${p.id}',${!p.is_published})">${p.is_published?'Unpublish':'Publish'}</button><button onclick="vkipArchivePackage('${p.id}')">Archive</button></div></div>`).join('')||'<p>No packages created.</p>';}catch(e){vkipMsg('Could not load packages: '+(e.message||e),true);}}
 async function vkipEditPackage(id){try{const {data,error}=await supabaseClient.from('vk_independent_packages').select('*').eq('id',id).single();if(error)throw error;document.getElementById('vkipPackageId').value=id;document.getElementById('vkipPackageName').value=data.name;document.getElementById('vkipPackagePrice').value=data.price;document.getElementById('vkipPackageDays').value=data.duration_days;document.getElementById('vkipPackageDesc').value=data.description||'';document.getElementById('vkipSelectedPackage').value=id;await vkipLoadStructure();vkipMsg('Package loaded for editing.');}catch(e){vkipMsg(e.message,true);}}
-async function vkipTogglePublish(id,publish){try{const {error}=await supabaseClient.from('vk_independent_packages').update({is_published:publish,updated_at:new Date().toISOString()}).eq('id',id);if(error)throw error;await vkipLoadPackages();vkipMsg(publish?'Package published.':'Package unpublished.');}catch(e){vkipMsg(e.message,true);}}
+async function vkipTogglePublish(id,publish){
+  try{
+    if(!vkAdminAuthorized)throw Error('Admin authorization required.');
+    if(publish){
+      const {data:papers,error:pe}=await supabaseClient.from('vk_independent_papers').select('id').eq('package_id',id).eq('is_active',true);
+      if(pe)throw pe;
+      const paperIds=(papers||[]).map(x=>x.id);if(!paperIds.length)throw Error('Add active Paper-I / Paper-II structure before publishing.');
+      const {data:topics,error:te}=await supabaseClient.from('vk_independent_topics').select('id').in('paper_id',paperIds).eq('is_active',true);
+      if(te)throw te;
+      const topicIds=(topics||[]).map(x=>x.id);if(!topicIds.length)throw Error('No active topics found in this package.');
+      const {data:tests,error:xe}=await supabaseClient.from('vk_independent_tests').select('id,name,question_count,is_active').in('topic_id',topicIds);
+      if(xe)throw xe;
+      if(!tests?.length)throw Error('Create at least one test before publishing.');
+      const inactive=tests.filter(t=>!t.is_active);if(inactive.length)throw Error(`${inactive.length} test(s) are still inactive. Import questions and activate every test first.`);
+      const testIds=tests.map(t=>t.id);
+      const {data:questions,error:qe}=await supabaseClient.from('vk_independent_questions').select('id,test_id').in('test_id',testIds).eq('is_active',true);
+      if(qe)throw qe;
+      const qids=(questions||[]).map(q=>q.id);
+      let keys=[];
+      if(qids.length){const kr=await supabaseClient.from('vk_independent_question_keys').select('question_id').in('question_id',qids);if(kr.error)throw kr.error;keys=kr.data||[];}
+      const missing=tests.filter(t=>{
+        const q=(questions||[]).filter(x=>x.test_id===t.id).length;
+        const qForTest=(questions||[]).filter(x=>x.test_id===t.id).map(x=>x.id);
+        const k=keys.filter(x=>qForTest.includes(x.question_id)).length;
+        return q!==Number(t.question_count||0)||k!==q;
+      });
+      if(missing.length)throw Error(`Cannot publish: ${missing.length} test(s) do not have the required number of questions and answer keys. Check each test before publishing.`);
+    }
+    const {error}=await supabaseClient.from('vk_independent_packages').update({is_published:publish,updated_at:new Date().toISOString()}).eq('id',id);
+    if(error)throw error;await vkipLoadPackages();vkipMsg(publish?'Package published. All active tests passed question and answer-key checks.':'Package unpublished.');
+  }catch(e){vkipMsg('Publish action failed: '+(e.message||e),true);}
+}
 async function vkipArchivePackage(id){if(!confirm('Archive this package? Purchases and attempts will be preserved.'))return;try{const {error}=await supabaseClient.from('vk_independent_packages').update({is_archived:true,is_published:false,updated_at:new Date().toISOString()}).eq('id',id);if(error)throw error;await vkipLoadPackages();vkipMsg('Package archived. Existing purchase and result history is preserved.');}catch(e){vkipMsg(e.message,true);}}
-async function vkipLoadStructure(){const id=document.getElementById('vkipSelectedPackage').value;if(!id)return;document.getElementById('vkipPackageId').value=id;try{const {data:papers,error:pe}=await supabaseClient.from('vk_independent_papers').select('*').eq('package_id',id).order('display_order');if(pe)throw pe;let topics=[],tests=[],questions=[];const pids=(papers||[]).map(x=>x.id);if(pids.length){const r=await supabaseClient.from('vk_independent_topics').select('*').in('paper_id',pids).order('display_order');if(r.error)throw r.error;topics=r.data||[];}const tids=topics.map(x=>x.id);if(tids.length){const r=await supabaseClient.from('vk_independent_tests').select('*').in('topic_id',tids).order('display_order');if(r.error)throw r.error;tests=r.data||[];}const testIds=tests.map(x=>x.id);if(testIds.length){const r=await supabaseClient.from('vk_independent_questions').select('id,test_id').in('test_id',testIds).eq('is_active',true);if(r.error)throw r.error;questions=r.data||[];}vkipStructure=(papers||[]).map(p=>({...p,topics:topics.filter(t=>t.paper_id===p.id).map(t=>({...t,tests:tests.filter(te=>te.topic_id===t.id).map(te=>({...te,qcount:questions.filter(q=>q.test_id===te.id).length}))}))}));const topicSel=document.getElementById('vkipTestTopic');topicSel.innerHTML='<option value="">Select topic</option>'+topics.filter(t=>t.is_active).map(t=>`<option value="${t.id}">${vkipEsc((papers.find(p=>p.id===t.paper_id)||{}).name)} · ${vkipEsc(t.name)}</option>`).join('');const testSel=document.getElementById('vkipQuestionTest');testSel.innerHTML='<option value="">Select test</option>'+tests.filter(t=>t.is_active).map(t=>`<option value="${t.id}">${vkipEsc(t.name)}</option>`).join('');document.getElementById('vkipStructure').innerHTML=vkipStructure.map(p=>`<section class="vk-topic-admin-paper"><h3>${vkipEsc(p.name)}</h3>${p.topics.map(t=>`<div class="vk-topic-admin-topic"><strong>${vkipEsc(t.name)}</strong> <button onclick="vkipDeactivateTopic('${t.id}')">Remove Topic</button>${t.tests.map(te=>`<div class="vk-topic-admin-test">• ${vkipEsc(te.name)} · ${te.qcount} questions <button onclick="vkipDeactivateTest('${te.id}')">Remove Test</button></div>`).join('')}</div>`).join('')||'<p>No topics.</p>'}</section>`).join('')||'<p>No papers/topics yet.</p>';}catch(e){vkipMsg('Structure load failed: '+e.message,true);}}
-async function vkipAddTopic(){try{const pkg=document.getElementById('vkipSelectedPackage').value,name=document.getElementById('vkipTopicName').value.trim();if(!pkg)throw Error('Select a package first.');if(!name)throw Error('Enter topic name.');const paperName=document.getElementById('vkipPaper').value;let {data:paper,error}=await supabaseClient.from('vk_independent_papers').select('id').eq('package_id',pkg).eq('name',paperName).maybeSingle();if(error)throw error;if(!paper){const r=await supabaseClient.from('vk_independent_papers').insert({package_id:pkg,name:paperName,display_order:paperName==='Paper-I'?1:2}).select('id').single();if(r.error)throw r.error;paper=r.data;}const r=await supabaseClient.from('vk_independent_topics').insert({paper_id:paper.id,name,display_order:Number(document.getElementById('vkipTopicOrder').value||1)});if(r.error)throw r.error;document.getElementById('vkipTopicName').value='';await vkipLoadStructure();vkipMsg('Topic added.');}catch(e){vkipMsg('Add topic failed: '+e.message,true);}}
-async function vkipCreateTest(){try{const topic=document.getElementById('vkipTestTopic').value,name=document.getElementById('vkipTestName').value.trim();if(!topic||!name)throw Error('Select topic and enter test name.');const row={topic_id:topic,name,duration_minutes:Number(document.getElementById('vkipTestDuration').value),total_marks:Number(document.getElementById('vkipTestMarks').value),negative_marks:Number(document.getElementById('vkipTestNegative').value),question_count:25};const {error}=await supabaseClient.from('vk_independent_tests').insert(row);if(error)throw error;document.getElementById('vkipTestName').value='';await vkipLoadStructure();vkipMsg('Independent package test created. Upload its questions using Excel/CSV.');}catch(e){vkipMsg('Create test failed: '+e.message,true);}}
-async function vkipImportQuestions(){try{const testId=document.getElementById('vkipQuestionTest').value,file=document.getElementById('vkipQuestionFile').files[0];if(!testId||!file)throw Error('Select a test and an Excel/CSV file.');if(!window.XLSX)throw Error('Excel import library is unavailable.');const buf=await file.arrayBuffer(),wb=XLSX.read(buf,{type:'array'}),rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:''});if(!rows.length)throw Error('No rows found in the first sheet.');const norm=s=>String(s||'').trim().toLowerCase().replace(/[\s-]+/g,'_');const out=rows.map((r,i)=>{const x={};for(const [k,v] of Object.entries(r))x[norm(k)]=v;const correct=String(x.correct_option||x.answer||'').trim().toUpperCase();if(!x.question_text||!x.option_a||!x.option_b||!x.option_c||!x.option_d||!['A','B','C','D'].includes(correct))throw Error(`Row ${i+2}: required question/options/correct_option missing.`);return {test_id:testId,question_text:String(x.question_text),option_a:String(x.option_a),option_b:String(x.option_b),option_c:String(x.option_c),option_d:String(x.option_d),explanation:String(x.explanation||''),display_order:i+1,correct_option:correct};});const {data:qs,error}=await supabaseClient.from('vk_independent_questions').insert(out.map(({correct_option,...q})=>q)).select('id');if(error)throw error;const keys=qs.map((q,i)=>({question_id:q.id,correct_option:out[i].correct_option}));const k=await supabaseClient.from('vk_independent_question_keys').insert(keys);if(k.error)throw k.error;document.getElementById('vkipQuestionFile').value='';await vkipLoadStructure();vkipMsg(`${qs.length} questions imported successfully.`);}catch(e){vkipMsg('Import failed: '+e.message,true);}}
-async function vkipDeactivateTopic(id){if(!confirm('Remove this topic? Tests and history are retained.'))return;try{const {error}=await supabaseClient.from('vk_independent_topics').update({is_active:false}).eq('id',id);if(error)throw error;await vkipLoadStructure();vkipMsg('Topic deactivated; test and attempt records retained.');}catch(e){vkipMsg(e.message,true);}}
-async function vkipDeactivateTest(id){if(!confirm('Remove this test from the active package? History is retained.'))return;try{const {error}=await supabaseClient.from('vk_independent_tests').update({is_active:false}).eq('id',id);if(error)throw error;await vkipLoadStructure();vkipMsg('Test deactivated.');}catch(e){vkipMsg(e.message,true);}}
+async function vkipLoadStructure(){
+  const id=document.getElementById('vkipSelectedPackage').value;if(!id)return;
+  document.getElementById('vkipPackageId').value=id;
+  try{
+    const {data:papers,error:pe}=await supabaseClient.from('vk_independent_papers').select('*').eq('package_id',id).order('display_order');if(pe)throw pe;
+    let topics=[],tests=[],questions=[];
+    const pids=(papers||[]).map(x=>x.id);
+    if(pids.length){const r=await supabaseClient.from('vk_independent_topics').select('*').in('paper_id',pids).order('display_order');if(r.error)throw r.error;topics=r.data||[];}
+    const tids=topics.map(x=>x.id);
+    if(tids.length){const r=await supabaseClient.from('vk_independent_tests').select('*').in('topic_id',tids).order('display_order');if(r.error)throw r.error;tests=r.data||[];}
+    const testIds=tests.map(x=>x.id);
+    if(testIds.length){const r=await supabaseClient.from('vk_independent_questions').select('id,test_id').in('test_id',testIds).eq('is_active',true);if(r.error)throw r.error;questions=r.data||[];}
+    vkipStructure=(papers||[]).map(p=>({...p,topics:topics.filter(t=>t.paper_id===p.id).map(t=>({...t,tests:tests.filter(te=>te.topic_id===t.id).map(te=>({...te,qcount:questions.filter(q=>q.test_id===te.id).length}))}))}));
+    const topicSel=document.getElementById('vkipTestTopic');
+    topicSel.innerHTML='<option value="">Select topic</option>'+topics.filter(t=>t.is_active).map(t=>`<option value="${t.id}">${vkipEsc((papers.find(p=>p.id===t.paper_id)||{}).name)} · ${vkipEsc(t.name)}</option>`).join('');
+    const testSel=document.getElementById('vkipQuestionTest');
+    const previousTest=testSel.value;
+    testSel.innerHTML='<option value="">Select test</option>'+tests.map(t=>`<option value="${t.id}">${vkipEsc(t.name)} · ${t.is_active?'Active':'Draft / Inactive'}</option>`).join('');
+    if(tests.some(t=>t.id===previousTest))testSel.value=previousTest;
+    document.getElementById('vkipStructure').innerHTML=vkipStructure.map(p=>`<section class="vk-topic-admin-paper"><h3>${vkipEsc(p.name)}</h3>${p.topics.map(t=>`<div class="vk-topic-admin-topic"><strong>${vkipEsc(t.name)}</strong> <button type="button" onclick="vkipDeactivateTopic('${t.id}')">Remove Topic</button>${t.tests.map(te=>`<div class="vk-topic-admin-test">• ${vkipEsc(te.name)} · ${te.qcount}/${Number(te.question_count||0)} questions · ${te.is_active?'Active':'Draft'} <button type="button" onclick="vkipSetTestActive('${te.id}',${!te.is_active})">${te.is_active?'Deactivate':'Validate & Activate'}</button><button type="button" onclick="vkipDeactivateTest('${te.id}')">Remove Test</button></div>`).join('')}</div>`).join('')||'<p>No topics.</p>'}</section>`).join('')||'<p>No papers/topics yet.</p>';
+  }catch(e){vkipMsg('Structure load failed: '+(e.message||e),true);}
+}
+async function vkipSetTestActive(testId,activate){
+  try{
+    if(!vkAdminAuthorized)throw Error('Admin authorization required.');
+    if(activate){
+      const {data:test,error:te}=await supabaseClient.from('vk_independent_tests').select('id,question_count').eq('id',testId).single();if(te)throw te;
+      const {data:qs,error:qe}=await supabaseClient.from('vk_independent_questions').select('id').eq('test_id',testId).eq('is_active',true);if(qe)throw qe;
+      const qids=(qs||[]).map(q=>q.id);const expected=Number(test.question_count||0);
+      if(!expected||qids.length!==expected)throw Error(`This test requires ${expected} questions; currently ${qids.length} active questions are available.`);
+      const {data:keys,error:ke}=await supabaseClient.from('vk_independent_question_keys').select('question_id').in('question_id',qids);if(ke)throw ke;
+      if((keys||[]).length!==expected)throw Error(`This test requires ${expected} correct-answer keys; currently ${(keys||[]).length} are available.`);
+    }
+    const {error}=await supabaseClient.from('vk_independent_tests').update({is_active:activate,updated_at:new Date().toISOString()}).eq('id',testId);if(error)throw error;
+    await vkipLoadStructure();vkipMsg(activate?'Test validated and activated.':'Test deactivated.');
+  }catch(e){vkipMsg('Test status update failed: '+(e.message||e),true);}
+}
+
+async function vkipAddTopic(){try{if(!vkAdminAuthorized)throw Error('Admin authorization required.');const pkg=document.getElementById('vkipSelectedPackage').value,name=document.getElementById('vkipTopicName').value.trim();if(!pkg)throw Error('Select a package first.');if(!name)throw Error('Enter topic name.');const paperName=document.getElementById('vkipPaper').value;let {data:paper,error}=await supabaseClient.from('vk_independent_papers').select('id').eq('package_id',pkg).eq('name',paperName).maybeSingle();if(error)throw error;if(!paper){const r=await supabaseClient.from('vk_independent_papers').insert({package_id:pkg,name:paperName,display_order:paperName==='Paper-I'?1:2}).select('id').single();if(r.error)throw r.error;paper=r.data;}const r=await supabaseClient.from('vk_independent_topics').insert({paper_id:paper.id,name,display_order:Number(document.getElementById('vkipTopicOrder').value||1)});if(r.error)throw r.error;document.getElementById('vkipTopicName').value='';await vkipLoadStructure();vkipMsg('Topic added.');}catch(e){vkipMsg('Add topic failed: '+e.message,true);}}
+async function vkipCreateTest(){try{if(!vkAdminAuthorized)throw Error('Admin authorization required.');const topic=document.getElementById('vkipTestTopic').value,name=document.getElementById('vkipTestName').value.trim();if(!topic||!name)throw Error('Select topic and enter test name.');const row={topic_id:topic,name,duration_minutes:Number(document.getElementById('vkipTestDuration').value),total_marks:Number(document.getElementById('vkipTestMarks').value),negative_marks:Number(document.getElementById('vkipTestNegative').value),question_count:25};const {error}=await supabaseClient.from('vk_independent_tests').insert(row);if(error)throw error;document.getElementById('vkipTestName').value='';await vkipLoadStructure();vkipMsg('Independent package test created. Upload its questions using Excel/CSV.');}catch(e){vkipMsg('Create test failed: '+e.message,true);}}
+async function vkipImportQuestions(){
+  let insertedQuestionIds=[];
+  try{
+    if(!vkAdminAuthorized)throw Error('Admin authorization required. Please sign in with the VK Exams admin account.');
+    if(!supabaseClient)throw Error('Supabase is not connected.');
+    const testId=document.getElementById('vkipQuestionTest').value;
+    const file=document.getElementById('vkipQuestionFile').files[0];
+    if(!testId||!file)throw Error('Select a test and an Excel/CSV file.');
+    if(!window.XLSX)throw Error('Excel import library is unavailable. Refresh the page and try again.');
+    const {data:test,error:testError}=await supabaseClient.from('vk_independent_tests').select('id,name,question_count').eq('id',testId).single();
+    if(testError)throw testError;
+    const {count:existingCount,error:existingError}=await supabaseClient.from('vk_independent_questions').select('id',{count:'exact',head:true}).eq('test_id',testId);
+    if(existingError)throw existingError;
+    if(Number(existingCount||0)>0)throw Error(`This test already contains ${existingCount} question(s). Import stopped to prevent duplicate questions. Remove/replace the existing test questions through an approved admin workflow first.`);
+    const buf=await file.arrayBuffer();
+    const wb=XLSX.read(buf,{type:'array'});
+    if(!wb.SheetNames?.length)throw Error('The uploaded file does not contain a worksheet.');
+    const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:'',raw:false});
+    if(!rows.length)throw Error('No question rows found in the first sheet.');
+    const norm=s=>String(s||'').trim().toLowerCase().replace(/[\s-]+/g,'_');
+    const out=rows.map((r,i)=>{
+      const x={};for(const [k,v] of Object.entries(r))x[norm(k)]=v;
+      const val=k=>String(x[k]??'').trim();
+      const correct=val('correct_option')||val('correct_answer')||val('answer')||val('key');
+      const answer=correct.toUpperCase().replace(/^OPTION\s+/, '').replace(/^OPTION_/, '');
+      if(!val('question_text'))throw Error(`Row ${i+2}: question_text is empty.`);
+      for(const k of ['option_a','option_b','option_c','option_d'])if(!val(k))throw Error(`Row ${i+2}: ${k} is empty.`);
+      if(!['A','B','C','D'].includes(answer))throw Error(`Row ${i+2}: correct_option must be A, B, C or D.`);
+      return {test_id:testId,question_text:val('question_text'),option_a:val('option_a'),option_b:val('option_b'),option_c:val('option_c'),option_d:val('option_d'),explanation:val('explanation'),display_order:i+1,correct_option:answer};
+    });
+    const expected=Number(test.question_count||0);
+    if(expected>0&&out.length!==expected)throw Error(`${test.name} requires exactly ${expected} questions. Your file contains ${out.length}.`);
+    const payload=out.map(({correct_option,...q})=>q);
+    const {data:qs,error}=await supabaseClient.from('vk_independent_questions').insert(payload).select('id');
+    if(error)throw error;
+    insertedQuestionIds=(qs||[]).map(q=>q.id);
+    if(insertedQuestionIds.length!==out.length)throw Error('Question insert count did not match the uploaded row count.');
+    const keys=qs.map((q,i)=>({question_id:q.id,correct_option:out[i].correct_option}));
+    const keyResult=await supabaseClient.from('vk_independent_question_keys').insert(keys);
+    if(keyResult.error)throw keyResult.error;
+    const {data:verifyKeys,error:verifyError}=await supabaseClient.from('vk_independent_question_keys').select('question_id').in('question_id',insertedQuestionIds);
+    if(verifyError)throw verifyError;
+    if((verifyKeys||[]).length!==out.length)throw Error('Answer-key verification failed. Please check the imported test before activating it.');
+    document.getElementById('vkipQuestionFile').value='';
+    await vkipLoadStructure();
+    vkipMsg(`${out.length} questions and ${out.length} answer keys imported successfully for ${test.name}. Next, click Validate & Activate for this test.`);
+  }catch(e){
+    if(insertedQuestionIds.length){
+      const rollback=await supabaseClient.from('vk_independent_questions').delete().in('id',insertedQuestionIds);
+      if(rollback.error){vkipMsg(`Import failed: ${e.message}. WARNING: automatic cleanup also failed (${rollback.error.message}); check this test's question and answer-key rows before retrying.`,true);return;}
+    }
+    vkipMsg('Import failed: '+(e.message||e),true);
+  }
+}
+
+async function vkipDeactivateTopic(id){if(!vkAdminAuthorized){vkipMsg('Admin authorization required.',true);return;}if(!confirm('Remove this topic? Tests and history are retained.'))return;try{const {error}=await supabaseClient.from('vk_independent_topics').update({is_active:false}).eq('id',id);if(error)throw error;await vkipLoadStructure();vkipMsg('Topic deactivated; test and attempt records retained.');}catch(e){vkipMsg(e.message,true);}}
+async function vkipDeactivateTest(id){if(!vkAdminAuthorized){vkipMsg('Admin authorization required.',true);return;}if(!confirm('Remove this test from the active package? History is retained.'))return;try{const {error}=await supabaseClient.from('vk_independent_tests').update({is_active:false}).eq('id',id);if(error)throw error;await vkipLoadStructure();vkipMsg('Test deactivated.');}catch(e){vkipMsg(e.message,true);}}
 async function vkipLoadStudentPackages(){
   const host=document.getElementById('vkTopicPaperArea');
   const buy=document.getElementById('vkTopicBuyButton');
