@@ -4138,8 +4138,8 @@ id="solutions">
         <div id="vkipPackages" class="vkip-admin-package-list"><p>Loading packages…</p></div>
       </div>
 
-      <div class="vkip-manager-section">
-        <div class="vkip-section-title"><span>2</span><div><strong>Select Package & Build Structure</strong><small>ముందుగా Package ఎంచుకోండి. తర్వాత Paper, Topic, Test క్రమంలో సృష్టించండి.</small></div></div>
+      <details class="vkip-manager-section vkip-step-accordion">
+        <summary class="vkip-section-title"><span>2</span><div><strong>Select Package & Build Structure</strong><small>ముందుగా Package ఎంచుకోండి. తర్వాత Paper, Topic, Test క్రమంలో సృష్టించండి.</small></div></summary>
         <div class="vkip-workflow-grid">
           <div class="vkip-field vkip-full"><label for="vkipSelectedPackage">Selected Package</label><select id="vkipSelectedPackage" onchange="vkipLoadStructure()"><option value="">Select a package</option></select></div>
           <div class="vkip-field"><label for="vkipPaper">Paper</label><select id="vkipPaper"><option>Paper-I</option><option>Paper-II</option></select></div>
@@ -4147,10 +4147,10 @@ id="solutions">
           <div class="vkip-field"><label for="vkipTopicOrder">Display Order</label><input id="vkipTopicOrder" type="number" min="1" value="1"></div>
           <div class="vkip-field vkip-action-field"><label>&nbsp;</label><button type="button" onclick="vkipAddTopic()">+ Add Topic</button></div>
         </div>
-      </div>
+      </details>
 
-      <div class="vkip-manager-section">
-        <div class="vkip-section-title"><span>3</span><div><strong>Create Test</strong><small>ఎంచుకున్న Topic కింద Test సృష్టించండి. సృష్టించిన వెంటనే అదే Test Questions Upload‌కు Select అవుతుంది.</small></div></div>
+      <details class="vkip-manager-section vkip-step-accordion">
+        <summary class="vkip-section-title"><span>3</span><div><strong>Create Test</strong><small>ఎంచుకున్న Topic కింద Test సృష్టించండి. సృష్టించిన వెంటనే అదే Test Questions Upload‌కు Select అవుతుంది.</small></div></summary>
         <div class="vkip-workflow-grid vkip-test-grid">
           <div class="vkip-field vkip-full"><label for="vkipTestTopic">Topic for this Test</label><select id="vkipTestTopic"><option value="">ముందుగా Package ఎంచుకోండి</option></select></div>
           <div class="vkip-field"><label for="vkipTestName">Test Name</label><input id="vkipTestName" placeholder="ఉదా: Ramayanam - Test 1"></div>
@@ -4159,26 +4159,26 @@ id="solutions">
           <div class="vkip-field"><label for="vkipTestNegative">Negative Marks</label><input id="vkipTestNegative" type="number" min="0" step="0.0001" value="0.3333"></div>
           <div class="vkip-field vkip-action-field"><label>&nbsp;</label><button type="button" onclick="vkipCreateTest()">Create Test</button></div>
         </div>
-      </div>
+      </details>
 
       <div class="vkip-manager-section vkip-upload-section">
-        <div class="vkip-section-title"><span>4</span><div><strong>Upload Questions to Selected Test</strong><small>ఈ Upload Independent Package Test‌కే వర్తిస్తుంది. Free / Paid Test Upload‌ను తాకదు.</small></div></div>
+        <div class="vkip-section-title"><span>4</span><div><strong>Use Existing Bulk Question Upload</strong><small>ఇప్పటికే ఉన్న Admin Bulk Upload Excel/CSV/JSON Preview విధానాన్నే ఉపయోగించండి. Target Test మాత్రమే Independent Package‌లో Save అవుతుంది.</small></div></div>
         <div class="vkip-workflow-grid">
-          <div class="vkip-field vkip-full"><label for="vkipQuestionTest">Choose Exact Test</label><select id="vkipQuestionTest"><option value="">Select a test</option></select></div>
-          <div class="vkip-field vkip-full"><label for="vkipQuestionFile">Excel / CSV File</label><input id="vkipQuestionFile" type="file" accept=".xlsx,.xls,.csv"></div>
-          <div class="vkip-field vkip-action-field"><label>&nbsp;</label><button type="button" onclick="vkipImportQuestions()">Import Questions</button></div>
+          <div class="vkip-field vkip-full"><label for="vkipQuestionTest">Choose Exact Independent Test</label><select id="vkipQuestionTest"><option value="">Select a test</option></select></div>
+          <div class="vkip-field vkip-full"><button type="button" onclick="vkipOpenSharedBulkUpload()">Open Existing Bulk Question Upload</button></div>
         </div>
-        <p class="vk-admin-hint">Excel columns: question_text, option_a, option_b, option_c, option_d, correct_option (A/B/C/D), explanation. One row = one question. Use a separate file for each Test.</p>
+        <p class="vk-admin-hint">ముందుగా Test ఎంచుకోండి. తర్వాత క్రింద ఉన్న Bulk Question Upload‌లో Excel/CSV లేదా JSON Preview చేసి Apply చేయండి. 25 Questions + Answer Keys Independent tables‌లోనే Save అవుతాయి.</p>
+        <div id="vkipSharedUploadStatus" class="vkip-admin-status" role="status" aria-live="polite"></div>
       </div>
 
-      <div class="vkip-manager-section">
-        <div class="vkip-section-title"><span>5</span><div><strong>Package Structure & Test Status</strong><small>ప్రతి Test‌లో ఎన్ని Questions Import అయ్యాయో ఇక్కడ చూడవచ్చు.</small></div></div>
+      <details class="vkip-manager-section vkip-structure-accordion">
+        <summary class="vkip-section-title"><span>5</span><div><strong>Package Structure & Test Status</strong><small>Paper లేదా Topic‌ను తెరిస్తే దాని Tests మాత్రమే కనిపిస్తాయి.</small></div></summary>
         <div id="vkipStructure" class="vk-topic-admin-structure">Select a package to load its Papers, Topics and Tests.</div>
-      </div>
+      </details>
     </section>
 
-    <div class="vk-admin-panel">
-      <h2 style="margin-bottom:16px">Test Details</h2>
+    <details class="vk-admin-panel vk-admin-accordion">
+      <summary class="vk-admin-accordion-title">Test Details</summary>
       <div class="vk-admin-grid">
         <div class="vk-admin-field">
           <label for="vkAdminTestType">Test Type</label>
@@ -4273,13 +4273,13 @@ id="solutions">
         </div>
       </div>
       <p id="vkAdminNamingHint" class="vk-admin-hint" style="margin-top:12px">Free tests receive automatic topic-wise titles, for example: Ramayanam - Test 2. Paid tests are numbered separately within each selected course test series.</p>
-    </div>
+    </details>
 
 
-    <div class="vk-admin-panel" id="vkAdminBulkImportPanel">
-      <div class="vk-admin-qtop">
+    <details class="vk-admin-panel vk-admin-accordion" id="vkAdminBulkImportPanel">
+      <summary class="vk-admin-accordion-title">Bulk Question Upload – Free & Paid</summary><div class="vk-admin-qtop">
         <div>
-          <h2>Bulk Question Upload – Free & Paid</h2>
+          
           <p class="vk-admin-hint">Upload an Excel (.xlsx), CSV file, or paste JSON to import many questions at once.</p>
         </div>
         <span class="badge">Bulk Import</span>
@@ -4314,18 +4314,18 @@ id="solutions">
         <button type="button" class="vk-admin-btn vk-admin-btn-primary" onclick="vkAdminApplyBulkQuestions()">Use These Questions in Test</button>
         <span class="vk-admin-hint">This fills the question editor. Nothing is published until you click Publish Mock Test.</span>
       </div>
-    </div>
+    </details>
 
-    <div class="vk-admin-panel">
-      <div class="vk-admin-qtop">
-        <h2>Questions</h2>
+    <details class="vk-admin-panel vk-admin-accordion">
+      <summary class="vk-admin-accordion-title">Questions</summary><div class="vk-admin-qtop">
+        
         <strong id="vkAdminQuestionCount">1 question</strong>
       </div>
       <div id="vkAdminQuestions"></div>
       <div class="vk-admin-actions">
         <button type="button" class="vk-admin-btn vk-admin-btn-secondary" onclick="vkAdminAddQuestion()">+ Add Question</button>
       </div>
-    </div>
+    </details>
 
     <div class="vk-admin-panel">
       <div class="vk-admin-actions">
@@ -9951,8 +9951,21 @@ async function vkAdminParseBulkFile(){
     }
 }
 
-function vkAdminApplyBulkQuestions(){
+async function vkAdminApplyBulkQuestions(){
     if(!vkAdminBulkParsedQuestions.length)return;
+    if(vkipSharedBulkTargetTestId){
+        const applyWrap=document.getElementById("vkAdminBulkApplyWrap");
+        const feedback=document.getElementById("vkAdminBulkFeedback");
+        try{
+            await vkipSaveSharedBulkQuestions();
+            if(feedback)feedback.innerHTML='<div class="vk-bulk-success">Independent Package Questions and Answer Keys saved. Test remains Draft until validation.</div>';
+            if(applyWrap)applyWrap.style.display="none";
+            vkAdminBulkParsedQuestions=[];
+        }catch(error){
+            if(feedback)feedback.innerHTML='<div class="vk-bulk-error">'+vkAdminEscape(error.message||String(error))+'</div>';
+        }
+        return;
+    }
 
     const isPaidEdit =
         document.getElementById("vkAdminTestType")?.value === "paid" &&
@@ -15504,15 +15517,20 @@ async function vkipLoadStructure(){
     }).join('');
     if(currentTest && tests.some(t=>t.id===currentTest))testSel.value=currentTest;
     document.getElementById('vkipStructure').innerHTML=vkipStructure.map(p=>`
-      <section class="vk-topic-admin-paper"><h3>${vkipEsc(p.name)}</h3>
-      ${p.topics.map(t=>`<div class="vk-topic-admin-topic"><strong>${vkipEsc(t.name)}</strong>
-        <button type="button" onclick="vkipDeactivateTopic('${t.id}')">Deactivate Topic</button>
-        ${t.tests.map(te=>`<div class="vk-topic-admin-test">• <strong>${vkipEsc(te.name)}</strong> · ${te.qcount}/${Number(te.question_count||25)} questions · ${te.is_active?'Active':'Draft'}
-          <button type="button" onclick="vkipSelectQuestionTest('${te.id}')">Upload to this Test</button>
-          ${te.is_active?`<button type="button" onclick="vkipDeactivateTest('${te.id}')">Deactivate</button>`:''}
-          <button type="button" onclick="vkipValidateAndActivate('${te.id}')">Validate & Activate</button>
-        </div>`).join('')||'<p class="vkip-empty">No tests under this topic yet.</p>'}
-      </div>`).join('')||'<p class="vkip-empty">No topics under this Paper yet.</p>'}</section>`).join('')||'<p class="vkip-empty">No Papers or Topics found. Add a topic above.</p>';
+      <details class="vkip-paper-accordion">
+        <summary><strong>${vkipEsc(p.name)}</strong><span>${p.topics.length} topics</span></summary>
+        <div class="vkip-paper-content">
+        ${p.topics.map(t=>`<details class="vkip-topic-accordion">
+          <summary><strong>${vkipEsc(t.name)}</strong><span>${t.tests.length} tests</span></summary>
+          <div class="vkip-topic-content">
+            <div class="vkip-topic-actions"><button type="button" onclick="vkipDeactivateTopic('${t.id}')">Deactivate Topic</button></div>
+            ${t.tests.map(te=>`<div class="vkip-test-row"><div class="vkip-test-meta"><strong>${vkipEsc(te.name)}</strong><small>${te.qcount}/${Number(te.question_count||25)} questions · ${te.is_active?'Active':'Draft'}</small></div>
+              <div class="vkip-test-actions"><button type="button" onclick="vkipSelectQuestionTest('${te.id}')">Select for Upload</button>${te.is_active?`<button type="button" onclick="vkipDeactivateTest('${te.id}')">Deactivate</button>`:''}<button type="button" onclick="vkipValidateAndActivate('${te.id}')">Validate & Activate</button></div>
+            </div>`).join('')||'<p class="vkip-empty">No tests under this topic yet.</p>'}
+          </div>
+        </details>`).join('')||'<p class="vkip-empty">No topics under this Paper yet.</p>'}
+        </div>
+      </details>`).join('')||'<p class="vkip-empty">No Papers or Topics found. Add a topic above.</p>';
   }catch(e){vkipMsg('Structure load failed: '+(e.message||e),true);}
 }
 async function vkipAddTopic(){
@@ -15564,6 +15582,50 @@ async function vkipCreateTest(){
     document.getElementById('vkipQuestionFile').focus();
     vkipMsg('Test created. It is selected in Step 4. Now choose its Excel/CSV file and import questions.');
   }catch(e){vkipMsg('Create test failed: '+(e.message||e),true);}
+}
+let vkipSharedBulkTargetTestId = null;
+function vkipOpenSharedBulkUpload(){
+  const testId=document.getElementById('vkipQuestionTest')?.value;
+  const status=document.getElementById('vkipSharedUploadStatus');
+  if(!testId){if(status)status.textContent='ముందుగా Choose Exact Independent Test లో Test ఎంచుకోండి.';return;}
+  vkipSharedBulkTargetTestId=testId;
+  const panel=document.getElementById('vkAdminBulkImportPanel');
+  if(panel){
+    const title=panel.querySelector('.vk-admin-qtop h2');
+    if(title)title.textContent='Bulk Question Upload – Independent Package';
+    const hint=panel.querySelector('.vk-admin-qtop .vk-admin-hint');
+    if(hint)hint.textContent='Selected Independent Test‌కు మాత్రమే Questions import అవుతాయి. Excel/CSV లేదా JSON upload చేసి Preview చేయండి.';
+    panel.scrollIntoView({behavior:'smooth',block:'start'});
+  }
+  if(status)status.textContent='Independent Test selected. ఇప్పుడు క్రింది Bulk Upload‌లో file/JSON Preview చేసి Apply చేయండి.';
+}
+async function vkipSaveSharedBulkQuestions(){
+  const testId=vkipSharedBulkTargetTestId;
+  if(!testId)throw new Error('Independent Test target not selected. Go to Independent Package Manager and select the exact Test.');
+  const questions=vkAdminBulkParsedQuestions||[];
+  if(questions.length!==25)throw new Error(`ఈ Test‌కు ఖచ్చితంగా 25 Questions అవసరం. ప్రస్తుతం ${questions.length} ఉన్నాయి.`);
+  const existing=await supabaseClient.from('vk_independent_questions').select('id',{count:'exact',head:true}).eq('test_id',testId);
+  if(existing.error)throw existing.error;
+  if((existing.count||0)>0)throw new Error(`ఈ Test‌లో ఇప్పటికే ${existing.count} Questions ఉన్నాయి. Duplicate import ఆపబడింది.`);
+  const payload=questions.map((q,i)=>{
+    const correct=String(q.correct_option||'').trim().toUpperCase();
+    if(!q.question_text||!q.option_a||!q.option_b||!q.option_c||!q.option_d||!['A','B','C','D'].includes(correct))
+      throw new Error(`Question ${i+1}: question, four options, and correct answer A/B/C/D తప్పనిసరి.`);
+    return {test_id:testId,question_text:String(q.question_text).trim(),option_a:String(q.option_a).trim(),option_b:String(q.option_b).trim(),option_c:String(q.option_c).trim(),option_d:String(q.option_d).trim(),explanation:String(q.explanation||''),display_order:i+1,correct_option:correct};
+  });
+  const inserted=await supabaseClient.from('vk_independent_questions').insert(payload.map(({correct_option,...q})=>q)).select('id');
+  if(inserted.error)throw inserted.error;
+  const ids=(inserted.data||[]).map(x=>x.id);
+  if(ids.length!==25)throw new Error('Question insert count mismatch. Test remains Draft; verify database before retrying.');
+  const keys=await supabaseClient.from('vk_independent_question_keys').insert(ids.map((id,i)=>({question_id:id,correct_option:payload[i].correct_option})));
+  if(keys.error){
+    await supabaseClient.from('vk_independent_questions').delete().in('id',ids);
+    throw new Error('Answer key insert failed; rollback attempted: '+keys.error.message);
+  }
+  await vkipLoadStructure();
+  const status=document.getElementById('vkipSharedUploadStatus');
+  if(status)status.textContent='25 Questions + 25 Answer Keys successfully saved to the selected Independent Test. Test is still Draft.';
+  vkipSharedBulkTargetTestId=null;
 }
 async function vkipImportQuestions(){
   let insertedQuestionIds=[];
@@ -16029,6 +16091,36 @@ body:has(#examPage.active) > footer{
 .vk-topic-admin-structure{margin-top:8px}
 .vk-topic-admin-test{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
 .vk-topic-admin-test button{font-size:11px;font-weight:700}
-@media(max-width:850px){.vkip-workflow-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+.vkip-manager-section{box-shadow:0 5px 18px rgba(20,45,90,.045)}
+.vkip-step-accordion>.vkip-section-title,.vkip-structure-accordion>.vkip-section-title{list-style:none;cursor:pointer;position:relative;padding-right:28px}
+.vkip-step-accordion>.vkip-section-title::-webkit-details-marker,.vkip-structure-accordion>.vkip-section-title::-webkit-details-marker{display:none}
+.vkip-step-accordion>.vkip-section-title:after,.vkip-structure-accordion>.vkip-section-title:after{content:"+";position:absolute;right:4px;top:2px;font-size:22px;color:#315b9c;font-weight:700}
+.vkip-step-accordion[open]>.vkip-section-title:after,.vkip-structure-accordion[open]>.vkip-section-title:after{content:"−"}
+.vkip-structure-accordion{background:#fff}
+.vkip-paper-accordion,.vkip-topic-accordion{border:1px solid #dfe7f2;border-radius:12px;background:#fff;margin:10px 0;overflow:hidden}
+.vkip-paper-accordion>summary,.vkip-topic-accordion>summary{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;list-style:none;color:#17345b}
+.vkip-paper-accordion>summary::-webkit-details-marker,.vkip-topic-accordion>summary::-webkit-details-marker{display:none}
+.vkip-paper-accordion>summary span,.vkip-topic-accordion>summary span{font-size:11px;color:#64748b;background:#eef3fa;padding:5px 9px;border-radius:20px;white-space:nowrap}
+.vkip-paper-accordion[open]>summary{background:#edf3ff}
+.vkip-topic-accordion[open]>summary{background:#f7f9fc}
+.vkip-paper-content{padding:4px 12px 12px}
+.vkip-topic-content{padding:4px 12px 12px}
+.vkip-topic-actions{display:flex;justify-content:flex-end;padding:4px 0 8px}
+.vkip-topic-actions button,.vkip-test-actions button{border:1px solid #d5deea;background:#f4f7fb;color:#294568;border-radius:8px;padding:7px 10px;font-size:11px;font-weight:700;cursor:pointer}
+.vkip-test-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px;border:1px solid #e8edf4;border-radius:10px;margin:8px 0;background:#fff}
+.vkip-test-meta{display:grid;gap:4px}.vkip-test-meta small{color:#64748b;font-size:11px}
+.vkip-test-actions{display:flex;gap:6px;flex-wrap:wrap}
+.vkip-test-actions button:last-child{background:#e9f7ef;border-color:#c6e8d2;color:#17633b}
+.vkip-shared-upload-target{border:1px solid #b9d8d0;border-radius:10px;padding:12px;background:#f6fcf9}
+#vkAdminBulkImportPanel{scroll-margin-top:70px}
+@media(max-width:650px){.vkip-test-row{align-items:flex-start;flex-direction:column}.vkip-test-actions{width:100%}}
+
+.vk-admin-accordion{display:block}
+.vk-admin-accordion-title{display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;list-style:none;font-size:17px;font-weight:850;color:#18345c;padding:4px 2px 14px}
+.vk-admin-accordion-title::-webkit-details-marker{display:none}
+.vk-admin-accordion-title:after{content:"+";font-size:22px;color:#315b9c;margin-left:auto}
+.vk-admin-accordion[open]>.vk-admin-accordion-title:after{content:"−"}
+\n@media(max-width:850px){.vkip-workflow-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:560px){#vkIndependentPackageAdmin.vk-independent-manager{padding:13px}.vkip-manager-section{padding:12px}.vkip-workflow-grid{grid-template-columns:1fr}.vkip-full{grid-column:auto}.vkip-package-row{align-items:flex-start}.vkip-package-buttons{width:100%}}
 </style>
