@@ -3745,7 +3745,7 @@ class="test-list">
         <button type="button" class="hall-tool" onclick="toggleQuestionPalette()">▤ <span id="paletteToggleText">Hide Palette</span></button>
         <button type="button" class="hall-tool" onclick="toggleExamPause()" id="pauseExamButton">Ⅱ Pause</button>
         <div class="hall-timer"><small>TIME LEFT</small><strong id="timer">15:00</strong></div>
-        <button type="button" class="hall-submit" onclick="submitExam()">Submit</button>
+        <button type="button" class="hall-submit" onclick="confirmSubmitExam()">Submit</button>
       </div>
     </header>
 
@@ -3801,7 +3801,7 @@ class="test-list">
           <span><i class="legend-review"></i> Marked for review</span>
           <span><i class="legend-empty"></i> Not answered</span>
         </div>
-        <button type="button" class="navigator-submit" onclick="submitExam()">Submit / Finish test</button>
+        <button type="button" class="navigator-submit" onclick="confirmSubmitExam()">Submit Test</button>
       </aside>
     </div>
 
@@ -13319,7 +13319,7 @@ function renderQuestion(){
     const previousButton=$("questionPreviousButton");
     const nextButton=$("questionNextButton");
     if(previousButton) previousButton.disabled=currentQuestionIndex===0;
-    if(nextButton) nextButton.textContent=currentQuestionIndex===total-1?"Finish Test →":"Save & Next →";
+    if(nextButton) nextButton.textContent=currentQuestionIndex===total-1?"Submit Test →":"Save & Next →";
     const englishButton=$("languageEnglishButton");
     const teluguButton=$("languageTeluguButton");
     if(englishButton) englishButton.classList.toggle("active",examLanguage==="en");
@@ -13427,20 +13427,15 @@ function nextQuestion(){
         return;
     }
 
-    // LAST QUESTION
-    const popup =
-        document.getElementById(
-            "lastQuestionPopup"
-        );
+    // Last question: ask for confirmation, then submit immediately.
+    confirmSubmitExam();
 
-    if(popup){
+}
 
-        popup.classList.add("active");
-
-        popup.style.display = "flex";
-
-    }
-
+function confirmSubmitExam(){
+    if(!examQuestions.length) return;
+    const confirmed = window.confirm("Are you sure you want to submit?");
+    if(confirmed) submitExam();
 }
 
 function closeLastQuestionPopup(){
@@ -14403,27 +14398,17 @@ function reattempt(){
         }
     }
 
-    // Free Mock Tests also create a server-side attempt ID. Therefore,
-    // identify the test type from its persisted Free Mock context BEFORE
-    // checking currentAttemptId; otherwise a Free Mock is misrouted to the
-    // paid-test (course/paper/testNumber) handler and shows a false error.
-    if(currentFreeMockTestId || currentFreeMockNumber){
-        if(!currentCourse || !currentFreeMockNumber){
-            toast("ఈ Free Mock Test వివరాలు లభించలేదు. Test Results నుంచి పరీక్షను మళ్లీ తెరవండి.");
-            return;
-        }
-        // startFreeMock resolves the published test again and creates a NEW
-        // attempt; the previous attempt/result remains in the database.
-        startFreeMock(Number(currentFreeMockNumber));
-        return;
-    }
-
     if(currentAttemptId || (currentPaper && currentCourse && currentTestNumber)){
         if(!currentCourse || !currentPaper || !currentTestNumber){
             toast("ఈ పరీక్ష వివరాలు తిరిగి పొందలేకపోయాము. Test Results నుంచి పరీక్షను తెరిచి Reattempt చేయండి.");
             return;
         }
         openLockedTest(currentTestNumber);
+        return;
+    }
+
+    if(currentFreeMockNumber){
+        startFreeMock(currentFreeMockNumber);
         return;
     }
 
