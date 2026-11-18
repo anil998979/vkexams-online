@@ -5335,39 +5335,14 @@ async function openFreeMocks(addHistory = true){
         }
     }
 
-    // Always show the three public exam categories, even when an anonymous
-    // Supabase request is delayed or a category row is temporarily omitted.
-    // This is display-only fallback; it does not create or modify database rows.
-    const requiredFreeMockCourses = [
-        ["APPSC", "🏛️"],
-        ["Endowment Officer", "🛕"],
-        ["High Court", "⚖️"]
-    ];
-    let courses = requiredFreeMockCourses.map(item => [...item]);
+    const fallbackCourses = [["Endowment Officer","🛕"],["APPSC","🏛️"]];
+    let courses = fallbackCourses;
     try {
         if (supabaseClient) {
-            const {data,error} = await supabaseClient
-                .from("courses")
-                .select("name,icon,is_active,display_order")
-                .eq("is_active",true)
-                .order("display_order",{ascending:true});
-            if (error) {
-                console.warn("Public course list could not be refreshed; showing the three standard categories.", error);
-            } else if (Array.isArray(data)) {
-                const courseMap = new Map(courses.map(item => [item[0].trim().toLowerCase(), item]));
-                data.forEach(c => {
-                    const key = String(c.name || "").trim().toLowerCase();
-                    if (courseMap.has(key)) {
-                        const fallback = courseMap.get(key);
-                        fallback[1] = c.icon || fallback[1];
-                    }
-                });
-                courses = requiredFreeMockCourses.map(item => courseMap.get(item[0].toLowerCase()) || [...item]);
-            }
+            const {data,error} = await supabaseClient.from("courses").select("name,icon,is_active,display_order").eq("is_active",true).order("display_order",{ascending:true});
+            if (!error && Array.isArray(data) && data.length) courses = data.map(c=>[c.name,c.icon || (c.name.includes("Endowment")?"🛕":"🏛️")]);
         }
-    } catch(e) {
-        console.warn("Dynamic free mock categories unavailable; showing standard categories.",e);
-    }
+    } catch(e) { console.warn("Dynamic free mock categories unavailable; using fallback.",e); }
 
     $("freeMocks").classList.remove("mock-list-mode");
     $("freeMockCourses").className = "choice-grid";
@@ -5396,10 +5371,8 @@ async function openFreeMocks(addHistory = true){
 
    async function preloadFreeMockData(course){
 
-    window.__vkFreeMockLoadError = "";
     if(!supabaseClient){
-        window.__vkFreeMockLoadError = "Supabase client is not initialized.";
-        return null;
+        return;
     }
 
     try{
@@ -5425,9 +5398,11 @@ async function openFreeMocks(addHistory = true){
                 .single();
 
             if(courseError || !courseData){
-                window.__vkFreeMockLoadError = courseError?.message || "Course was not found or is not publicly readable.";
-                console.error("Preload course error:", courseError);
-                return null;
+                console.error(
+                    "Preload course error:",
+                    courseError
+                );
+                return;
             }
 
             const {
@@ -5441,9 +5416,11 @@ async function openFreeMocks(addHistory = true){
                 .single();
 
             if(seriesError || !seriesData){
-                window.__vkFreeMockLoadError = seriesError?.message || "Free Mock Tests series was not found or is not publicly readable.";
-                console.error("Preload series error:", seriesError);
-                return null;
+                console.error(
+                    "Preload series error:",
+                    seriesError
+                );
+                return;
             }
 
             cache.courseId =
@@ -5488,9 +5465,11 @@ async function openFreeMocks(addHistory = true){
             );
 
         if(testError){
-            window.__vkFreeMockLoadError = testError.message || "Free tests could not be read publicly.";
-            console.error("Preload tests error:", testError);
-            return null;
+            console.error(
+                "Preload tests error:",
+                testError
+            );
+            return;
         }
 
         cache.tests = {};
@@ -5610,7 +5589,6 @@ async function openFreeMocks(addHistory = true){
             error
         );
 
-        window.__vkFreeMockLoadError = error?.message || "Unable to load Free Mock Tests.";
         toast("Unable to load Free Mock Tests.");
         return null;
 
@@ -5709,11 +5687,10 @@ async function openFreeMockTests(course, addHistory = true, selectedTestNumber =
     let html = "";
 
     if(!tests.length){
-        const loadError = String(window.__vkFreeMockLoadError || "").trim();
         html = `
             <div class="free-mock-empty">
-                <strong>${loadError ? "Free Mock Tests could not be loaded." : "No free mock tests available yet."}</strong>
-                <p style="margin:7px 0 0;">${loadError ? "Please check the public data access configuration. Details: " + escapeText(loadError) : "Please check again later."}</p>
+                <strong>No free mock tests available yet.</strong>
+                <p style="margin:7px 0 0;">Please check again later.</p>
             </div>`;
     }else{
         tests.forEach(function(test){
@@ -14426,17 +14403,27 @@ function reattempt(){
         }
     }
 
+    // Free Mock Tests also create a server-side attempt ID. Therefore,
+    // identify the test type from its persisted Free Mock context BEFORE
+    // checking currentAttemptId; otherwise a Free Mock is misrouted to the
+    // paid-test (course/paper/testNumber) handler and shows a false error.
+    if(currentFreeMockTestId || currentFreeMockNumber){
+        if(!currentCourse || !currentFreeMockNumber){
+            toast("ఈ Free Mock Test వివరాలు లభించలేదు. Test Results నుంచి పరీక్షను మళ్లీ తెరవండి.");
+            return;
+        }
+        // startFreeMock resolves the published test again and creates a NEW
+        // attempt; the previous attempt/result remains in the database.
+        startFreeMock(Number(currentFreeMockNumber));
+        return;
+    }
+
     if(currentAttemptId || (currentPaper && currentCourse && currentTestNumber)){
         if(!currentCourse || !currentPaper || !currentTestNumber){
             toast("ఈ పరీక్ష వివరాలు తిరిగి పొందలేకపోయాము. Test Results నుంచి పరీక్షను తెరిచి Reattempt చేయండి.");
             return;
         }
         openLockedTest(currentTestNumber);
-        return;
-    }
-
-    if(currentFreeMockNumber){
-        startFreeMock(currentFreeMockNumber);
         return;
     }
 
