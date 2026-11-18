@@ -4954,7 +4954,7 @@ aria-live="polite">
 
 <div id="vkTopicPackagePage" class="page vk-topic-package-page">
   <div class="container"><button class="vk-topic-back" type="button" onclick="vkTopicGoBack()">← Back</button>
-    <div class="vk-topic-page-hero"><span>🛕 VK EXAMS · INDEPENDENT PACKAGE</span><h1 id="vkipStudentName">Complete Topic-wise Test Package</h1><p id="vkipStudentDescription">Paper-I &amp; Paper-II topic-wise mock tests</p><div class="vk-topic-page-price" id="vkipStudentPrice">₹29 <small>· 5 Days Validity</small></div><div id="vkTopicAccessStatus" class="vk-topic-access-status">Package access status</div><button id="vkTopicBuyButton" type="button" onclick="vkipStartPurchase()" disabled>Buy Package</button></div>
+    <div class="vk-topic-page-hero"><span>🛕 VK EXAMS · INDEPENDENT PACKAGE</span><h1 id="vkipStudentName">Complete Topic-wise Test Package</h1><p id="vkipStudentDescription">Paper-I &amp; Paper-II topic-wise mock tests</p><div class="vk-topic-page-price" id="vkipStudentPrice">₹29 <small>· 5 Days Validity</small></div><div id="vkTopicAccessStatus" class="vk-topic-access-status">Package access status</div><button id="vkTopicBuyButton" type="button" onclick="vkipStartPurchase()">Buy Package</button></div>
     <div id="vkTopicCountdown" class="vk-topic-countdown" hidden></div><div id="vkTopicPaperArea" class="vk-topic-paper-grid"><p class="vk-topic-loading">Loading packages…</p></div><div id="vkTopicMessage" class="vk-topic-message" role="status"></div>
   </div>
 </div>
@@ -5058,6 +5058,7 @@ let lastResult = null;
    let currentFreeMockTestId = null;
 let currentFreeMockNumber = null;
 let currentAttemptId = null;
+let currentIndependentTestId = null;
    let freeMockStarting = false;
    let testSubmitted = false;
 
@@ -6911,6 +6912,7 @@ await startPaidTest(
 ===================================================== */
 
 async function startPaidTest(testNumber){
+    currentIndependentTestId = null;
     testSubmitted = false;
    currentTestNumber = testNumber;
     if(
@@ -12594,6 +12596,8 @@ const QUESTIONS = [
 ===================================================== */
 async function startFreeMock(testNumber, options = {}){
 
+   currentIndependentTestId = null;
+
    /* Require login only when a student starts a test. Browsing the list is public. */
    if(!isLoggedIn() || !supabaseClient){
        window.__vkAfterLogin = "freeMocks";
@@ -13425,7 +13429,7 @@ payload[q.id] =
        ----------------------------------------- */
 
     if(
-        currentAttemptId &&
+        (currentAttemptId || currentIndependentTestId) &&
         supabaseClient
     ){
 
@@ -13434,16 +13438,21 @@ payload[q.id] =
             const {
                 data,
                 error
-            } = await supabaseClient.rpc(
-                "submit_test_attempt",
-                {
-                    p_attempt_id:
-                        currentAttemptId,
-
-                    p_answers:
-                        payload
-                }
-            );
+            } = currentIndependentTestId
+                ? await supabaseClient.rpc(
+                    "vk_independent_submit_attempt",
+                    {
+                        p_test_id: currentIndependentTestId,
+                        p_answers: payload
+                    }
+                  )
+                : await supabaseClient.rpc(
+                    "submit_test_attempt",
+                    {
+                        p_attempt_id: currentAttemptId,
+                        p_answers: payload
+                    }
+                  );
 
 
             if(error){
@@ -13531,6 +13540,10 @@ payload[q.id] =
                 Number(
                     result?.unanswered ?? 0
                 );
+
+            if(currentIndependentTestId){
+                currentAttemptId = result?.attempt_id || null;
+            }
            
  testSubmitted = true;
 lastResult = {
@@ -13627,7 +13640,7 @@ lastResult = {
 
             renderVkProfessionalResult(lastResult);
             restoreLiveResultActions();
-            saveVkCompletedResult();
+            if(!currentIndependentTestId) saveVkCompletedResult();
             showPage(
                 "resultPage"
             );
@@ -15372,8 +15385,197 @@ async function vkipCreateTest(){try{const topic=document.getElementById('vkipTes
 async function vkipImportQuestions(){try{const testId=document.getElementById('vkipQuestionTest').value,file=document.getElementById('vkipQuestionFile').files[0];if(!testId||!file)throw Error('Select a test and an Excel/CSV file.');if(!window.XLSX)throw Error('Excel import library is unavailable.');const buf=await file.arrayBuffer(),wb=XLSX.read(buf,{type:'array'}),rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:''});if(!rows.length)throw Error('No rows found in the first sheet.');const norm=s=>String(s||'').trim().toLowerCase().replace(/[\s-]+/g,'_');const out=rows.map((r,i)=>{const x={};for(const [k,v] of Object.entries(r))x[norm(k)]=v;const correct=String(x.correct_option||x.answer||'').trim().toUpperCase();if(!x.question_text||!x.option_a||!x.option_b||!x.option_c||!x.option_d||!['A','B','C','D'].includes(correct))throw Error(`Row ${i+2}: required question/options/correct_option missing.`);return {test_id:testId,question_text:String(x.question_text),option_a:String(x.option_a),option_b:String(x.option_b),option_c:String(x.option_c),option_d:String(x.option_d),explanation:String(x.explanation||''),display_order:i+1,correct_option:correct};});const {data:qs,error}=await supabaseClient.from('vk_independent_questions').insert(out.map(({correct_option,...q})=>q)).select('id');if(error)throw error;const keys=qs.map((q,i)=>({question_id:q.id,correct_option:out[i].correct_option}));const k=await supabaseClient.from('vk_independent_question_keys').insert(keys);if(k.error)throw k.error;document.getElementById('vkipQuestionFile').value='';await vkipLoadStructure();vkipMsg(`${qs.length} questions imported successfully.`);}catch(e){vkipMsg('Import failed: '+e.message,true);}}
 async function vkipDeactivateTopic(id){if(!confirm('Remove this topic? Tests and history are retained.'))return;try{const {error}=await supabaseClient.from('vk_independent_topics').update({is_active:false}).eq('id',id);if(error)throw error;await vkipLoadStructure();vkipMsg('Topic deactivated; test and attempt records retained.');}catch(e){vkipMsg(e.message,true);}}
 async function vkipDeactivateTest(id){if(!confirm('Remove this test from the active package? History is retained.'))return;try{const {error}=await supabaseClient.from('vk_independent_tests').update({is_active:false}).eq('id',id);if(error)throw error;await vkipLoadStructure();vkipMsg('Test deactivated.');}catch(e){vkipMsg(e.message,true);}}
-async function vkipLoadStudentPackages(){const host=document.getElementById('vkTopicPaperArea');if(!host||!supabaseClient)return;try{host.innerHTML='<p class="vk-topic-loading">Loading package…</p>';const {data:pkgs,error}=await supabaseClient.from('vk_independent_packages').select('*').eq('is_published',true).eq('is_archived',false).order('created_at',{ascending:false});if(error)throw error;if(!pkgs?.length){host.innerHTML='<p class="vk-topic-loading">No packages are currently published.</p>';return;}vkipCurrentPackage=pkgs[0];const p=vkipCurrentPackage;document.getElementById('vkipStudentName').textContent=p.name;document.getElementById('vkipStudentDescription').textContent=p.description||'Paper-I & Paper-II topic-wise tests';document.getElementById('vkipStudentPrice').innerHTML=`₹${Number(p.price).toLocaleString('en-IN')} <small>· ${p.duration_days} Days Validity</small>`;const {data:user}=await supabaseClient.auth.getUser();vkipActivePurchase=null;if(user?.user){const r=await supabaseClient.from('vk_independent_purchases').select('id,expires_at').eq('package_id',p.id).eq('user_id',user.user.id).eq('payment_status','paid').gt('expires_at',new Date().toISOString()).order('expires_at',{ascending:false}).limit(1);if(r.error)throw r.error;vkipActivePurchase=r.data?.[0]||null;}const unlocked=!!vkipActivePurchase;document.getElementById('vkTopicAccessStatus').textContent=unlocked?'🔓 Package Unlocked':'🔒 Package Locked';document.getElementById('vkTopicBuyButton').disabled=true;document.getElementById('vkTopicBuyButton').textContent='Online purchase setup pending';document.getElementById('vkTopicBuyButton').title='Razorpay server-side order and signature verification must be deployed before accepting payment.';const {data:papers,error:pe}=await supabaseClient.from('vk_independent_papers').select('*').eq('package_id',p.id).eq('is_active',true).order('display_order');if(pe)throw pe;let topics=[];const ids=(papers||[]).map(x=>x.id);if(ids.length){const r=await supabaseClient.from('vk_independent_topics').select('*').in('paper_id',ids).eq('is_active',true).order('display_order');if(r.error)throw r.error;topics=r.data||[];}let tests=[];const tids=topics.map(x=>x.id);if(tids.length){const r=await supabaseClient.from('vk_independent_tests').select('id,topic_id,name,duration_minutes,total_marks,question_count').in('topic_id',tids).eq('is_active',true).order('display_order');if(r.error)throw r.error;tests=r.data||[];}host.innerHTML=(papers||[]).map(paper=>`<section class="vk-topic-paper-card"><h2>${vkipEsc(paper.name)}</h2>${topics.filter(t=>t.paper_id===paper.id).map(t=>`<div class="vk-topic-topic"><div class="vk-topic-topic-head">${vkipEsc(t.name)} · ${tests.filter(te=>te.topic_id===t.id).length} Tests</div>${tests.filter(te=>te.topic_id===t.id).map(te=>`<div class="vk-topic-test-row"><span>${vkipEsc(te.name)} · ${te.question_count} Questions</span><button disabled>${unlocked?'CBT connection pending':'Locked'}</button></div>`).join('')||'<div class="vk-topic-test-row">Tests will be added soon.</div>'}</div>`).join('')||'<p>No topics published yet.</p>'}</section>`).join('')||'<p>No Paper/Topic structure published yet.</p>';if(unlocked){const cd=document.getElementById('vkTopicCountdown');cd.hidden=false;cd.textContent='Access expires: '+new Date(vkipActivePurchase.expires_at).toLocaleString('en-IN');}}catch(e){host.innerHTML='<p class="vk-topic-loading">Could not load package: '+vkipEsc(e.message||e)+'</p>';}}
-async function vkipStartPurchase(){vkipStudentMsg('Razorpay order creation and server-side payment verification must be deployed before payments can be accepted.',true);}
+async function vkipLoadStudentPackages(){
+  const host=document.getElementById('vkTopicPaperArea');
+  const buy=document.getElementById('vkTopicBuyButton');
+  if(!host||!supabaseClient)return;
+  try{
+    host.innerHTML='<p class="vk-topic-loading">Loading package…</p>';
+    const {data:pkgs,error}=await supabaseClient.from('vk_independent_packages')
+      .select('*').eq('is_published',true).eq('is_archived',false)
+      .order('created_at',{ascending:false});
+    if(error)throw error;
+    if(!pkgs?.length){
+      vkipCurrentPackage=null;host.innerHTML='<p class="vk-topic-loading">No packages are currently published.</p>';
+      buy.disabled=true;buy.textContent='Package unavailable';return;
+    }
+    vkipCurrentPackage=pkgs[0];const p=vkipCurrentPackage;
+    document.getElementById('vkipStudentName').textContent=p.name;
+    document.getElementById('vkipStudentDescription').textContent=p.description||'Paper-I & Paper-II topic-wise tests';
+    document.getElementById('vkipStudentPrice').innerHTML=`₹${Number(p.price).toLocaleString('en-IN')} <small>· ${Number(p.duration_days)} Days Validity</small>`;
+    const {data:userData,error:userError}=await supabaseClient.auth.getUser();
+    if(userError)throw userError;
+    vkipActivePurchase=null;
+    if(userData?.user){
+      const r=await supabaseClient.from('vk_independent_purchases')
+        .select('id,starts_at,expires_at').eq('package_id',p.id)
+        .eq('user_id',userData.user.id).eq('payment_status','paid')
+        .gt('expires_at',new Date().toISOString())
+        .order('expires_at',{ascending:false}).limit(1);
+      if(r.error)throw r.error;vkipActivePurchase=r.data?.[0]||null;
+    }
+    const unlocked=!!vkipActivePurchase;
+    document.getElementById('vkTopicAccessStatus').textContent=unlocked?'🔓 Package Unlocked':'🔒 Package Locked';
+    buy.disabled=false;buy.textContent=unlocked?'Start Learning':'Buy Package';
+    buy.title=unlocked?'Open Paper-I and Paper-II topics':'Purchase this package securely using Razorpay';
+    buy.onclick=unlocked?()=>vkipShowLearningStructure():()=>vkipStartPurchase();
+
+    const {data:papers,error:pe}=await supabaseClient.from('vk_independent_papers')
+      .select('*').eq('package_id',p.id).eq('is_active',true).order('display_order');
+    if(pe)throw pe;
+    let topics=[];
+    const paperIds=(papers||[]).map(x=>x.id);
+    if(paperIds.length){
+      const r=await supabaseClient.from('vk_independent_topics').select('*')
+        .in('paper_id',paperIds).eq('is_active',true).order('display_order');
+      if(r.error)throw r.error;topics=r.data||[];
+    }
+    let tests=[];const topicIds=topics.map(x=>x.id);
+    if(topicIds.length){
+      const r=await supabaseClient.from('vk_independent_tests')
+        .select('id,topic_id,name,duration_minutes,total_marks,question_count')
+        .in('topic_id',topicIds).eq('is_active',true).order('display_order');
+      if(r.error)throw r.error;tests=r.data||[];
+    }
+    vkipStudentStructure={papers:papers||[],topics,tests};
+    if(unlocked){
+      const cd=document.getElementById('vkTopicCountdown');cd.hidden=false;
+      cd.textContent='Access expires: '+new Date(vkipActivePurchase.expires_at).toLocaleString('en-IN');
+      host.innerHTML='<p class="vk-topic-loading">Select Start Learning to view your papers and topics.</p>';
+    }else{
+      document.getElementById('vkTopicCountdown').hidden=true;
+      host.innerHTML=(papers||[]).map(paper=>`<section class="vk-topic-paper-card"><h2>${vkipEsc(paper.name)}</h2>${topics.filter(t=>t.paper_id===paper.id).map(t=>`<div class="vk-topic-topic"><div class="vk-topic-topic-head">${vkipEsc(t.name)} · ${tests.filter(te=>te.topic_id===t.id).length} Tests</div><div class="vk-topic-test-row">🔒 Purchase the package to access these tests</div></div>`).join('')||'<p>No topics published yet.</p>'}</section>`).join('')||'<p>No Paper/Topic structure published yet.</p>';
+    }
+  }catch(e){
+    host.innerHTML='<p class="vk-topic-loading">Could not load package: '+vkipEsc(e.message||e)+'</p>';
+    buy.disabled=true;
+  }
+}
+let vkipStudentStructure={papers:[],topics:[],tests:[]};
+function vkipShowLearningStructure(){
+  if(!vkipActivePurchase||new Date(vkipActivePurchase.expires_at)<=new Date()){
+    vkipStudentMsg('Your package access has expired. Please purchase again.',true);
+    vkipLoadStudentPackages();return;
+  }
+  const host=document.getElementById('vkTopicPaperArea');
+  const {papers,topics,tests}=vkipStudentStructure;
+  host.innerHTML=(papers||[]).map(paper=>`<section class="vk-topic-paper-card"><h2>${vkipEsc(paper.name)}</h2>${topics.filter(t=>t.paper_id===paper.id).map(t=>`<div class="vk-topic-topic"><div class="vk-topic-topic-head">${vkipEsc(t.name)} · ${tests.filter(te=>te.topic_id===t.id).length} Tests</div>${tests.filter(te=>te.topic_id===t.id).map(te=>`<div class="vk-topic-test-row"><span>${vkipEsc(te.name)} · ${Number(te.question_count||0)} Questions · ${Number(te.duration_minutes||0)} Min · ${Number(te.total_marks||0)} Marks</span><button type="button" onclick="startIndependentTest('${te.id}')">Start Test</button></div>`).join('')||'<div class="vk-topic-test-row">Tests will be added soon.</div>'}</div>`).join('')||'<p>No topics published yet.</p>'}</section>`).join('')||'<p>No Paper/Topic structure published yet.</p>';
+  vkipStudentMsg('Your package is active. Select a topic to view its tests.');
+}
+async function vkipStartPurchase(){
+  try{
+    if(!supabaseClient)throw Error('Supabase is not connected.');
+    if(!vkipCurrentPackage)throw Error('No published Topic-wise Package is available.');
+    const {data:userData,error:userError}=await supabaseClient.auth.getUser();
+    if(userError||!userData?.user){openLogin();return;}
+    if(typeof Razorpay==='undefined')throw Error('Razorpay Checkout did not load. Refresh and try again.');
+    const buy=document.getElementById('vkTopicBuyButton');buy.disabled=true;buy.textContent='Preparing payment…';
+    showLoading('Preparing your payment…','Please wait…');
+    const {data:orderData,error:orderError}=await supabaseClient.functions.invoke('create-razorpay-order',{
+      body:{product_type:'independent',package_id:vkipCurrentPackage.id}
+    });
+    hideLoading();
+    if(orderError||!orderData?.success){
+      if(orderData?.already_active){await vkipLoadStudentPackages();return;}
+      throw Error(orderData?.error||orderError?.message||'Unable to create payment order.');
+    }
+    const options={
+      key:orderData.key_id,amount:orderData.amount,currency:orderData.currency||'INR',
+      name:'VK Exams',description:orderData.package_name||'Complete Topic-wise Test Package',
+      order_id:orderData.order_id,
+      handler:async function(response){
+        try{
+          vkipStudentMsg('Payment received. Verifying securely…');
+          showLoading('Verifying payment…','Please wait…');
+          const {data,error}=await supabaseClient.functions.invoke('verify-razorpay-payment',{
+            body:{
+              razorpay_payment_id:response.razorpay_payment_id,
+              razorpay_order_id:response.razorpay_order_id,
+              razorpay_signature:response.razorpay_signature
+            }
+          });
+          hideLoading();
+          if(error||!data?.success)throw Error(data?.error||error?.message||'Payment verification failed.');
+          await vkipLoadStudentPackages();
+          vkipStudentMsg('Payment successful. Your Topic-wise Package is now active.');
+        }catch(e){hideLoading();vkipStudentMsg(e.message||'Payment verification failed.',true);}
+      },
+      prefill:{email:userData.user.email||''},
+      theme:{color:'#2563eb'},
+      modal:{ondismiss:async function(){buy.disabled=false;buy.textContent='Buy Package';vkipStudentMsg('Payment was cancelled.');}}
+    };
+    const checkout=new Razorpay(options);checkout.open();
+    buy.disabled=false;buy.textContent='Buy Package';
+  }catch(e){
+    hideLoading();const buy=document.getElementById('vkTopicBuyButton');
+    if(buy){buy.disabled=false;buy.textContent='Buy Package';}
+    vkipStudentMsg(e.message||'Unable to start purchase.',true);
+  }
+}
+async function startIndependentTest(testId){
+  try{
+    if(!supabaseClient)throw Error('Supabase is not connected.');
+    const {data:userData,error:userError}=await supabaseClient.auth.getUser();
+    if(userError||!userData?.user){openLogin();return;}
+    const {data:purchase,error:purchaseError}=await supabaseClient
+      .from('vk_independent_purchases').select('id,expires_at')
+      .eq('user_id',userData.user.id).eq('package_id',vkipCurrentPackage.id)
+      .eq('payment_status','paid').lte('starts_at',new Date().toISOString())
+      .gt('expires_at',new Date().toISOString())
+      .order('expires_at',{ascending:false}).limit(1).maybeSingle();
+    if(purchaseError)throw purchaseError;
+    if(!purchase){vkipActivePurchase=null;await vkipLoadStudentPackages();throw Error('Your Topic-wise Package is not active. Please purchase or renew it.');}
+    vkipActivePurchase=purchase;
+    showLoading('Loading test…','Checking package access and questions.');
+    const {data:test,error:testError}=await supabaseClient
+      .from('vk_independent_tests')
+      .select('id,name,duration_minutes,total_marks,negative_marks,question_count,is_active')
+      .eq('id',testId).eq('is_active',true).single();
+    if(testError||!test)throw testError||Error('This test is not available.');
+    const {data:questions,error:questionError}=await supabaseClient
+      .from('vk_independent_questions')
+      .select('id,question_text,option_a,option_b,option_c,option_d,display_order')
+      .eq('test_id',testId).eq('is_active',true).order('display_order');
+    if(questionError)throw questionError;
+    if(!questions?.length)throw Error('No questions are available in this test yet.');
+    examQuestions=questions.map((q,i)=>({
+      id:q.id,number:i+1,q:q.question_text,
+      o:[q.option_a,q.option_b,q.option_c,q.option_d],
+      marks:Number(test.total_marks||questions.length)/questions.length,
+      negative:Number(test.negative_marks||0)
+    }));
+    currentIndependentTestId=test.id;
+    currentAttemptId=null;
+    currentTestNumber=0;
+    currentFreeMockTestId=null;
+    currentFreeMockNumber=null;
+    testSubmitted=false;
+    userAnswers=new Array(examQuestions.length).fill(null);
+    currentQuestionIndex=0;
+    examReviewFlags=new Array(examQuestions.length).fill(false);
+    examBookmarkedQuestions=new Set();
+    examPaletteHidden=false;examPaused=false;
+    const examNav=$("examQuestionNavigator");
+    const examBody=document.querySelector(".exam-hall-body");
+    if(examNav)examNav.classList.remove("hidden");
+    if(examBody)examBody.classList.remove("palette-hidden");
+    const shell=document.querySelector(".exam-hall-shell");
+    if(shell){shell.classList.remove("paused");shell.classList.add("paid-theme");}
+    const paletteLabel=$("paletteToggleText");if(paletteLabel)paletteLabel.textContent="Hide Palette";
+    const pauseLabel=$("pauseExamButton");if(pauseLabel)pauseLabel.textContent="Ⅱ Pause";
+    clearInterval(timerInterval);
+    timeLeft=Number(test.duration_minutes||30)*60;
+    $("examTitle").textContent=`Complete Topic-wise Package – ${test.name}`;
+    hideLoading();showPage("examPage");renderQuestion();renderTimer();
+    timerInterval=window.setInterval(function(){
+      if(timeLeft>0){timeLeft--;renderTimer();}
+      if(timeLeft<=0){clearInterval(timerInterval);toast("Time is over. Submitting your test…");submitExam(true);}
+    },1000);
+  }catch(e){
+    hideLoading();console.error('Independent CBT start error:',e);
+    toast(e.message||'Unable to start this test.');
+  }
+}
 async function vkTopicLoadStudent(){return vkipLoadStudentPackages();}
 // Initialize only after the existing Super Admin gate has completed.
 const vkipOriginalAdminInit=window.openAdminMockBuilder;
