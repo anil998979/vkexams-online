@@ -3232,44 +3232,6 @@ body.dark-mode .vk-theme-toggle{background:#243247;color:#f8fafc;border-color:#4
 }
 </style>
 
-<style id="vk-unified-admin-v1">
-/* VK Exams unified admin shell — presentation/navigation only */
-#vkAdminMockBuilder .vk-admin-wrap{max-width:1440px;margin:0 auto;padding:18px 22px 48px}
-#vkAdminMockBuilder .vk-admin-hero{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;flex-wrap:wrap;padding:22px 24px;margin:14px 0 18px;border:1px solid #e5eaf2;border-radius:18px;background:linear-gradient(135deg,#fff 0%,#f7faff 100%);box-shadow:0 8px 28px rgba(24,52,92,.05)}
-#vkAdminMockBuilder .vk-admin-hero h1{margin:0 0 7px;font-size:clamp(24px,3vw,32px);font-weight:850;letter-spacing:-.6px;color:#142b4a}
-#vkAdminMockBuilder .vk-admin-hero p{margin:0;color:#64748b;font-size:14px;line-height:1.6}
-#vkAdminMockBuilder .vk-admin-hero-actions{display:flex;gap:9px;flex-wrap:wrap}
-#vkAdminMockBuilder .vk-admin-nav{display:flex;gap:7px;flex-wrap:wrap;padding:8px;margin:0 0 18px;border:1px solid #e5eaf2;border-radius:14px;background:#fff;position:sticky;top:8px;z-index:20;box-shadow:0 5px 18px rgba(15,35,65,.05)}
-#vkAdminMockBuilder .vk-admin-nav button{border:1px solid transparent;background:transparent;color:#52647c;border-radius:10px;padding:10px 13px;font-size:13px;font-weight:750;cursor:pointer;display:flex;align-items:center;gap:8px}
-#vkAdminMockBuilder .vk-admin-nav button:hover{background:#f3f6fb;color:#17345b}
-#vkAdminMockBuilder .vk-admin-nav button[aria-current="page"]{background:#eaf1ff;border-color:#d8e5ff;color:#1d4ed8}
-#vkAdminMockBuilder .vk-admin-tab-panel{min-width:0;animation:vkAdminFade .16s ease-out}
-#vkAdminMockBuilder .vk-admin-tab-panel[hidden]{display:none!important}
-#vkAdminMockBuilder .vk-admin-panel-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin:4px 0 15px}
-#vkAdminMockBuilder .vk-admin-panel-heading h2{margin:0 0 5px;color:#17345b;font-size:21px;font-weight:850}
-#vkAdminMockBuilder .vk-admin-panel-heading p{margin:0;color:#718096;font-size:13px;line-height:1.55}
-#vkAdminMockBuilder .vk-admin-shortcuts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:4px 0 18px}
-#vkAdminMockBuilder .vk-admin-shortcut{display:flex;align-items:flex-start;gap:13px;text-align:left;width:100%;padding:17px;border:1px solid #e4eaf2;border-radius:15px;background:#fff;cursor:pointer;box-shadow:0 4px 16px rgba(20,43,74,.035);transition:.15s ease}
-#vkAdminMockBuilder .vk-admin-shortcut:hover{transform:translateY(-2px);border-color:#b9ccef;box-shadow:0 9px 22px rgba(20,43,74,.08)}
-#vkAdminMockBuilder .vk-admin-shortcut .vk-shortcut-icon{width:40px;height:40px;flex:0 0 40px;border-radius:12px;background:#edf3ff;color:#2456a6;display:grid;place-items:center;font-size:20px;font-weight:800}
-#vkAdminMockBuilder .vk-admin-shortcut strong{display:block;color:#18345c;font-size:14px;margin:1px 0 5px}
-#vkAdminMockBuilder .vk-admin-shortcut small{display:block;color:#718096;font-size:12px;line-height:1.5}
-#vkAdminMockBuilder .vk-admin-note{padding:13px 15px;border:1px solid #dce8f8;border-radius:12px;background:#f7faff;color:#536984;font-size:12px;line-height:1.6;margin:14px 0}
-#vkAdminMockBuilder .vk-admin-tab-panel>.vk-management-stack{margin:0!important}
-#vkAdminMockBuilder .vk-admin-tab-panel>.vk-custom-package-panel{margin:0}
-#vkAdminMockBuilder .vk-admin-tab-panel>.vk-admin-panel{margin:0 0 13px}
-#vkAdminMockBuilder .vk-management-card,#vkAdminMockBuilder .vk-custom-package-panel{border-radius:16px;box-shadow:0 5px 22px rgba(20,43,74,.045)}
-#vkAdminMockBuilder .vk-admin-accordion{border:1px solid #e1e8f0;border-radius:15px;padding:18px 19px;margin:0 0 13px;background:#fff;box-shadow:0 4px 18px rgba(20,43,74,.035)}
-#vkAdminMockBuilder .vk-admin-accordion[open]{border-color:#cbd9ed}
-#vkAdminMockBuilder .vk-admin-accordion-title{font-size:16px;padding:2px 1px 4px}
-#vkAdminMockBuilder .vk-admin-accordion[open]>.vk-admin-accordion-title{padding-bottom:15px;border-bottom:1px solid #edf1f6;margin-bottom:16px}
-#vkAdminMockBuilder .vk-admin-accordion .vk-admin-grid{gap:14px}
-#vkAdminMockBuilder .vk-admin-accordion input,#vkAdminMockBuilder .vk-admin-accordion select,#vkAdminMockBuilder .vk-admin-accordion textarea{border-radius:9px}
-#vkAdminMockBuilder .vk-admin-back-link{display:inline-flex;align-items:center;gap:7px;color:#526984;font-size:13px;font-weight:700;text-decoration:none;margin:2px 0 6px}
-@keyframes vkAdminFade{from{opacity:.65;transform:translateY(3px)}to{opacity:1;transform:none}}
-@media(max-width:850px){#vkAdminMockBuilder .vk-admin-shortcuts{grid-template-columns:repeat(2,minmax(0,1fr))}#vkAdminMockBuilder .vk-admin-wrap{padding:12px 13px 36px}}
-@media(max-width:560px){#vkAdminMockBuilder .vk-admin-shortcuts{grid-template-columns:1fr}#vkAdminMockBuilder .vk-admin-nav{position:static;display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}#vkAdminMockBuilder .vk-admin-nav button{justify-content:flex-start;padding:10px}#vkAdminMockBuilder .vk-admin-hero{padding:17px}#vkAdminMockBuilder .vk-admin-hero-actions{width:100%}#vkAdminMockBuilder .vk-admin-hero-actions button{flex:1}}
-</style>
 </head>
 
 
@@ -15761,8 +15723,8 @@ async function vkipLoadStudentPackages(){
     }
     const unlocked=!!vkipActivePurchase;
     document.getElementById('vkTopicAccessStatus').textContent=unlocked?'🔓 Package Unlocked':'🔒 Package Locked';
-    buy.disabled=false;buy.textContent=unlocked?'Start Learning':'Buy Package';
-    buy.title=unlocked?'Open Paper-I and Paper-II topics':'Purchase this package securely using Razorpay';
+    buy.disabled=false;buy.textContent=unlocked?'Start Your Exam':'Buy Package';
+    buy.title=unlocked?'Open Paper-I and Paper-II topics and start your exam':'Purchase this package securely using Razorpay';
     buy.onclick=unlocked?()=>vkipShowLearningStructure():()=>vkipStartPurchase();
 
     const {data:papers,error:pe}=await supabaseClient.from('vk_independent_papers')
@@ -15927,90 +15889,6 @@ const vkipOriginalAdminInit=window.openAdminMockBuilder;
 if(typeof vkipOriginalAdminInit==='function'){window.openAdminMockBuilder=async function(){await vkipOriginalAdminInit.apply(this,arguments);if(vkAdminAuthorized){await vkipLoadPackages();}};}
 </script>
 
-<script id="vk-unified-admin-v1-script">
-(function(){
-  function initVkUnifiedAdmin(){
-    const root=document.getElementById('vkAdminMockBuilder');
-    if(!root || root.dataset.unifiedAdminReady==='1') return;
-    const wrap=root.querySelector('.vk-admin-wrap');
-    if(!wrap) return;
-    root.dataset.unifiedAdminReady='1';
-
-    const originalHeader=wrap.querySelector('.exam-header');
-    const categoryManager=document.getElementById('vkCategoryManager');
-    const paidPackages=document.getElementById('vkCustomPackageManager');
-    const independent=document.getElementById('vkIndependentPackageAdmin');
-    const directAccordions=Array.from(wrap.children).filter(el=>el.matches('details.vk-admin-panel'));
-    const testDetails=directAccordions.find(el=>el.querySelector('#vkAdminTestType'));
-    const bulkDetails=document.getElementById('vkAdminBulkImportPanel');
-    const questionDetails=directAccordions.find(el=>el.querySelector('#vkAdminQuestions'));
-
-    // The Independent Package admin workflow is intentionally not part of this
-    // unified legacy Free/Paid admin. Keep its source in the file for rollback,
-    // but do not display or invoke it from this dashboard.
-    if(independent){ independent.hidden=true; independent.setAttribute('aria-hidden','true'); }
-
-    const hero=document.createElement('section');
-    hero.className='vk-admin-hero';
-    hero.innerHTML='<div><h1>VK Exams Admin Dashboard</h1><p>Manage exam categories, test series, Free Mock Tests and Paid Test Series from one place.</p></div><div class="vk-admin-hero-actions"><button type="button" class="vk-admin-btn vk-admin-btn-secondary" id="vkAdminOpenStudy">📚 Study Materials</button></div>';
-    if(originalHeader){
-      originalHeader.replaceWith(hero);
-    }else{wrap.prepend(hero);}
-    const studyBtn=hero.querySelector('#vkAdminOpenStudy');
-    if(studyBtn) studyBtn.addEventListener('click',function(){ if(typeof openAdminStudyMaterials==='function') openAdminStudyMaterials(); });
-
-    const nav=document.createElement('nav');
-    nav.className='vk-admin-nav'; nav.setAttribute('aria-label','Admin sections');
-    nav.innerHTML='<button type="button" data-tab="home" aria-current="page">⌂ Overview</button><button type="button" data-tab="categories">▦ Categories & Series</button><button type="button" data-tab="builder">✚ Test Builder</button><button type="button" data-tab="packages">₹ Paid Packages</button>';
-    hero.insertAdjacentElement('afterend',nav);
-
-    const makePanel=(id,title,description)=>{
-      const panel=document.createElement('section'); panel.className='vk-admin-tab-panel'; panel.id=id; panel.hidden=true;
-      const heading=document.createElement('div'); heading.className='vk-admin-panel-heading';
-      heading.innerHTML='<div><h2>'+title+'</h2><p>'+description+'</p></div>';
-      panel.appendChild(heading); return panel;
-    };
-    const home=makePanel('vkAdminOverviewPanel','Welcome to VK Exams','Choose a task to manage your exam content.');
-    home.hidden=false;
-    home.insertAdjacentHTML('beforeend','<div class="vk-admin-shortcuts"><button class="vk-admin-shortcut" type="button" data-go="categories"><span class="vk-shortcut-icon">▦</span><span><strong>Categories & Test Series</strong><small>Create categories, organize exam series and manage visibility.</small></span></button><button class="vk-admin-shortcut" type="button" data-go="builder"><span class="vk-shortcut-icon">✚</span><span><strong>Create / Edit Test</strong><small>Choose Free or Paid, enter test details and manage questions.</small></span></button><button class="vk-admin-shortcut" type="button" data-go="packages"><span class="vk-shortcut-icon">₹</span><span><strong>Paid Test Packages</strong><small>Manage existing custom access packages for Paid Tests.</small></span></button></div><div class="vk-admin-note"><strong>Recommended workflow:</strong> Create or confirm the Category → create its Test Series → build the Test → upload questions → preview and validate → publish. Existing database tables, payment logic and student attempt history are not changed by this dashboard update.</div>');
-
-    const categories=makePanel('vkAdminCategoriesPanel','Categories & Test Series','Set up the exam structure first. Categories and their series are managed together below.');
-    if(categoryManager) categories.appendChild(categoryManager);
-    const builder=makePanel('vkAdminBuilderPanel','Test Builder','Create or edit Free Mock Tests and Paid Tests using the existing test builder and question upload tools.');
-    if(testDetails){ testDetails.open=true; builder.appendChild(testDetails); }
-    if(bulkDetails){ builder.appendChild(bulkDetails); }
-    if(questionDetails){ builder.appendChild(questionDetails); }
-    builder.insertAdjacentHTML('beforeend','<div class="vk-admin-note">Before publishing, confirm the selected Test Type, Category, Series / Paper, duration, marks, negative marks and question answer keys. Bulk upload preview must be checked before applying questions.</div>');
-    const packages=makePanel('vkAdminPaidPackagesPanel','Paid Test Packages','Manage existing custom packages that grant access to selected Paid Tests. This is separate from creating an individual test.');
-    if(paidPackages) packages.appendChild(paidPackages);
-
-    const panels=[home,categories,builder,packages];
-    nav.insertAdjacentElement('afterend',home);
-    home.insertAdjacentElement('afterend',categories);
-    categories.insertAdjacentElement('afterend',builder);
-    builder.insertAdjacentElement('afterend',packages);
-
-    function showTab(name){
-      panels.forEach(p=>p.hidden=p.id!==({home:'vkAdminOverviewPanel',categories:'vkAdminCategoriesPanel',builder:'vkAdminBuilderPanel',packages:'vkAdminPaidPackagesPanel'}[name]));
-      nav.querySelectorAll('button[data-tab]').forEach(b=>{
-        if(b.dataset.tab===name) b.setAttribute('aria-current','page'); else b.removeAttribute('aria-current');
-      });
-      if(name==='categories' && typeof vkLoadCategoryManager==='function'){
-        // Refresh only when entering this section; existing save/edit handlers remain unchanged.
-        vkLoadCategoryManager();
-      }
-      if(name==='packages' && typeof vkCpLoadPackages==='function') vkCpLoadPackages();
-      // Do not re-run mode-change handlers on tab navigation: they may reset an in-progress form.
-      root.scrollIntoView({behavior:'smooth',block:'start'});
-    }
-    nav.addEventListener('click',e=>{const b=e.target.closest('button[data-tab]');if(b)showTab(b.dataset.tab);});
-    home.addEventListener('click',e=>{const b=e.target.closest('button[data-go]');if(b)showTab(b.dataset.go);});
-    showTab('home');
-  }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',initVkUnifiedAdmin,{once:true});
-  else initVkUnifiedAdmin();
-})();
-</script>
 </body>
 
 </html>
