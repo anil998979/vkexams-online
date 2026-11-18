@@ -4075,6 +4075,24 @@ id="solutions">
       </section>
     </div>
 
+    <!-- TOPIC-WISE INDEPENDENT TEST BUILDER: additive; legacy Free/Paid flow remains unchanged -->
+    <section class="vk-admin-panel vk-management-card" id="vkTopicWiseDraftBuilder" style="margin:16px 0;border:1px solid #d8e2f0;border-radius:16px;padding:18px;background:#fff">
+      <div class="vk-management-heading"><div><span class="vk-management-kicker">03 · ENDOWMENT TOPIC-WISE</span><h2>Topic-wise Draft Test Builder</h2><p>Create tests under the existing Endowment Paper-I / Paper-II topic structure. Tests remain inactive until separately validated.</p></div><span class="vk-management-icon purple">📝</span></div>
+      <div class="vk-admin-grid">
+        <div class="vk-admin-field"><label for="vkTopicWisePackage">Independent Package</label><select id="vkTopicWisePackage"><option value="d215d986-263c-404c-aa2c-6f1aba65f1bf">Endowment Topic-wise Package (₹29)</option></select></div>
+        <div class="vk-admin-field"><label for="vkTopicWisePaper">Paper</label><select id="vkTopicWisePaper" onchange="vkTopicWiseLoadTopics()"><option value="">Loading papers…</option></select></div>
+        <div class="vk-admin-field"><label for="vkTopicWiseTopic">Topic</label><select id="vkTopicWiseTopic" onchange="vkTopicWiseLoadTests()"><option value="">Select Paper first</option></select></div>
+        <div class="vk-admin-field"><label for="vkTopicWiseExistingTest">Existing Tests in Topic</label><select id="vkTopicWiseExistingTest"><option value="">Select a topic first</option></select></div>
+        <div class="vk-admin-field"><label for="vkTopicWiseTestName">New Test Name</label><input id="vkTopicWiseTestName" maxlength="150" placeholder="Example: Hindu Festivals - Sample Test 2"></div>
+        <div class="vk-admin-field"><label for="vkTopicWiseDuration">Duration (minutes)</label><input id="vkTopicWiseDuration" type="number" min="1" max="300" value="10"></div>
+        <div class="vk-admin-field"><label for="vkTopicWiseMarks">Total Marks</label><input id="vkTopicWiseMarks" type="number" min="1" max="500" value="5"></div>
+        <div class="vk-admin-field"><label for="vkTopicWiseNegative">Negative Marks</label><input id="vkTopicWiseNegative" type="number" min="0" max="5" step="0.01" value="0"></div>
+      </div>
+      <div class="vk-admin-actions" style="margin-top:12px"><button type="button" class="vk-admin-btn vk-admin-btn-secondary" onclick="vkTopicWiseRefresh()">Refresh Paper / Topic Data</button><button type="button" class="vk-admin-btn vk-admin-btn-secondary" onclick="vkTopicWiseInspectSelected()">Inspect Selected Test</button></div>
+      <p class="vk-admin-hint">Use the shared Questions editor below to enter questions, four options, correct answer and explanation. This builder creates a new inactive test only; it does not edit existing tests or change package/payment settings.</p>
+      <div id="vkTopicWiseStatus" class="vk-management-status" role="status" aria-live="polite"></div>
+    </section>
+
     <!-- CUSTOM PAID TEST PACKAGES -->
     
 
@@ -4226,6 +4244,7 @@ id="solutions">
     <div class="vk-admin-panel">
       <div class="vk-admin-actions">
         <button type="button" id="vkAdminPublishBtn" class="vk-admin-btn vk-admin-btn-primary" onclick="vkAdminPublishTest()">Publish Test</button>
+        <button type="button" class="vk-admin-btn vk-admin-btn-secondary" onclick="vkTopicWiseCreateDraft()">Save Topic-wise Draft Test</button>
         <button type="button" class="vk-admin-btn vk-admin-btn-secondary" onclick="vkAdminResetBuilder()">Clear Form</button>
       </div>
       <div id="vkAdminStatus" class="vk-admin-status" role="status" aria-live="polite"></div>
@@ -8813,6 +8832,7 @@ async function openAdminMockBuilder(){
     }
     showPage("vkAdminMockBuilder");
     await vkAdminLoadCourses();
+    if(document.getElementById("vkTopicWiseDraftBuilder")) await vkTopicWiseRefresh();
     await vkLoadCategoryManager();
     await vkCpInit();
     vkAdminOnTestTypeChange();
@@ -9551,6 +9571,113 @@ function vkAdminNormalizeFreeTopicName(value){
         // Examples: "Hindu Festivals Test - 2" -> "Hindu Festivals".
         .replace(/\s*[-–—]?\s*Test\s*[-#]?\s*\d+\s*$/i, "")
         .trim();
+}
+
+// Topic-wise Independent Builder. Uses only vk_independent_* tables.
+// Existing legacy Free/Paid RPCs and their validation rules are not modified.
+const VK_TOPICWISE_PACKAGE_ID = "d215d986-263c-404c-aa2c-6f1aba65f1bf";
+async function vkTopicWiseRefresh(){
+  const status=document.getElementById("vkTopicWiseStatus");
+  const paper=document.getElementById("vkTopicWisePaper");
+  if(!paper||!supabaseClient)return;
+  try{
+    if(!await refreshVkAdminAccess())throw new Error("Admin authorization required.");
+    if(status)status.textContent="Loading Endowment papers…";
+    const {data,error}=await supabaseClient.from("vk_independent_papers").select("id,name,display_order,is_active").eq("package_id",VK_TOPICWISE_PACKAGE_ID).order("display_order").order("name");
+    if(error)throw error;
+    paper.innerHTML='<option value="">Select Paper</option>'+(data||[]).map(x=>`<option value="${vkAdminEscape(x.id)}">${vkAdminEscape(x.name)}${x.is_active===false?' (Inactive)':''}</option>`).join("");
+    document.getElementById("vkTopicWiseTopic").innerHTML='<option value="">Select Paper first</option>';
+    document.getElementById("vkTopicWiseExistingTest").innerHTML='<option value="">Select Topic first</option>';
+    if(status)status.textContent=`Loaded ${(data||[]).length} papers. Select a paper to continue.`;
+  }catch(e){if(status)status.textContent="Could not load papers: "+(e.message||e);}
+}
+async function vkTopicWiseLoadTopics(){
+  const paperId=document.getElementById("vkTopicWisePaper")?.value;
+  const topic=document.getElementById("vkTopicWiseTopic");
+  const status=document.getElementById("vkTopicWiseStatus");
+  if(!topic)return;
+  topic.innerHTML='<option value="">Loading topics…</option>';
+  document.getElementById("vkTopicWiseExistingTest").innerHTML='<option value="">Select Topic first</option>';
+  if(!paperId){topic.innerHTML='<option value="">Select Paper first</option>';return;}
+  try{
+    const {data,error}=await supabaseClient.from("vk_independent_topics").select("id,name,display_order,is_active").eq("paper_id",paperId).order("display_order").order("name");
+    if(error)throw error;
+    topic.innerHTML='<option value="">Select Topic</option>'+(data||[]).map(x=>`<option value="${vkAdminEscape(x.id)}">${vkAdminEscape(x.name)}${x.is_active===false?' (Inactive)':''}</option>`).join("");
+    if(status)status.textContent=`Loaded ${(data||[]).length} topics.`;
+  }catch(e){topic.innerHTML='<option value="">Unable to load topics</option>';if(status)status.textContent="Topic load failed: "+(e.message||e);}
+}
+async function vkTopicWiseLoadTests(){
+  const topicId=document.getElementById("vkTopicWiseTopic")?.value;
+  const sel=document.getElementById("vkTopicWiseExistingTest");
+  if(!sel)return;
+  sel.innerHTML='<option value="">Loading tests…</option>';
+  if(!topicId){sel.innerHTML='<option value="">Select Topic first</option>';return;}
+  try{
+    const {data,error}=await supabaseClient.from("vk_independent_tests").select("id,name,question_count,is_active").eq("topic_id",topicId).order("display_order").order("name");
+    if(error)throw error;
+    sel.innerHTML='<option value="">Select existing test to inspect</option>'+(data||[]).map(x=>`<option value="${vkAdminEscape(x.id)}">${vkAdminEscape(x.name)} · ${Number(x.question_count||0)} Q · ${x.is_active?'Active':'Draft'}</option>`).join("");
+  }catch(e){sel.innerHTML='<option value="">Unable to load tests</option>';const status=document.getElementById("vkTopicWiseStatus");if(status)status.textContent="Test list failed: "+(e.message||e);}
+}
+async function vkTopicWiseInspectSelected(){
+  const id=document.getElementById("vkTopicWiseExistingTest")?.value;
+  const status=document.getElementById("vkTopicWiseStatus");
+  if(!id){if(status)status.textContent="Select an existing test first.";return;}
+  try{
+    const {data:test,error}=await supabaseClient.from("vk_independent_tests").select("id,name,duration_minutes,total_marks,negative_marks,question_count,is_active").eq("id",id).single();
+    if(error)throw error;
+    const {data:qs,error:qerr}=await supabaseClient.from("vk_independent_questions").select("id").eq("test_id",id);
+    if(qerr)throw qerr;
+    const ids=(qs||[]).map(q=>q.id);
+    let keyCount=0;
+    if(ids.length){const {data:keys,error:kerr}=await supabaseClient.from("vk_independent_question_keys").select("question_id").in("question_id",ids);if(kerr)throw kerr;keyCount=(keys||[]).length;}
+    if(status)status.textContent=`${test.name}: ${ids.length} questions, ${keyCount} answer keys, ${test.is_active?'Active':'Draft'}. Inspect only; existing test is not changed.`;
+  }catch(e){if(status)status.textContent="Inspection failed: "+(e.message||e);}
+}
+async function vkTopicWiseCreateDraft(){
+  const status=document.getElementById("vkTopicWiseStatus");
+  const button=document.getElementById("vkAdminPublishBtn");
+  try{
+    if(!await refreshVkAdminAccess())throw new Error("Admin authorization required.");
+    const topicId=document.getElementById("vkTopicWiseTopic")?.value;
+    const name=document.getElementById("vkTopicWiseTestName")?.value.trim();
+    const duration=Number(document.getElementById("vkTopicWiseDuration")?.value);
+    const marks=Number(document.getElementById("vkTopicWiseMarks")?.value);
+    const negative=Number(document.getElementById("vkTopicWiseNegative")?.value);
+    if(!topicId)throw new Error("Select Paper and Topic.");
+    if(!name)throw new Error("Enter a new Test Name.");
+    if(!Number.isInteger(duration)||duration<1||duration>300)throw new Error("Duration must be 1–300 minutes.");
+    if(!Number.isFinite(marks)||marks<1||marks>500)throw new Error("Total Marks must be 1–500.");
+    if(!Number.isFinite(negative)||negative<0||negative>5)throw new Error("Negative Marks must be 0–5.");
+    const cards=Array.from(document.querySelectorAll("#vkAdminQuestions .vk-admin-question"));
+    if(!cards.length)throw new Error("Add at least one question in the shared Questions section.");
+    const questions=cards.map((card,i)=>{
+      const get=f=>(card.querySelector(`[data-field="${f}"]`)?.value||"").trim();
+      const q={question_text:get("question_text"),option_a:get("option_a"),option_b:get("option_b"),option_c:get("option_c"),option_d:get("option_d"),correct_option:get("correct_option"),explanation:get("explanation")};
+      if(!q.question_text||!q.option_a||!q.option_b||!q.option_c||!q.option_d)throw new Error(`Question ${i+1}: question and all four options are required.`);
+      if(!["A","B","C","D"].includes(q.correct_option))throw new Error(`Question ${i+1}: select correct answer.`);
+      if(!q.explanation)throw new Error(`Question ${i+1}: explanation is required.`);
+      return {...q,display_order:i+1};
+    });
+    const existing=await supabaseClient.from("vk_independent_tests").select("id,name,display_order").eq("topic_id",topicId);
+    if(existing.error)throw existing.error;
+    if((existing.data||[]).some(x=>String(x.name||"").trim().toLowerCase()===name.toLowerCase()))throw new Error("A test with this name already exists in the selected topic.");
+    const nextOrder=Math.max(0,...(existing.data||[]).map(x=>Number(x.display_order)||0))+1;
+    if(status)status.textContent="Creating inactive topic-wise test…";
+    const {data:test,error:te}=await supabaseClient.from("vk_independent_tests").insert({topic_id:topicId,name,duration_minutes:duration,total_marks:marks,negative_marks:negative,question_count:questions.length,display_order:nextOrder,is_active:false}).select("id").single();
+    if(te)throw te;
+    const payload=questions.map(q=>({test_id:test.id,question_text:q.question_text,option_a:q.option_a,option_b:q.option_b,option_c:q.option_c,option_d:q.option_d,explanation:q.explanation,display_order:q.display_order,is_active:false}));
+    const {data:inserted,error:ie}=await supabaseClient.from("vk_independent_questions").insert(payload).select("id");
+    if(ie){await supabaseClient.from("vk_independent_tests").delete().eq("id",test.id);throw ie;}
+    if((inserted||[]).length!==questions.length){await supabaseClient.from("vk_independent_questions").delete().eq("test_id",test.id);await supabaseClient.from("vk_independent_tests").delete().eq("id",test.id);throw new Error("Question insert count mismatch; incomplete draft creation was rolled back where permitted.");}
+    const keys=inserted.map((q,i)=>({question_id:q.id,correct_option:questions[i].correct_option}));
+    const {error:ke}=await supabaseClient.from("vk_independent_question_keys").insert(keys);
+    if(ke){await supabaseClient.from("vk_independent_questions").delete().eq("test_id",test.id);await supabaseClient.from("vk_independent_tests").delete().eq("id",test.id);throw new Error("Answer-key insert failed; cleanup was attempted: "+ke.message);}
+    document.getElementById("vkTopicWiseTestName").value="";
+    document.getElementById("vkAdminQuestions").innerHTML="";
+    vkAdminAddQuestion();
+    await vkTopicWiseLoadTests();
+    if(status)status.textContent=`Draft saved successfully: ${name} · ${questions.length} Questions · ${questions.length} Answer Keys. Test and questions remain inactive.`;
+  }catch(e){if(status)status.textContent="Draft save failed: "+(e.message||e);}
 }
 
 async function vkAdminPublishTest(){
