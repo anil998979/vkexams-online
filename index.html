@@ -6670,13 +6670,26 @@ if (isLoggedIn() && supabaseClient) {
 
     let html = "";
 
-    // APPSC Screening Test and High Court show only Paid Tests 1–10.
-    // Endowment Officer keeps its existing 1–15 display behavior.
+    // Endowment Officer Paper-1 and Paper-2 show only real, active tests.
+    // Do not generate synthetic Test-11...Test-15 / "Coming Soon" rows.
+    // Other courses retain their existing numbered-slot behavior.
+    const isEndowmentPaidSeries = currentCourse === "Endowment Officer";
     const visiblePaidTestLimit =
         (currentCourse === "APPSC" || currentCourse === "High Court") ? 10 : 15;
 
-    for (let i = 1; i <= visiblePaidTestLimit; i++) {
-        const test = testByNumber.get(i);
+    const testsToDisplay = isEndowmentPaidSeries
+        ? publishedTests
+            .filter(test => test && test.is_active === true)
+            .sort((a, b) => Number(a.test_number) - Number(b.test_number))
+            .map(test => ({ testNumber: Number(test.test_number), test }))
+        : Array.from({ length: visiblePaidTestLimit }, (_, index) => ({
+            testNumber: index + 1,
+            test: testByNumber.get(index + 1)
+        }));
+
+    for (const testEntry of testsToDisplay) {
+        const i = testEntry.testNumber;
+        const test = testEntry.test;
         const isPublished = !!test && test.is_active === true;
         const label = test?.title || `Test-${i}`;
 
@@ -6717,7 +6730,7 @@ if (isLoggedIn() && supabaseClient) {
                     <span class="locked-label paid-locked-label">🔒 Locked</span>
                 </div>
             `;
-        } else {
+        } else if (!isEndowmentPaidSeries) {
             html += `
                 <div class="test-item locked" aria-disabled="true">
                     <span>${vkAdminEscape(label)}</span>
