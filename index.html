@@ -14604,13 +14604,9 @@ async function initializeAuth(){
         }, 0);
     });
 
-    // Complete the admin-role check before the auth bootstrap promise resolves.
-    // This prevents the Topic Wise panel from being hidden by a race on hard refresh.
-    try{
-        await refreshVkAdminAccess();
-    }catch(error){
+    refreshVkAdminAccess().catch(function(error){
         console.warn("Admin access refresh failed:", error);
-    }
+    });
 }
 
 /* =====================================================
@@ -16124,54 +16120,165 @@ async function vkTWDeleteTest(){
 <!-- VK TOPIC-WISE ADMIN REFRESH ROUTE FIX (v2)
      The initial hash route is evaluated before vkEnsureTopicWiseAdminPanel
      is declared. Re-run initialization after the full page scripts load. -->
-<script id="vk-topicwise-admin-refresh-route-fix-v3">
+<script id="vk-topicwise-admin-refresh-route-fix-v2">
 (function () {
-  let restoreRunning = false;
   async function restoreTopicWiseAdminPanelAfterRefresh() {
-    const hashPage = (window.location.hash || "").replace(/^#/, "").split("?")[0];
-    const builder = document.getElementById("vkAdminMockBuilder");
-    const panel = document.getElementById("vkTopicWiseSharedAdmin");
-    const isBuilderRoute = hashPage === "vkAdminMockBuilder";
-    const builderIsActive = !!(builder && builder.classList.contains("active"));
-    if ((!isBuilderRoute && !builderIsActive) || !panel || restoreRunning) return;
-    restoreRunning = true;
     try {
-      // Wait for persisted Supabase session AND the initial admin-role lookup.
-      if (window.__vkAuthInitialization && typeof window.__vkAuthInitialization.then === "function") {
+      var hashPage = (window.location.hash || "").replace(/^#/, "").split("?")[0];
+      var builder = document.getElementById("vkAdminMockBuilder");
+      var isBuilderRoute = hashPage === "vkAdminMockBuilder";
+      var builderIsActive = !!(builder && builder.classList.contains("active"));
+      if (!isBuilderRoute && !builderIsActive) return;
+
+      // Wait for the existing Supabase/Firebase auth bootstrap before checking admin access.
+      if (window.__vkAuthInitialization &&
+          typeof window.__vkAuthInitialization.then === "function") {
         await window.__vkAuthInitialization;
       }
-      // Recheck role after auth bootstrap; non-admin users remain blocked.
-      if (typeof refreshVkAdminAccess !== "function" || !(await refreshVkAdminAccess())) {
-        panel.style.display = "none";
-        return;
-      }
+
+      // The panel initializer is declared later in this HTML file.
       if (typeof window.vkEnsureTopicWiseAdminPanel === "function") {
         await window.vkEnsureTopicWiseAdminPanel();
       }
-      // Ensure the admin builder route remains active after direct URL refresh.
-      if (isBuilderRoute && builder && !builder.classList.contains("active")) {
-        document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
-        builder.classList.add("active");
-      }
     } catch (err) {
       console.error("Topic Wise admin refresh initialization failed:", err);
-      const status = document.getElementById("vkTWStatus");
-      if (status) status.textContent = "Topic Wise panel could not initialize: " + (err.message || err);
-    } finally {
-      restoreRunning = false;
+      var panel = document.getElementById("vkTopicWiseSharedAdmin");
+      var status = document.getElementById("vkTWStatus");
+      if (panel) panel.style.display = "block";
+      if (status) status.textContent =
+        "Topic Wise panel initialization failed. Please check admin login and refresh once.";
     }
   }
-  function scheduleRestore() {
+
+  // Run after all preceding scripts have declared the initializer.
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", restoreTopicWiseAdminPanelAfterRefresh, { once: true });
+  } else {
     restoreTopicWiseAdminPanelAfterRefresh();
   }
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", scheduleRestore, { once: true });
-  } else {
-    scheduleRestore();
+
+  // Also recover when the browser restores this page from its back/forward cache.
+  window.addEventListener("pageshow", function () {
+    restoreTopicWiseAdminPanelAfterRefresh();
+  });
+})();
+</script>
+
+
+<!-- VK TOPIC WISE AUTH-READY RESTORE FIX v4 -->
+<script id="vk-topicwise-auth-ready-fix-v4">
+(function () {
+  let restoreTimer = null;
+  let restoring = false;
+
+  function isBuilderRoute() {
+    const hash = (location.hash || '').replace(/^#/, '').split('?')[0];
+    const page = document.getElementById('vkAdminMockBuilder');
+    return hash === 'vkAdminMockBuilder' || !!(page && page.classList.contains('active'));
   }
-  window.addEventListener("load", scheduleRestore, { once: true });
-  window.addEventListener("pageshow", scheduleRestore);
-  window.addEventListener("hashchange", scheduleRestore);
+
+  async function restorePanel() {
+    if (!isBuilderRoute() || restoring) return;
+    restoring = true;
+    let panel = document.getElementById('vkTopicWiseSharedAdmin');
+
+    try {
+      // Wait for the Supabase client and admin navigation to be created.
+      for (let i = 0; i < 40; i++) {
+        if ((typeof supabaseClient !== 'undefined' && supabaseClient) || window.supabaseClient) break;
+        await new Promise(resolve => setTimeout(resolve, 400));
+      }
+
+      const sb = (typeof supabaseClient !== 'undefined' && supabaseClient) || window.supabaseClient;
+      if (!sb) {
+        if (panel) {
+          panel.style.display = 'block';
+          const status = document.getElementById('vkTWStatus');
+          if (status) status.textContent = 'Supabase is still loading. Please wait and retry.';
+        }
+        return;
+      }
+
+      // Auth session can be restored after the first page render on mobile browsers.
+      let allowed = false;
+      for (let i = 0; i < 30; i++) {
+        try {
+          const result = await sb.auth.getSession();
+          const session = result && result.data && result.data.session;
+          if (session && session.user && !session.user.is_anonymous) {
+            const check = await sb.rpc('vk_is_exam_admin');
+            if (!check.error && check.data === true) {
+              allowed = true;
+              break;
+            }
+          }
+        } catch (e) {
+          console.warn('Topic Wise admin session retry:', e);
+        }
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+
+      panel = document.getElementById('vkTopicWiseSharedAdmin');
+      if (!panel) return;
+
+      if (!allowed) {
+        panel.style.display = 'none';
+        const status = document.getElementById('vkTWStatus');
+        if (status) status.textContent = 'Admin session not verified. Sign in with the authorized admin account.';
+        return;
+      }
+
+      panel.style.display = 'block';
+      if (typeof window.vkAdminLoadCourses === 'function') {
+        await window.vkAdminLoadCourses();
+      }
+      if (typeof window.vkTWLoad === 'function') {
+        await window.vkTWLoad();
+      }
+      panel.dataset.routeInit = 'ready';
+    } catch (e) {
+      console.error('Topic Wise panel restore v4 failed:', e);
+      panel = document.getElementById('vkTopicWiseSharedAdmin');
+      if (panel) {
+        panel.style.display = 'block';
+        const status = document.getElementById('vkTWStatus');
+        if (status) status.textContent = 'Topic Wise load error: ' + (e.message || e);
+      }
+    } finally {
+      restoring = false;
+    }
+  }
+
+  function scheduleRestore(delay) {
+    clearTimeout(restoreTimer);
+    restoreTimer = setTimeout(restorePanel, delay || 250);
+  }
+
+  // Run after the complete HTML and its scripts have loaded.
+  if (document.readyState === 'complete') scheduleRestore(100);
+  else window.addEventListener('load', () => scheduleRestore(100), { once: true });
+
+  window.addEventListener('pageshow', () => scheduleRestore(300));
+  window.addEventListener('hashchange', () => scheduleRestore(250));
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) scheduleRestore(250);
+  });
+
+  // Re-run when Supabase finishes restoring/signing in the user session.
+  const attachAuthListener = () => {
+    const sb = (typeof supabaseClient !== 'undefined' && supabaseClient) || window.supabaseClient;
+    if (!sb || !sb.auth || typeof sb.auth.onAuthStateChange !== 'function') return false;
+    if (window.__vkTopicWiseAuthListenerV4) return true;
+    window.__vkTopicWiseAuthListenerV4 = true;
+    sb.auth.onAuthStateChange(() => scheduleRestore(350));
+    return true;
+  };
+
+  let tries = 0;
+  const attachTimer = setInterval(() => {
+    tries++;
+    if (attachAuthListener() || tries >= 40) clearInterval(attachTimer);
+  }, 500);
 })();
 </script>
 
@@ -16490,4 +16597,3 @@ body:has(#examPage.active) > footer{
 @media(max-width:650px){#vkTopicWiseSharedAdmin{padding:13px!important}#vkTopicWiseSharedAdmin .vk-tw-shared-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:12px!important}#vkTopicWiseSharedAdmin .vk-tw-shared-grid label{font-size:12px!important}#vkTopicWiseSharedAdmin .vk-tw-shared-grid input,#vkTopicWiseSharedAdmin .vk-tw-shared-grid select{font-size:12px!important;padding:9px!important;min-height:42px!important}#vkTopicWiseSharedAdmin .vk-tw-upload-controls{display:grid!important;grid-template-columns:1fr 1fr!important}#vkTopicWiseSharedAdmin .vk-tw-upload-controls input{grid-column:1/-1!important}#vkTopicWiseSharedAdmin .vk-tw-upload-controls button{width:100%!important;white-space:normal!important;font-size:12px!important}#vkTopicWiseSharedAdmin .vk-tw-action-bar{grid-template-columns:repeat(2,minmax(0,1fr))!important}#vkTopicWiseSharedAdmin .vk-tw-action-bar button:last-child{grid-column:1/-1}}
 @media(max-width:360px){#vkTopicWiseSharedAdmin .vk-tw-shared-grid{grid-template-columns:1fr!important}}
 </style>
- 
