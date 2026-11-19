@@ -4103,7 +4103,8 @@ id="solutions">
 
     <!-- ADMIN-ONLY TOPIC WISE TESTS: uses shared tests/questions/attempts engine; no package/payment flow -->
     <section id="vkTopicWiseSharedAdmin" class="vk-tw-shared-panel" style="display:none" aria-label="Admin Topic Wise Test Management">
-      <div class="vk-tw-shared-head"><div><span>ADMIN ONLY · SHARED EXAM ENGINE</span><h2>Topic Wise Test Management</h2><p>Create and edit internal Topic Wise tests. Student access and payment are not enabled.</p></div><strong>📝</strong></div>
+      <div class="vk-tw-shared-head"><div><span>ADMIN ONLY · SHARED EXAM ENGINE</span><h2>Topic Wise Test Management</h2><p>Create and edit internal Topic Wise tests. Student access and payment are not enabled.</p></div><div class="vk-tw-head-actions"><strong aria-hidden="true">📝</strong><button type="button" id="vkTWToggle" class="vk-tw-collapse" aria-expanded="true" aria-controls="vkTWBody" onclick="vkTWTogglePanel()">Collapse −</button></div></div>
+      <div id="vkTWBody">
       <div class="vk-tw-shared-grid">
         <label>Course<select id="vkTWCourse"><option value="">Loading courses…</option></select></label>
         <label>Topic Name<input id="vkTWTopic" maxlength="150" placeholder="e.g. Ramayanam"></label>
@@ -4111,12 +4112,14 @@ id="solutions">
         <label>Duration (minutes)<input id="vkTWDuration" type="number" min="1" max="600" value="30"></label>
         <label>Question count (1–500)<input id="vkTWCount" type="number" min="1" max="500" value="25"></label>
         <label class="vk-tw-wide">Edit existing Topic Wise test (optional)<select id="vkTWExisting" onchange="vkTWSelectExisting()"><option value="">Create a new test</option></select></label>
+        <div class="vk-tw-upload-box vk-tw-wide"><div><b>Upload Questions from Excel</b><small>Upload .xlsx, .xls or .csv. One question per row; maximum 500 questions.</small></div><div class="vk-tw-upload-controls"><input id="vkTWExcelFile" type="file" accept=".xlsx,.xls,.csv" aria-label="Choose Excel or CSV question file"><button type="button" class="secondary" onclick="vkTWDownloadTemplate()">Download Excel Template</button><button type="button" onclick="vkTWImportExcel()">Import Excel Questions</button></div><small class="vk-tw-upload-note">Required columns: question_text, option_a, option_b, option_c, option_d, correct_option. Optional: marks, negative_marks, explanation. Import fills the JSON box; it does not save until you press Create / Update.</small></div>
         <label class="vk-tw-wide">Questions JSON<textarea id="vkTWQuestions" rows="12" spellcheck="false" placeholder='[ { "question_text":"Question text", "option_a":"Option A", "option_b":"Option B", "option_c":"Option C", "option_d":"Option D", "marks":1, "negative_marks":0.25, "correct_option":"A", "explanation":"Explanation" } ]'></textarea></label>
       </div>
       <div class="vk-tw-shared-actions"><button type="button" onclick="vkTWInsertSample()">Insert 1-question template</button><button type="button" class="secondary" onclick="vkTWClearForm()">Clear / New Test</button><button type="button" class="primary" id="vkTWSubmit" onclick="vkTWSubmitTest()">Create Topic Wise Test</button><button type="button" class="secondary" onclick="vkTWLoad()">Refresh Tests</button></div>
-      <p class="vk-tw-shared-hint">JSON fields: question_text, option_a, option_b, option_c, option_d, marks, negative_marks, correct_option (A/B/C/D), explanation. Paste an array containing the exact number of questions. Maximum 500.</p>
+      <p class="vk-tw-shared-hint">JSON fields: question_text, option_a, option_b, option_c, option_d, marks, negative_marks, correct_option (A/B/C/D), explanation. Excel import supports the same fields. Maximum 500.</p>
       <div id="vkTWStatus" role="status" aria-live="polite"></div>
       <div id="vkTWRows" class="vk-tw-shared-list">Loading Topic Wise tests…</div>
+      </div>
     </section>
 
     <div id="vkCategoryManager" class="vk-management-stack" style="margin:16px 0">
@@ -15971,9 +15974,40 @@ async function vkIpSubmitTest(){try{const form=document.getElementById('vkIpExam
 /* Shared-engine Topic Wise admin panel */
 (function(){
  const css=`.vk-tw-shared-panel{margin:18px 0 24px;padding:22px;background:linear-gradient(145deg,#111b3b,#30205f 62%,#4b2675);border:1px solid #57418d;border-radius:18px;color:#fff;box-shadow:0 14px 34px rgba(31,24,74,.18)}.vk-tw-shared-head{display:flex;justify-content:space-between;gap:15px;align-items:center}.vk-tw-shared-head span{font-size:10px;font-weight:900;letter-spacing:1.2px;color:#fbbf24}.vk-tw-shared-head h2{font-size:23px;margin:5px 0;color:#fff}.vk-tw-shared-head p{font-size:13px;color:#d8d5ed}.vk-tw-shared-head strong{font-size:34px}.vk-tw-shared-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:20px}.vk-tw-shared-grid label{display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:800;color:#f1edff}.vk-tw-shared-grid input,.vk-tw-shared-grid select,.vk-tw-shared-grid textarea{width:100%;padding:11px 12px;border:1px solid #c9c2e4;border-radius:9px;background:#fff;color:#172033;min-height:42px}.vk-tw-shared-grid textarea{font:12px/1.55 ui-monospace,monospace;resize:vertical}.vk-tw-wide{grid-column:1/-1}.vk-tw-shared-actions{display:flex;gap:9px;flex-wrap:wrap;margin:14px 0}.vk-tw-shared-actions button{border:0;border-radius:9px;padding:11px 15px;background:#f3e8ff;color:#3b236c;font-weight:900;cursor:pointer}.vk-tw-shared-actions button.primary{background:linear-gradient(135deg,#fbbf24,#f97316);color:#28143f}.vk-tw-shared-actions button.secondary{background:#fff;color:#3b236c}.vk-tw-shared-hint{font-size:12px;line-height:1.55;color:#e1dcf5}.vk-tw-shared-status{margin:10px 0;font-size:13px;font-weight:800;color:#fde68a}.vk-tw-shared-list{display:grid;gap:8px;margin-top:12px}.vk-tw-shared-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px 14px;border:1px solid rgba(255,255,255,.2);border-radius:10px;background:rgba(255,255,255,.09)}.vk-tw-shared-row small{display:block;color:#d8d5ed;margin-top:4px}.vk-tw-shared-row button{border:0;border-radius:8px;padding:7px 11px;background:#fff;color:#30205f;font-weight:800;cursor:pointer}@media(max-width:600px){.vk-tw-shared-grid{grid-template-columns:1fr}.vk-tw-shared-head h2{font-size:20px}}`;
+ css += `.vk-tw-shared-panel{background:#f7f9ff!important;color:#172b4d!important;border:1px solid #cbd7ed!important}.vk-tw-shared-head h2{color:#172b4d!important}.vk-tw-shared-head p{color:#526581!important}.vk-tw-shared-head span{color:#8a4b00!important}.vk-tw-shared-grid label{color:#243b63!important;font-size:13px!important}.vk-tw-shared-grid input,.vk-tw-shared-grid select,.vk-tw-shared-grid textarea{background:#fff!important;color:#14294d!important;border:1px solid #aebed8!important;font-weight:600}.vk-tw-shared-hint{color:#425675!important}.vk-tw-shared-status{color:#14532d!important}.vk-tw-shared-row{background:#fff!important;border:1px solid #d5deed!important;color:#172b4d!important}.vk-tw-shared-row small{color:#526581!important}.vk-tw-head-actions{display:flex;align-items:center;gap:14px}.vk-tw-collapse{border:1px solid #9aacc8;border-radius:9px;padding:9px 13px;background:#e9effb;color:#18345d;font-weight:800}.vk-tw-upload-box{padding:14px;border:1px dashed #8fa4c6;border-radius:12px;background:#edf3ff;color:#18345d;display:grid;gap:10px}.vk-tw-upload-box b{display:block;font-size:14px}.vk-tw-upload-box small{display:block;color:#526581;line-height:1.5;margin-top:4px}.vk-tw-upload-controls{display:flex;align-items:center;gap:9px;flex-wrap:wrap}.vk-tw-upload-controls input{flex:1 1 240px}.vk-tw-upload-controls button{border:0;border-radius:9px;padding:10px 13px;background:#244b85;color:#fff;font-weight:800}.vk-tw-upload-controls button.secondary{background:#fff;color:#244b85;border:1px solid #9aacc8}.vk-tw-upload-note{font-size:12px!important}@media(max-width:600px){.vk-tw-head-actions{align-items:flex-end;flex-direction:column}.vk-tw-upload-controls{align-items:stretch;flex-direction:column}.vk-tw-upload-controls button{width:100%}}`;
  const st=document.createElement('style');st.textContent=css;document.head.appendChild(st);
 })();
 let vkTWTests=[];
+function vkTWTogglePanel(){
+ const body=document.getElementById('vkTWBody'),btn=document.getElementById('vkTWToggle');
+ if(!body||!btn)return;const willOpen=body.hidden;body.hidden=!willOpen;btn.textContent=willOpen?'Collapse −':'Expand +';btn.setAttribute('aria-expanded',String(willOpen));
+}
+function vkTWDownloadTemplate(){
+ if(!window.XLSX){vkTWStatus('Excel library is not available. Refresh the page and try again.',true);return;}
+ const rows=[{question_text:'Sample question',option_a:'Option A',option_b:'Option B',option_c:'Option C',option_d:'Option D',correct_option:'A',marks:1,negative_marks:0.25,explanation:'Explanation'}];
+ const wb=XLSX.utils.book_new(),ws=XLSX.utils.json_to_sheet(rows);XLSX.utils.book_append_sheet(wb,ws,'Questions');XLSX.writeFile(wb,'VK_Exams_Topic_Wise_Question_Template.xlsx');
+}
+async function vkTWImportExcel(){
+ const input=document.getElementById('vkTWExcelFile'),file=input?.files?.[0];
+ try{
+  if(!file)throw new Error('Please choose an Excel or CSV file first.');
+  if(!window.XLSX)throw new Error('Excel reader did not load. Refresh the page and try again.');
+  const buffer=await file.arrayBuffer();let rows;
+  if(file.name.toLowerCase().endsWith('.csv')){const wb=XLSX.read(new Uint8Array(buffer),{type:'array'});rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:'',raw:false});}
+  else{const wb=XLSX.read(buffer,{type:'array'});if(!wb.SheetNames.length)throw new Error('The workbook has no sheets.');rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:'',raw:false});}
+  if(!rows.length)throw new Error('No question rows found in the first worksheet.');
+  if(rows.length>500)throw new Error('Maximum 500 questions are allowed. Found '+rows.length+'.');
+  const normKey=k=>String(k).trim().toLowerCase().replace(/[\s-]+/g,'_');
+  const aliases={question_text:['question_text','question','question_telugu','ప్రశ్న'],option_a:['option_a','option_a_text','a','optiona','ఎంపిక_a'],option_b:['option_b','option_b_text','b','optionb','ఎంపిక_b'],option_c:['option_c','option_c_text','c','optionc','ఎంపిక_c'],option_d:['option_d','option_d_text','d','optiond','ఎంపిక_d'],correct_option:['correct_option','correct_answer','answer','key','సమాధానం'],marks:['marks','mark'],negative_marks:['negative_marks','negative_mark','negative'],explanation:['explanation','solution','వివరణ']};
+  const get=(row,key)=>{const wanted=aliases[key];const actual=Object.keys(row).find(k=>wanted.includes(normKey(k)));return actual===undefined?'':row[actual];};
+  const questions=rows.map((r,i)=>({question_text:String(get(r,'question_text')??'').trim(),option_a:String(get(r,'option_a')??'').trim(),option_b:String(get(r,'option_b')??'').trim(),option_c:String(get(r,'option_c')??'').trim(),option_d:String(get(r,'option_d')??'').trim(),marks:Number(get(r,'marks')||1),negative_marks:Number(get(r,'negative_marks')||0),correct_option:String(get(r,'correct_option')||'').trim().toUpperCase(),explanation:String(get(r,'explanation')??'').trim()})).filter(q=>q.question_text||q.option_a||q.option_b||q.option_c||q.option_d);
+  if(!questions.length)throw new Error('Question column not found. Use the Download Excel Template button for the correct headers.');
+  const invalid=questions.findIndex(q=>!q.question_text||!q.option_a||!q.option_b||!q.option_c||!q.option_d||!['A','B','C','D'].includes(q.correct_option)||!Number.isFinite(q.marks)||q.marks<=0||!Number.isFinite(q.negative_marks)||q.negative_marks<0);
+  if(invalid>=0)throw new Error('Row '+(invalid+2)+' has missing question/options, invalid answer key, or invalid marks.');
+  document.getElementById('vkTWQuestions').value=JSON.stringify(questions,null,2);document.getElementById('vkTWCount').value=questions.length;
+  vkTWStatus(questions.length+' questions imported into the JSON editor. Review them, then click Create / Update to save.');input.value='';
+ }catch(e){vkTWStatus('Excel import failed: '+(e.message||e),true);}
+}
 function vkTWStatus(message,isError=false){const el=document.getElementById('vkTWStatus');if(el){el.className='vk-tw-shared-status';el.style.color=isError?'#fecaca':'#fde68a';el.textContent=message||'';}}
 function vkTWClearForm(){document.getElementById('vkTWExisting').value='';document.getElementById('vkTWTopic').value='';document.getElementById('vkTWTitle').value='';document.getElementById('vkTWDuration').value=30;document.getElementById('vkTWCount').value=25;document.getElementById('vkTWQuestions').value='';document.getElementById('vkTWSubmit').textContent='Create Topic Wise Test';vkTWStatus('New test mode.');}
 function vkTWInsertSample(){document.getElementById('vkTWQuestions').value=JSON.stringify([{question_text:'మీ ప్రశ్నను ఇక్కడ నమోదు చేయండి',option_a:'ఎంపిక A',option_b:'ఎంపిక B',option_c:'ఎంపిక C',option_d:'ఎంపిక D',marks:1,negative_marks:0.25,correct_option:'A',explanation:'వివరణ'}],null,2);document.getElementById('vkTWCount').value=1;}
