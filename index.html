@@ -5991,16 +5991,6 @@ function openCourse(course, addHistory = true){
                 </div>
             </div>
 
-            <div class="vk-eo-card vk-eo-free" role="button" tabindex="0"
-                 onclick="openFreeMockTests('Endowment Officer')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openFreeMockTests('Endowment Officer');}">
-                <div class="vk-eo-card-art">📝</div>
-                <div class="vk-eo-card-copy">
-                    <span class="vk-eo-eyebrow">PRACTICE & IMPROVE</span>
-                    <h2>Free Mock Tests</h2>
-                    <p>Attempt free practice tests and check your preparation.</p>
-                    <span class="vk-eo-card-cta">Attempt Free Tests <b>→</b></span>
-                </div>
-            </div>
         `;
 
         let featureStrip = document.getElementById("vkEoFeatureStrip");
@@ -6281,7 +6271,19 @@ async function openTestSeries(addHistory = true){
 
         if(seriesError) throw seriesError;
 
-        const rows = seriesRows || [];
+        /*
+           Permanent UI rule requested for APPSC and High Court:
+           hide the top-level Free Mock Tests card from the Test Series
+           paper-selection screen. The underlying free tests, records,
+           attempts and results remain untouched.
+        */
+        const hideFreeMockCardForCourse = ["APPSC", "High Court"].includes(String(currentCourse || "").trim());
+        const rows = (seriesRows || []).filter(series => {
+            if(!hideFreeMockCardForCourse) return true;
+            const seriesName = String(series.name || "").trim().toLowerCase();
+            const seriesType = String(series.series_type || "").trim().toLowerCase();
+            return seriesName !== "free mock tests" && seriesType !== "free_mock";
+        });
         if(!list) return;
 
         if(!rows.length){
