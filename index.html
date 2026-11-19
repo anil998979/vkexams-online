@@ -1,4 +1,4 @@
-             <!DOCTYPE html>
+              <!DOCTYPE html>
 <html lang="en">
 <head>
 
@@ -4125,18 +4125,19 @@ id="solutions">
 
     <!-- ADMIN-ONLY TOPIC WISE TESTS: uses shared tests/questions/attempts engine; no package/payment flow -->
     <section id="vkTopicWiseSharedAdmin" class="vk-tw-shared-panel" style="display:none" aria-label="Admin Topic Wise Test Management">
-      <div class="vk-tw-shared-head"><div><span>ADMIN ONLY · SHARED EXAM ENGINE</span><h2>Topic Wise Test Management</h2><p>Create and edit internal Topic Wise tests. Student access and payment are not enabled.</p></div><div class="vk-tw-head-actions"><strong aria-hidden="true">📝</strong><button type="button" id="vkTWToggle" class="vk-tw-collapse" aria-expanded="true" aria-controls="vkTWBody" onclick="vkTWTogglePanel()">Collapse −</button></div></div>
+      <div class="vk-tw-shared-head"><div class="vk-tw-heading-copy"><span>ADMIN CONTROL PANEL · SHARED EXAM ENGINE</span><div class="vk-tw-title-line"><h2>Topic Wise Test Management</h2><button type="button" id="vkTWToggle" class="vk-tw-collapse" aria-expanded="true" aria-controls="vkTWBody" onclick="vkTWTogglePanel()" aria-label="Collapse Topic Wise Test Management">⌃</button></div><p>Create drafts privately and publish approved Topic Wise tests.</p></div></div>
       <div id="vkTWBody">
         <section class="vk-tw-card vk-tw-details-card">
           <button type="button" class="vk-tw-card-toggle" id="vkTWDetailsToggle" aria-expanded="true" aria-controls="vkTWDetailsBody" onclick="vkTWToggleSection('vkTWDetailsBody','vkTWDetailsToggle')"><span>Test Details</span><b>⌃</b></button>
           <div id="vkTWDetailsBody" class="vk-tw-card-body">
             <div class="vk-tw-shared-grid">
-              <label>Test Title<input id="vkTWTitle" maxlength="180" placeholder="e.g. Ramayanam – Practice Test 1"></label>
+              <label>Select Paper<select id="vkTWTitle"><option value="Paper - 1">Paper 1</option><option value="Paper - 2">Paper 2</option></select></label>
               <label>Topic Name<input id="vkTWTopic" maxlength="150" placeholder="e.g. Ramayanam"></label>
               <label>Course<select id="vkTWCourse"><option value="">Loading courses…</option></select></label>
               <label>Duration (minutes)<input id="vkTWDuration" type="number" min="1" max="600" value="30"></label>
               <label>Question count (1–500)<input id="vkTWCount" type="number" min="1" max="500" value="25"></label>
-              <label class="vk-tw-wide">Select existing Topic Wise test (for Modify / Delete)<select id="vkTWExisting" onchange="vkTWSelectExisting()"><option value="">Create a new Topic Wise test</option></select></label>
+              <label>Test Action<select id="vkTWAction" onchange="vkTWActionChanged()"><option value="create">Create New Topic Test</option><option value="edit">Edit Existing Topic Test</option></select></label>
+              <label id="vkTWExistingWrap" class="vk-tw-wide" hidden>Select Existing Topic Test<select id="vkTWExisting" onchange="vkTWSelectExisting()"><option value="">Select an existing test</option></select></label>
             </div>
           </div>
         </section>
@@ -4160,11 +4161,12 @@ id="solutions">
 
         <textarea id="vkTWQuestions" hidden aria-hidden="true"></textarea>
         <div class="vk-tw-shared-actions vk-tw-action-bar">
-          <button type="button" class="vk-tw-insert-btn" id="vkTWInsert" onclick="vkTWSubmitTest()">Insert</button>
-          <button type="button" class="vk-tw-modify-btn" id="vkTWModify" onclick="vkTWSubmitTest()" disabled>Modify / Save</button>
-          <button type="button" class="vk-tw-delete-btn" id="vkTWDelete" onclick="vkTWDeleteTest()" disabled>Delete</button>
-          <button type="button" class="vk-tw-remove-btn" id="vkTWRemove" onclick="vkTWClearForm()">Remove / Clear</button>
+          <button type="button" class="vk-tw-draft-btn" id="vkTWDraft" onclick="vkTWSaveDraft()">Save Draft</button>
+          <button type="button" class="vk-tw-publish-btn" id="vkTWPublish" onclick="vkTWPublishTest()">Publish</button>
+          <button type="button" class="vk-tw-delete-btn" id="vkTWDelete" onclick="vkTWDeleteTest()">Remove</button>
+          <button type="button" class="vk-tw-remove-btn" onclick="vkTWClearForm()">Clear Form</button>
           <button type="button" class="vk-tw-refresh-btn" onclick="vkTWLoad()">Refresh Tests</button>
+          <button type="button" class="vk-tw-restore-btn" id="vkTWRestoreDraft" onclick="vkTWRestoreDraft()" hidden>Restore Saved Draft</button>
         </div>
         <p id="vkTWStatus" class="vk-tw-shared-status" role="status" aria-live="polite"></p>
         <div id="vkTWRows" class="vk-tw-shared-list">Loading Topic Wise tests…</div>
@@ -16060,46 +16062,24 @@ async function vkTWImportExcel(){
 function vkTWStatus(message,isError=false){const el=document.getElementById('vkTWStatus');if(el){el.className='vk-tw-shared-status';el.style.color=isError?'#fecaca':'#fde68a';el.textContent=message||'';}}
 function vkTWToggleSection(bodyId,buttonId){const body=document.getElementById(bodyId),btn=document.getElementById(buttonId);if(!body||!btn)return;const open=body.hidden;body.hidden=!open;btn.setAttribute('aria-expanded',String(open));btn.querySelector('b').textContent=open?'⌃':'⌄';}
 function vkTWRenderPreview(questions){const box=document.getElementById('vkTWQuestionPreview'),badge=document.getElementById('vkTWQuestionBadge');if(badge)badge.textContent=(questions?.length||0)+' questions';if(!box)return;if(!questions?.length){box.textContent='Upload an Excel file to preview questions here.';return;}box.innerHTML=questions.slice(0,20).map((q,i)=>`<div class="vk-tw-question-item"><b>Q${i+1}.</b> ${vkAdminEscape(q.question_text)}<br><small>A. ${vkAdminEscape(q.option_a)} · B. ${vkAdminEscape(q.option_b)} · C. ${vkAdminEscape(q.option_c)} · D. ${vkAdminEscape(q.option_d)} · Answer: ${vkAdminEscape(q.correct_option)}</small></div>`).join('')+(questions.length>20?`<div class="vk-tw-question-item">Showing first 20 of ${questions.length} questions.</div>`:'');}
-function vkTWSetMode(editing){document.getElementById('vkTWInsert').disabled=editing;document.getElementById('vkTWModify').disabled=!editing;document.getElementById('vkTWDelete').disabled=!editing;}
-function vkTWClearForm(){document.getElementById('vkTWExisting').value='';document.getElementById('vkTWTopic').value='';document.getElementById('vkTWTitle').value='';document.getElementById('vkTWDuration').value=30;document.getElementById('vkTWCount').value=25;document.getElementById('vkTWQuestions').value='';document.getElementById('vkTWExcelFile').value='';document.getElementById('vkTWImportSummary').textContent='No Excel file imported yet.';vkTWRenderPreview([]);vkTWSetMode(false);vkTWStatus('New Topic Wise test mode. Add an Excel file, then click Insert.');}
-function vkTWInsertSample(){document.getElementById('vkTWQuestions').value=JSON.stringify([{question_text:'మీ ప్రశ్నను ఇక్కడ నమోదు చేయండి',option_a:'ఎంపిక A',option_b:'ఎంపిక B',option_c:'ఎంపిక C',option_d:'ఎంపిక D',marks:1,negative_marks:0.25,correct_option:'A',explanation:'వివరణ'}],null,2);document.getElementById('vkTWCount').value=1;vkTWRenderPreview([{question_text:'మీ ప్రశ్నను ఇక్కడ నమోదు చేయండి',option_a:'ఎంపిక A',option_b:'ఎంపిక B',option_c:'ఎంపిక C',option_d:'ఎంపిక D',correct_option:'A'}]);}
-async function vkTWLoad(){
- const panel=document.getElementById('vkTopicWiseSharedAdmin');if(!panel)return;
- if(!await refreshVkAdminAccess()){panel.style.display='none';return;}panel.style.display='block';
- try{
-  const courseSel=document.getElementById('vkTWCourse');const prev=courseSel.value;
-  const {data:courses,error:ce}=await supabaseClient.from('courses').select('id,name').eq('is_active',true).order('display_order');if(ce)throw ce;
-  courseSel.innerHTML='<option value="">Select course</option>'+(courses||[]).map(c=>`<option value="${vkAdminEscape(c.id)}">${vkAdminEscape(c.name)}</option>`).join('');if(prev)courseSel.value=prev;
-  const {data:series,error:se}=await supabaseClient.from('test_series').select('id,course_id,name').eq('series_type','topic_wise');if(se)throw se;
-  const ids=(series||[]).map(x=>x.id);let tests=[];if(ids.length){const r=await supabaseClient.from('tests').select('id,title,topic_name,test_number,topic_test_number,duration_minutes,total_marks,test_series_id,is_active').in('test_series_id',ids).eq('is_active',true).order('created_at',{ascending:false});if(r.error)throw r.error;tests=r.data||[];}
-  vkTWTests=tests.map(t=>({...t,series:(series||[]).find(s=>s.id===t.test_series_id)}));
-  const sel=document.getElementById('vkTWExisting');sel.innerHTML='<option value="">Create a new test</option>'+vkTWTests.map(t=>`<option value="${t.id}">${vkAdminEscape(t.topic_name||'Topic')} · ${vkAdminEscape(t.title||'Test')}</option>`).join('');
-  document.getElementById('vkTWRows').innerHTML=vkTWTests.map(t=>`<div class="vk-tw-shared-row"><div><strong>${vkAdminEscape(t.title||'Topic Wise Test')}</strong><small>${vkAdminEscape(t.series?.name||'Topic Wise')} · ${vkAdminEscape(t.topic_name||'')} · ${Number(t.total_marks||0)} marks · ${Number(t.duration_minutes||0)} min</small></div><button type="button" onclick="document.getElementById('vkTWExisting').value='${t.id}';vkTWSelectExisting()">Edit</button></div>`).join('')||'<div class="vk-tw-shared-row">No Topic Wise tests created yet.</div>';
-  vkTWSetMode(false);vkTWStatus('Admin access verified. '+tests.length+' shared-engine Topic Wise test(s) found. Student access and payments remain disabled.');
- }catch(e){vkTWStatus('Load failed: '+(e.message||e),true);}
-}
-async function vkTWSelectExisting(){
- const id=document.getElementById('vkTWExisting').value;const t=vkTWTests.find(x=>x.id===id);if(!t){vkTWClearForm();return;}
- document.getElementById('vkTWCourse').value=t.series?.course_id||'';document.getElementById('vkTWTopic').value=t.topic_name||'';document.getElementById('vkTWTitle').value=t.title||'';document.getElementById('vkTWDuration').value=t.duration_minutes||30;
- try{const {data:qs,error}=await supabaseClient.from('questions').select('id,question_text,option_a,option_b,option_c,option_d,marks,negative_marks,correct_option').eq('test_id',id).order('question_number');if(error)throw error;const qids=(qs||[]).map(q=>q.id);let ans=[];if(qids.length){const a=await supabaseClient.from('question_answers').select('question_id,correct_option,explanation').in('question_id',qids);if(a.error)throw a.error;ans=a.data||[];}const payload=(qs||[]).map(q=>{const a=ans.find(x=>x.question_id===q.id)||{};return {question_text:q.question_text,option_a:q.option_a,option_b:q.option_b,option_c:q.option_c,option_d:q.option_d,marks:q.marks??1,negative_marks:q.negative_marks??0,correct_option:a.correct_option||q.correct_option||'A',explanation:a.explanation||''};});document.getElementById('vkTWCount').value=payload.length;document.getElementById('vkTWQuestions').value=JSON.stringify(payload,null,2);vkTWSetMode(true);vkTWRenderPreview(payload);vkTWStatus('Loaded '+payload.length+' questions. Modify / Save is blocked by the database if attempt/result history exists.');}catch(e){vkTWStatus('Could not load questions: '+(e.message||e),true);}
-}
-async function vkTWSubmitTest(){
+function vkTWSetMode(editing){const action=document.getElementById('vkTWAction');if(action){action.value=editing?'edit':'create';}const wrap=document.getElementById('vkTWExistingWrap');if(wrap)wrap.hidden=!editing;const del=document.getElementById('vkTWDelete');if(del)del.disabled=!editing;const pub=document.getElementById('vkTWPublish');if(pub)pub.textContent=editing?'Publish Changes':'Publish';}
+function vkTWActionChanged(){const editing=document.getElementById('vkTWAction').value==='edit';document.getElementById('vkTWExistingWrap').hidden=!editing;if(!editing){document.getElementById('vkTWExisting').value='';vkTWSetMode(false);}else{vkTWSetMode(true);}}
+function vkTWClearForm(){document.getElementById('vkTWAction').value='create';document.getElementById('vkTWExistingWrap').hidden=true;document.getElementById('vkTWExisting').value='';document.getElementById('vkTWTitle').value='Paper - 1';document.getElementById('vkTWTopic').value='';document.getElementById('vkTWCourse').value='';document.getElementById('vkTWDuration').value=30;document.getElementById('vkTWCount').value=25;document.getElementById('vkTWQuestions').value='';document.getElementById('vkTWExcelFile').value='';document.getElementById('vkTWImportSummary').textContent='No Excel file imported yet.';vkTWRenderPreview([]);vkTWSetMode(false);vkTWStatus('New topic test. Import the Excel questions, then Save Draft or Publish.');}
+function vkTWGetFormData(){let questions=[];try{questions=JSON.parse(document.getElementById('vkTWQuestions').value||'[]')}catch(e){}return {courseId:document.getElementById('vkTWCourse').value,paper:document.getElementById('vkTWTitle').value,topic:document.getElementById('vkTWTopic').value.trim(),duration:Number(document.getElementById('vkTWDuration').value),count:Number(document.getElementById('vkTWCount').value),action:document.getElementById('vkTWAction').value,editId:document.getElementById('vkTWExisting').value,questions};}
+function vkTWValidateForm(d){if(!d.courseId||!d.topic){vkTWStatus('Select a course and enter the Topic Name.',true);return false;}if(!Number.isInteger(d.duration)||d.duration<1||d.duration>600){vkTWStatus('Duration must be 1–600 minutes.',true);return false;}if(!Array.isArray(d.questions)||d.questions.length<1||d.questions.length>500||d.questions.length!==d.count){vkTWStatus('Upload an Excel file with exactly '+d.count+' valid questions. Current imported count: '+(d.questions?.length||0),true);return false;}return true;}
+function vkTWSaveDraft(){const d=vkTWGetFormData();if(!d.courseId||!d.topic){vkTWStatus('Select a course and enter the Topic Name before saving a draft.',true);return;}if(!Array.isArray(d.questions)||!d.questions.length){vkTWStatus('Import the questions from Excel before saving this draft.',true);return;}const draft={...d,savedAt:new Date().toISOString()};try{localStorage.setItem('vkTopicWiseAdminDraftV1',JSON.stringify(draft));document.getElementById('vkTWRestoreDraft').hidden=false;vkTWStatus('Draft saved on this device only. It is not uploaded online and students cannot see it.');}catch(e){vkTWStatus('Could not save draft in this browser: '+(e.message||e),true);}}
+function vkTWRestoreDraft(){try{const d=JSON.parse(localStorage.getItem('vkTopicWiseAdminDraftV1')||'null');if(!d){vkTWStatus('No saved draft found on this device.',true);return;}document.getElementById('vkTWCourse').value=d.courseId||'';document.getElementById('vkTWTitle').value=d.paper||'Paper - 1';document.getElementById('vkTWTopic').value=d.topic||'';document.getElementById('vkTWDuration').value=d.duration||30;document.getElementById('vkTWCount').value=d.count||d.questions?.length||25;document.getElementById('vkTWQuestions').value=JSON.stringify(d.questions||[]);vkTWRenderPreview(d.questions||[]);document.getElementById('vkTWImportSummary').textContent=(d.questions?.length||0)+' questions restored from this device draft.';document.getElementById('vkTWAction').value=d.editId?'edit':'create';document.getElementById('vkTWExistingWrap').hidden=!d.editId;if(d.editId)document.getElementById('vkTWExisting').value=d.editId;vkTWSetMode(!!d.editId);vkTWStatus('Saved draft restored from this device.');}catch(e){vkTWStatus('Could not restore draft: '+(e.message||e),true);}}
+async function vkTWPublishTest(){
  if(!await refreshVkAdminAccess()){vkTWStatus('Admin access required.',true);return;}
- const courseId=document.getElementById('vkTWCourse').value,topic=document.getElementById('vkTWTopic').value.trim(),title=document.getElementById('vkTWTitle').value.trim(),duration=Number(document.getElementById('vkTWDuration').value),expected=Number(document.getElementById('vkTWCount').value),editId=document.getElementById('vkTWExisting').value;
- let questions;try{questions=JSON.parse(document.getElementById('vkTWQuestions').value||'[]');}catch(e){vkTWStatus('Imported question data is invalid. Please upload the Excel file again.',true);return;}
- if(!courseId||!topic||!title){vkTWStatus('Select a course and enter Test Title and Topic Name.',true);return;}
- if(!Number.isInteger(duration)||duration<1||duration>600){vkTWStatus('Duration must be 1–600 minutes.',true);return;}
- if(!Array.isArray(questions)||questions.length<1||questions.length>500||questions.length!==expected){vkTWStatus('Upload an Excel file with exactly '+expected+' valid questions. Current imported count: '+(Array.isArray(questions)?questions.length:0),true);return;}
- const button=document.getElementById(editId?'vkTWModify':'vkTWInsert');button.disabled=true;const oldText=button.textContent;button.textContent='Saving…';
- try{const args={p_topic_name:topic,p_title:title,p_duration_minutes:duration,p_questions:questions};let result;
-  if(editId){args.p_test_id=editId;const r=await supabaseClient.rpc('vk_admin_update_topic_wise_test',args);if(r.error)throw r.error;result=r.data;}
-  else{args.p_course_id=courseId;const r=await supabaseClient.rpc('vk_admin_create_topic_wise_test',args);if(r.error)throw r.error;result=r.data;}
-  vkTWStatus((editId?'Modified':'Inserted')+' successfully. Test ID: '+(typeof result==='string'?result:(result?.test_id||'saved')));vkTWClearForm();await vkTWLoad();
- }catch(e){vkTWStatus('Save failed: '+(e.message||e),true);}finally{button.disabled=false;button.textContent=oldText;vkTWSetMode(!!document.getElementById('vkTWExisting').value);}
+ const d=vkTWGetFormData();if(!vkTWValidateForm(d))return;const editId=d.action==='edit'?d.editId:'';if(d.action==='edit'&&!editId){vkTWStatus('Select an existing Topic Wise test to edit.',true);return;}
+ if(!confirm(editId?'Publish the updated test online?':'Publish this Topic Wise test online?'))return;
+ const btn=document.getElementById('vkTWPublish'),old=btn.textContent;btn.disabled=true;btn.textContent='Publishing…';
+ try{const args={p_topic_name:d.topic,p_title:d.paper,p_duration_minutes:d.duration,p_questions:d.questions};let r;if(editId){args.p_test_id=editId;r=await supabaseClient.rpc('vk_admin_update_topic_wise_test',args);}else{args.p_course_id=d.courseId;r=await supabaseClient.rpc('vk_admin_create_topic_wise_test',args);}if(r.error)throw r.error;localStorage.removeItem('vkTopicWiseAdminDraftV1');document.getElementById('vkTWRestoreDraft').hidden=true;vkTWStatus('Published successfully to the shared exam database. Student visibility still follows the current Topic Wise access controls.');vkTWClearForm();await vkTWLoad();}
+ catch(e){vkTWStatus('Publish failed: '+(e.message||e),true);}finally{btn.disabled=false;btn.textContent=old;}
 }
 async function vkTWDeleteTest(){
  if(!await refreshVkAdminAccess()){vkTWStatus('Admin access required.',true);return;}
- const id=document.getElementById('vkTWExisting').value;if(!id){vkTWStatus('Select an existing Topic Wise test to delete.',true);return;}
+ const id=document.getElementById('vkTWExisting').value;if(document.getElementById('vkTWAction').value!=='edit'||!id){vkTWStatus('Choose Edit Existing Topic Test and select a test before removing it.',true);return;}
  const t=vkTWTests.find(x=>x.id===id);if(!t)return;
  if(!confirm('Delete this Topic Wise test from active use? Its record will be retained; tests with attempt/result history cannot be deleted.'))return;
  const btn=document.getElementById('vkTWDelete');btn.disabled=true;
@@ -16387,4 +16367,38 @@ body:has(#examPage.active) > footer{
 #vkTopicWiseSharedAdmin .vk-tw-shared-row{background:#fff!important;border:1px solid #dce5f1!important;color:#17356f!important;border-radius:11px}
 #vkTopicWiseSharedAdmin .vk-tw-shared-row small{color:#526581!important}
 @media(max-width:650px){#vkTopicWiseSharedAdmin{padding:13px!important}#vkTopicWiseSharedAdmin .vk-tw-shared-grid{grid-template-columns:1fr!important}#vkTopicWiseSharedAdmin .vk-tw-shared-head{align-items:flex-start}#vkTopicWiseSharedAdmin .vk-tw-upload-controls{align-items:stretch;flex-direction:column}#vkTopicWiseSharedAdmin .vk-tw-upload-controls button{width:100%}#vkTopicWiseSharedAdmin .vk-tw-action-bar button{flex:1 1 42%}}
+</style>
+
+<style id="vk-topicwise-professional-layout-v2">
+#vkTopicWiseSharedAdmin{background:#fff!important;color:#17345f!important;border:1px solid #d7e2f1!important;border-radius:18px!important;padding:20px!important;box-shadow:0 10px 30px rgba(28,55,100,.07)!important}
+#vkTopicWiseSharedAdmin .vk-tw-shared-head{display:block!important;padding:0 0 16px!important;margin:0 0 16px!important;border-bottom:1px solid #e5ecf6!important}
+#vkTopicWiseSharedAdmin .vk-tw-heading-copy>span{display:inline-block;background:#eaf1ff!important;color:#2451a6!important;padding:5px 10px;border-radius:7px;font-size:10px;font-weight:900;letter-spacing:.7px}
+#vkTopicWiseSharedAdmin .vk-tw-title-line{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:5px}
+#vkTopicWiseSharedAdmin .vk-tw-title-line h2{margin:0!important;color:#17356f!important;font-size:clamp(20px,2.4vw,25px)!important;font-weight:850!important}
+#vkTopicWiseSharedAdmin .vk-tw-shared-head p{margin:5px 0 0!important;color:#64748b!important;font-size:13px!important}
+#vkTopicWiseSharedAdmin .vk-tw-collapse{flex:0 0 38px;width:38px;height:38px;padding:0!important;border-radius:10px!important;background:#eef4ff!important;border:1px solid #c8d8f3!important;color:#244fa4!important;font-size:22px!important;display:grid;place-items:center}
+#vkTopicWiseSharedAdmin .vk-tw-card{margin:14px 0!important;padding:14px!important;border:1px solid #dce6f3!important;border-radius:14px!important;background:#fff!important;box-shadow:0 4px 14px rgba(27,55,98,.035)!important}
+#vkTopicWiseSharedAdmin .vk-tw-shared-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:14px 16px!important;margin:0!important}
+#vkTopicWiseSharedAdmin .vk-tw-shared-grid label{display:flex!important;flex-direction:column!important;gap:7px!important;color:#243f6a!important;font-size:13px!important;font-weight:800!important;min-width:0}
+#vkTopicWiseSharedAdmin .vk-tw-shared-grid input,#vkTopicWiseSharedAdmin .vk-tw-shared-grid select{width:100%!important;min-width:0!important;min-height:44px!important;padding:10px 12px!important;border:1px solid #c7d5e9!important;border-radius:9px!important;background:#fff!important;color:#172b4d!important;font-size:14px!important;font-weight:600!important;box-sizing:border-box!important}
+#vkTopicWiseSharedAdmin #vkTWExistingWrap[hidden]{display:none!important}
+#vkTopicWiseSharedAdmin .vk-tw-excel-card{border:1px solid #b8d2f8!important;background:#fbfdff!important}
+#vkTopicWiseSharedAdmin .vk-tw-excel-card .vk-tw-card-toggle{background:#eaf3ff!important;color:#174a9a!important}
+#vkTopicWiseSharedAdmin .vk-tw-upload-box{width:100%!important;box-sizing:border-box!important;background:#eef6ff!important;border:1px solid #9ec5ff!important;border-left:5px solid #2864dc!important;border-radius:11px!important;padding:14px!important;color:#17356f!important}
+#vkTopicWiseSharedAdmin .vk-tw-upload-controls{display:grid!important;grid-template-columns:minmax(180px,1fr) auto auto!important;gap:9px!important;align-items:center!important}
+#vkTopicWiseSharedAdmin .vk-tw-upload-controls input{width:100%!important;min-width:0!important;box-sizing:border-box!important;background:#fff!important;color:#172b4d!important}
+#vkTopicWiseSharedAdmin .vk-tw-upload-controls button{min-height:42px!important;padding:9px 14px!important;white-space:nowrap!important;border-radius:9px!important;background:#245bd5!important;color:#fff!important;border:1px solid #245bd5!important;font-weight:800!important}
+#vkTopicWiseSharedAdmin .vk-tw-upload-controls button.secondary{background:#fff!important;color:#2452a4!important;border-color:#a9c3ee!important}
+#vkTopicWiseSharedAdmin .vk-tw-action-bar{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:10px!important;padding:13px!important;margin:14px 0!important;background:#f7f9fd!important;border:1px solid #e0e8f4!important;border-radius:12px!important}
+#vkTopicWiseSharedAdmin .vk-tw-action-bar button{min-width:0!important;min-height:43px!important;padding:9px 10px!important;border-radius:9px!important;font-size:13px!important;font-weight:850!important;white-space:nowrap!important}
+#vkTopicWiseSharedAdmin .vk-tw-draft-btn{background:#fff!important;color:#31527f!important;border:1px solid #c6d5e9!important}
+#vkTopicWiseSharedAdmin .vk-tw-publish-btn{background:#176b49!important;color:#fff!important}
+#vkTopicWiseSharedAdmin .vk-tw-delete-btn{background:#fff1f1!important;color:#b42318!important;border:1px solid #f0b8b8!important}
+#vkTopicWiseSharedAdmin .vk-tw-restore-btn{background:#eef4ff!important;color:#244fa4!important;border:1px solid #c8d8f3!important}
+#vkTopicWiseSharedAdmin .vk-tw-action-bar button:disabled{opacity:.45!important;cursor:not-allowed!important}
+#vkTopicWiseSharedAdmin .vk-tw-shared-status{background:#effaf3!important;color:#17633f!important;border-radius:9px!important;padding:10px 12px!important}
+#vkTopicWiseSharedAdmin .vk-tw-shared-row{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:12px!important;padding:12px 14px!important;background:#fff!important;border:1px solid #dce5f1!important;border-radius:10px!important;color:#17356f!important}
+#vkTopicWiseSharedAdmin .vk-tw-shared-row small{color:#64748b!important}
+@media(max-width:650px){#vkTopicWiseSharedAdmin{padding:13px!important}#vkTopicWiseSharedAdmin .vk-tw-shared-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:12px!important}#vkTopicWiseSharedAdmin .vk-tw-shared-grid label{font-size:12px!important}#vkTopicWiseSharedAdmin .vk-tw-shared-grid input,#vkTopicWiseSharedAdmin .vk-tw-shared-grid select{font-size:12px!important;padding:9px!important;min-height:42px!important}#vkTopicWiseSharedAdmin .vk-tw-upload-controls{display:grid!important;grid-template-columns:1fr 1fr!important}#vkTopicWiseSharedAdmin .vk-tw-upload-controls input{grid-column:1/-1!important}#vkTopicWiseSharedAdmin .vk-tw-upload-controls button{width:100%!important;white-space:normal!important;font-size:12px!important}#vkTopicWiseSharedAdmin .vk-tw-action-bar{grid-template-columns:repeat(2,minmax(0,1fr))!important}#vkTopicWiseSharedAdmin .vk-tw-action-bar button:last-child{grid-column:1/-1}}
+@media(max-width:360px){#vkTopicWiseSharedAdmin .vk-tw-shared-grid{grid-template-columns:1fr!important}}
 </style>
