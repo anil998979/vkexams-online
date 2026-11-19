@@ -3044,6 +3044,91 @@ body > footer p{
 
 
 
+/* ENDOWMENT COURSE: DISTINCT CARD PALETTE + TOPIC SERIES EMPHASIS */
+#course.vk-eo-premium .vk-eo-syllabus{
+    border-color:#a8d8ff;
+    background:linear-gradient(135deg,#f0f9ff 0%,#dceeff 100%);
+    box-shadow:0 9px 24px rgba(14,116,190,.13);
+}
+#course.vk-eo-premium .vk-eo-syllabus .vk-eo-card-art{
+    background:linear-gradient(145deg,#d8efff,#fff);
+    box-shadow:inset 0 0 0 1px #b9ddff;
+}
+#course.vk-eo-premium .vk-eo-syllabus h2{color:#0756a5}
+#course.vk-eo-premium .vk-eo-syllabus .vk-eo-card-cta{background:#d8ecff;color:#0756a5}
+
+/* Main real-time exam series retains the high-visibility gold treatment. */
+#course.vk-eo-premium .vk-eo-series{
+    border-color:#ffbd28;
+    background:radial-gradient(circle at 90% 12%,rgba(255,255,255,.78),transparent 29%),linear-gradient(130deg,#fff2b2 0%,#ffdc55 52%,#ffad18 100%);
+    box-shadow:0 12px 30px rgba(217,137,0,.27),0 0 0 4px rgba(255,191,36,.18);
+}
+
+/* Topic-wise plan is the featured conversion card. */
+#course.vk-eo-premium .vk-eo-topicwise{
+    position:relative;
+    border:2px solid #8b5cf6;
+    background:radial-gradient(circle at 92% 8%,rgba(255,255,255,.24),transparent 30%),linear-gradient(125deg,#312e81 0%,#5b21b6 52%,#7c3aed 100%);
+    box-shadow:0 13px 30px rgba(91,33,182,.28),0 0 0 4px rgba(139,92,246,.14);
+    transform:translateY(-2px);
+}
+#course.vk-eo-premium .vk-eo-topicwise:before{
+    content:"⭐ RECOMMENDED PLAN";
+    position:absolute;
+    z-index:2;
+    top:13px;
+    right:14px;
+    padding:7px 11px;
+    border:1px solid rgba(255,255,255,.4);
+    border-radius:999px;
+    background:linear-gradient(90deg,#f97316,#ea580c);
+    color:#fff;
+    font-size:9px;
+    font-weight:950;
+    letter-spacing:.55px;
+    box-shadow:0 4px 12px rgba(124,45,18,.25);
+}
+#course.vk-eo-premium .vk-eo-topicwise:after{
+    background:rgba(255,255,255,.10);
+    width:175px;height:175px;right:-42px;bottom:-82px;
+}
+#course.vk-eo-premium .vk-eo-topicwise .vk-eo-card-art{
+    background:linear-gradient(145deg,#ede9fe,#fff);
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.7),0 5px 15px rgba(20,10,60,.16);
+}
+#course.vk-eo-premium .vk-eo-topicwise .vk-eo-eyebrow{color:#ddd6fe}
+#course.vk-eo-premium .vk-eo-topicwise h2{color:#fff;font-size:clamp(20px,2.5vw,27px)}
+#course.vk-eo-premium .vk-eo-topicwise p{color:#f3e8ff;font-weight:650}
+#course.vk-eo-premium .vk-eo-topicwise .vk-eo-card-cta{
+    background:linear-gradient(90deg,#fff,#f3e8ff);
+    color:#5b21b6;
+    box-shadow:0 5px 13px rgba(20,10,60,.18);
+}
+#course.vk-eo-premium .vk-eo-topicwise:hover{
+    border-color:#c4b5fd;
+    box-shadow:0 17px 36px rgba(91,33,182,.34),0 0 0 5px rgba(139,92,246,.18);
+    transform:translateY(-5px);
+}
+
+#course.vk-eo-premium .vk-eo-study{
+    border-color:#86dec0;
+    background:linear-gradient(135deg,#effdf7 0%,#d5f7e9 100%);
+    box-shadow:0 9px 24px rgba(5,150,105,.12);
+}
+#course.vk-eo-premium .vk-eo-study .vk-eo-card-art{
+    background:linear-gradient(145deg,#c9f7e4,#fff);
+    box-shadow:inset 0 0 0 1px #a7ebd0;
+}
+#course.vk-eo-premium .vk-eo-study h2{color:#047857}
+#course.vk-eo-premium .vk-eo-study .vk-eo-card-cta{background:#c9f7e4;color:#047857}
+@media(max-width:650px){
+    #course.vk-eo-premium .vk-eo-topicwise:before{top:9px;right:8px;padding:5px 7px;font-size:7px}
+    #course.vk-eo-premium .vk-eo-topicwise .vk-eo-card-copy{padding-top:12px}
+}
+@media(prefers-reduced-motion:reduce){
+    #course.vk-eo-premium .vk-eo-topicwise{transform:none}
+}
+
 /* VK EXAMS GLOBAL DARK MODE */
 body.dark-mode{background:#0b1220!important;color:#e5edf8!important}
 body.dark-mode header{background:rgba(15,23,42,.97)!important;border-bottom-color:#263449!important}
