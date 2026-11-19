@@ -3274,8 +3274,6 @@ Jobs
 <a onclick="openProfile()">
 Profile
 </a>
-
-<a onclick="vkIpOpenPackages()">Packages</a>
 <a id="vkAdminNav" class="vk-admin-nav" onclick="openAdminMockBuilder()">
 Admin
 </a>
@@ -3391,14 +3389,7 @@ Select an examination and start your preparation.
   </article>
 </div>
 
-<div class="vk-topic-package-home-wrap">
-  <article class="vk-topic-package-home-card" onclick="vkIpOpenPackages()" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();vkIpOpenPackages()}">
-    <div class="vk-topic-package-lock" id="vkTopicHomeLock">🔒</div>
-    <div class="vk-topic-package-home-copy"><span class="vk-topic-package-kicker">VK EXAMS · INDEPENDENT PACKAGES</span>
-      <h3>Topic-wise Test Packages</h3>
-      <p>Buy a package and access its own Paper-I / Paper-II topics and tests.</p>
-      <div class="vk-topic-package-highlights"><span>Separate Package Tests</span><span>Admin-defined Validity</span><span>Instant Results</span></div>
-    </div>
+
     <div class="vk-topic-package-home-price"><strong id="vkTopicHomePrice">View</strong><small>Only</small><button type="button" onclick="event.stopPropagation();vkIpOpenPackages()">Explore Package&nbsp; →</button></div>
   </article>
 </div>
@@ -4045,7 +4036,7 @@ id="solutions">
       </section>
       <section class="vk-admin-panel vk-management-card">
         <div class="vk-management-heading"><div><span class="vk-management-kicker">02 · EXAM STRUCTURE</span><h2>Test Series / Card Management</h2><p>Add, edit, order, enable or hide any card under any active category. New cards appear from the database; no code edit is required.</p></div><span class="vk-management-icon purple">▤</span></div>
-        <div class="vk-admin-grid"><div><label>Course / Category</label><select id="vkSeriesCourse"></select></div><div><label>Card / Test Series name</label><input id="vkSeriesName" maxlength="100" placeholder="Example: Paper 1 / Group 2 / Free Mock Tests"></div><div><label>Series type</label><input id="vkSeriesType" list="vkSeriesTypeOptions" maxlength="50" placeholder="Select or type a new type"><datalist id="vkSeriesTypeOptions"><option value="general"><option value="prelims"><option value="mains"><option value="free_mock"><option value="paper_1"><option value="paper_2"><option value="topic_wise"></datalist></div><div><label>Display order</label><input id="vkSeriesOrder" type="number" min="0" value="10"></div></div>
+        <div class="vk-admin-grid"><div><label>Course / Category</label><select id="vkSeriesCourse"></select></div><div><label>Card / Test Series name</label><input id="vkSeriesName" maxlength="100" placeholder="Example: Paper 1 / Group 2 / Free Mock Tests"></div><div><label>Series type</label><input id="vkSeriesType" list="vkSeriesTypeOptions" maxlength="50" placeholder="Select or type a new type"><datalist id="vkSeriesTypeOptions"><option value="general"><option value="prelims"><option value="mains"><option value="free_mock"><option value="paper_1"><option value="paper_2"></datalist></div><div><label>Display order</label><input id="vkSeriesOrder" type="number" min="0" value="10"></div></div>
         <input id="vkSeriesId" type="hidden"><div class="vk-management-actions"><button type="button" class="vk-admin-btn" onclick="vkSaveSeries()">Save Test Series</button><button type="button" class="vk-admin-btn vk-admin-btn-secondary" onclick="vkResetSeriesForm()">Clear Form</button><button type="button" class="vk-admin-btn vk-admin-btn-secondary" onclick="vkLoadCategoryManager()">Refresh</button></div>
         <div class="vk-series-filter-bar" aria-label="Filter test series">
           <div><label for="vkSeriesFilterCourse">Filter by Course / Category</label><select id="vkSeriesFilterCourse"><option value="">All Categories</option></select></div>
@@ -4179,7 +4170,6 @@ id="solutions">
           <select id="vkAdminTestType" onchange="vkAdminOnTestTypeChange()">
             <option value="free">Free Mock Test</option>
             <option value="paid">Paid Test Series</option>
-            <option value="topic_wise">Topic Wise Test</option>
           </select>
         </div>
         <div class="vk-admin-field">
@@ -15723,97 +15713,8 @@ document.addEventListener('DOMContentLoaded',()=>{const old=window.openAdminMock
 
 
 
-<style id="vk-topicwise-test-management-integration">
-/* Topic Wise Test is part of the same Test Management box. */
-#vkAdminMockBuilder #vkIndependentPackageAdmin { display:none !important; margin:14px 0 0; }
-#vkAdminMockBuilder.topicwise-mode #vkIndependentPackageAdmin { display:block !important; }
-#vkAdminMockBuilder.topicwise-mode .vk-test-management-box > .vk-admin-panel:not(.vk-topicwise-selector-panel) { display:none !important; }
-#vkAdminMockBuilder .vk-test-management-box > #vkIndependentPackageAdmin { width:100%; box-sizing:border-box; }
-#vkAdminMockBuilder .vk-topicwise-mode-note{margin:0 0 14px;padding:11px 13px;border:1px solid #c7d2fe;border-radius:11px;background:#eef2ff;color:#3730a3;font-size:13px;font-weight:700}
-#vkAdminMockBuilder #vkIndependentPackageAdmin .vk-ip-head h2{font-size:20px}
-@media(max-width:640px){#vkAdminMockBuilder #vkIndependentPackageAdmin{padding:15px}.vk-ip-grid{grid-template-columns:1fr!important}}
-</style>
-<script id="vk-topicwise-test-management-integration-js">
-(function(){
-  const rootId='vkAdminMockBuilder';
-  function integrate(){
-    const root=document.getElementById(rootId);
-    if(!root || root.dataset.topicwiseIntegrated==='1') return;
-    const box=root.querySelector('.vk-test-management-box');
-    const independent=root.querySelector('#vkIndependentPackageAdmin');
-    const type=document.getElementById('vkAdminTestType');
-    if(!box || !independent || !type) return;
 
-    // Keep all three test types inside the one Test Management container.
-    box.appendChild(independent);
-    const selectorPanel=type.closest('.vk-admin-panel');
-    if(selectorPanel) selectorPanel.classList.add('vk-topicwise-selector-panel');
 
-    const note=document.createElement('div');
-    note.className='vk-topicwise-mode-note';
-    note.textContent='Topic Wise Test: Select a package category, then create or manage its exam groups, topics, tests and questions. These tests are separate from Free and Paid Test Series.';
-    independent.insertBefore(note,independent.firstChild);
-
-    const original=window.vkAdminOnTestTypeChange;
-    window.vkAdminOnTestTypeChange=function(){
-      const mode=type.value;
-      if(mode==='topic_wise'){
-        root.classList.add('topicwise-mode');
-        if(selectorPanel){
-          selectorPanel.querySelectorAll('.vk-admin-field').forEach(el=>{
-            if(el.querySelector('#vkAdminTestType')) return;
-          });
-        }
-        independent.style.setProperty('display','block','important');
-        const btn=document.getElementById('vkAdminPublishBtn');
-        if(btn) btn.textContent='Use Topic Wise Package Builder below';
-        if(typeof vkIpLoadPackages==='function') vkIpLoadPackages();
-        return;
-      }
-      root.classList.remove('topicwise-mode');
-      if(typeof original==='function') original.apply(this,arguments);
-    };
-
-    // Do not expose old independent package administration outside this mode.
-    root.dataset.topicwiseIntegrated='1';
-    if(type.value==='topic_wise') window.vkAdminOnTestTypeChange();
-  }
-
-  // Category chooser: reuse an existing non-archived package or prepare a new one.
-  window.vkIpSelectCategory=async function(){
-    const code=document.getElementById('vkIpCode')?.value||'';
-    const idEl=document.getElementById('vkIpPackageId');
-    if(!code){ if(typeof vkIpReset==='function') vkIpReset(); return; }
-    const defaults={
-      APPSC:{name:'APPSC Topic Wise Test Series',description:'Topic-wise preparation for all relevant APPSC recruitment examinations.'},
-      ENDOWMENT:{name:'Endowment Officer Topic Wise Test Series',description:'Topic-wise preparation for Endowment Officer Paper-I and Paper-II.'},
-      HIGH_COURT:{name:'Andhra Pradesh High Court Topic Wise Test Series',description:'Topic-wise preparation for Andhra Pradesh High Court recruitment examinations.'}
-    };
-    const d=defaults[code];
-    try{
-      const {data,error}=await supabaseClient.from('vk_independent_packages').select('*').eq('package_code',code).eq('is_archived',false).maybeSingle();
-      if(error) throw error;
-      if(data){
-        if(typeof vkIpEditPackage==='function') await vkIpEditPackage(data.id);
-        return;
-      }
-      idEl.value='';
-      document.getElementById('vkIpName').value=d.name;
-      document.getElementById('vkIpDescription').value=d.description;
-      document.getElementById('vkIpPrice').value='29';
-      document.getElementById('vkIpDays').value='5';
-      document.getElementById('vkIpBuilder').hidden=true;
-      if(typeof vkIpStatus==='function') vkIpStatus('New '+code+' package selected. Click Save Package, then add exam groups, topics, tests and questions.');
-    }catch(e){
-      if(typeof vkIpStatus==='function') vkIpStatus('Could not load category package: '+(e.message||e),true);
-    }
-  };
-
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',integrate,{once:true});
-  else integrate();
-  window.addEventListener('load',integrate,{once:true});
-})();
-</script>
 
 
 <style id="vk-topic-wise-package-preview">
@@ -15824,6 +15725,53 @@ document.addEventListener('DOMContentLoaded',()=>{const old=window.openAdminMock
 @media(max-width:850px){#vkIndependentPackagesPage .vk-ip-student-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:560px){#vkIndependentPackagesPage .vk-ip-student-grid{grid-template-columns:1fr}}
 </style>
+
+
+<style id="vk-permanent-topic-package-ui-removal">
+/* VK Exams: Topic Wise / Independent Package UI retired.
+   Historical database rows and payment records are intentionally preserved. */
+#vkIndependentPackageAdmin,
+#vkTopicPackageAdmin,
+#vkIndependentPackagesPage,
+#vkIndependentPackageDetail,
+#vkCustomPackageManager,
+#vkTopicPackageHome,
+.vk-topic-package-home-wrap,
+.vk-topic-package-home-card,
+#vkTopicHomeLock,
+#vkTopicHomePrice,
+#vkAdminMockBuilder .vk-independent-admin,
+#vkAdminMockBuilder [data-vk-topicwise],
+#vkAdminMockBuilder .vk-topicwise-mode-note,
+#vkAdminMockBuilder .vk-topicwise-selector-panel {
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+<script id="vk-permanent-topic-package-ui-removal-js">
+(function(){
+  // Prevent old links or cached callbacks from reopening the retired screens.
+  window.vkIpOpenPackages = function(){ return false; };
+  window.vkIpBackToPackages = function(){ return false; };
+  // Keep Test Management restricted to Free Mock Test and Paid Test Series.
+  function removeRetiredChoice(){
+    var type=document.getElementById('vkAdminTestType');
+    if(type){
+      Array.from(type.options).forEach(function(option){
+        if(option.value==='topic_wise' || /topic wise/i.test(option.textContent)) option.remove();
+      });
+      if(type.value==='topic_wise') type.value='free';
+      if(typeof window.vkAdminOnTestTypeChange==='function') window.vkAdminOnTestTypeChange();
+    }
+    var root=document.getElementById('vkAdminMockBuilder');
+    if(root) root.classList.remove('topicwise-mode');
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',removeRetiredChoice,{once:true});
+  else removeRetiredChoice();
+  window.addEventListener('load',removeRetiredChoice,{once:true});
+})();
+</script>
 
 </body>
 
