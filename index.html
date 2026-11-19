@@ -15610,6 +15610,80 @@ async function vkIpSubmitTest(){try{const form=document.getElementById('vkIpExam
 document.addEventListener('DOMContentLoaded',()=>{const old=window.openAdminMockBuilder;if(typeof old==='function')window.openAdminMockBuilder=async function(){await old.apply(this,arguments);if(vkAdminAuthorized){document.getElementById('vkIndependentPackageAdmin').style.display='block';await vkIpLoadPackages();}};});
 </script>
 
+
+<style id="vk-admin-test-management-cleanup">
+/* VK Exams: streamlined admin screen */
+#vkAdminMockBuilder #vkCategoryManager,
+#vkAdminMockBuilder #vkCustomPackageManager,
+#vkAdminMockBuilder #vkTopicPackageAdmin,
+#vkAdminMockBuilder #vkIndependentPackageAdmin,
+#vkAdminMockBuilder .vk-admin-actions:has(button[onclick="openAdminStudyMaterials()"]) {
+  display: none !important;
+}
+#vkAdminMockBuilder .vk-test-management-box {
+  background: #fff;
+  border: 1px solid #d7e2f2;
+  border-radius: 18px;
+  box-shadow: 0 8px 26px rgba(30, 64, 175, .07);
+  padding: 22px;
+  margin: 18px 0 28px;
+}
+#vkAdminMockBuilder .vk-test-management-box > .vk-admin-panel {
+  margin: 0 0 14px;
+  box-shadow: none;
+}
+#vkAdminMockBuilder .vk-test-management-box > .vk-admin-panel:last-child {
+  margin-bottom: 0;
+}
+#vkAdminMockBuilder .vk-test-management-title {
+  margin: 0 0 18px;
+  color: #1e3a8a;
+  font-size: 22px;
+  font-weight: 800;
+}
+#vkAdminMockBuilder #vkTopicTestPackageWrap {
+  display: none !important;
+}
+</style>
+<script id="vk-admin-test-management-group">
+(function () {
+  function groupTestManagement() {
+    const root = document.getElementById('vkAdminMockBuilder');
+    if (!root || root.dataset.testManagementGrouped === '1') return;
+    const adminWrap = root.querySelector('.vk-admin-wrap');
+    if (!adminWrap) return;
+
+    const panels = [
+      ...adminWrap.querySelectorAll(':scope > .vk-admin-panel')
+    ].filter(panel =>
+      panel.querySelector('#vkAdminTestType') ||
+      panel.id === 'vkAdminBulkImportPanel' ||
+      panel.querySelector('#vkAdminQuestions') ||
+      panel.querySelector('#vkAdminPublishBtn')
+    );
+    if (!panels.length) return;
+
+    const box = document.createElement('section');
+    box.className = 'vk-test-management-box';
+    box.setAttribute('aria-label', 'Test Management');
+    const title = document.createElement('h2');
+    title.className = 'vk-test-management-title';
+    title.textContent = 'Test Management';
+    box.appendChild(title);
+    adminWrap.insertBefore(box, panels[0]);
+    panels.forEach(panel => box.appendChild(panel));
+    root.dataset.testManagementGrouped = '1';
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', groupTestManagement, { once: true });
+  } else {
+    groupTestManagement();
+  }
+  window.addEventListener('load', groupTestManagement, { once: true });
+})();
+</script>
+
 </body>
 
 </html>
