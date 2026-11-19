@@ -4133,7 +4133,7 @@ id="solutions">
             <div class="vk-tw-shared-grid">
               <label>Select Paper<select id="vkTWTitle"><option value="Paper - 1">Paper 1</option><option value="Paper - 2">Paper 2</option></select></label>
               <label>Topic Name<input id="vkTWTopic" maxlength="150" placeholder="e.g. Ramayanam"></label>
-              <label>Course<select id="vkTWCourse"><option value="">Loading courses…</option></select></label>
+              <label>Course<select id="vkTWCourse"><option value="">Select course</option></select></label>
               <label>Duration (minutes)<input id="vkTWDuration" type="number" min="1" max="600" value="30"></label>
               <label>Question count (1–500)<input id="vkTWCount" type="number" min="1" max="500" value="25"></label>
               <label>Test Action<select id="vkTWAction" onchange="vkTWActionChanged()"><option value="create">Create New Topic Test</option><option value="edit">Edit Existing Topic Test</option></select></label>
@@ -4165,11 +4165,11 @@ id="solutions">
           <button type="button" class="vk-tw-publish-btn" id="vkTWPublish" onclick="vkTWPublishTest()">Publish</button>
           <button type="button" class="vk-tw-delete-btn" id="vkTWDelete" onclick="vkTWDeleteTest()">Remove</button>
           <button type="button" class="vk-tw-remove-btn" onclick="vkTWClearForm()">Clear Form</button>
-          <button type="button" class="vk-tw-refresh-btn" onclick="vkTWLoad()">Refresh Tests</button>
+          
           <button type="button" class="vk-tw-restore-btn" id="vkTWRestoreDraft" onclick="vkTWRestoreDraft()" hidden>Restore Saved Draft</button>
         </div>
         <p id="vkTWStatus" class="vk-tw-shared-status" role="status" aria-live="polite"></p>
-        <div id="vkTWRows" class="vk-tw-shared-list">Loading Topic Wise tests…</div>
+        <div id="vkTWRows" class="vk-tw-shared-list" hidden></div>
       </div>
     </section>
 
@@ -16046,8 +16046,8 @@ window.vkEnsureTopicWiseAdminPanel = async function(){
       return;
     }
     panel.style.display = "block";
-    if(typeof vkAdminLoadCourses === "function") await vkAdminLoadCourses();
-    if(typeof vkTWLoad === "function") await vkTWLoad();
+    if(typeof vkTWLoadCourses === "function") await vkTWLoadCourses();
+    if(typeof vkTWLoad === "function") 
     panel.dataset.routeInit = "ready";
   }catch(error){
     panel.style.display = "block";
@@ -16103,7 +16103,7 @@ async function vkTWPublishTest(){
  const d=vkTWGetFormData();if(!vkTWValidateForm(d))return;const editId=d.action==='edit'?d.editId:'';if(d.action==='edit'&&!editId){vkTWStatus('Select an existing Topic Wise test to edit.',true);return;}
  if(!confirm(editId?'Publish the updated test online?':'Publish this Topic Wise test online?'))return;
  const btn=document.getElementById('vkTWPublish'),old=btn.textContent;btn.disabled=true;btn.textContent='Publishing…';
- try{const args={p_topic_name:d.topic,p_title:d.paper,p_duration_minutes:d.duration,p_questions:d.questions};let r;if(editId){args.p_test_id=editId;r=await supabaseClient.rpc('vk_admin_update_topic_wise_test',args);}else{args.p_course_id=d.courseId;r=await supabaseClient.rpc('vk_admin_create_topic_wise_test',args);}if(r.error)throw r.error;localStorage.removeItem('vkTopicWiseAdminDraftV1');document.getElementById('vkTWRestoreDraft').hidden=true;vkTWStatus('Published successfully to the shared exam database. Student visibility still follows the current Topic Wise access controls.');vkTWClearForm();await vkTWLoad();}
+ try{const args={p_topic_name:d.topic,p_title:d.paper,p_duration_minutes:d.duration,p_questions:d.questions};let r;if(editId){args.p_test_id=editId;r=await supabaseClient.rpc('vk_admin_update_topic_wise_test',args);}else{args.p_course_id=d.courseId;r=await supabaseClient.rpc('vk_admin_create_topic_wise_test',args);}if(r.error)throw r.error;localStorage.removeItem('vkTopicWiseAdminDraftV1');document.getElementById('vkTWRestoreDraft').hidden=true;vkTWStatus('Published successfully to the shared exam database. Student visibility still follows the current Topic Wise access controls.');vkTWClearForm();}
  catch(e){vkTWStatus('Publish failed: '+(e.message||e),true);}finally{btn.disabled=false;btn.textContent=old;}
 }
 async function vkTWDeleteTest(){
@@ -16112,7 +16112,7 @@ async function vkTWDeleteTest(){
  const t=vkTWTests.find(x=>x.id===id);if(!t)return;
  if(!confirm('Delete this Topic Wise test from active use? Its record will be retained; tests with attempt/result history cannot be deleted.'))return;
  const btn=document.getElementById('vkTWDelete');btn.disabled=true;
- try{const r=await supabaseClient.rpc('vk_admin_delete_topic_wise_test',{p_test_id:id});if(r.error)throw r.error;vkTWStatus('Topic Wise test deleted from active use. Historical records were preserved.');vkTWClearForm();await vkTWLoad();}
+ try{const r=await supabaseClient.rpc('vk_admin_delete_topic_wise_test',{p_test_id:id});if(r.error)throw r.error;vkTWStatus('Topic Wise test deleted from active use. Historical records were preserved.');vkTWClearForm();}
  catch(e){vkTWStatus('Delete failed: '+(e.message||e),true);}finally{btn.disabled=false;}
 }
 </script>
@@ -16229,11 +16229,8 @@ async function vkTWDeleteTest(){
       }
 
       panel.style.display = 'block';
-      if (typeof window.vkAdminLoadCourses === 'function') {
-        await window.vkAdminLoadCourses();
-      }
-      if (typeof window.vkTWLoad === 'function') {
-        await window.vkTWLoad();
+      if (typeof window.vkTWLoadCourses === 'function') {
+        await window.vkTWLoadCourses();
       }
       panel.dataset.routeInit = 'ready';
     } catch (e) {
@@ -16282,6 +16279,70 @@ async function vkTWDeleteTest(){
 })();
 </script>
 
+
+<script id="vk-topicwise-course-loader-fix-v5">
+async function vkTWLoadCourses(){
+  const select=document.getElementById('vkTWCourse');
+  if(!select) return;
+  const sb=(typeof supabaseClient!=='undefined'&&supabaseClient)||window.supabaseClient;
+  if(!sb){select.innerHTML='<option value="">Supabase not ready</option>';return;}
+  const previous=select.value;
+  select.innerHTML='<option value="">Loading…</option>';
+  try{
+    const allowed=Array.isArray(window.VK_ADMIN_ALLOWED_COURSES)
+      ? window.VK_ADMIN_ALLOWED_COURSES
+      : ['APPSC','Endowment Officer','High Court'];
+    const {data,error}=await sb.from('courses').select('id,name')
+      .in('name',allowed).order('name',{ascending:true});
+    if(error) throw error;
+    const rows=data||[];
+    const ordered=allowed.map(n=>rows.find(r=>r.name===n)).filter(Boolean);
+    select.innerHTML='<option value="">Select course</option>'+
+      ordered.map(r=>`<option value="${String(r.id).replace(/"/g,'&quot;')}">${String(r.name).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}</option>`).join('');
+    if(previous && ordered.some(r=>r.id===previous)) select.value=previous;
+    else {
+      const preferred=ordered.find(r=>r.name==='Endowment Officer')||ordered[0];
+      if(preferred) select.value=preferred.id;
+    }
+    if(!ordered.length) select.innerHTML='<option value="">No permitted courses found</option>';
+  }catch(e){
+    console.error('Topic Wise course loading failed:',e);
+    select.innerHTML='<option value="">Course loading failed</option>';
+    const status=document.getElementById('vkTWStatus');
+    if(status) status.textContent='Courses could not be loaded: '+(e.message||e);
+  }
+}
+(function(){
+  function cleanTopicWiseBuilder(){
+    const refresh=document.querySelector('#vkTopicWiseSharedAdmin .vk-tw-refresh-btn');
+    if(refresh) refresh.remove();
+    const rows=document.getElementById('vkTWRows');
+    if(rows){rows.textContent='';rows.hidden=true;}
+    const course=document.getElementById('vkTWCourse');
+    if(course && (!course.options.length || /Loading courses/i.test(course.textContent))){
+      course.innerHTML='<option value="">Select course</option>';
+    }
+  }
+  async function init(){
+    const panel=document.getElementById('vkTopicWiseSharedAdmin');
+    if(!panel) return;
+    const hash=(location.hash||'').replace(/^#/,'').split('?')[0];
+    const page=document.getElementById('vkAdminMockBuilder');
+    if(hash!=='vkAdminMockBuilder' && !(page&&page.classList.contains('active'))) return;
+    cleanTopicWiseBuilder();
+    try{
+      if(typeof refreshVkAdminAccess==='function' && await refreshVkAdminAccess()){
+        panel.style.display='block';
+        await vkTWLoadCourses();
+      }
+    }catch(e){console.error('Topic Wise builder init v5:',e);}
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init,{once:true});
+  else setTimeout(init,150);
+  window.addEventListener('pageshow',()=>setTimeout(init,250));
+  window.addEventListener('hashchange',()=>setTimeout(init,250));
+})();
+</script>
 </body>
 
 </html>
