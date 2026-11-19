@@ -5172,6 +5172,25 @@ const $ = id =>
    PAGE SYSTEM
 ===================================================== */
 
+/* TOPIC-WISE TEMPORARY RELEASE GATE
+   Admin-only testing phase. Student access and all Topic Wise payments are disabled.
+   Server-side RLS/RPC enforcement must be applied separately before deployment. */
+const VK_TOPICWISE_ADMIN_ONLY = true;
+const VK_TOPICWISE_PAYMENT_ENABLED = false;
+function vkTopicwiseBlockStudent(action='access'){
+  console.warn('Topic Wise is temporarily restricted to Admin-only testing:', action);
+  if(typeof vkTopicAdminStatus==='function') vkTopicAdminStatus('Admin-only testing is active. Student access and payments are disabled.');
+  else if(typeof toast==='function') toast('Topic Wise is temporarily available to Admin only.');
+  return false;
+}
+function vkTopicwiseHideStudentEntryPoints(){
+  if(!VK_TOPICWISE_ADMIN_ONLY)return;
+  document.querySelectorAll('.vk-eo-topicwise').forEach(el=>el.style.display='none');
+  ['vkTopicPackagePage'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});
+  const buy=document.getElementById('vkTopicBuyButton');if(buy){buy.disabled=true;buy.style.display='none';}
+  document.querySelectorAll('.vk-ip-buy-plan,.vk-ip-view-series').forEach(el=>{el.disabled=true;el.style.display='none';});
+}
+
 let vkHomeAdInitialized = false;
 
 function initializeVkHomeAd(){
@@ -15458,13 +15477,14 @@ let vkTopicPackage=null, vkTopicPackagePurchase=null, vkTopicStructure=[];
 const vkTopicEsc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function vkTopicSetMessage(msg,isError=false){const el=document.getElementById('vkTopicMessage');if(el){el.textContent=msg||'';el.style.color=isError?'#b42318':'#166534';}}
 function vkTopicAdminStatus(msg,isError=false){const el=document.getElementById('vkTopicAdminStatus');if(el){el.textContent=msg||'';el.style.color=isError?'#b42318':'#475569';}}
-function vkTopicOpenPackage(){showPage('vkTopicPackagePage');vkPushContextRoute('vkTopicPackagePage');vkTopicLoadStudent();}
+function vkTopicOpenPackage(){if(VK_TOPICWISE_ADMIN_ONLY)return vkTopicwiseBlockStudent('open package');showPage('vkTopicPackagePage');vkPushContextRoute('vkTopicPackagePage');vkTopicLoadStudent();}
 function vkTopicGoBack(){if(history.state?.vkPage){history.back();}else showHome();}
 async function vkTopicFindPackage(){
  const {data,error}=await supabaseClient.from('packages').select('id,name,description,price,duration_days,is_active,package_type').eq('name','Complete Topic-wise Test Package').eq('package_type','custom').order('created_at',{ascending:false}).limit(1);
  if(error)throw error;vkTopicPackage=(data||[]).find(p=>p.is_active===true)||null;return vkTopicPackage;
 }
 async function vkTopicLoadStudent(){
+ if(VK_TOPICWISE_ADMIN_ONLY){vkTopicwiseHideStudentEntryPoints();return vkTopicwiseBlockStudent('load student package');}
  const host=document.getElementById('vkTopicPaperArea');if(!host||!supabaseClient)return;
  host.innerHTML='<p class="vk-topic-loading">Loading package structure…</p>';vkTopicSetMessage('');
  try{
@@ -15495,6 +15515,7 @@ async function vkTopicLoadStudent(){
  }catch(e){console.error('Topic package load failed',e);host.innerHTML='<p class="vk-topic-loading">Could not load package. '+vkTopicEsc(e.message||e)+'</p>';}
 }
 async function vkTopicBuyPackage(){
+ if(!VK_TOPICWISE_PAYMENT_ENABLED)return vkTopicwiseBlockStudent('purchase');
  try{if(!isLoggedIn()){openLogin();toast('Please login/register before purchasing.');return;}const pkg=vkTopicPackage||await vkTopicFindPackage();if(!pkg)throw new Error('Package is not published.');
   const {data:course,error}=await supabaseClient.from('courses').select('id').eq('name','Endowment Officer').single();if(error)throw error;
   selectedStoreCourse='Endowment Officer';
@@ -15503,6 +15524,7 @@ async function vkTopicBuyPackage(){
 }
 
 async function vkTopicStartTest(testId) {
+    if(VK_TOPICWISE_ADMIN_ONLY)return vkTopicwiseBlockStudent('student test start');
     if (!vkTopicPackagePurchase) {
         vkTopicSetMessage(
             "Active package access is required to start this test.",
@@ -15637,6 +15659,7 @@ async function vkIpRemoveTest(id){if(!confirm('Remove this test from the active 
 async function vkIpAddQuestion(){try{const testId=document.getElementById('vkIpQuestionTest').value;if(!testId)throw Error('Select a test.');const row={test_id:testId,question_text:document.getElementById('vkIpQuestionText').value.trim(),option_a:document.getElementById('vkIpOptA').value.trim(),option_b:document.getElementById('vkIpOptB').value.trim(),option_c:document.getElementById('vkIpOptC').value.trim(),option_d:document.getElementById('vkIpOptD').value.trim(),correct_option:document.getElementById('vkIpCorrect').value,explanation:document.getElementById('vkIpExplanation').value.trim()};if(!row.question_text||!row.option_a||!row.option_b||!row.option_c||!row.option_d)throw Error('Enter question and all four options.');const q=await supabaseClient.from('vk_independent_questions').insert({test_id:row.test_id,question_text:row.question_text,option_a:row.option_a,option_b:row.option_b,option_c:row.option_c,option_d:row.option_d,explanation:row.explanation}).select('id').single();if(q.error)throw q.error;const k=await supabaseClient.from('vk_independent_question_keys').insert({question_id:q.data.id,correct_option:row.correct_option});if(k.error)throw k.error;['vkIpQuestionText','vkIpOptA','vkIpOptB','vkIpOptC','vkIpOptD','vkIpExplanation'].forEach(id=>document.getElementById(id).value='');vkIpStatus('Question added.');}catch(e){vkIpStatus(e.message,true);}}
 async function vkIpImportQuestions(ev){try{const f=ev.target.files?.[0],testId=document.getElementById('vkIpQuestionTest').value;if(!f||!testId)throw Error('Select a test before uploading Excel.');const buf=await f.arrayBuffer();let rows;if(f.name.toLowerCase().endsWith('.csv')){const text= new TextDecoder().decode(buf);rows=text.split(/\r?\n/).filter(Boolean).map(line=>line.split(','));}else{if(!window.XLSX)throw Error('Excel reader could not load.');const wb=XLSX.read(buf,{type:'array'});rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:'' ,raw:false});}if(!rows.length)throw Error('No question rows found.');const normalized=rows.map((r,i)=>{if(Array.isArray(r)){return {test_id:testId,question_text:r[0],option_a:r[1],option_b:r[2],option_c:r[3],option_d:r[4],correct_option:String(r[5]||'A').trim().toUpperCase(),explanation:r[6]||'',display_order:i+1};}const get=(...keys)=>{const k=Object.keys(r).find(x=>keys.includes(x.trim().toLowerCase()));return k?r[k]:''};return {test_id:testId,question_text:get('question','question_text'),option_a:get('option a','option_a','a'),option_b:get('option b','option_b','b'),option_c:get('option c','option_c','c'),option_d:get('option d','option_d','d'),correct_option:String(get('correct option','correct_option','answer')||'A').trim().toUpperCase(),explanation:get('explanation'),display_order:i+1};}).filter(x=>String(x.question_text||'').trim());if(!normalized.length)throw Error('Could not find Question column.');const questionRows=normalized.map(x=>({test_id:x.test_id,question_text:String(x.question_text||''),option_a:String(x.option_a||''),option_b:String(x.option_b||''),option_c:String(x.option_c||''),option_d:String(x.option_d||''),explanation:String(x.explanation||''),display_order:x.display_order}));if(questionRows.some(x=>!x.question_text||!x.option_a||!x.option_b||!x.option_c||!x.option_d))throw Error('Every row must include Question and Options A-D.');const ins=await supabaseClient.from('vk_independent_questions').insert(questionRows).select('id');if(ins.error)throw ins.error;const keys=ins.data.map((q,i)=>({question_id:q.id,correct_option:normalized[i].correct_option}));const ki=await supabaseClient.from('vk_independent_question_keys').insert(keys);if(ki.error)throw ki.error;vkIpStatus(normalized.length+' questions imported.');ev.target.value='';}catch(e){vkIpStatus('Excel import failed: '+e.message,true);}}
 async function vkIpStudentLoad(){
+  if(VK_TOPICWISE_ADMIN_ONLY)return vkTopicwiseBlockStudent('legacy student package list');
   const host=document.getElementById('vkIpStudentPackages');
   if(!host)return;
   host.innerHTML='Loading Topic Wise Test Series…';
@@ -15666,9 +15689,10 @@ async function vkIpStudentLoad(){
     host.textContent='Unable to load packages: '+(e.message||e);
   }
 }
-function vkIpOpenPackages(){showPage('vkIndependentPackagesPage');vkIpStudentLoad();}
+function vkIpOpenPackages(){return vkTopicwiseBlockStudent('legacy independent package page');}
 function vkIpBackToPackages(){vkIpOpenPackages();}
 async function vkIpOpenStudentPackage(id){
+  if(VK_TOPICWISE_ADMIN_ONLY)return vkTopicwiseBlockStudent('legacy student package detail');
   showPage('vkIndependentPackageDetail');
   const host=document.getElementById('vkIpStudentDetail');
   host.innerHTML='<div class="vk-ip-loading">Loading Paper–1 and Paper–2 topics…</div>';
@@ -15716,6 +15740,7 @@ async function vkIpOpenStudentPackage(id){
   }catch(e){host.innerHTML='<div class="vk-ip-error">Unable to load test series: '+vkIpEsc(e.message)+'</div>';}
 }
 async function vkIpRequestStart(packageId){
+  if(VK_TOPICWISE_ADMIN_ONLY)return vkTopicwiseBlockStudent('legacy student test start');
   const {data:u}=await supabaseClient.auth.getUser();
   if(!u?.user){openLogin();return;}
   const {data:purchase,error}=await supabaseClient.from('vk_independent_purchases').select('id').eq('package_id',packageId).eq('user_id',u.user.id).eq('payment_status','paid').gt('expires_at',new Date().toISOString()).limit(1);
@@ -15728,6 +15753,7 @@ async function vkIpRequestStart(packageId){
   box.scrollIntoView({behavior:'smooth',block:'center'});
 }
 async function vkIpBuy(id){
+  if(!VK_TOPICWISE_PAYMENT_ENABLED)return vkTopicwiseBlockStudent('legacy payment');
   if(!supabaseClient){alert('Login service is unavailable. Please refresh and try again.');return;}
   const {data:userData,error:userError}=await supabaseClient.auth.getUser();
   if(userError||!userData?.user?.id){openLogin();return;}
@@ -15911,6 +15937,18 @@ async function vkIpSubmitTest(){try{const form=document.getElementById('vkIpExam
 })();
 </script>
 
+<script>
+(function(){
+  function applyTopicWiseAdminGate(){
+    if(!VK_TOPICWISE_ADMIN_ONLY)return;
+    vkTopicwiseHideStudentEntryPoints();
+    // Hide any legacy Topic Wise student cards/links by their known classes and labels.
+    document.querySelectorAll('.vk-ip-student-card,.vk-ip-series-hero,.vk-ip-paper-stack').forEach(el=>el.style.display='none');
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',applyTopicWiseAdminGate,{once:true});
+  else applyTopicWiseAdminGate();
+})();
+</script>
 </body>
 
 </html>
