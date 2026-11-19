@@ -1,4 +1,4 @@
-               <!DOCTYPE html>
+                <!DOCTYPE html>
 <html lang="en">
 <head>
 
@@ -14604,9 +14604,13 @@ async function initializeAuth(){
         }, 0);
     });
 
-    refreshVkAdminAccess().catch(function(error){
+    // Complete the admin-role check before the auth bootstrap promise resolves.
+    // This prevents the Topic Wise panel from being hidden by a race on hard refresh.
+    try{
+        await refreshVkAdminAccess();
+    }catch(error){
         console.warn("Admin access refresh failed:", error);
-    });
+    }
 }
 
 /* =====================================================
@@ -16120,47 +16124,54 @@ async function vkTWDeleteTest(){
 <!-- VK TOPIC-WISE ADMIN REFRESH ROUTE FIX (v2)
      The initial hash route is evaluated before vkEnsureTopicWiseAdminPanel
      is declared. Re-run initialization after the full page scripts load. -->
-<script id="vk-topicwise-admin-refresh-route-fix-v2">
+<script id="vk-topicwise-admin-refresh-route-fix-v3">
 (function () {
+  let restoreRunning = false;
   async function restoreTopicWiseAdminPanelAfterRefresh() {
+    const hashPage = (window.location.hash || "").replace(/^#/, "").split("?")[0];
+    const builder = document.getElementById("vkAdminMockBuilder");
+    const panel = document.getElementById("vkTopicWiseSharedAdmin");
+    const isBuilderRoute = hashPage === "vkAdminMockBuilder";
+    const builderIsActive = !!(builder && builder.classList.contains("active"));
+    if ((!isBuilderRoute && !builderIsActive) || !panel || restoreRunning) return;
+    restoreRunning = true;
     try {
-      var hashPage = (window.location.hash || "").replace(/^#/, "").split("?")[0];
-      var builder = document.getElementById("vkAdminMockBuilder");
-      var isBuilderRoute = hashPage === "vkAdminMockBuilder";
-      var builderIsActive = !!(builder && builder.classList.contains("active"));
-      if (!isBuilderRoute && !builderIsActive) return;
-
-      // Wait for the existing Supabase/Firebase auth bootstrap before checking admin access.
-      if (window.__vkAuthInitialization &&
-          typeof window.__vkAuthInitialization.then === "function") {
+      // Wait for persisted Supabase session AND the initial admin-role lookup.
+      if (window.__vkAuthInitialization && typeof window.__vkAuthInitialization.then === "function") {
         await window.__vkAuthInitialization;
       }
-
-      // The panel initializer is declared later in this HTML file.
+      // Recheck role after auth bootstrap; non-admin users remain blocked.
+      if (typeof refreshVkAdminAccess !== "function" || !(await refreshVkAdminAccess())) {
+        panel.style.display = "none";
+        return;
+      }
       if (typeof window.vkEnsureTopicWiseAdminPanel === "function") {
         await window.vkEnsureTopicWiseAdminPanel();
       }
+      // Ensure the admin builder route remains active after direct URL refresh.
+      if (isBuilderRoute && builder && !builder.classList.contains("active")) {
+        document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+        builder.classList.add("active");
+      }
     } catch (err) {
       console.error("Topic Wise admin refresh initialization failed:", err);
-      var panel = document.getElementById("vkTopicWiseSharedAdmin");
-      var status = document.getElementById("vkTWStatus");
-      if (panel) panel.style.display = "block";
-      if (status) status.textContent =
-        "Topic Wise panel initialization failed. Please check admin login and refresh once.";
+      const status = document.getElementById("vkTWStatus");
+      if (status) status.textContent = "Topic Wise panel could not initialize: " + (err.message || err);
+    } finally {
+      restoreRunning = false;
     }
   }
-
-  // Run after all preceding scripts have declared the initializer.
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", restoreTopicWiseAdminPanelAfterRefresh, { once: true });
-  } else {
+  function scheduleRestore() {
     restoreTopicWiseAdminPanelAfterRefresh();
   }
-
-  // Also recover when the browser restores this page from its back/forward cache.
-  window.addEventListener("pageshow", function () {
-    restoreTopicWiseAdminPanelAfterRefresh();
-  });
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", scheduleRestore, { once: true });
+  } else {
+    scheduleRestore();
+  }
+  window.addEventListener("load", scheduleRestore, { once: true });
+  window.addEventListener("pageshow", scheduleRestore);
+  window.addEventListener("hashchange", scheduleRestore);
 })();
 </script>
 
