@@ -4101,6 +4101,24 @@ id="solutions">
       <div class="vk-admin-actions"><button type="button" class="vk-admin-btn vk-admin-btn-secondary" onclick="openAdminStudyMaterials()">📚 Manage Study Materials</button></div>
     </div>
 
+    <!-- ADMIN-ONLY TOPIC WISE TESTS: uses shared tests/questions/attempts engine; no package/payment flow -->
+    <section id="vkTopicWiseSharedAdmin" class="vk-tw-shared-panel" style="display:none" aria-label="Admin Topic Wise Test Management">
+      <div class="vk-tw-shared-head"><div><span>ADMIN ONLY · SHARED EXAM ENGINE</span><h2>Topic Wise Test Management</h2><p>Create and edit internal Topic Wise tests. Student access and payment are not enabled.</p></div><strong>📝</strong></div>
+      <div class="vk-tw-shared-grid">
+        <label>Course<select id="vkTWCourse"><option value="">Loading courses…</option></select></label>
+        <label>Topic Name<input id="vkTWTopic" maxlength="150" placeholder="e.g. Ramayanam"></label>
+        <label>Test Title<input id="vkTWTitle" maxlength="180" placeholder="e.g. Ramayanam – Practice Test 1"></label>
+        <label>Duration (minutes)<input id="vkTWDuration" type="number" min="1" max="600" value="30"></label>
+        <label>Question count (1–500)<input id="vkTWCount" type="number" min="1" max="500" value="25"></label>
+        <label class="vk-tw-wide">Edit existing Topic Wise test (optional)<select id="vkTWExisting" onchange="vkTWSelectExisting()"><option value="">Create a new test</option></select></label>
+        <label class="vk-tw-wide">Questions JSON<textarea id="vkTWQuestions" rows="12" spellcheck="false" placeholder='[ { "question_text":"Question text", "option_a":"Option A", "option_b":"Option B", "option_c":"Option C", "option_d":"Option D", "marks":1, "negative_marks":0.25, "correct_option":"A", "explanation":"Explanation" } ]'></textarea></label>
+      </div>
+      <div class="vk-tw-shared-actions"><button type="button" onclick="vkTWInsertSample()">Insert 1-question template</button><button type="button" class="secondary" onclick="vkTWClearForm()">Clear / New Test</button><button type="button" class="primary" id="vkTWSubmit" onclick="vkTWSubmitTest()">Create Topic Wise Test</button><button type="button" class="secondary" onclick="vkTWLoad()">Refresh Tests</button></div>
+      <p class="vk-tw-shared-hint">JSON fields: question_text, option_a, option_b, option_c, option_d, marks, negative_marks, correct_option (A/B/C/D), explanation. Paste an array containing the exact number of questions. Maximum 500.</p>
+      <div id="vkTWStatus" role="status" aria-live="polite"></div>
+      <div id="vkTWRows" class="vk-tw-shared-list">Loading Topic Wise tests…</div>
+    </section>
+
     <div id="vkCategoryManager" class="vk-management-stack" style="margin:16px 0">
       <section class="vk-admin-panel vk-management-card">
         <div class="vk-management-heading"><div><span class="vk-management-kicker">01 · COURSE SETUP</span><h2>Category Management</h2><p>Create and organize the main exam categories.</p></div><span class="vk-management-icon">▦</span></div>
@@ -8969,6 +8987,7 @@ async function openAdminMockBuilder(){
     }
     showPage("vkAdminMockBuilder");
     await vkAdminLoadCourses();
+    await vkTWLoad();
     await vkLoadCategoryManager();
     await vkCpInit();
     vkAdminOnTestTypeChange();
@@ -15948,6 +15967,50 @@ async function vkIpSubmitTest(){try{const form=document.getElementById('vkIpExam
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',applyTopicWiseAdminGate,{once:true});
   else applyTopicWiseAdminGate();
 })();
+
+/* Shared-engine Topic Wise admin panel */
+(function(){
+ const css=`.vk-tw-shared-panel{margin:18px 0 24px;padding:22px;background:linear-gradient(145deg,#111b3b,#30205f 62%,#4b2675);border:1px solid #57418d;border-radius:18px;color:#fff;box-shadow:0 14px 34px rgba(31,24,74,.18)}.vk-tw-shared-head{display:flex;justify-content:space-between;gap:15px;align-items:center}.vk-tw-shared-head span{font-size:10px;font-weight:900;letter-spacing:1.2px;color:#fbbf24}.vk-tw-shared-head h2{font-size:23px;margin:5px 0;color:#fff}.vk-tw-shared-head p{font-size:13px;color:#d8d5ed}.vk-tw-shared-head strong{font-size:34px}.vk-tw-shared-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:20px}.vk-tw-shared-grid label{display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:800;color:#f1edff}.vk-tw-shared-grid input,.vk-tw-shared-grid select,.vk-tw-shared-grid textarea{width:100%;padding:11px 12px;border:1px solid #c9c2e4;border-radius:9px;background:#fff;color:#172033;min-height:42px}.vk-tw-shared-grid textarea{font:12px/1.55 ui-monospace,monospace;resize:vertical}.vk-tw-wide{grid-column:1/-1}.vk-tw-shared-actions{display:flex;gap:9px;flex-wrap:wrap;margin:14px 0}.vk-tw-shared-actions button{border:0;border-radius:9px;padding:11px 15px;background:#f3e8ff;color:#3b236c;font-weight:900;cursor:pointer}.vk-tw-shared-actions button.primary{background:linear-gradient(135deg,#fbbf24,#f97316);color:#28143f}.vk-tw-shared-actions button.secondary{background:#fff;color:#3b236c}.vk-tw-shared-hint{font-size:12px;line-height:1.55;color:#e1dcf5}.vk-tw-shared-status{margin:10px 0;font-size:13px;font-weight:800;color:#fde68a}.vk-tw-shared-list{display:grid;gap:8px;margin-top:12px}.vk-tw-shared-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px 14px;border:1px solid rgba(255,255,255,.2);border-radius:10px;background:rgba(255,255,255,.09)}.vk-tw-shared-row small{display:block;color:#d8d5ed;margin-top:4px}.vk-tw-shared-row button{border:0;border-radius:8px;padding:7px 11px;background:#fff;color:#30205f;font-weight:800;cursor:pointer}@media(max-width:600px){.vk-tw-shared-grid{grid-template-columns:1fr}.vk-tw-shared-head h2{font-size:20px}}`;
+ const st=document.createElement('style');st.textContent=css;document.head.appendChild(st);
+})();
+let vkTWTests=[];
+function vkTWStatus(message,isError=false){const el=document.getElementById('vkTWStatus');if(el){el.className='vk-tw-shared-status';el.style.color=isError?'#fecaca':'#fde68a';el.textContent=message||'';}}
+function vkTWClearForm(){document.getElementById('vkTWExisting').value='';document.getElementById('vkTWTopic').value='';document.getElementById('vkTWTitle').value='';document.getElementById('vkTWDuration').value=30;document.getElementById('vkTWCount').value=25;document.getElementById('vkTWQuestions').value='';document.getElementById('vkTWSubmit').textContent='Create Topic Wise Test';vkTWStatus('New test mode.');}
+function vkTWInsertSample(){document.getElementById('vkTWQuestions').value=JSON.stringify([{question_text:'మీ ప్రశ్నను ఇక్కడ నమోదు చేయండి',option_a:'ఎంపిక A',option_b:'ఎంపిక B',option_c:'ఎంపిక C',option_d:'ఎంపిక D',marks:1,negative_marks:0.25,correct_option:'A',explanation:'వివరణ'}],null,2);document.getElementById('vkTWCount').value=1;}
+async function vkTWLoad(){
+ const panel=document.getElementById('vkTopicWiseSharedAdmin');if(!panel)return;
+ if(!await refreshVkAdminAccess()){panel.style.display='none';return;}panel.style.display='block';
+ try{
+  const courseSel=document.getElementById('vkTWCourse');const prev=courseSel.value;
+  const {data:courses,error:ce}=await supabaseClient.from('courses').select('id,name').eq('is_active',true).order('display_order');if(ce)throw ce;
+  courseSel.innerHTML='<option value="">Select course</option>'+(courses||[]).map(c=>`<option value="${vkAdminEscape(c.id)}">${vkAdminEscape(c.name)}</option>`).join('');if(prev)courseSel.value=prev;
+  const {data:series,error:se}=await supabaseClient.from('test_series').select('id,course_id,name').eq('series_type','topic_wise');if(se)throw se;
+  const ids=(series||[]).map(x=>x.id);let tests=[];if(ids.length){const r=await supabaseClient.from('tests').select('id,title,topic_name,test_number,topic_test_number,duration_minutes,total_marks,test_series_id,is_active').in('test_series_id',ids).order('created_at',{ascending:false});if(r.error)throw r.error;tests=r.data||[];}
+  vkTWTests=tests.map(t=>({...t,series:(series||[]).find(s=>s.id===t.test_series_id)}));
+  const sel=document.getElementById('vkTWExisting');sel.innerHTML='<option value="">Create a new test</option>'+vkTWTests.map(t=>`<option value="${t.id}">${vkAdminEscape(t.topic_name||'Topic')} · ${vkAdminEscape(t.title||'Test')}</option>`).join('');
+  document.getElementById('vkTWRows').innerHTML=vkTWTests.map(t=>`<div class="vk-tw-shared-row"><div><strong>${vkAdminEscape(t.title||'Topic Wise Test')}</strong><small>${vkAdminEscape(t.series?.name||'Topic Wise')} · ${vkAdminEscape(t.topic_name||'')} · ${Number(t.total_marks||0)} marks · ${Number(t.duration_minutes||0)} min</small></div><button type="button" onclick="document.getElementById('vkTWExisting').value='${t.id}';vkTWSelectExisting()">Edit</button></div>`).join('')||'<div class="vk-tw-shared-row">No Topic Wise tests created yet.</div>';
+  vkTWStatus('Admin access verified. '+tests.length+' shared-engine Topic Wise test(s) found. Student access and payments remain disabled.');
+ }catch(e){vkTWStatus('Load failed: '+(e.message||e),true);}
+}
+async function vkTWSelectExisting(){
+ const id=document.getElementById('vkTWExisting').value;const t=vkTWTests.find(x=>x.id===id);if(!t){vkTWClearForm();return;}
+ document.getElementById('vkTWCourse').value=t.series?.course_id||'';document.getElementById('vkTWTopic').value=t.topic_name||'';document.getElementById('vkTWTitle').value=t.title||'';document.getElementById('vkTWDuration').value=t.duration_minutes||30;
+ try{const {data:qs,error}=await supabaseClient.from('questions').select('id,question_text,option_a,option_b,option_c,option_d,marks,negative_marks,correct_option').eq('test_id',id).order('question_number');if(error)throw error;const qids=(qs||[]).map(q=>q.id);let ans=[];if(qids.length){const a=await supabaseClient.from('question_answers').select('question_id,correct_option,explanation').in('question_id',qids);if(a.error)throw a.error;ans=a.data||[];}const payload=(qs||[]).map(q=>{const a=ans.find(x=>x.question_id===q.id)||{};return {question_text:q.question_text,option_a:q.option_a,option_b:q.option_b,option_c:q.option_c,option_d:q.option_d,marks:q.marks??1,negative_marks:q.negative_marks??0,correct_option:a.correct_option||q.correct_option||'A',explanation:a.explanation||''};});document.getElementById('vkTWCount').value=payload.length;document.getElementById('vkTWQuestions').value=JSON.stringify(payload,null,2);document.getElementById('vkTWSubmit').textContent='Update Topic Wise Test';vkTWStatus('Loaded '+payload.length+' questions. Update is blocked by the database if any attempt/result history exists.');}catch(e){vkTWStatus('Could not load questions: '+(e.message||e),true);}
+}
+async function vkTWSubmitTest(){
+ if(!await refreshVkAdminAccess()){vkTWStatus('Admin access required.',true);return;}
+ const courseId=document.getElementById('vkTWCourse').value,topic=document.getElementById('vkTWTopic').value.trim(),title=document.getElementById('vkTWTitle').value.trim(),duration=Number(document.getElementById('vkTWDuration').value),expected=Number(document.getElementById('vkTWCount').value),editId=document.getElementById('vkTWExisting').value;
+ let questions;try{questions=JSON.parse(document.getElementById('vkTWQuestions').value);}catch(e){vkTWStatus('Questions JSON is invalid. Check commas, quotes and brackets.',true);return;}
+ if(!courseId||!topic||!title){vkTWStatus('Select a course and enter topic and test title.',true);return;}
+ if(!Number.isInteger(duration)||duration<1||duration>600){vkTWStatus('Duration must be 1–600 minutes.',true);return;}
+ if(!Array.isArray(questions)||questions.length<1||questions.length>500||questions.length!==expected){vkTWStatus('Question count must match the JSON array length (1–500). Current JSON: '+(Array.isArray(questions)?questions.length:'not an array'),true);return;}
+ const button=document.getElementById('vkTWSubmit');button.disabled=true;button.textContent='Saving…';
+ try{const args={p_topic_name:topic,p_title:title,p_duration_minutes:duration,p_questions:questions};let result;
+  if(editId){args.p_test_id=editId;const r=await supabaseClient.rpc('vk_admin_update_topic_wise_test',args);if(r.error)throw r.error;result=r.data;}
+  else{args.p_course_id=courseId;const r=await supabaseClient.rpc('vk_admin_create_topic_wise_test',args);if(r.error)throw r.error;result=r.data;}
+  vkTWStatus((editId?'Updated':'Created')+' successfully. Test ID: '+(typeof result==='string'?result:(result?.test_id||'saved')));vkTWClearForm();await vkTWLoad();
+ }catch(e){vkTWStatus('Save failed: '+(e.message||e),true);}finally{button.disabled=false;button.textContent=editId?'Update Topic Wise Test':'Create Topic Wise Test';}
+}
 </script>
 </body>
 
