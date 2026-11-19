@@ -15668,10 +15668,8 @@ async function vkIpStudentLoad(){
         <p>${vkIpEsc(p.description||'Topic-wise mock test package')}</p>
         <div class="price">₹${Number(p.price).toLocaleString('en-IN')}</div>
         <small>${Number(p.duration_days)} Days Validity</small><br>
-        ${ready
-          ? `<button onclick="vkIpOpenStudentPackage('${p.id}')">View Package</button>`
-          : `<button type="button" disabled aria-disabled="true" title="Admin is adding topics and tests">Coming Soon</button>
-             <small class="vk-ip-draft-note">Tests are being prepared</small>`}
+        <button class="vk-ip-view-series" onclick="vkIpOpenStudentPackage('${p.id}')">View Test Series</button>
+        ${!ready ? `<small class="vk-ip-draft-note">Tests will be available after admin publishes the series</small>` : ''}
       </article>`;
     }).join('')||'<p>Topic Wise Test Series packages are being configured.</p>';
   }catch(e){
@@ -15680,7 +15678,65 @@ async function vkIpStudentLoad(){
 }
 function vkIpOpenPackages(){showPage('vkIndependentPackagesPage');vkIpStudentLoad();}
 function vkIpBackToPackages(){vkIpOpenPackages();}
-async function vkIpOpenStudentPackage(id){showPage('vkIndependentPackageDetail');const host=document.getElementById('vkIpStudentDetail');host.textContent='Loading package…';try{const {data:p,error}=await supabaseClient.from('vk_independent_packages').select('*').eq('id',id).eq('is_published',true).single();if(error)throw error;const {data:u}=await supabaseClient.auth.getUser();let purchase=null;if(u?.user){const q=await supabaseClient.from('vk_independent_purchases').select('*').eq('package_id',id).eq('user_id',u.user.id).eq('payment_status','paid').gt('expires_at',new Date().toISOString()).order('expires_at',{ascending:false}).limit(1);if(q.error)throw q.error;purchase=q.data?.[0]||null;}const {data:papers,error:pe}=await supabaseClient.from('vk_independent_papers').select('*').eq('package_id',id).eq('is_active',true).order('display_order');if(pe)throw pe;let topics=[];if(papers.length){const q=await supabaseClient.from('vk_independent_topics').select('*').in('paper_id',papers.map(x=>x.id)).eq('is_active',true).order('display_order');if(q.error)throw q.error;topics=q.data||[];}host.innerHTML=`<div class="vk-ip-student-card"><h1>${vkIpEsc(p.name)}</h1><p>${vkIpEsc(p.description||'')}</p><div class="price">₹${p.price}</div><p>${p.duration_days} Days Validity</p>${purchase?`<strong style="color:#16804b">UNLOCKED · Expires ${new Date(purchase.expires_at).toLocaleString()}</strong>`:`<button class="vk-ip-buy" onclick="vkIpBuy('${id}')">Buy Plan · ₹${p.price}</button>`}</div>`+(purchase?papers.map((paper,i)=>`<section class="vk-ip-paper-student ${i===0?'paper1':'paper2'}"><h2>${vkIpEsc(paper.name)}</h2><div class="vk-ip-topic-grid">${topics.filter(t=>t.paper_id===paper.id).map(t=>`<div class="vk-ip-topic-card" onclick="vkIpOpenTopic('${t.id}')"><strong>${vkIpEsc(t.name)}</strong><small>View Tests · 25 Questions each</small></div>`).join('')||'<p>No topics published yet.</p>'}</div></section>`).join(''):'');window.vkIpActivePackageId=id;}catch(e){host.textContent='Package could not be opened: '+e.message;}}
+async function vkIpOpenStudentPackage(id){
+  showPage('vkIndependentPackageDetail');
+  const host=document.getElementById('vkIpStudentDetail');
+  host.innerHTML='<div class="vk-ip-loading">Loading Paper–1 and Paper–2 topics…</div>';
+  try{
+    const {data:p,error}=await supabaseClient.from('vk_independent_packages').select('*').eq('id',id).single();
+    if(error)throw error;
+    const {data:u}=await supabaseClient.auth.getUser();
+    let purchase=null;
+    if(u?.user){
+      const q=await supabaseClient.from('vk_independent_purchases').select('*').eq('package_id',id).eq('user_id',u.user.id).eq('payment_status','paid').gt('expires_at',new Date().toISOString()).order('expires_at',{ascending:false}).limit(1);
+      if(q.error)throw q.error;
+      purchase=q.data?.[0]||null;
+    }
+    const {data:papers,error:pe}=await supabaseClient.from('vk_independent_papers').select('*').eq('package_id',id).eq('is_active',true).order('display_order');
+    if(pe)throw pe;
+    let topics=[];
+    if(papers?.length){
+      const q=await supabaseClient.from('vk_independent_topics').select('*').in('paper_id',papers.map(x=>x.id)).eq('is_active',true).order('display_order');
+      if(q.error)throw q.error;
+      topics=q.data||[];
+    }
+    window.vkIpActivePackageId=id;
+    window.vkIpActivePurchase=!!purchase;
+    const paperMarkup=(paper,index)=>{
+      const paperTopics=topics.filter(t=>t.paper_id===paper.id);
+      return `<section class="vk-ip-paper-student ${index===0?'paper1':'paper2'}">
+        <div class="vk-ip-paper-heading"><span class="vk-ip-paper-icon">${index===0?'📘':'📙'}</span><div><span class="vk-ip-paper-kicker">ENDOWMENT OFFICER · ${index===0?'PAPER–1':'PAPER–2'}</span><h2>${vkIpEsc(paper.name)}</h2><p>${paperTopics.length} Topics · 25 Questions per Test</p></div></div>
+        <div class="vk-ip-topic-grid">${paperTopics.map((t,n)=>`<article class="vk-ip-topic-card ${purchase?'unlocked':'locked'}">
+          <div class="vk-ip-topic-number">${String(n+1).padStart(2,'0')}</div>
+          <div class="vk-ip-topic-content"><strong>${vkIpEsc(t.name)}</strong><small>${purchase?'Ready to practice':'Unlock with ₹29 plan'}</small></div>
+          <span class="vk-ip-lock" aria-label="${purchase?'Unlocked':'Locked'}">${purchase?'🔓':'🔒'}</span>
+          <button type="button" class="vk-ip-topic-action" onclick="${purchase?`vkIpOpenTopic('${t.id}')`:`vkIpRequestStart('${id}')`}">${purchase?'View Tests':'Start Test'}</button>
+        </article>`).join('')||'<p class="vk-ip-empty">Topics are being added by the admin.</p>'}</div>
+      </section>`;
+    };
+    host.innerHTML=`<section class="vk-ip-series-hero">
+      <div class="vk-ip-series-tag">🛕 VK EXAMS · ENDOWMENT OFFICER</div>
+      <h1>Topic Wise Test Series</h1>
+      <p>Paper–1 + Paper–2 · 25 Questions per Test · 5 Days Access</p>
+      <div class="vk-ip-hero-bottom"><strong>₹${Number(p.price).toLocaleString('en-IN')}</strong><span>${purchase?'🎉 Plan Activated':'Complete access to all topics'}</span></div>
+      ${purchase?`<div class="vk-ip-access-success">✓ UNLOCKED · Valid until ${new Date(purchase.expires_at).toLocaleDateString('en-IN')}</div>`:`<button class="vk-ip-buy-plan" onclick="vkIpBuy('${id}')">🔓 Buy Plan · ₹${p.price}</button><small class="vk-ip-secure-note">Secure Razorpay payment · 5 Days Validity</small>`}
+    </section>
+    <div class="vk-ip-paper-stack">${(papers||[]).map(paperMarkup).join('')||'<div class="vk-ip-empty">Paper topics are being prepared. Please check again soon.</div>'}</div>
+    <div id="vkIpTopicTests" class="vk-ip-topic-tests"></div>`;
+  }catch(e){host.innerHTML='<div class="vk-ip-error">Unable to load test series: '+vkIpEsc(e.message)+'</div>';}
+}
+async function vkIpRequestStart(packageId){
+  const {data:u}=await supabaseClient.auth.getUser();
+  if(!u?.user){openLogin();return;}
+  const {data:purchase,error}=await supabaseClient.from('vk_independent_purchases').select('id').eq('package_id',packageId).eq('user_id',u.user.id).eq('payment_status','paid').gt('expires_at',new Date().toISOString()).limit(1);
+  if(error){alert(error.message);return;}
+  if(purchase?.length){await vkIpOpenStudentPackage(packageId);return;}
+  const host=document.getElementById('vkIpStudentDetail');
+  let box=document.getElementById('vkIpBuyPrompt');
+  if(!box){box=document.createElement('div');box.id='vkIpBuyPrompt';box.className='vk-ip-buy-prompt';host.appendChild(box);}
+  box.innerHTML=`<div class="vk-ip-buy-prompt-icon">🔐</div><h2>Unlock All Topic-wise Tests</h2><p>Buy the Endowment Officer plan to start tests in both Paper–1 and Paper–2.</p><strong>₹29 · 5 Days Validity</strong><button class="vk-ip-buy-plan" onclick="vkIpBuy('${packageId}')">Buy a Plan · ₹29</button>`;
+  box.scrollIntoView({behavior:'smooth',block:'center'});
+}
 async function vkIpBuy(id){
   if(!supabaseClient){alert('Login service is unavailable. Please refresh and try again.');return;}
   const {data:userData,error:userError}=await supabaseClient.auth.getUser();
@@ -15710,7 +15766,7 @@ async function vkIpBuy(id){
           }
           vkIpStatus('Payment successful. Your package is activated.');
           await vkIpOpenStudentPackage(id);
-          alert('Payment successful! Topic-wise Package activated.');
+          alert('Payment successful! All Paper–1 and Paper–2 topics are now unlocked.');
         }catch(e){vkIpStatus(e.message||String(e),true);alert(e.message||String(e));}
       },
       modal:{ondismiss:function(){vkIpStatus('Payment window closed. If payment was completed, reopen the package to check its status.');}}
@@ -15721,7 +15777,15 @@ async function vkIpBuy(id){
   }catch(e){vkIpStatus(e.message||String(e),true);alert(e.message||String(e));}
   finally{if(button){button.disabled=false;button.textContent='BUY PACKAGE';}}
 }
-async function vkIpOpenTopic(id){const {data:tests,error}=await supabaseClient.from('vk_independent_tests').select('id,name,question_count,duration_minutes').eq('topic_id',id).eq('is_active',true).order('display_order');if(error){alert(error.message);return;}const host=document.getElementById('vkIpStudentDetail');const old=document.getElementById('vkIpTopicTests');if(old)old.remove();const div=document.createElement('div');div.id='vkIpTopicTests';div.className='vk-ip-test-list';div.innerHTML=(tests||[]).map(t=>`<div class="vk-ip-test-student"><strong>${vkIpEsc(t.name)} · ${t.question_count} Questions</strong><button class="vk-ip-buy" onclick="vkIpStartTest('${t.id}')">Start Your Exam</button></div>`).join('')||'No tests in this topic yet.';host.appendChild(div);}
+async function vkIpOpenTopic(id){
+  const host=document.getElementById('vkIpTopicTests');
+  if(!window.vkIpActivePurchase){await vkIpRequestStart(window.vkIpActivePackageId);return;}
+  host.innerHTML='<div class="vk-ip-loading">Loading tests…</div>';
+  const {data:tests,error}=await supabaseClient.from('vk_independent_tests').select('id,name,question_count,duration_minutes').eq('topic_id',id).eq('is_active',true).order('display_order');
+  if(error){host.innerHTML='<p class="vk-ip-error">'+vkIpEsc(error.message)+'</p>';return;}
+  host.innerHTML=`<h2>📝 Available Topic Tests</h2><div class="vk-ip-test-list">${(tests||[]).map((t,i)=>`<div class="vk-ip-test-student"><div><strong>${vkIpEsc(t.name)}</strong><small>${t.question_count||25} Questions · ${t.duration_minutes||'—'} Minutes</small></div><button class="vk-ip-test-start" onclick="vkIpStartTest('${t.id}')">Start Your Exam →</button></div>`).join('')||'<p class="vk-ip-empty">Tests for this topic are being prepared.</p>'}</div>`;
+  host.scrollIntoView({behavior:'smooth',block:'start'});
+}
 async function vkIpStartTest(id){try{const {data:test,error}=await supabaseClient.from('vk_independent_tests').select('*').eq('id',id).single();if(error)throw error;const {data:questions,error:qe}=await supabaseClient.from('vk_independent_questions').select('id,question_text,option_a,option_b,option_c,option_d,display_order').eq('test_id',id).order('display_order');if(qe)throw qe;if(!questions?.length)throw Error('No questions uploaded for this test.');if(questions.length!==25)throw Error('This test is not ready. Exactly 25 questions are required.');vkIpCurrentTest=test;vkIpCurrentQuestions=questions;showPage('vkIndependentExamPage');const host=document.getElementById('vkIpExamHost');host.innerHTML=`<h2>${vkIpEsc(test.name)}</h2><p>${questions.length} Questions · ${test.duration_minutes} Minutes</p><form id="vkIpExamForm">${questions.map((q,i)=>`<div class="vk-ip-exam-q"><strong>Q${i+1}. ${vkIpEsc(q.question_text)}</strong>${['A','B','C','D'].map(k=>`<label><input type="radio" name="q_${q.id}" value="${k}"> ${k}. ${vkIpEsc(q['option_'+k.toLowerCase()])}</label>`).join('')}</div>`).join('')}<button type="button" class="vk-ip-buy" onclick="vkIpSubmitTest()">Submit Test</button></form>`;}catch(e){alert(e.message||e);}}
 async function vkIpSubmitTest(){try{const form=document.getElementById('vkIpExamForm');const answers={};vkIpCurrentQuestions.forEach(q=>{answers[q.id]=form.querySelector(`input[name="q_${q.id}"]:checked`)?.value||null;});const {data:result,error:saveError}=await supabaseClient.rpc('vk_independent_submit_attempt',{p_test_id:vkIpCurrentTest.id,p_answers:answers});if(saveError)throw saveError;document.getElementById('vkIpExamHost').innerHTML=`<div class="vk-ip-result"><h2>Test Submitted</h2><h3>Score: ${result.score} / ${result.total_marks}</h3><p>Correct: ${result.correct_answers} · Wrong: ${result.wrong_answers} · Unanswered: ${result.unanswered}</p><p>Percentage: ${result.percentage}%</p></div><button class="vk-ip-buy" onclick="vkIpBackToPackages()">Back to Packages</button>`;}catch(e){alert('Could not submit test: '+e.message);}}
 document.addEventListener('DOMContentLoaded',()=>{const old=window.openAdminMockBuilder;if(typeof old==='function')window.openAdminMockBuilder=async function(){await old.apply(this,arguments);if(vkAdminAuthorized){document.getElementById('vkIndependentPackageAdmin').style.display='block';await vkIpLoadPackages();}};});
@@ -16032,4 +16096,47 @@ body:has(#examPage.active) > footer{
 <style id="vk-eo-topicwise-card-style">
 #course.vk-eo-premium .vk-eo-topicwise{border-color:#cbdaf5;background:linear-gradient(135deg,#fff,#f1f6ff)}
 #course.vk-eo-premium .vk-eo-topicwise .vk-eo-card-art{background:linear-gradient(145deg,#e8efff,#fff)}
+</style>
+
+<style id="vk-ip-premium-student-series">
+#vkIndependentPackagesPage .section-title h2{font-size:clamp(25px,3vw,38px);font-weight:950;background:linear-gradient(100deg,#173bb7,#7926d5,#e33d84);-webkit-background-clip:text;background-clip:text;color:transparent}
+#vkIndependentPackageDetail .container{max-width:1120px}
+#vkIndependentPackageDetail .back{background:#fff;border:1px solid #c9d6ff;color:#2447b7;border-radius:12px;padding:10px 18px;font-weight:850;box-shadow:0 5px 15px #253c8b12}
+.vk-ip-series-hero{position:relative;overflow:hidden;margin:20px 0 24px;padding:30px 34px;border-radius:25px;color:#fff;background:linear-gradient(115deg,#182ca9 0%,#6430d5 53%,#a52bd0 100%);box-shadow:0 16px 36px #5631b633}
+.vk-ip-series-hero:after{content:"🎯";position:absolute;right:35px;top:25px;font-size:65px;opacity:.28}
+.vk-ip-series-tag{font-size:12px;font-weight:950;letter-spacing:1.2px;color:#ffe66d}
+.vk-ip-series-hero h1{font-size:clamp(28px,4vw,43px);font-weight:1000;margin:9px 0;color:#fff}
+.vk-ip-series-hero p{font-weight:650;color:#f4edff;margin:0}
+.vk-ip-hero-bottom{display:flex;align-items:center;gap:14px;margin-top:16px}.vk-ip-hero-bottom strong{font-size:30px;color:#ffed67}.vk-ip-hero-bottom span{font-weight:800}
+.vk-ip-buy-plan{display:inline-flex;align-items:center;justify-content:center;gap:10px;margin-top:17px;padding:14px 25px;border:0;border-radius:13px;background:linear-gradient(100deg,#ff7a18,#ed2f53);color:white;font-size:16px;font-weight:950;box-shadow:0 8px 20px #ed3c4a55;cursor:pointer}
+.vk-ip-secure-note{display:block;margin-top:8px;color:#f4eaff;font-size:12px;font-weight:700}
+.vk-ip-access-success{display:inline-block;margin-top:15px;padding:10px 16px;border-radius:12px;background:#d4ffe8;color:#087344;font-weight:950}
+.vk-ip-paper-stack{display:grid;gap:22px}
+.vk-ip-paper-student{padding:23px;border-radius:23px;box-shadow:0 12px 30px #283d7b12}
+.vk-ip-paper-student.paper1{background:linear-gradient(135deg,#e1f2ff,#f3f7ff 65%,#e6eaff);border:2px solid #73b8ff}
+.vk-ip-paper-student.paper2{background:linear-gradient(135deg,#fff0d9,#fff6e9 55%,#ffe2ed);border:2px solid #ffb45d}
+.vk-ip-paper-heading{display:flex;align-items:center;gap:15px;margin-bottom:17px}
+.vk-ip-paper-icon{display:grid;place-items:center;width:57px;height:57px;border-radius:17px;background:#fff;box-shadow:0 6px 16px #24417b18;font-size:30px}
+.vk-ip-paper-kicker{font-size:11px;letter-spacing:1.1px;font-weight:950;color:#52658c}
+.vk-ip-paper-heading h2{font-size:27px;font-weight:1000;margin:2px 0;color:#183a9a}
+.paper2 .vk-ip-paper-heading h2{color:#a94b13}
+.vk-ip-paper-heading p{margin:0;font-size:13px;font-weight:750;color:#58627a}
+.vk-ip-topic-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+.vk-ip-topic-card{position:relative;display:grid;grid-template-columns:38px 1fr 30px;gap:10px;align-items:center;padding:15px;border-radius:16px;background:#fff;border:1px solid #d9e5f6;box-shadow:0 5px 14px #203e7610;cursor:default}
+.vk-ip-topic-number{display:grid;place-items:center;width:36px;height:36px;border-radius:11px;background:#e8f1ff;color:#2353b9;font-size:13px;font-weight:950}
+.paper2 .vk-ip-topic-number{background:#fff0df;color:#b85b1c}
+.vk-ip-topic-content strong{display:block;color:#192d55;font-size:14px;font-weight:900;line-height:1.35}
+.vk-ip-topic-content small{display:block;margin-top:4px;color:#7c8498;font-size:11px;font-weight:700}
+.vk-ip-lock{font-size:21px;text-align:center}
+.vk-ip-topic-action{grid-column:2/4;justify-self:start;border:0;border-radius:9px;padding:8px 13px;background:linear-gradient(90deg,#2456d7,#7438d5);color:#fff;font-size:12px;font-weight:900;cursor:pointer}
+.paper2 .vk-ip-topic-action{background:linear-gradient(90deg,#ed7b22,#e54862)}
+.vk-ip-topic-card.unlocked{border-color:#60c89b;background:linear-gradient(120deg,#fff,#effff7)}
+.vk-ip-topic-card.unlocked .vk-ip-topic-action{background:linear-gradient(90deg,#07966c,#20b78a)}
+.vk-ip-buy-prompt{margin:22px 0;padding:26px;text-align:center;border:2px solid #ffb34d;border-radius:20px;background:linear-gradient(135deg,#fff3c4,#ffe5ef);box-shadow:0 12px 30px #dc87372a}
+.vk-ip-buy-prompt-icon{font-size:38px}.vk-ip-buy-prompt h2{color:#7b2b9e;font-size:25px;font-weight:950}.vk-ip-buy-prompt p{color:#4b4560;font-weight:650}.vk-ip-buy-prompt strong{display:block;color:#b24a13;font-size:23px}
+.vk-ip-topic-tests{margin:22px 0;padding:22px;border-radius:20px;background:#f2edff;border:1px solid #d7c8ff}
+.vk-ip-topic-tests h2{color:#5123a9;font-weight:950}.vk-ip-test-student{border-radius:13px;padding:15px}.vk-ip-test-student strong{display:block;color:#1c315b}.vk-ip-test-student small{display:block;color:#75809a;margin-top:5px}
+.vk-ip-test-start{border:0;border-radius:10px;padding:10px 15px;background:linear-gradient(90deg,#5c31cb,#a52cce);color:white;font-weight:900;cursor:pointer}
+.vk-ip-loading,.vk-ip-empty,.vk-ip-error{padding:20px;border-radius:14px;background:#fff;text-align:center;color:#52617d;font-weight:750}
+@media(max-width:650px){.vk-ip-series-hero{padding:24px 20px}.vk-ip-series-hero:after{right:15px;top:16px;font-size:40px}.vk-ip-paper-student{padding:15px}.vk-ip-topic-grid{grid-template-columns:1fr}.vk-ip-topic-card{grid-template-columns:34px 1fr 25px}.vk-ip-test-student{align-items:flex-start;flex-direction:column}.vk-ip-test-start{width:100%}}
 </style>
