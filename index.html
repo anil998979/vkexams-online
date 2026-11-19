@@ -3319,6 +3319,28 @@ body.dark-mode .vk-theme-toggle{background:#243247;color:#f8fafc;border-color:#4
 }
 </style>
 
+
+<style id="vk-topicwise-readable-fix">
+/* Small targeted polish: retain the existing layout, improve contrast and highlight Excel upload. */
+#vkTopicWiseSharedAdmin{background:#f7f9ff!important;color:#183153!important;border:1px solid #c7d6f2!important;border-left:5px solid #4f46e5!important;border-radius:16px!important;padding:20px!important;box-shadow:0 8px 24px rgba(30,64,175,.09)!important}
+#vkTopicWiseSharedAdmin .vk-tw-shared-head h2{color:#172554!important}
+#vkTopicWiseSharedAdmin .vk-tw-shared-head p{color:#475569!important}
+#vkTopicWiseSharedAdmin .vk-tw-shared-head span{display:inline-block;background:#e0e7ff;color:#3730a3!important;padding:5px 9px;border-radius:6px}
+#vkTopicWiseSharedAdmin .vk-tw-shared-grid label{color:#1e3a8a!important;font-weight:800!important}
+#vkTopicWiseSharedAdmin .vk-tw-shared-grid input,#vkTopicWiseSharedAdmin .vk-tw-shared-grid select,#vkTopicWiseSharedAdmin .vk-tw-shared-grid textarea{color:#172033!important;background:#fff!important;border:1px solid #b8c7e3!important}
+#vkTopicWiseSharedAdmin .vk-tw-upload-box{background:#eef6ff!important;border:2px solid #60a5fa!important;border-left:6px solid #2563eb!important;border-radius:12px!important;padding:15px!important;color:#12356b!important}
+#vkTopicWiseSharedAdmin .vk-tw-upload-box b{color:#123b83!important;font-size:16px!important}
+#vkTopicWiseSharedAdmin .vk-tw-upload-box small,#vkTopicWiseSharedAdmin .vk-tw-upload-note{color:#334155!important}
+#vkTopicWiseSharedAdmin .vk-tw-upload-controls button{background:#2563eb!important;color:#fff!important;border:1px solid #1d4ed8!important;border-radius:8px!important;font-weight:800!important;padding:10px 14px!important}
+#vkTopicWiseSharedAdmin .vk-tw-upload-controls button.secondary{background:#fff!important;color:#1d4ed8!important;border:1px solid #93c5fd!important}
+#vkTopicWiseSharedAdmin .vk-tw-collapse{background:#e0e7ff!important;color:#1e40af!important;border:1px solid #a5b4fc!important;border-radius:8px!important;padding:8px 13px!important;font-weight:800!important;cursor:pointer}
+#vkTopicWiseSharedAdmin .vk-tw-shared-hint{color:#475569!important}
+#vkTopicWiseSharedAdmin .vk-tw-shared-row{background:#fff!important;color:#172554!important;border:1px solid #dbe4f3!important}
+#vkTopicWiseSharedAdmin .vk-tw-shared-row small{color:#475569!important}
+#vkTopicWiseSharedAdmin #vkTWBody[hidden]{display:none!important}
+@media(max-width:650px){#vkTopicWiseSharedAdmin .vk-tw-shared-grid{grid-template-columns:1fr!important}#vkTopicWiseSharedAdmin .vk-tw-head-actions{align-items:flex-end}}
+</style>
+
 </head>
 
 
@@ -15977,7 +15999,7 @@ async function vkIpSubmitTest(){try{const form=document.getElementById('vkIpExam
  css += `.vk-tw-shared-panel{background:#f7f9ff!important;color:#172b4d!important;border:1px solid #cbd7ed!important}.vk-tw-shared-head h2{color:#172b4d!important}.vk-tw-shared-head p{color:#526581!important}.vk-tw-shared-head span{color:#8a4b00!important}.vk-tw-shared-grid label{color:#243b63!important;font-size:13px!important}.vk-tw-shared-grid input,.vk-tw-shared-grid select,.vk-tw-shared-grid textarea{background:#fff!important;color:#14294d!important;border:1px solid #aebed8!important;font-weight:600}.vk-tw-shared-hint{color:#425675!important}.vk-tw-shared-status{color:#14532d!important}.vk-tw-shared-row{background:#fff!important;border:1px solid #d5deed!important;color:#172b4d!important}.vk-tw-shared-row small{color:#526581!important}.vk-tw-head-actions{display:flex;align-items:center;gap:14px}.vk-tw-collapse{border:1px solid #9aacc8;border-radius:9px;padding:9px 13px;background:#e9effb;color:#18345d;font-weight:800}.vk-tw-upload-box{padding:14px;border:1px dashed #8fa4c6;border-radius:12px;background:#edf3ff;color:#18345d;display:grid;gap:10px}.vk-tw-upload-box b{display:block;font-size:14px}.vk-tw-upload-box small{display:block;color:#526581;line-height:1.5;margin-top:4px}.vk-tw-upload-controls{display:flex;align-items:center;gap:9px;flex-wrap:wrap}.vk-tw-upload-controls input{flex:1 1 240px}.vk-tw-upload-controls button{border:0;border-radius:9px;padding:10px 13px;background:#244b85;color:#fff;font-weight:800}.vk-tw-upload-controls button.secondary{background:#fff;color:#244b85;border:1px solid #9aacc8}.vk-tw-upload-note{font-size:12px!important}@media(max-width:600px){.vk-tw-head-actions{align-items:flex-end;flex-direction:column}.vk-tw-upload-controls{align-items:stretch;flex-direction:column}.vk-tw-upload-controls button{width:100%}}`;
  const st=document.createElement('style');st.textContent=css;document.head.appendChild(st);
 })();
-let vkTWTests=[];
+var vkTWTests = window.vkTWTests || []; window.vkTWTests = vkTWTests;
 function vkTWTogglePanel(){
  const body=document.getElementById('vkTWBody'),btn=document.getElementById('vkTWToggle');
  if(!body||!btn)return;const willOpen=body.hidden;body.hidden=!willOpen;btn.textContent=willOpen?'Collapse −':'Expand +';btn.setAttribute('aria-expanded',String(willOpen));
