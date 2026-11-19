@@ -9040,6 +9040,9 @@ async function openAdminMockBuilder(){
         return;
     }
     showPage("vkAdminMockBuilder");
+    // Reveal the Topic Wise panel only after the server-side admin check succeeds.
+    const topicWiseAdminPanel = document.getElementById("vkTopicWiseSharedAdmin");
+    if (topicWiseAdminPanel) topicWiseAdminPanel.style.display = "block";
     await vkAdminLoadCourses();
     await vkTWLoad();
     await vkLoadCategoryManager();
