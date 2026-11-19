@@ -4130,7 +4130,7 @@ id="solutions">
     <section id="vkIndependentPackageAdmin" class="vk-independent-admin">
       <div class="vk-ip-head"><div><span>05 · INDEPENDENT PRODUCT</span><h2>Independent Package Management</h2><p>Packages and their tests are managed separately from Free Mock Tests and Paid Test Series.</p></div><div class="vk-ip-icon">📦</div></div>
       <div class="vk-ip-grid">
-        <label>Package Category<select id="vkIpCode" onchange="vkIpApplyCategoryDefaults()"><option value="">Select package category</option><option value="APPSC">APPSC · All APPSC Recruitment Exams</option><option value="ENDOWMENT">Endowment Officer</option><option value="HIGH_COURT">Andhra Pradesh High Court</option></select></label>
+        <label>Package Category<select id="vkIpCode" onchange="vkIpSelectCategory()"><option value="">Select package category</option><option value="APPSC">APPSC · All APPSC Recruitment Exams</option><option value="ENDOWMENT">Endowment Officer</option><option value="HIGH_COURT">Andhra Pradesh High Court</option></select></label>
         <label>Package Name<input id="vkIpName" maxlength="120" placeholder="Select category first"></label>
         <label>Price (₹)<input id="vkIpPrice" type="number" value="29" readonly></label>
         <label>Validity (Days)<input id="vkIpDays" type="number" value="5" readonly></label>
@@ -4179,6 +4179,7 @@ id="solutions">
           <select id="vkAdminTestType" onchange="vkAdminOnTestTypeChange()">
             <option value="free">Free Mock Test</option>
             <option value="paid">Paid Test Series</option>
+            <option value="topic_wise">Topic Wise Test</option>
           </select>
         </div>
         <div class="vk-admin-field">
@@ -15560,7 +15561,7 @@ async function vkIpEditTest(id){const {data,error}=await supabaseClient.from('vk
 async function vkIpRemoveTest(id){if(!confirm('Remove this test from the active package? Attempts and results remain stored.'))return;const {error}=await supabaseClient.from('vk_independent_tests').update({is_active:false}).eq('id',id);if(error){vkIpStatus(error.message,true);return;}await vkIpLoadStructure();}
 async function vkIpAddQuestion(){try{const testId=document.getElementById('vkIpQuestionTest').value;if(!testId)throw Error('Select a test.');const row={test_id:testId,question_text:document.getElementById('vkIpQuestionText').value.trim(),option_a:document.getElementById('vkIpOptA').value.trim(),option_b:document.getElementById('vkIpOptB').value.trim(),option_c:document.getElementById('vkIpOptC').value.trim(),option_d:document.getElementById('vkIpOptD').value.trim(),correct_option:document.getElementById('vkIpCorrect').value,explanation:document.getElementById('vkIpExplanation').value.trim()};if(!row.question_text||!row.option_a||!row.option_b||!row.option_c||!row.option_d)throw Error('Enter question and all four options.');const q=await supabaseClient.from('vk_independent_questions').insert({test_id:row.test_id,question_text:row.question_text,option_a:row.option_a,option_b:row.option_b,option_c:row.option_c,option_d:row.option_d,explanation:row.explanation}).select('id').single();if(q.error)throw q.error;const k=await supabaseClient.from('vk_independent_question_keys').insert({question_id:q.data.id,correct_option:row.correct_option});if(k.error)throw k.error;['vkIpQuestionText','vkIpOptA','vkIpOptB','vkIpOptC','vkIpOptD','vkIpExplanation'].forEach(id=>document.getElementById(id).value='');vkIpStatus('Question added.');}catch(e){vkIpStatus(e.message,true);}}
 async function vkIpImportQuestions(ev){try{const f=ev.target.files?.[0],testId=document.getElementById('vkIpQuestionTest').value;if(!f||!testId)throw Error('Select a test before uploading Excel.');const buf=await f.arrayBuffer();let rows;if(f.name.toLowerCase().endsWith('.csv')){const text= new TextDecoder().decode(buf);rows=text.split(/\r?\n/).filter(Boolean).map(line=>line.split(','));}else{if(!window.XLSX)throw Error('Excel reader could not load.');const wb=XLSX.read(buf,{type:'array'});rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:'' ,raw:false});}if(!rows.length)throw Error('No question rows found.');const normalized=rows.map((r,i)=>{if(Array.isArray(r)){return {test_id:testId,question_text:r[0],option_a:r[1],option_b:r[2],option_c:r[3],option_d:r[4],correct_option:String(r[5]||'A').trim().toUpperCase(),explanation:r[6]||'',display_order:i+1};}const get=(...keys)=>{const k=Object.keys(r).find(x=>keys.includes(x.trim().toLowerCase()));return k?r[k]:''};return {test_id:testId,question_text:get('question','question_text'),option_a:get('option a','option_a','a'),option_b:get('option b','option_b','b'),option_c:get('option c','option_c','c'),option_d:get('option d','option_d','d'),correct_option:String(get('correct option','correct_option','answer')||'A').trim().toUpperCase(),explanation:get('explanation'),display_order:i+1};}).filter(x=>String(x.question_text||'').trim());if(!normalized.length)throw Error('Could not find Question column.');const questionRows=normalized.map(x=>({test_id:x.test_id,question_text:String(x.question_text||''),option_a:String(x.option_a||''),option_b:String(x.option_b||''),option_c:String(x.option_c||''),option_d:String(x.option_d||''),explanation:String(x.explanation||''),display_order:x.display_order}));if(questionRows.some(x=>!x.question_text||!x.option_a||!x.option_b||!x.option_c||!x.option_d))throw Error('Every row must include Question and Options A-D.');const ins=await supabaseClient.from('vk_independent_questions').insert(questionRows).select('id');if(ins.error)throw ins.error;const keys=ins.data.map((q,i)=>({question_id:q.id,correct_option:normalized[i].correct_option}));const ki=await supabaseClient.from('vk_independent_question_keys').insert(keys);if(ki.error)throw ki.error;vkIpStatus(normalized.length+' questions imported.');ev.target.value='';}catch(e){vkIpStatus('Excel import failed: '+e.message,true);}}
-async function vkIpStudentLoad(){const host=document.getElementById('vkIpStudentPackages');try{const {data,error}=await supabaseClient.from('vk_independent_packages').select('id,name,description,price,duration_days,package_code').eq('is_published',true).eq('is_archived',false).order('created_at',{ascending:false});if(error)throw error;host.innerHTML=(data||[]).map(p=>`<article class="vk-ip-student-card"><small class="vk-ip-category">${vkIpEsc(({APPSC:'APPSC · All Recruitment Exams',ENDOWMENT:'Endowment Officer',HIGH_COURT:'Andhra Pradesh High Court'}[p.package_code]||'Exam Preparation'))}</small><h3>${vkIpEsc(p.name)}</h3><p>${vkIpEsc(p.description||'Topic-wise mock test package')}</p><div class="price">₹${Number(p.price).toLocaleString('en-IN')}</div><small>${p.duration_days} Days Validity</small><br><button onclick="vkIpOpenStudentPackage('${p.id}')">View Package</button></article>`).join('')||'No packages are currently available.';}catch(e){host.textContent='Unable to load packages: '+e.message;}}
+async function vkIpStudentLoad(){const host=document.getElementById('vkIpStudentPackages');try{const {data,error}=await supabaseClient.from('vk_independent_packages').select('id,name,description,price,duration_days,package_code').eq('is_published',true).eq('is_archived',false).order('package_code',{ascending:true});if(error)throw error;host.innerHTML=(data||[]).map(p=>`<article class="vk-ip-student-card"><small class="vk-ip-category">${vkIpEsc(({APPSC:'APPSC · All Recruitment Exams',ENDOWMENT:'Endowment Officer',HIGH_COURT:'Andhra Pradesh High Court'}[p.package_code]||'Exam Preparation'))}</small><h3>${vkIpEsc(p.name)}</h3><p>${vkIpEsc(p.description||'Topic-wise mock test package')}</p><div class="price">₹${Number(p.price).toLocaleString('en-IN')}</div><small>${p.duration_days} Days Validity</small><br><button onclick="vkIpOpenStudentPackage('${p.id}')">View Package</button></article>`).join('')||'No packages are currently available.';}catch(e){host.textContent='Unable to load packages: '+e.message;}}
 function vkIpOpenPackages(){showPage('vkIndependentPackagesPage');vkIpStudentLoad();}
 function vkIpBackToPackages(){vkIpOpenPackages();}
 async function vkIpOpenStudentPackage(id){showPage('vkIndependentPackageDetail');const host=document.getElementById('vkIpStudentDetail');host.textContent='Loading package…';try{const {data:p,error}=await supabaseClient.from('vk_independent_packages').select('*').eq('id',id).eq('is_published',true).single();if(error)throw error;const {data:u}=await supabaseClient.auth.getUser();let purchase=null;if(u?.user){const q=await supabaseClient.from('vk_independent_purchases').select('*').eq('package_id',id).eq('user_id',u.user.id).eq('payment_status','paid').gt('expires_at',new Date().toISOString()).order('expires_at',{ascending:false}).limit(1);if(q.error)throw q.error;purchase=q.data?.[0]||null;}const {data:papers,error:pe}=await supabaseClient.from('vk_independent_papers').select('*').eq('package_id',id).eq('is_active',true).order('display_order');if(pe)throw pe;let topics=[];if(papers.length){const q=await supabaseClient.from('vk_independent_topics').select('*').in('paper_id',papers.map(x=>x.id)).eq('is_active',true).order('display_order');if(q.error)throw q.error;topics=q.data||[];}host.innerHTML=`<div class="vk-ip-student-card"><h1>${vkIpEsc(p.name)}</h1><p>${vkIpEsc(p.description||'')}</p><div class="price">₹${p.price}</div><p>${p.duration_days} Days Validity</p>${purchase?`<strong style="color:#16804b">UNLOCKED · Expires ${new Date(purchase.expires_at).toLocaleString()}</strong>`:`<button class="vk-ip-buy" onclick="vkIpBuy('${id}')">BUY PACKAGE · ₹${p.price}</button>`}</div>`+(purchase?papers.map((paper,i)=>`<section class="vk-ip-paper-student ${i===0?'paper1':'paper2'}"><h2>${vkIpEsc(paper.name)}</h2><div class="vk-ip-topic-grid">${topics.filter(t=>t.paper_id===paper.id).map(t=>`<div class="vk-ip-topic-card" onclick="vkIpOpenTopic('${t.id}')"><strong>${vkIpEsc(t.name)}</strong><small>View Tests</small></div>`).join('')||'<p>No topics published yet.</p>'}</div></section>`).join(''):'');window.vkIpActivePackageId=id;}catch(e){host.textContent='Package could not be opened: '+e.message;}}
@@ -15681,6 +15682,100 @@ document.addEventListener('DOMContentLoaded',()=>{const old=window.openAdminMock
     groupTestManagement();
   }
   window.addEventListener('load', groupTestManagement, { once: true });
+})();
+</script>
+
+
+
+<style id="vk-topicwise-test-management-integration">
+/* Topic Wise Test is part of the same Test Management box. */
+#vkAdminMockBuilder #vkIndependentPackageAdmin { display:none !important; margin:14px 0 0; }
+#vkAdminMockBuilder.topicwise-mode #vkIndependentPackageAdmin { display:block !important; }
+#vkAdminMockBuilder.topicwise-mode .vk-test-management-box > .vk-admin-panel:not(.vk-topicwise-selector-panel) { display:none !important; }
+#vkAdminMockBuilder .vk-test-management-box > #vkIndependentPackageAdmin { width:100%; box-sizing:border-box; }
+#vkAdminMockBuilder .vk-topicwise-mode-note{margin:0 0 14px;padding:11px 13px;border:1px solid #c7d2fe;border-radius:11px;background:#eef2ff;color:#3730a3;font-size:13px;font-weight:700}
+#vkAdminMockBuilder #vkIndependentPackageAdmin .vk-ip-head h2{font-size:20px}
+@media(max-width:640px){#vkAdminMockBuilder #vkIndependentPackageAdmin{padding:15px}.vk-ip-grid{grid-template-columns:1fr!important}}
+</style>
+<script id="vk-topicwise-test-management-integration-js">
+(function(){
+  const rootId='vkAdminMockBuilder';
+  function integrate(){
+    const root=document.getElementById(rootId);
+    if(!root || root.dataset.topicwiseIntegrated==='1') return;
+    const box=root.querySelector('.vk-test-management-box');
+    const independent=root.querySelector('#vkIndependentPackageAdmin');
+    const type=document.getElementById('vkAdminTestType');
+    if(!box || !independent || !type) return;
+
+    // Keep all three test types inside the one Test Management container.
+    box.appendChild(independent);
+    const selectorPanel=type.closest('.vk-admin-panel');
+    if(selectorPanel) selectorPanel.classList.add('vk-topicwise-selector-panel');
+
+    const note=document.createElement('div');
+    note.className='vk-topicwise-mode-note';
+    note.textContent='Topic Wise Test: Select a package category, then create or manage its exam groups, topics, tests and questions. These tests are separate from Free and Paid Test Series.';
+    independent.insertBefore(note,independent.firstChild);
+
+    const original=window.vkAdminOnTestTypeChange;
+    window.vkAdminOnTestTypeChange=function(){
+      const mode=type.value;
+      if(mode==='topic_wise'){
+        root.classList.add('topicwise-mode');
+        if(selectorPanel){
+          selectorPanel.querySelectorAll('.vk-admin-field').forEach(el=>{
+            if(el.querySelector('#vkAdminTestType')) return;
+          });
+        }
+        independent.style.setProperty('display','block','important');
+        const btn=document.getElementById('vkAdminPublishBtn');
+        if(btn) btn.textContent='Use Topic Wise Package Builder below';
+        if(typeof vkIpLoadPackages==='function') vkIpLoadPackages();
+        return;
+      }
+      root.classList.remove('topicwise-mode');
+      if(typeof original==='function') original.apply(this,arguments);
+    };
+
+    // Do not expose old independent package administration outside this mode.
+    root.dataset.topicwiseIntegrated='1';
+    if(type.value==='topic_wise') window.vkAdminOnTestTypeChange();
+  }
+
+  // Category chooser: reuse an existing non-archived package or prepare a new one.
+  window.vkIpSelectCategory=async function(){
+    const code=document.getElementById('vkIpCode')?.value||'';
+    const idEl=document.getElementById('vkIpPackageId');
+    if(!code){ if(typeof vkIpReset==='function') vkIpReset(); return; }
+    const defaults={
+      APPSC:{name:'APPSC Topic Wise Test Series',description:'Topic-wise preparation for all relevant APPSC recruitment examinations.'},
+      ENDOWMENT:{name:'Endowment Officer Topic Wise Test Series',description:'Topic-wise preparation for Endowment Officer Paper-I and Paper-II.'},
+      HIGH_COURT:{name:'Andhra Pradesh High Court Topic Wise Test Series',description:'Topic-wise preparation for Andhra Pradesh High Court recruitment examinations.'}
+    };
+    const d=defaults[code];
+    try{
+      const {data,error}=await supabaseClient.from('vk_independent_packages').select('*').eq('package_code',code).eq('is_archived',false).maybeSingle();
+      if(error) throw error;
+      if(data){
+        if(typeof vkIpEditPackage==='function') await vkIpEditPackage(data.id);
+        return;
+      }
+      idEl.value='';
+      document.getElementById('vkIpName').value=d.name;
+      document.getElementById('vkIpDescription').value=d.description;
+      document.getElementById('vkIpPrice').value='29';
+      document.getElementById('vkIpDays').value='5';
+      document.getElementById('vkIpBuilder').hidden=true;
+      if(typeof vkIpStatus==='function') vkIpStatus('New '+code+' package selected. Click Save Package, then add exam groups, topics, tests and questions.');
+    }catch(e){
+      if(typeof vkIpStatus==='function') vkIpStatus('Could not load category package: '+(e.message||e),true);
+    }
+  };
+
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',integrate,{once:true});
+  else integrate();
+  window.addEventListener('load',integrate,{once:true});
 })();
 </script>
 
