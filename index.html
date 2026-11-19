@@ -4201,7 +4201,7 @@ id="solutions">
       <div id="vkCpPackageList" class="vk-cp-package-list"><p class="vk-cp-sub">Loading packages...</p></div>
     </section>
 
-    <section id="vkTopicPackageAdmin" class="vk-topic-admin-panel" style="display:none!important">
+    <section id="vkTopicPackageAdmin" class="vk-topic-admin-panel" style="display:block">
       <div class="vk-management-heading"><div><span class="vk-management-kicker">04 · TOPIC-WISE PACKAGE</span><h2>Complete Topic-wise Test Package</h2><p>Create Paper-I / Paper-II, add unlimited topics and assign existing paid tests individually. Existing test builder and Excel upload remain unchanged.</p></div><span class="vk-management-icon">🛕</span></div>
       <div class="vk-topic-admin-form">
         <input id="vkTopicAdminPackageId" type="hidden">
@@ -15690,7 +15690,36 @@ function vkTopicAdminPreview(){vkTopicOpenPackage();}
 document.addEventListener('change',e=>{if(e.target?.id==='vkTopicAdminAssignTopic')vkTopicAdminLoadTests();});
 // Hook into the existing admin entry point without replacing its established setup.
 const vkTopicOriginalAdminInit=window.openAdminMockBuilder;
-if(typeof vkTopicOriginalAdminInit==='function'){window.openAdminMockBuilder=async function(){await vkTopicOriginalAdminInit.apply(this,arguments);if(vkAdminAuthorized){await vkTopicAdminLoad();await vkTopicTestLoadPackages();}};}
+if(typeof vkTopicOriginalAdminInit==='function'){
+ window.openAdminMockBuilder=async function(){
+  await vkTopicOriginalAdminInit.apply(this,arguments);
+  const panel=document.getElementById('vkTopicPackageAdmin');
+  if(vkAdminAuthorized && panel){
+   panel.hidden=false;
+   panel.style.removeProperty('display');
+   panel.style.setProperty('display','block','important');
+   await vkTopicAdminLoad();
+   if(typeof vkTopicTestLoadPackages==='function') await vkTopicTestLoadPackages();
+  }
+ };
+}
+// Keep the Topic Wise admin panel visible whenever the authenticated Admin page is restored.
+function vkEnsureTopicWiseAdminPanel(){
+ const root=document.getElementById('vkAdminMockBuilder');
+ const panel=document.getElementById('vkTopicPackageAdmin');
+ if(!root||!panel)return;
+ const isAdminPage=root.classList.contains('active') || root.style.display==='block';
+ if(isAdminPage && window.vkAdminAuthorized===true){
+  panel.hidden=false;
+  panel.style.setProperty('display','block','important');
+  if(panel.dataset.vkAdminInit!=='1'){
+   panel.dataset.vkAdminInit='1';
+   vkTopicAdminLoad().catch(e=>{console.error('Topic Wise admin initialization failed:',e);vkTopicAdminStatus('Could not initialize Topic Wise Test Management: '+(e.message||e),true);});
+  }
+ }
+}
+window.addEventListener('pageshow',vkEnsureTopicWiseAdminPanel);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)vkEnsureTopicWiseAdminPanel();});
 // When a student returns from CBT, return to the topic package instead of a generic list.
 window.addEventListener('pageshow',()=>{if(location.hash.startsWith('#vkTopicPackagePage'))vkTopicLoadStudent();});
 </script>
@@ -15880,7 +15909,6 @@ async function vkIpSubmitTest(){try{const form=document.getElementById('vkIpExam
 /* VK Exams: streamlined admin screen */
 #vkAdminMockBuilder #vkCategoryManager,
 #vkAdminMockBuilder #vkCustomPackageManager,
-#vkAdminMockBuilder #vkTopicPackageAdmin,
 #vkAdminMockBuilder .vk-admin-actions:has(button[onclick="openAdminStudyMaterials()"]) {
   display: none !important;
 }
@@ -15967,7 +15995,6 @@ async function vkIpSubmitTest(){try{const form=document.getElementById('vkIpExam
 <style id="vk-permanent-topic-package-ui-removal">
 /* VK Exams: Topic Wise / Independent Package UI retired.
    Historical database rows and payment records are intentionally preserved. */
-#vkTopicPackageAdmin,
 #vkCustomPackageManager,
 #vkTopicPackageHome,
 .vk-topic-package-home-wrap,
