@@ -6016,6 +6016,17 @@ function openCourse(course, addHistory = true){
             </div>
 
 
+            <div class="vk-eo-card vk-eo-topicwise" role="button" tabindex="0"
+                 onclick="vkTopicOpenPackage()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();vkTopicOpenPackage();}">
+                <div class="vk-eo-card-art">🛕</div>
+                <div class="vk-eo-card-copy">
+                    <span class="vk-eo-eyebrow">TOPIC-WISE PRACTICE</span>
+                    <h2>Topic Wise Tests</h2>
+                    <p>Practice individual Paper-I and Paper-II topics with focused mock tests.</p>
+                    <span class="vk-eo-card-cta">Explore Topic Tests <b>→</b></span>
+                </div>
+            </div>
+
             <div class="vk-eo-card vk-eo-study" role="button" tabindex="0"
                  onclick="openStudyMaterials('Endowment Officer')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openStudyMaterials('Endowment Officer');}">
                 <div class="vk-eo-card-art">📚</div>
@@ -15460,7 +15471,7 @@ async function vkTopicLoadStudent(){
   const pkg=await vkTopicFindPackage();
   if(!pkg){host.innerHTML='<p class="vk-topic-loading">Package is not published yet. Please check again later.</p>';document.getElementById('vkTopicBuyButton').disabled=true;return;}
   document.getElementById('vkTopicBuyButton').disabled=false;
-  document.getElementById('vkTopicHomePrice').textContent='₹'+Number(pkg.price).toLocaleString('en-IN');
+  const homePrice=document.getElementById('vkTopicHomePrice');if(homePrice)homePrice.textContent='₹'+Number(pkg.price).toLocaleString('en-IN');
   document.querySelector('.vk-topic-page-price').innerHTML='₹'+Number(pkg.price).toLocaleString('en-IN')+' <small>· '+Number(pkg.duration_days)+' Days Validity</small>';
   const {data:papers,error:pe}=await supabaseClient.from('package_papers').select('id,package_id,name,display_order,is_active').eq('package_id',pkg.id).eq('is_active',true).order('display_order');if(pe)throw pe;
   const paperIds=(papers||[]).map(x=>x.id);
@@ -15476,7 +15487,7 @@ async function vkTopicLoadStudent(){
   if(userData?.user){const now=new Date().toISOString();const r=await supabaseClient.from('purchases').select('id,starts_at,expires_at,payment_status,package_id').eq('user_id',userData.user.id).eq('package_id',pkg.id).eq('payment_status','paid').gt('expires_at',now).order('expires_at',{ascending:false}).limit(1);if(r.error)throw r.error;vkTopicPackagePurchase=(r.data||[])[0]||null;}
   const unlocked=!!vkTopicPackagePurchase;
   document.getElementById('vkTopicAccessStatus').textContent=unlocked?'✓ Package Unlocked':'🔒 Package Locked';
-  document.getElementById('vkTopicHomeLock').textContent=unlocked?'🔓':'🔒';
+  const homeLock=document.getElementById('vkTopicHomeLock');if(homeLock)homeLock.textContent=unlocked?'🔓':'🔒';
   document.getElementById('vkTopicBuyButton').style.display=unlocked?'none':'inline-block';
   const countdown=document.getElementById('vkTopicCountdown');countdown.hidden=!unlocked;
   if(unlocked){const expiry=new Date(vkTopicPackagePurchase.expires_at);const remaining=Math.max(0,expiry-Date.now());const days=Math.floor(remaining/86400000),hours=Math.floor((remaining%86400000)/3600000),mins=Math.floor((remaining%3600000)/60000);countdown.textContent=`Access active · ${days} days ${hours} hours ${mins} minutes remaining · Expires ${expiry.toLocaleString('en-IN')}`;}
