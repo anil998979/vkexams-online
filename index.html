@@ -3252,7 +3252,7 @@ body.dark-mode .vk-theme-toggle{background:#243247;color:#f8fafc;border-color:#4
 @media(max-width:650px){.vk-cp-grid,.vk-cp-test-list,.vk-cp-package-list{grid-template-columns:1fr}.vk-custom-package-panel{padding:15px}}
 
 #course.vk-eo-premium .vk-eo-free{display:none!important}
-#course.vk-eo-premium .vk-eo-topicwise{border:1px solid #d9e4f5;background:linear-gradient(135deg,#fff,#f1f6ff)}
+#course.vk-eo-premium .vk-eo-topicwise{border:2px solid #7c3aed;background:linear-gradient(125deg,#11164f 0%,#312e81 38%,#6d28d9 72%,#a21caf 100%);box-shadow:0 14px 32px rgba(49,46,129,.32),0 0 0 4px rgba(124,58,237,.15)}
 </style>
 
 
@@ -16085,8 +16085,16 @@ body:has(#examPage.active) > footer{
 
 
 <style id="vk-eo-topicwise-card-style">
-#course.vk-eo-premium .vk-eo-topicwise{border-color:#cbdaf5;background:linear-gradient(135deg,#fff,#f1f6ff)}
-#course.vk-eo-premium .vk-eo-topicwise .vk-eo-card-art{background:linear-gradient(145deg,#e8efff,#fff)}
+/* Final high-contrast Topic Wise card theme */
+#course.vk-eo-premium .vk-eo-topicwise{border:2px solid #a78bfa!important;background:radial-gradient(circle at 88% 12%,rgba(251,191,36,.28),transparent 25%),radial-gradient(circle at 8% 100%,rgba(34,211,238,.18),transparent 30%),linear-gradient(125deg,#11164f 0%,#312e81 38%,#6d28d9 72%,#a21caf 100%)!important;box-shadow:0 15px 34px rgba(49,46,129,.34),0 0 0 4px rgba(124,58,237,.17)!important;color:#fff!important;overflow:hidden}
+#course.vk-eo-premium .vk-eo-topicwise .vk-eo-card-art{background:linear-gradient(145deg,#fbbf24,#fb7185 55%,#8b5cf6)!important;color:#fff!important;box-shadow:0 8px 20px rgba(0,0,0,.28),inset 0 0 0 1px rgba(255,255,255,.45)!important}
+#course.vk-eo-premium .vk-eo-topicwise .vk-eo-eyebrow{color:#fde68a!important;font-size:10px!important;font-weight:950!important;letter-spacing:1.2px!important}
+#course.vk-eo-premium .vk-eo-topicwise h2{color:#fff!important;font-size:clamp(22px,2.7vw,30px)!important;font-weight:1000!important;text-shadow:0 2px 12px rgba(0,0,0,.25)}
+#course.vk-eo-premium .vk-eo-topicwise p{color:#f5f3ff!important;font-size:14px!important;font-weight:700!important;line-height:1.5}
+#course.vk-eo-premium .vk-eo-topicwise .vk-eo-card-cta{background:linear-gradient(95deg,#fbbf24,#fb923c)!important;color:#35115f!important;border:1px solid rgba(255,255,255,.55)!important;font-weight:950!important;box-shadow:0 7px 18px rgba(0,0,0,.24)!important}
+#course.vk-eo-premium .vk-eo-topicwise:before{background:linear-gradient(90deg,#f97316,#e11d48)!important;color:#fff!important;border:1px solid rgba(255,255,255,.5)!important;box-shadow:0 5px 14px rgba(0,0,0,.25)!important}
+#course.vk-eo-premium .vk-eo-topicwise:hover{border-color:#fbbf24!important;box-shadow:0 19px 40px rgba(49,46,129,.42),0 0 0 5px rgba(251,191,36,.2)!important;transform:translateY(-5px)}
+@media(max-width:650px){#course.vk-eo-premium .vk-eo-topicwise{min-height:175px!important}}
 </style>
 
 <style id="vk-ip-premium-student-series">
@@ -16130,4 +16138,13 @@ body:has(#examPage.active) > footer{
 .vk-ip-test-start{border:0;border-radius:10px;padding:10px 15px;background:linear-gradient(90deg,#5c31cb,#a52cce);color:white;font-weight:900;cursor:pointer}
 .vk-ip-loading,.vk-ip-empty,.vk-ip-error{padding:20px;border-radius:14px;background:#fff;text-align:center;color:#52617d;font-weight:750}
 @media(max-width:650px){.vk-ip-series-hero{padding:24px 20px}.vk-ip-series-hero:after{right:15px;top:16px;font-size:40px}.vk-ip-paper-student{padding:15px}.vk-ip-topic-grid{grid-template-columns:1fr}.vk-ip-topic-card{grid-template-columns:34px 1fr 25px}.vk-ip-test-student{align-items:flex-start;flex-direction:column}.vk-ip-test-start{width:100%}}
+</style>
+
+<style id="vk-topicwise-final-contrast-override">
+#course.vk-eo-premium .vk-eo-topicwise{background:radial-gradient(circle at 90% 10%,rgba(251,191,36,.26),transparent 27%),linear-gradient(125deg,#11164f,#312e81 42%,#6d28d9 76%,#a21caf)!important;border:2px solid #a78bfa!important;color:#fff!important}
+#course.vk-eo-premium .vk-eo-topicwise h2{color:#fff!important;text-shadow:0 2px 12px #171044!important}
+#course.vk-eo-premium .vk-eo-topicwise p{color:#f5f3ff!important}
+#course.vk-eo-premium .vk-eo-topicwise .vk-eo-eyebrow{color:#fde68a!important}
+#course.vk-eo-premium .vk-eo-topicwise .vk-eo-card-cta{background:linear-gradient(90deg,#fbbf24,#fb923c)!important;color:#35115f!important}
+#course.vk-eo-premium .vk-eo-topicwise .vk-eo-card-art{background:linear-gradient(145deg,#fbbf24,#fb7185,#8b5cf6)!important}
 </style>
