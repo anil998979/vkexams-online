@@ -5353,6 +5353,12 @@ function showPage(
         });
     }
 
+    // Restore the Topic Wise admin panel when the builder is opened directly
+    // from a refreshed URL/hash (not only when the Admin button is clicked).
+    if(page === "vkAdminMockBuilder" && typeof window.vkEnsureTopicWiseAdminPanel === "function"){
+        window.vkEnsureTopicWiseAdminPanel();
+    }
+
 
     window.scrollTo(
         {
@@ -9040,11 +9046,8 @@ async function openAdminMockBuilder(){
         return;
     }
     showPage("vkAdminMockBuilder");
-    // Reveal the Topic Wise panel only after the server-side admin check succeeds.
-    const topicWiseAdminPanel = document.getElementById("vkTopicWiseSharedAdmin");
-    if (topicWiseAdminPanel) topicWiseAdminPanel.style.display = "block";
-    await vkAdminLoadCourses();
-    await vkTWLoad();
+    // Initialize Topic Wise panel for normal Admin-button navigation as well.
+    await window.vkEnsureTopicWiseAdminPanel();
     await vkLoadCategoryManager();
     await vkCpInit();
     vkAdminOnTestTypeChange();
@@ -16031,6 +16034,29 @@ async function vkIpSubmitTest(){try{const form=document.getElementById('vkIpExam
  css += `.vk-tw-shared-panel{background:#f7f9ff!important;color:#172b4d!important;border:1px solid #cbd7ed!important}.vk-tw-shared-head h2{color:#172b4d!important}.vk-tw-shared-head p{color:#526581!important}.vk-tw-shared-head span{color:#8a4b00!important}.vk-tw-shared-grid label{color:#243b63!important;font-size:13px!important}.vk-tw-shared-grid input,.vk-tw-shared-grid select,.vk-tw-shared-grid textarea{background:#fff!important;color:#14294d!important;border:1px solid #aebed8!important;font-weight:600}.vk-tw-shared-hint{color:#425675!important}.vk-tw-shared-status{color:#14532d!important}.vk-tw-shared-row{background:#fff!important;border:1px solid #d5deed!important;color:#172b4d!important}.vk-tw-shared-row small{color:#526581!important}.vk-tw-head-actions{display:flex;align-items:center;gap:14px}.vk-tw-collapse{border:1px solid #9aacc8;border-radius:9px;padding:9px 13px;background:#e9effb;color:#18345d;font-weight:800}.vk-tw-upload-box{padding:14px;border:1px dashed #8fa4c6;border-radius:12px;background:#edf3ff;color:#18345d;display:grid;gap:10px}.vk-tw-upload-box b{display:block;font-size:14px}.vk-tw-upload-box small{display:block;color:#526581;line-height:1.5;margin-top:4px}.vk-tw-upload-controls{display:flex;align-items:center;gap:9px;flex-wrap:wrap}.vk-tw-upload-controls input{flex:1 1 240px}.vk-tw-upload-controls button{border:0;border-radius:9px;padding:10px 13px;background:#244b85;color:#fff;font-weight:800}.vk-tw-upload-controls button.secondary{background:#fff;color:#244b85;border:1px solid #9aacc8}.vk-tw-upload-note{font-size:12px!important}@media(max-width:600px){.vk-tw-head-actions{align-items:flex-end;flex-direction:column}.vk-tw-upload-controls{align-items:stretch;flex-direction:column}.vk-tw-upload-controls button{width:100%}}`;
  const st=document.createElement('style');st.textContent=css;document.head.appendChild(st);
 })();
+window.vkEnsureTopicWiseAdminPanel = async function(){
+  const panel = document.getElementById("vkTopicWiseSharedAdmin");
+  if(!panel || panel.dataset.routeInit === "loading") return;
+  panel.dataset.routeInit = "loading";
+  try{
+    const allowed = typeof refreshVkAdminAccess === "function" && await refreshVkAdminAccess();
+    if(!allowed){
+      panel.style.display = "none";
+      panel.dataset.routeInit = "";
+      return;
+    }
+    panel.style.display = "block";
+    if(typeof vkAdminLoadCourses === "function") await vkAdminLoadCourses();
+    if(typeof vkTWLoad === "function") await vkTWLoad();
+    panel.dataset.routeInit = "ready";
+  }catch(error){
+    panel.style.display = "block";
+    panel.dataset.routeInit = "";
+    const status = document.getElementById("vkTWStatus");
+    if(status) status.textContent = "Topic Wise panel could not refresh: " + (error.message || error);
+  }
+};
+
 var vkTWTests = window.vkTWTests || []; window.vkTWTests = vkTWTests;
 function vkTWTogglePanel(){
  const body=document.getElementById('vkTWBody'),btn=document.getElementById('vkTWToggle');
