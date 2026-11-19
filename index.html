@@ -6308,12 +6308,12 @@ async function openTestSeries(addHistory = true){
         if(seriesError) throw seriesError;
 
         /*
-           Permanent UI rule requested for APPSC and High Court:
+           Permanent UI rule requested for APPSC, High Court and Endowment Officer:
            hide the top-level Free Mock Tests card from the Test Series
            paper-selection screen. The underlying free tests, records,
            attempts and results remain untouched.
         */
-        const hideFreeMockCardForCourse = ["APPSC", "High Court"].includes(String(currentCourse || "").trim());
+        const hideFreeMockCardForCourse = ["APPSC", "High Court", "Endowment Officer"].includes(String(currentCourse || "").trim());
         const rows = (seriesRows || []).filter(series => {
             if(!hideFreeMockCardForCourse) return true;
             const seriesName = String(series.name || "").trim().toLowerCase();
