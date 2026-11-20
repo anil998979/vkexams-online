@@ -4181,7 +4181,7 @@ id="solutions">
               <label>Duration (minutes)<input id="vkTWDuration" type="number" min="1" max="600" value="30"></label>
               <label>Negative marks per wrong answer<input id="vkTWNegativeMarks" type="number" min="0" max="5" step="0.000001" value="0.333333" inputmode="decimal" placeholder="e.g. 0.333333"><small class="vk-tw-negative-hint">0.333333 = 1/3 mark · 0.25 = 1/4 mark · 0 = No negative marks</small></label>
               <label>Question count (1–500)<input id="vkTWCount" type="number" min="1" max="500" value="25"></label>
-              <label class="vk-tw-package-topic-compat" hidden>Package Topic<select id="vkTWPackageTopic"><option value="">Select a saved package/topic</option></select></label>
+              <label class="vk-tw-package-topic-compat vk-tw-package-topic-visible">Assign to Topic (required for Student Preview)<select id="vkTWPackageTopic"><option value="">Loading saved package topics…</option></select><small>Select the Paper → Topic where this published test should appear.</small></label>
             </div>
           </div>
         </section>
@@ -16653,6 +16653,43 @@ document.addEventListener('DOMContentLoaded',()=>{
     showNotReleasedMessage();
     return false;
   };
+})();
+</script>
+
+<style id="vk-topicwise-live-mapping-preview-fix-v15">
+#vkTopicWiseSharedAdmin .vk-tw-reference-layout .vk-tw-package-topic-compat,
+#vkTopicWiseSharedAdmin .vk-tw-reference-layout .vk-tw-package-topic-compat[hidden]{display:flex!important;grid-column:1/-1!important;flex-direction:column!important;gap:6px!important}
+#vkTopicWiseSharedAdmin .vk-tw-package-topic-compat small{font-size:11px;color:#526581;font-weight:500}
+#vkTopicWiseSharedAdmin .vk-tw-package-topic-compat select{min-height:44px}
+</style>
+<script id="vk-topicwise-live-mapping-preview-fix-v15">
+(function(){
+  const originalOpen=window.vkTopicOpenPackage;
+  window.vkTopicOpenPackage=async function(){
+    let admin=false;
+    try{admin=typeof window.refreshVkAdminAccess==='function' && await window.refreshVkAdminAccess();}
+    catch(e){console.warn('Topic Wise admin authorization check failed',e);}
+    if(!admin){
+      const msg='Topic Wise Tests are not published for students yet. Please check again later.';
+      if(typeof window.toast==='function')window.toast(msg);else window.alert(msg);
+      return false;
+    }
+    if(typeof window.showPage==='function')window.showPage('vkTopicPackagePage');
+    if(typeof window.vkPushContextRoute==='function')window.vkPushContextRoute('vkTopicPackagePage');
+    if(typeof window.vkTopicLoadAdminPreview==='function')await window.vkTopicLoadAdminPreview();
+    return true;
+  };
+  const priorEnsure=window.vkEnsureTopicWiseAdminPanel;
+  window.vkEnsureTopicWiseAdminPanel=async function(){
+    if(typeof priorEnsure==='function')await priorEnsure.apply(this,arguments);
+    const allowed=typeof window.refreshVkAdminAccess==='function' && await window.refreshVkAdminAccess();
+    if(allowed && typeof window.vkTWLoadPackageTopics==='function')await window.vkTWLoadPackageTopics();
+  };
+  // Refresh package/topic options when the admin panel is opened, including SPA navigation.
+  document.addEventListener('click',function(ev){
+    const target=ev.target?.closest?.('[onclick*="vkTW"], [onclick*="vkTopic"]');
+    if(target && typeof window.vkTWLoadPackageTopics==='function')setTimeout(()=>window.vkTWLoadPackageTopics(),0);
+  },true);
 })();
 </script>
 </body>
