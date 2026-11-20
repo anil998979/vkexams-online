@@ -4174,15 +4174,14 @@ id="solutions">
           <div id="vkTWDetailsBody" class="vk-tw-card-body">
             <div class="vk-tw-shared-grid vk-tw-reference-layout">
               <label>Test Action<select id="vkTWAction" onchange="vkTWActionChanged()"><option value="create">Create New Topic Test</option><option value="edit">Edit Existing Topic Test</option></select></label>
-              <label>Package<select id="vkTWPackageSelect"><option value="">Loading packages…</option></select></label>
-              <label>Select Paper<select id="vkTWTitle" disabled><option value="">Select package first</option></select></label>
-              <select id="vkTWCourse" hidden aria-hidden="true" tabindex="-1"><option value="">Select course</option></select>
+              <label>Course<select id="vkTWCourse"><option value="">Select course</option></select></label>
+              <label>Select Paper<select id="vkTWTitle"><option value="Paper - 1">Paper 1</option><option value="Paper - 2">Paper 2</option></select></label>
               <label id="vkTWExistingWrap" class="vk-tw-wide" hidden>Select Existing Topic Test<select id="vkTWExisting" onchange="vkTWSelectExisting()"><option value="">Select an existing test</option></select></label>
               <label>Topic Name<input id="vkTWTopic" maxlength="150" placeholder="e.g. Ramayanam"></label>
               <label>Duration (minutes)<input id="vkTWDuration" type="number" min="1" max="600" value="30"></label>
               <label>Negative marks per wrong answer<input id="vkTWNegativeMarks" type="number" min="0" max="5" step="0.000001" value="0.333333" inputmode="decimal" placeholder="e.g. 0.333333"><small class="vk-tw-negative-hint">0.333333 = 1/3 mark · 0.25 = 1/4 mark · 0 = No negative marks</small></label>
               <label>Question count (1–500)<input id="vkTWCount" type="number" min="1" max="500" value="25"></label>
-              
+              <label class="vk-tw-package-topic-compat vk-tw-package-topic-visible">Assign to Topic (required for Student Preview)<select id="vkTWPackageTopic"><option value="">Loading saved package topics…</option></select><small>Select the Paper → Topic where this published test should appear.</small></label>
             </div>
           </div>
         </section>
@@ -9117,24 +9116,13 @@ async function openAdminMockBuilder(){
         return;
     }
     showPage("vkAdminMockBuilder");
-
-    // Start Topic Wise initialization immediately. Do not make its visibility
-    // wait for unrelated Email Settings / Category / Test Series requests.
-    const topicWiseTask = (typeof window.vkEnsureTopicWiseAdminPanel === "function")
-        ? window.vkEnsureTopicWiseAdminPanel()
-        : Promise.resolve();
-    const emailTask = (typeof vkAdminLoadGlobalEmailAlerts === "function")
-        ? vkAdminLoadGlobalEmailAlerts()
-        : Promise.resolve();
-
-    await Promise.allSettled([topicWiseTask, emailTask]);
-    await Promise.allSettled([
-        typeof vkLoadCategoryManager === "function" ? vkLoadCategoryManager() : Promise.resolve(),
-        typeof vkCpInit === "function" ? vkCpInit() : Promise.resolve()
-    ]);
-    if(typeof vkAdminOnTestTypeChange === "function") vkAdminOnTestTypeChange();
-    const questions = document.getElementById("vkAdminQuestions");
-    if(questions && !questions.children.length && typeof vkAdminAddQuestion === "function"){
+    await vkAdminLoadGlobalEmailAlerts();
+    // Initialize Topic Wise panel for normal Admin-button navigation as well.
+    await window.vkEnsureTopicWiseAdminPanel();
+    await vkLoadCategoryManager();
+    await vkCpInit();
+    vkAdminOnTestTypeChange();
+    if(!document.getElementById("vkAdminQuestions").children.length){
         vkAdminAddQuestion();
     }
 }
@@ -16128,7 +16116,7 @@ window.vkEnsureTopicWiseAdminPanel = async function(){
     }
     panel.style.display = "block";
     if(typeof vkTWLoadCourses === "function") await vkTWLoadCourses();
-    if(typeof vkTWLoad === "function") await vkTWLoad();
+    if(typeof vkTWLoad === "function") 
     panel.dataset.routeInit = "ready";
   }catch(error){
     panel.style.display = "block";
@@ -16191,28 +16179,12 @@ function vkTWGetFormData(){let questions=[];try{questions=JSON.parse(document.ge
 function vkTWValidateForm(d){if(!d.courseId||!d.topic){vkTWStatus('Select a course and enter the Topic Name.',true);return false;}if(!Number.isInteger(d.duration)||d.duration<1||d.duration>600){vkTWStatus('Duration must be 1–600 minutes.',true);return false;}if(!Number.isFinite(d.negativeMarks)||d.negativeMarks<0||d.negativeMarks>5){vkTWStatus('Negative marks must be a number between 0 and 5.',true);return false;}if(!Array.isArray(d.questions)||d.questions.length<1||d.questions.length>500||d.questions.length!==d.count){vkTWStatus('Upload an Excel file with exactly '+d.count+' valid questions. Current imported count: '+(d.questions?.length||0),true);return false;}return true;}
 function vkTWSaveDraft(){const d=vkTWGetFormData();if(!d.courseId||!d.topic){vkTWStatus('Select a course and enter the Topic Name before saving a draft.',true);return;}if(!Array.isArray(d.questions)||!d.questions.length){vkTWStatus('Import the questions from Excel before saving this draft.',true);return;}const draft={...d,savedAt:new Date().toISOString()};try{localStorage.setItem('vkTopicWiseAdminDraftV1',JSON.stringify(draft));document.getElementById('vkTWRestoreDraft').hidden=false;vkTWStatus('Draft saved on this device only. It is not uploaded online and students cannot see it.');}catch(e){vkTWStatus('Could not save draft in this browser: '+(e.message||e),true);}}
 function vkTWRestoreDraft(){try{const d=JSON.parse(localStorage.getItem('vkTopicWiseAdminDraftV1')||'null');if(!d){vkTWStatus('No saved draft found on this device.',true);return;}document.getElementById('vkTWCourse').value=d.courseId||'';document.getElementById('vkTWTitle').value=d.paper||'Paper - 1';document.getElementById('vkTWTopic').value=d.topic||'';document.getElementById('vkTWDuration').value=d.duration||30;document.getElementById('vkTWNegativeMarks').value=Number.isFinite(Number(d.negativeMarks))?d.negativeMarks:0.333333;document.getElementById('vkTWCount').value=d.count||d.questions?.length||25;document.getElementById('vkTWQuestions').value=JSON.stringify(d.questions||[]);vkTWRenderPreview(d.questions||[]);document.getElementById('vkTWImportSummary').textContent=(d.questions?.length||0)+' questions restored from this device draft.';document.getElementById('vkTWAction').value=d.editId?'edit':'create';document.getElementById('vkTWExistingWrap').hidden=!d.editId;if(d.editId)document.getElementById('vkTWExisting').value=d.editId;vkTWSetMode(!!d.editId);vkTWStatus('Saved draft restored from this device.');}catch(e){vkTWStatus('Could not restore draft: '+(e.message||e),true);}}
-function vkTWExtractReturnedTestId(payload){
- const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
- const seen=new Set();
- function scan(v,depth){
-  if(depth>5||v==null)return null;
-  if(typeof v==='string'){const x=v.trim();return uuid.test(x)?x:null;}
-  if(typeof v!=='object'||seen.has(v))return null;seen.add(v);
-  if(Array.isArray(v)){for(const item of v){const got=scan(item,depth+1);if(got)return got;}return null;}
-  for(const k of ['test_id','id','vk_admin_create_topic_wise_test','vk_admin_update_topic_wise_test','result','data']){
-   if(Object.prototype.hasOwnProperty.call(v,k)){const got=scan(v[k],depth+1);if(got)return got;}
-  }
-  for(const value of Object.values(v)){const got=scan(value,depth+1);if(got)return got;}
-  return null;
- }
- return scan(payload,0);
-}
 async function vkTWPublishTest(){
  if(!await refreshVkAdminAccess()){vkTWStatus('Admin access required.',true);return;}
  const d=vkTWGetFormData();if(!vkTWValidateForm(d))return;const editId=d.action==='edit'?d.editId:'';if(d.action==='edit'&&!editId){vkTWStatus('Select an existing Topic Wise test to edit.',true);return;}
  if(!confirm(editId?'Publish the updated test online?':'Publish this Topic Wise test online?'))return;
  const btn=document.getElementById('vkTWPublish'),old=btn.textContent;btn.disabled=true;btn.textContent='Publishing…';
- try{const topicQuestions=d.questions.map(q=>({...q,negative_marks:d.negativeMarks}));const args={p_topic_name:d.topic,p_title:d.paper,p_duration_minutes:d.duration,p_questions:topicQuestions};let r;if(editId){args.p_test_id=editId;r=await supabaseClient.rpc('vk_admin_update_topic_wise_test',args);}else{args.p_course_id=d.courseId;r=await supabaseClient.rpc('vk_admin_create_topic_wise_test',args);}if(r.error)throw r.error;window.vkTWLastPublishedTestId=vkTWExtractReturnedTestId(r.data); if(!window.vkTWLastPublishedTestId){throw new Error('Publish RPC completed but returned an unrecognized Test ID format: '+JSON.stringify(r.data).slice(0,500));}localStorage.removeItem('vkTopicWiseAdminDraftV1');document.getElementById('vkTWRestoreDraft').hidden=true;vkTWStatus('Published successfully to the shared exam database. Student visibility still follows the current Topic Wise access controls.');vkTWClearForm();}
+ try{const topicQuestions=d.questions.map(q=>({...q,negative_marks:d.negativeMarks}));const args={p_topic_name:d.topic,p_title:d.paper,p_duration_minutes:d.duration,p_questions:topicQuestions};let r;if(editId){args.p_test_id=editId;r=await supabaseClient.rpc('vk_admin_update_topic_wise_test',args);}else{args.p_course_id=d.courseId;r=await supabaseClient.rpc('vk_admin_create_topic_wise_test',args);}if(r.error)throw r.error;window.vkTWLastPublishedTestId=typeof r.data==='string'?r.data:(r.data?.test_id||r.data?.id||null);localStorage.removeItem('vkTopicWiseAdminDraftV1');document.getElementById('vkTWRestoreDraft').hidden=true;vkTWStatus('Published successfully to the shared exam database. Student visibility still follows the current Topic Wise access controls.');vkTWClearForm();}
  catch(e){vkTWStatus('Publish failed: '+(e.message||e),true);}finally{btn.disabled=false;btn.textContent=old;}
 }
 async function vkTWDeleteTest(){
@@ -16720,151 +16692,6 @@ document.addEventListener('DOMContentLoaded',()=>{
   },true);
 })();
 </script>
-
-<script id="vk-topicwise-package-paper-binding-v20">
-(function(){
-  const PACKAGE_NAMES=['Endowment Officer','APPSC','High Court'];
-  let loadSeq=0, publishBusy=false;
-  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  function status(msg,bad=false){if(typeof window.vkTWStatus==='function')window.vkTWStatus(msg,bad);}
-  function selectedPackage(){return document.getElementById('vkTWPackageSelect')?.selectedOptions?.[0]||null;}
-  async function loadPapers(){
-    const seq=++loadSeq, pkgSel=document.getElementById('vkTWPackageSelect'), paperSel=document.getElementById('vkTWTitle');
-    const courseSel=document.getElementById('vkTWCourse');
-    if(!pkgSel||!paperSel||!window.supabaseClient&&!supabaseClient)return;
-    const sb=(typeof supabaseClient!=='undefined'&&supabaseClient)||window.supabaseClient;
-    const pkgId=pkgSel.value; paperSel.disabled=true; paperSel.innerHTML='<option value="">Loading papers…</option>';
-    if(!pkgId){paperSel.innerHTML='<option value="">Select package first</option>';if(courseSel)courseSel.value='';return;}
-    try{
-      const {data:pkg,error:pkgErr}=await sb.from('packages').select('id,name').eq('id',pkgId).eq('package_type','custom').single();
-      if(pkgErr)throw pkgErr;
-      const {data:courses,error:courseErr}=await sb.from('courses').select('id,name').eq('name',pkg.name).limit(1);
-      if(courseErr)throw courseErr;
-      if(seq!==loadSeq||pkgSel.value!==pkgId)return;
-      if(courseSel)courseSel.value=courses?.[0]?.id||'';
-      if(!courses?.[0])throw new Error('No matching course record found for '+pkg.name+'.');
-      const {data:papers,error}=await sb.from('package_papers').select('id,name,display_order').eq('package_id',pkgId).eq('is_active',true).order('display_order',{ascending:true});
-      if(error)throw error;
-      if(seq!==loadSeq||pkgSel.value!==pkgId)return;
-      paperSel.innerHTML='<option value="">Select Paper</option>'+(papers||[]).map(p=>`<option value="${esc(p.name)}" data-paper-id="${esc(p.id)}">${esc(p.name)}</option>`).join('');
-      paperSel.disabled=!(papers||[]).length;
-      if(!papers?.length)paperSel.innerHTML='<option value="">No active Papers in this Package</option>';
-    }catch(e){if(seq!==loadSeq)return;paperSel.innerHTML='<option value="">Paper loading failed</option>';paperSel.disabled=true;status('Package/Paper loading failed: '+(e.message||e),true);console.error('Topic Wise Package/Paper binding:',e);}
-  }
-  async function loadPackages(){
-    const pkgSel=document.getElementById('vkTWPackageSelect');
-    if(!pkgSel)return;
-    const sb=(typeof supabaseClient!=='undefined'&&supabaseClient)||window.supabaseClient;
-    if(!sb){pkgSel.innerHTML='<option value="">Database connection unavailable</option>';return;}
-    const keep=pkgSel.value;
-    pkgSel.disabled=true;
-    try{
-      const {data,error}=await sb.from('packages').select('id,name,is_active,package_type').eq('package_type','custom').eq('is_active',true).in('name',PACKAGE_NAMES).order('name',{ascending:true});
-      if(error)throw error;
-      const rows=data||[];
-      const order=['Endowment Officer','APPSC','High Court'];
-      rows.sort((a,b)=>order.indexOf(a.name)-order.indexOf(b.name));
-      pkgSel.innerHTML='<option value="">Select package</option>'+rows.map(p=>`<option value="${esc(p.id)}">${esc(p.name)}</option>`).join('');
-      pkgSel.disabled=false;
-      if(keep&&rows.some(p=>p.id===keep))pkgSel.value=keep;
-      else if(rows.length===1)pkgSel.value=rows[0].id;
-      await loadPapers();
-      if(!rows.length)status('No active Topic-wise Packages found. Check the three custom Package records.',true);
-    }catch(e){pkgSel.innerHTML='<option value="">Could not load packages</option>';pkgSel.disabled=true;status('Package loading failed: '+(e.message||e),true);}
-  }
-  // Keep the old course loader API for existing page initializers, but prevent it from replacing Package UI.
-  window.vkTWLoadCourses=loadPackages;
-  document.addEventListener('change',e=>{
-    if(e.target?.id==='vkTWPackageSelect')loadPapers();
-  });
-  // Remove legacy course and separate-topic controls from the visible form.
-  function setup(){
-    const course=document.getElementById('vkTWCourse');if(course){course.hidden=true;course.setAttribute('aria-hidden','true');}
-    const legacy=document.querySelector('#vkTopicWiseSharedAdmin .vk-tw-package-topic-compat');if(legacy)legacy.remove();
-    const pkg=document.getElementById('vkTWPackageSelect');if(pkg&&!pkg.dataset.bound){pkg.dataset.bound='1';}
-    loadPackages();
-  }
-  const priorEnsure=window.vkEnsureTopicWiseAdminPanel;
-  window.vkEnsureTopicWiseAdminPanel=async function(){if(typeof priorEnsure==='function')await priorEnsure.apply(this,arguments);await setup();};
-  document.addEventListener('DOMContentLoaded',()=>{
-    const panel=document.getElementById('vkTopicWiseSharedAdmin');
-    if(panel){const observer=new MutationObserver(()=>{if(panel.style.display!=='none'&&panel.offsetParent!==null)setup();});observer.observe(panel,{attributes:true,attributeFilter:['style','class']});}
-  });
-  const originalPublish=window.vkTWPublishTest;
-  window.vkTWPublishTest=async function(){
-    if(publishBusy)return;
-    const pkgId=document.getElementById('vkTWPackageSelect')?.value||'';
-    const paperSel=document.getElementById('vkTWTitle');
-    const paperId=paperSel?.selectedOptions?.[0]?.dataset?.paperId||'';
-    const paperName=paperSel?.value||'';
-    const topicName=document.getElementById('vkTWTopic')?.value?.trim()||'';
-    const isCreate=document.getElementById('vkTWAction')?.value!=='edit';
-    if(isCreate&&(!pkgId||!paperId||!paperName||!topicName)){status('Select a Package, its Paper, and enter the Topic Name before publishing.',true);return;}
-    publishBusy=true;
-    try{
-      window.vkTWLastPublishedTestId=null;
-      await originalPublish();
-      if(!isCreate)return;
-      const testId=window.vkTWLastPublishedTestId;
-      if(!testId){status('Test was submitted, but the publish RPC did not return a Test ID. No Topic mapping was created; please share the RPC result/error before retrying.',true);return;}
-      const sb=(typeof supabaseClient!=='undefined'&&supabaseClient)||window.supabaseClient;
-      const {data:found,error:findErr}=await sb.from('package_topics').select('id').eq('paper_id',paperId).eq('name',topicName).maybeSingle();
-      if(findErr)throw findErr;
-      let topicId=found?.id;
-      if(!topicId){const ins=await sb.from('package_topics').insert({paper_id:paperId,name:topicName,display_order:1,is_active:true}).select('id').single();if(ins.error)throw ins.error;topicId=ins.data.id;}
-      const {data:assignment,error:assignFindErr}=await sb.from('package_topic_tests').select('id').eq('topic_id',topicId).eq('test_id',testId).maybeSingle();
-      if(assignFindErr)throw assignFindErr;
-      if(!assignment){const a=await sb.from('package_topic_tests').insert({topic_id:topicId,test_id:testId,display_order:1,is_active:true});if(a.error)throw a.error;}
-      const m=await sb.from('package_tests').upsert({package_id:pkgId,test_id:testId},{onConflict:'package_id,test_id',ignoreDuplicates:true});if(m.error)throw m.error;
-      status('Published and assigned successfully: '+selectedPackage()?.textContent+' → '+paperName+' → '+topicName+'.');
-    }catch(e){status('Test publish/mapping needs attention: '+(e.message||e),true);console.error('Topic Wise publish mapping:',e);}
-    finally{publishBusy=false;}
-  };
-  // Initial load and SPA/admin navigation loads are safe to repeat; selection is preserved.
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setup,{once:true});else setTimeout(setup,0);
-})();
-</script>
-
-<style id="vk-topicwise-package-binding-v20-css">#vkTopicWiseSharedAdmin #vkTWCourse{display:none!important}#vkTopicWiseSharedAdmin #vkTWPackageTopic{display:none!important}</style>
-
-
-<!-- VK ADMIN TOPIC-WISE IMMEDIATE INIT / DEDUPE FIX v21 -->
-<script id="vk-topicwise-admin-immediate-init-v21">
-(function(){
-  const previous = window.vkEnsureTopicWiseAdminPanel;
-  let inFlight = null;
-  window.vkEnsureTopicWiseAdminPanel = function(){
-    if(inFlight) return inFlight;
-    inFlight = (async function(){
-      const panel = document.getElementById('vkTopicWiseSharedAdmin');
-      if(!panel) return false;
-      try {
-        const allowed = typeof window.refreshVkAdminAccess === 'function'
-          ? await window.refreshVkAdminAccess() : false;
-        if(!allowed){ panel.style.display='none'; return false; }
-        panel.style.display='block';
-        panel.dataset.routeInit='loading';
-        if(typeof previous === 'function') await previous.apply(this, arguments);
-        // The final v20 package binding replaces the legacy course loader.
-        if(typeof window.vkTWLoadCourses === 'function') await window.vkTWLoadCourses();
-        if(typeof window.vkTWLoad === 'function') await window.vkTWLoad();
-        panel.style.display='block';
-        panel.dataset.routeInit='ready';
-        return true;
-      } catch(error) {
-        console.error('Topic Wise immediate admin initialization failed:', error);
-        panel.style.display='block';
-        panel.dataset.routeInit='error';
-        const status=document.getElementById('vkTWStatus');
-        if(status) status.textContent='Topic Wise panel could not load: '+(error?.message||error);
-        return false;
-      }
-    })().finally(function(){ inFlight=null; });
-    return inFlight;
-  };
-})();
-</script>
-
 </body>
 
 </html>
@@ -17179,8 +17006,6 @@ body:has(#examPage.active) > footer{
 #vkTopicWiseSharedAdmin .vk-tw-shared-row small{color:#64748b!important}
 @media(max-width:650px){#vkTopicWiseSharedAdmin{padding:13px!important}#vkTopicWiseSharedAdmin .vk-tw-shared-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:12px!important}#vkTopicWiseSharedAdmin .vk-tw-shared-grid label{font-size:12px!important}#vkTopicWiseSharedAdmin .vk-tw-shared-grid input,#vkTopicWiseSharedAdmin .vk-tw-shared-grid select{font-size:12px!important;padding:9px!important;min-height:42px!important}#vkTopicWiseSharedAdmin .vk-tw-upload-controls{display:grid!important;grid-template-columns:1fr 1fr!important}#vkTopicWiseSharedAdmin .vk-tw-upload-controls input{grid-column:1/-1!important}#vkTopicWiseSharedAdmin .vk-tw-upload-controls button{width:100%!important;white-space:normal!important;font-size:12px!important}#vkTopicWiseSharedAdmin .vk-tw-action-bar{grid-template-columns:repeat(2,minmax(0,1fr))!important}#vkTopicWiseSharedAdmin .vk-tw-action-bar button:last-child{grid-column:1/-1}}
 @media(max-width:360px){#vkTopicWiseSharedAdmin .vk-tw-shared-grid{grid-template-columns:1fr!important}}
-#vkTopicPackagePage .vk-topic-admin-start-btn{background:#2458d3!important;color:#fff!important;border:1px solid #2458d3!important;border-radius:8px!important;padding:8px 14px!important;font-weight:800!important;cursor:pointer!important}
-#vkTopicPackagePage .vk-topic-admin-start-btn:disabled{background:#e2e8f0!important;color:#64748b!important;border-color:#cbd5e1!important;cursor:not-allowed!important}
 </style>
 
 <style id="vk-topicwise-negative-marks-field-v1">
@@ -17188,7 +17013,7 @@ body:has(#examPage.active) > footer{
 #vkTopicWiseSharedAdmin #vkTWNegativeMarks{font-variant-numeric:tabular-nums}
 </style>
 
-\n<!-- VK ADMIN-ONLY TOPIC WISE STUDENT-PAGE PREVIEW v14 -->
+\n<!-- VK ADMIN-ONLY TOPIC WISE STUDENT-PAGE PREVIEW v16 -->
 <script id="vk-topicwise-admin-student-preview-v14">
 (function(){
   let adminPreviewAuthorized=false;
@@ -17213,123 +17038,56 @@ body:has(#examPage.active) > footer{
     return true;
   };
 
-  // Admin preview reads the configured package even before it is activated/published.
+  // Admin preview reads the Endowment Officer custom package even before it is activated/published.
   // It renders the same Paper > Topic > Test layout as the student page, but disables actions.
   window.vkTopicLoadAdminPreview = async function(){
     const host=document.getElementById('vkTopicPaperArea');
-    const sb=window.supabaseClient;
-    if(!host || !sb){ if(host) host.innerHTML='<p class="vk-topic-loading">Supabase connection is not available.</p>'; return false; }
-    host.innerHTML='<p class="vk-topic-loading">Loading Topic Wise admin preview…</p>';
+    if(!host || !window.supabaseClient){ if(host) host.innerHTML='<p class="vk-topic-loading">Supabase connection is not available.</p>'; return false; }
+    host.innerHTML='<p class="vk-topic-loading">Loading Topic Wise student-page preview…</p>';
     if(typeof window.vkTopicSetMessage==='function') window.vkTopicSetMessage('');
     const buy=document.getElementById('vkTopicBuyButton');
     if(buy){ buy.style.display='none'; buy.disabled=true; }
     const countdown=document.getElementById('vkTopicCountdown'); if(countdown) countdown.hidden=true;
     const access=document.getElementById('vkTopicAccessStatus');
-    if(access) access.textContent='ADMIN PREVIEW · STUDENT ACCESS DISABLED';
+    if(access) access.textContent='ADMIN PREVIEW · NOT VISIBLE TO STUDENTS';
     const price=document.querySelector('.vk-topic-page-price');
     try{
-      // The three exam packages are independent custom packages. Do not use the old
-      // inactive "Complete Topic-wise Test Package" record as the preview source.
-      const {data:pkgs,error:pkgErr}=await sb.from('packages')
+      const {data:pkgs,error:pkgErr}=await window.supabaseClient.from('packages')
         .select('id,name,description,price,duration_days,is_active,package_type,created_at')
-        .eq('package_type','custom').in('name',['Endowment Officer','APPSC','High Court'])
-        .order('name',{ascending:true});
+        .eq('name','Endowment Officer').eq('package_type','custom')
+        .order('created_at',{ascending:false}).limit(1);
       if(pkgErr) throw pkgErr;
-      const packages=pkgs||[];
-      if(!packages.length){ host.innerHTML='<p class="vk-topic-loading">No Endowment Officer, APPSC or High Court custom packages were found. Check the packages table.</p>'; return false; }
-      if(price) price.innerHTML='ADMIN PREVIEW <small>· '+packages.length+' exam packages</small>';
-      const allStructures=[]; let totalTopics=0,totalAssigned=0,totalUnassigned=0;
-      for(const pkg of packages){
-        const {data:papers,error:paperErr}=await sb.from('package_papers')
-          .select('id,package_id,name,display_order,is_active').eq('package_id',pkg.id)
-          .eq('is_active',true).order('display_order');
-        if(paperErr) throw paperErr;
-        const paperIds=(papers||[]).map(p=>p.id);
-        let topics=[],assignments=[],tests=[],packageTests=[];
-        if(paperIds.length){ const r=await sb.from('package_topics')
-          .select('id,paper_id,name,display_order,is_active').in('paper_id',paperIds)
-          .eq('is_active',true).order('display_order'); if(r.error) throw r.error; topics=r.data||[]; }
-        const topicIds=topics.map(t=>t.id);
-        if(topicIds.length){ const r=await sb.from('package_topic_tests')
-          .select('id,topic_id,test_id,display_order,is_active').in('topic_id',topicIds)
-          .eq('is_active',true).order('display_order'); if(r.error) throw r.error; assignments=r.data||[]; }
-        { const r=await sb.from('package_tests').select('test_id').eq('package_id',pkg.id); if(r.error) throw r.error; packageTests=r.data||[]; }
-        const testIds=[...new Set([...assignments.map(a=>a.test_id),...packageTests.map(a=>a.test_id)].filter(Boolean))];
-        if(testIds.length){ const r=await sb.from('tests')
-          .select('id,title,test_number,is_active,test_series_id').in('id',testIds); if(r.error) throw r.error; tests=r.data||[]; }
-        const testMap=new Map(tests.map(t=>[t.id,t]));
-        const structure=(papers||[]).map(p=>({...p,topics:topics.filter(t=>t.paper_id===p.id).map(t=>({...t,tests:assignments.filter(a=>a.topic_id===t.id).map(a=>({...a,test:testMap.get(a.test_id)})).filter(a=>!!a.test)}))}));
-        const assignedIds=new Set(assignments.map(a=>a.test_id));
-        const unassigned=(packageTests||[]).map(a=>testMap.get(a.test_id)).filter(t=>t&&!assignedIds.has(t.id));
-        allStructures.push({pkg,structure,topics,assignments,unassigned});
-        totalTopics+=topics.length; totalAssigned+=assignments.length; totalUnassigned+=unassigned.length;
-      }
-      window.vkTopicAdminPreviewPackages=allStructures;
-      window.vkTopicStructure=allStructures.flatMap(x=>x.structure);
-      host.innerHTML=allStructures.map(({pkg,structure,topics,assignments,unassigned})=>`
-        <section class="vk-topic-paper-card" style="margin-bottom:18px;border:1px solid #cbdaf3;border-radius:14px;padding:14px">
-          <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap">
-            <h2 style="margin:0">${esc(pkg.name)}</h2>
-            <small style="font-weight:800;color:${pkg.is_active?'#16804a':'#b45309'}">${pkg.is_active?'Package Active':'Package Inactive'} · ${assignments.length} assigned tests</small>
-          </div>
-          ${structure.length ? structure.map(p=>`<section style="margin-top:12px"><h3>${esc(p.name)}</h3>${p.topics.length?p.topics.map(t=>`<div class="vk-topic-topic"><div class="vk-topic-topic-head">${esc(t.name)}</div>${t.tests.length?t.tests.map(a=>`<div class="vk-topic-test-row"><span>${esc(a.test.title||('Test '+a.test.test_number))} <small style="margin-left:8px;color:${a.test.is_active?'#16804a':'#b45309'};font-weight:800">${a.test.is_active?'Published':'Draft / Inactive'}</small></span><button type="button" class="vk-topic-admin-start-btn" onclick="vkTopicAdminPreviewStartTest('${esc(a.test.id)}')" ${a.test.is_active ? '' : 'disabled'} title="${a.test.is_active ? 'Start this published test as Admin' : 'Only published active tests can be started'}">${a.test.is_active ? 'Start Test' : 'Not Published'}</button></div>`).join(''):'<div class="vk-topic-test-row">No tests assigned to this topic yet.</div>'}</div>`).join(''):'<p class="vk-topic-loading">No active topics in this paper.</p>'}</section>`).join(''):'<p class="vk-topic-loading">No active papers configured for this package.</p>'}
-          ${unassigned.length?`<div style="margin-top:12px;padding:10px;border-radius:10px;background:#fff7e8;color:#854d0e"><strong>Package tests not assigned to a topic (${unassigned.length})</strong>${unassigned.map(t=>`<div style="padding:5px 0">${esc(t.title||('Test '+t.test_number))} · ${t.is_active?'Published':'Draft / Inactive'}</div>`).join('')}</div>`:''}
-        </section>`).join('');
+      const pkg=(pkgs||[])[0]||null;
+      if(!pkg){ host.innerHTML='<p class="vk-topic-loading">No Topic-wise package structure has been created yet. Create/save the package structure first, then return here to preview it.</p>'; return false; }
+      window.vkTopicPackage=pkg;
+      if(price) price.innerHTML='ADMIN PREVIEW <small>· '+(pkg.is_active?'Package active':'Package not published')+'</small>';
+      const {data:papers,error:paperErr}=await window.supabaseClient.from('package_papers')
+        .select('id,package_id,name,display_order,is_active').eq('package_id',pkg.id)
+        .eq('is_active',true).order('display_order');
+      if(paperErr) throw paperErr;
+      const paperIds=(papers||[]).map(p=>p.id);
+      let topics=[],assignments=[],tests=[];
+      if(paperIds.length){ const r=await window.supabaseClient.from('package_topics')
+        .select('id,paper_id,name,display_order,is_active').in('paper_id',paperIds)
+        .eq('is_active',true).order('display_order'); if(r.error) throw r.error; topics=r.data||[]; }
+      const topicIds=topics.map(t=>t.id);
+      if(topicIds.length){ const r=await window.supabaseClient.from('package_topic_tests')
+        .select('id,topic_id,test_id,display_order,is_active').in('topic_id',topicIds)
+        .eq('is_active',true).order('display_order'); if(r.error) throw r.error; assignments=r.data||[]; }
+      const testIds=[...new Set(assignments.map(a=>a.test_id).filter(Boolean))];
+      if(testIds.length){ const r=await window.supabaseClient.from('tests')
+        .select('id,title,test_number,is_active,test_series_id').in('id',testIds); if(r.error) throw r.error; tests=r.data||[]; }
+      const testMap=new Map(tests.map(t=>[t.id,t]));
+      const structure=(papers||[]).map(p=>({...p,topics:topics.filter(t=>t.paper_id===p.id).map(t=>({...t,tests:assignments.filter(a=>a.topic_id===t.id).map(a=>({...a,test:testMap.get(a.test_id)})).filter(a=>!!a.test)}))}));
+      window.vkTopicStructure=structure;
+      window.vkTopicPackagePurchase=null;
+      const total=structure.reduce((n,p)=>n+p.topics.reduce((m,t)=>m+t.tests.length,0),0);
+      host.innerHTML=structure.length ? structure.map(p=>`<section class="vk-topic-paper-card"><h2>${esc(p.name)}</h2>${p.topics.length?p.topics.map(t=>`<div class="vk-topic-topic"><div class="vk-topic-topic-head">${esc(t.name)}</div>${t.tests.length?t.tests.map(a=>`<div class="vk-topic-test-row"><span>${esc(a.test.title||('Test '+a.test.test_number))} <small style="margin-left:8px;color:${a.test.is_active?'#16804a':'#b45309'};font-weight:800">${a.test.is_active?'Published':'Draft / Inactive'}</small></span><button type="button" disabled title="Admin preview only">Preview only</button></div>`).join(''):'<div class="vk-topic-test-row">Tests will be added soon.</div>'}</div>`).join(''):'<p class="vk-topic-loading">Topics have not been added to this paper yet.</p>'}</section>`).join(''):'<p class="vk-topic-loading">Paper / Topic structure has not been added yet.</p>';
       const note=document.createElement('div'); note.className='vk-topic-message'; note.style.cssText='display:block;margin-top:14px;padding:12px 14px;border-radius:12px;background:#eef4ff;color:#234b87;font-weight:700';
-      note.textContent=`Admin-only preview · ${packages.length} packages · ${allStructures.reduce((n,x)=>n+x.structure.length,0)} papers · ${totalTopics} topics · ${totalAssigned} topic assignments · ${totalUnassigned} package tests not assigned to a topic. Admins can start published tests here. Student access remains disabled.`;
+      note.textContent=`Admin-only preview · ${structure.length} papers · ${topics.length} topics · ${total} assigned tests. Students cannot access this page until release is enabled.`;
       host.appendChild(note);
       return true;
     }catch(e){ console.error('Topic Wise Admin preview load failed',e); host.innerHTML='<p class="vk-topic-loading">Could not load the Topic Wise preview: '+esc(e.message||e)+'</p>'; return false; }
-  };
-
-
-  // Admin-only launch: reuse the shared paid-test engine, but do not require a student purchase.
-  // The server-side start_test_attempt RPC remains authoritative for permissions.
-  window.vkTopicAdminPreviewStartTest = async function(testId){
-    try{
-      const ok = typeof window.refreshVkAdminAccess === 'function'
-        ? await window.refreshVkAdminAccess()
-        : false;
-      if(!ok){ notifyStudentNotReleased(); return false; }
-      if(!testId) throw new Error('Test ID is missing.');
-      const sb=window.supabaseClient;
-      if(!sb) throw new Error('Supabase connection is not available.');
-
-      const {data:test,error:testErr}=await sb.from('tests')
-        .select('id,title,test_number,test_series_id,is_free,is_active')
-        .eq('id',testId).single();
-      if(testErr) throw testErr;
-      if(!test || !test.is_active || test.is_free)
-        throw new Error('Only published, active Topic Wise paid tests can be started.');
-
-      const {data:series,error:seriesErr}=await sb.from('test_series')
-        .select('id,name,course_id').eq('id',test.test_series_id).single();
-      if(seriesErr) throw seriesErr;
-      const {data:course,error:courseErr}=await sb.from('courses')
-        .select('id,name').eq('id',series.course_id).single();
-      if(courseErr) throw courseErr;
-
-      // Populate the shared exam engine context and target this exact test ID.
-      window.currentCourse=course.name;
-      window.currentGroup=series.name;
-      window.currentPaper=series.name;
-      window.currentTestNumber=Number(test.test_number);
-      window.vkTopicTargetTestId=test.id;
-      window.vkTopicPackageReturn=true;
-
-      if(typeof window.showPage==='function') window.showPage('paidTestPage');
-      // Existing function is a top-level declaration in this page; call it directly.
-      if(typeof window.startPaidTest!=='function' && typeof startPaidTest!=='function')
-        throw new Error('Shared exam engine start function is not available.');
-      await startPaidTest(Number(test.test_number));
-      return true;
-    }catch(e){
-      console.error('Admin Topic Wise test start failed:',e);
-      if(typeof window.toast==='function') window.toast(e.message||'Unable to start this test.');
-      else if(typeof window.showToast==='function') window.showToast(e.message||'Unable to start this test.');
-      else window.alert(e.message||'Unable to start this test.');
-      return false;
-    }
   };
 
   // Prevent any non-admin route from opening the preview page directly.
