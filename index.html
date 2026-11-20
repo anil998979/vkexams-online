@@ -9210,7 +9210,15 @@ async function vkLoadHomepageCards(){
     const color=/^#[0-9a-f]{6}$/i.test(c.homepage_color||'')?c.homepage_color:'#2563eb';
     const art={Police:'🚔',DSC:'📚',Banks:'💳'}[rawName]||iconDefaults[rawName]||'🎓';
     return `<article class="vk-exam-card vk-appsc-card vk-restored-course-card" style="--vk-card-color:${color}" ${open}><div class="vk-card-top"><span class="vk-card-emblem">${icon}</span></div>${image}<div class="vk-card-art vk-appsc-art">${art}</div><h3>${name}</h3><p>${description}</p><div class="vk-card-features"><span>☑ Free Mock Tests</span></div>${action}</article>`;
-  }).join('');
+  }).join('') + `
+    <article class="vk-exam-card vk-endowment-topicwise-card" onclick="vkIpOpenEndowmentSeries()" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();vkIpOpenEndowmentSeries()}">
+      <div class="vk-card-top"><span class="vk-card-emblem">🛕</span><span class="vk-topicwise-ribbon">NEW · DEVOTIONAL SERIES</span></div>
+      <div class="vk-card-art">🪔</div>
+      <h3>Endowment Topic Wise<br>Test Series</h3>
+      <p>Paper-1 &amp; Paper-2 · Topic-wise practice</p>
+      <div class="vk-card-features"><span>🔒 Secure Paid Access</span><span>✨ 5 Days Validity</span></div>
+      <button class="vk-card-button" type="button" onclick="event.stopPropagation();vkIpOpenEndowmentSeries()">Explore Topic Tests <b>➜</b></button>
+    </article>`;
 }
 
 async function vkToggleCategory(id,active){const {error}=await supabaseClient.from('courses').update({is_active:active}).eq('id',id);if(error){alert(error.message);return}await vkLoadCategoryManager();await vkLoadHomepageCards()}
