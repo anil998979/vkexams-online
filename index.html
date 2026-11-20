@@ -4103,10 +4103,13 @@ id="solutions">
 
     <!-- GLOBAL STUDENT EMAIL ALERTS -->
     <section id="vkGlobalEmailSettings" class="vk-admin-panel" style="margin:18px 0;border:1px solid #cbd8f5;background:linear-gradient(135deg,#ffffff,#f5f8ff)">
+      <button type="button" class="vk-admin-collapse-head" aria-expanded="false" aria-controls="vkGlobalEmailSettingsBody" onclick="vkToggleAdminSection('globalEmail',this)">
+        <span><small>ADMIN CONTROL · EMAIL NOTIFICATIONS</small><strong>Global Student Email Alerts</strong></span><span class="vk-admin-collapse-arrow" aria-hidden="true">⌄</span>
+      </button>
+      <div id="vkGlobalEmailSettingsBody" class="vk-admin-collapse-body" hidden>
+
       <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px">
         <div style="min-width:220px;flex:1">
-          <div style="font-size:12px;font-weight:900;letter-spacing:.08em;color:#5269a8">ADMIN CONTROL · EMAIL NOTIFICATIONS</div>
-          <h2 style="margin:6px 0;color:#18356f;font-size:21px">Global Student Email Alerts</h2>
           <p style="margin:0;color:#64748b;font-size:13px;line-height:1.5">ON: Test publish notification emails can be sent to all students with an email address. OFF: Pending and failed unsent test notifications are deleted. Sent delivery history is retained. Login and password-reset emails are not controlled here.</p>
         </div>
         <label for="vkGlobalEmailToggle" style="display:flex;align-items:center;gap:11px;margin:0;padding:12px 15px;border:1px solid #d9e2f4;border-radius:14px;background:#fff;cursor:pointer">
@@ -4116,7 +4119,9 @@ id="solutions">
       </div>
       <div id="vkGlobalEmailStatus" role="status" aria-live="polite" style="margin-top:12px;color:#64748b;font-size:13px">Checking current setting...</div>
       <button type="button" class="vk-admin-btn vk-admin-btn-secondary" style="margin-top:10px" onclick="vkLoadGlobalEmailAlerts()">↻ Refresh Setting</button>
-    </section>
+    
+      </div>
+</section>
 
     <div id="vkCategoryManager" class="vk-management-stack" style="margin:16px 0">
       <section class="vk-admin-panel vk-management-card">
@@ -4202,7 +4207,10 @@ id="solutions">
     </section>
 
     <section id="vkTopicPackageAdmin" class="vk-topic-admin-panel" style="display:block">
-      <div class="vk-management-heading"><div><span class="vk-management-kicker">04 · TOPIC-WISE PACKAGE</span><h2>Complete Topic-wise Test Package</h2><p>Create Paper-I / Paper-II, add unlimited topics and assign existing paid tests individually. Existing test builder and Excel upload remain unchanged.</p></div><span class="vk-management-icon">🛕</span></div>
+      <button type="button" class="vk-admin-collapse-head" aria-expanded="false" aria-controls="vkTopicPackageAdminBody" onclick="vkToggleAdminSection('topicWise',this)">
+        <span><small>04 · TOPIC-WISE PACKAGE</small><strong>Topic-wise Test Management</strong><em>Create Paper-I / Paper-II, add topics and assign existing paid tests.</em></span><span class="vk-admin-collapse-arrow" aria-hidden="true">⌄</span>
+      </button>
+      <div id="vkTopicPackageAdminBody" class="vk-admin-collapse-body" hidden>
       <div class="vk-topic-admin-form">
         <input id="vkTopicAdminPackageId" type="hidden">
         <div><label>Package Name</label><input id="vkTopicAdminName" value="Complete Topic-wise Test Package" maxlength="120"></div>
@@ -4215,7 +4223,9 @@ id="solutions">
       <div class="vk-topic-admin-add-row"><div class="vk-topic-admin-wide"><label>Choose Topic to assign an existing paid test</label><select id="vkTopicAdminAssignTopic"><option value="">Select topic</option></select></div><div class="vk-topic-admin-wide"><label>Existing Test</label><select id="vkTopicAdminTest"><option value="">Load tests after selecting topic</option></select></div><button type="button" onclick="vkTopicAdminAssignTest()">Assign Test</button></div>
       <div id="vkTopicAdminStatus" class="vk-topic-admin-status" role="status"></div>
       <div id="vkTopicAdminStructure" class="vk-topic-admin-structure">Save package details to load the Paper / Topic structure.</div>
-    </section>
+    
+      </div>
+</section>
 
 
 
@@ -16041,6 +16051,41 @@ async function vkIpSubmitTest(){try{const form=document.getElementById('vkIpExam
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',applyTopicWiseAdminGate,{once:true});
   else applyTopicWiseAdminGate();
+})();
+</script>
+
+<style id="vk-admin-collapsible-sections">
+.vk-admin-collapse-head{width:100%;display:flex;align-items:center;justify-content:space-between;gap:14px;text-align:left;border:0;background:#f4f7ff;color:#18356f;border-radius:13px;padding:13px 16px;cursor:pointer;min-height:54px}
+.vk-admin-collapse-head>span:first-child{display:flex;flex-direction:column;gap:3px;min-width:0}
+.vk-admin-collapse-head small{font-size:10px;letter-spacing:.08em;font-weight:800;color:#64748b}
+.vk-admin-collapse-head strong{font-size:16px;font-weight:900;line-height:1.25}
+.vk-admin-collapse-head em{font-size:11px;font-style:normal;font-weight:500;color:#64748b;line-height:1.35}
+.vk-admin-collapse-arrow{flex:0 0 27px;width:27px;height:27px;display:grid;place-items:center;border:1px solid #d9e2f4;border-radius:8px;background:#fff;font-size:20px;transition:transform .18s ease}
+.vk-admin-collapse-head[aria-expanded="true"] .vk-admin-collapse-arrow{transform:rotate(180deg)}
+.vk-admin-collapse-body{padding-top:14px}
+#vkGlobalEmailSettings,#vkTopicPackageAdmin{padding:12px!important}
+@media(max-width:600px){.vk-admin-collapse-head{padding:11px 12px}.vk-admin-collapse-head strong{font-size:14px}.vk-admin-collapse-head em{font-size:10px}}
+</style>
+
+<script id="vk-admin-collapsible-sections-js">
+function vkToggleAdminSection(key,button){
+  const bodyId=key==='globalEmail'?'vkGlobalEmailSettingsBody':'vkTopicPackageAdminBody';
+  const body=document.getElementById(bodyId); if(!body||!button)return;
+  const expand=button.getAttribute('aria-expanded')!=='true';
+  button.setAttribute('aria-expanded',String(expand)); body.hidden=!expand;
+  try{localStorage.setItem('vk_admin_section_'+key,expand?'open':'closed');}catch(e){}
+}
+(function(){
+  function init(){
+    [['globalEmail','vkGlobalEmailSettingsBody'],['topicWise','vkTopicPackageAdminBody']].forEach(([key,id])=>{
+      const body=document.getElementById(id); if(!body)return;
+      const btn=document.querySelector('[aria-controls="'+id+'"]'); if(!btn)return;
+      let open=false; try{open=localStorage.getItem('vk_admin_section_'+key)==='open';}catch(e){}
+      body.hidden=!open; btn.setAttribute('aria-expanded',String(open));
+    });
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
+  window.addEventListener('pageshow',init);
 })();
 </script>
 </body>
