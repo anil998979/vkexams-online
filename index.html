@@ -6215,6 +6215,28 @@ function openCourse(course, addHistory = true){
             `;
             options.insertAdjacentElement("afterend", featureStrip);
         }
+    }else if(course === "Endowment Topic Wise Test Series"){
+        coursePage.classList.remove("vk-eo-premium");
+        options.className = "choice-grid vk-topic-paper-choice-grid";
+        options.innerHTML = `
+            <article class="vk-topic-paper-card vk-topic-paper-one" role="button" tabindex="0"
+                 onclick="vkTopicOpenPaperCard('PAPER1')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();vkTopicOpenPaperCard('PAPER1');}">
+                <div class="vk-topic-paper-icon">📘</div>
+                <span class="vk-topic-paper-kicker">TOPIC-WISE PRACTICE</span>
+                <h2>Paper-1</h2>
+                <p>Paper-1 Topic Wise Test Series</p>
+                <span class="vk-topic-paper-cta">Explore Paper-1 Topics <b>→</b></span>
+            </article>
+            <article class="vk-topic-paper-card vk-topic-paper-two" role="button" tabindex="0"
+                 onclick="vkTopicOpenPaperCard('PAPER2')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();vkTopicOpenPaperCard('PAPER2');}">
+                <div class="vk-topic-paper-icon">📙</div>
+                <span class="vk-topic-paper-kicker">TOPIC-WISE PRACTICE</span>
+                <h2>Paper-2</h2>
+                <p>Paper-2 Topic Wise Test Series</p>
+                <span class="vk-topic-paper-cta">Explore Paper-2 Topics <b>→</b></span>
+            </article>
+        `;
+        document.getElementById("vkEoFeatureStrip")?.remove();
     }else{
         coursePage.classList.remove("vk-eo-premium");
         options.className = "choice-grid";
@@ -15828,6 +15850,28 @@ window.addEventListener('pageshow',()=>{if(location.hash.startsWith('#vkTopicPac
 </script>
 
 
+<style id="vk-topic-paper-choice-css">
+.vk-topic-paper-choice-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-top:18px}
+.vk-topic-paper-card{position:relative;min-height:210px;padding:25px 22px;border-radius:18px;background:linear-gradient(140deg,#fff 0%,#f7faff 100%);border:1px solid #d8e4f5;box-shadow:0 10px 26px rgba(34,70,130,.10);cursor:pointer;overflow:hidden;transition:transform .18s ease,box-shadow .18s ease}
+.vk-topic-paper-card:active{transform:scale(.985)}.vk-topic-paper-card:focus-visible{outline:3px solid #f2b84b;outline-offset:3px}
+.vk-topic-paper-one{border-top:5px solid #2865d9}.vk-topic-paper-two{border-top:5px solid #b65a28}
+.vk-topic-paper-icon{font-size:35px;margin-bottom:12px}.vk-topic-paper-kicker{font-size:10px;font-weight:900;letter-spacing:1px;color:#64748b}.vk-topic-paper-card h2{font-size:24px;color:#183b70;margin:7px 0}.vk-topic-paper-card p{font-size:14px;color:#53657d;margin:0 0 20px}.vk-topic-paper-cta{display:inline-flex;align-items:center;gap:10px;padding:10px 15px;border-radius:10px;background:#245a91;color:#fff;font-weight:800;font-size:12px}.vk-topic-paper-two .vk-topic-paper-cta{background:#a64b24}
+@media(max-width:560px){.vk-topic-paper-choice-grid{grid-template-columns:1fr;gap:12px}.vk-topic-paper-card{min-height:170px;padding:20px}}
+</style>
+<script id="vk-topic-paper-card-actions">
+function vkTopicOpenPaperCard(paperCode){
+  // Route into the existing topic-wise package view; paper-specific filtering is handled there.
+  if(typeof vkTopicOpenPackage==='function'){
+    window.vkTopicSelectedPaper=paperCode;
+    vkTopicOpenPackage();
+  }else if(typeof vkIpStudentLoad==='function'){
+    window.vkTopicSelectedPaper=paperCode;
+    vkIpStudentLoad();
+  }else{
+    alert('Topic-wise tests are being configured. Please try again shortly.');
+  }
+}
+</script>
 <style id="vk-independent-package-css">
 .vk-independent-admin{margin:22px 0;padding:22px;background:#fff;border:1px solid #d6e2f3;border-radius:18px;box-shadow:0 8px 24px rgba(31,55,100,.06)}
 .vk-ip-head{display:flex;justify-content:space-between;gap:16px;align-items:center;margin-bottom:18px}.vk-ip-head span{font-size:10px;font-weight:900;letter-spacing:1px;color:#315bd0}.vk-ip-head h2{font-size:22px;color:#172b4d;margin:4px 0}.vk-ip-head p,.vk-ip-hint{font-size:13px;color:#64748b}.vk-ip-icon{font-size:32px;background:#eef2ff;padding:12px;border-radius:14px}
