@@ -4156,6 +4156,16 @@ id="solutions">
       <div class="vk-admin-actions"><button type="button" class="vk-admin-btn vk-admin-btn-secondary" onclick="openAdminStudyMaterials()">📚 Manage Study Materials</button></div>
     </div>
 
+    <!-- ADMIN-ONLY GLOBAL EMAIL MANAGEMENT -->
+    <section id="vkAdminEmailManagement" class="vk-admin-panel" style="border:1px solid #d8e3f3;background:#fff;margin:18px 0 20px;padding:20px;border-radius:18px">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap">
+        <div><span style="font-size:10px;font-weight:900;letter-spacing:.8px;color:#64748b">ADMIN CONTROL · EMAIL NOTIFICATIONS</span><h2 style="margin:4px 0;color:#17356f">Email Management – Global Student Alerts</h2><p style="margin:0;color:#64748b;font-size:13px;max-width:760px">ON: Test publish notification emails can be sent to all students with an email address. OFF: Test notification emails are blocked globally. Login and password-reset emails are not controlled here.</p></div>
+        <label for="vkGlobalEmailToggle" style="display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid #dbe4f0;border-radius:12px;background:#f8fafc;font-weight:900;color:#243b5a;cursor:pointer;margin:0"><input id="vkGlobalEmailToggle" type="checkbox" style="width:20px;height:20px;accent-color:#16804a" onchange="vkAdminSetGlobalEmailAlerts(this.checked)"><span id="vkGlobalEmailToggleLabel">Loading setting…</span></label>
+      </div>
+      <div id="vkGlobalEmailStatus" role="status" aria-live="polite" style="margin-top:12px;padding:10px 12px;border-radius:9px;background:#f1f5f9;color:#475569;font-size:13px">Loading global email setting…</div>
+      <div style="margin-top:10px"><button type="button" class="vk-admin-btn vk-admin-btn-secondary" onclick="vkAdminLoadGlobalEmailAlerts()">↻ Refresh Setting</button></div>
+    </section>
+
     <!-- ADMIN-ONLY TOPIC WISE TESTS: uses shared tests/questions/attempts engine; no package/payment flow -->
     <section id="vkTopicWiseSharedAdmin" class="vk-tw-shared-panel" style="display:none" aria-label="Admin Topic Wise Test Management">
       <div class="vk-tw-shared-head"><div class="vk-tw-heading-copy"><span>ADMIN CONTROL PANEL · SHARED EXAM ENGINE</span><div class="vk-tw-title-line"><h2>Topic Wise Test Management</h2><button type="button" id="vkTWToggle" class="vk-tw-collapse" aria-expanded="true" aria-controls="vkTWBody" onclick="vkTWTogglePanel()" aria-label="Collapse Topic Wise Test Management">⌃</button></div><p>Create drafts privately and publish approved Topic Wise tests.</p></div></div>
@@ -9059,6 +9069,45 @@ async function vkCpDeletePackage(id){
   }
 }
 
+async function vkAdminLoadGlobalEmailAlerts(){
+  const toggle=document.getElementById('vkGlobalEmailToggle');
+  const label=document.getElementById('vkGlobalEmailToggleLabel');
+  const status=document.getElementById('vkGlobalEmailStatus');
+  if(!toggle||!label||!status) return;
+  if(!supabaseClient){status.textContent='Supabase connection is not ready.';return;}
+  toggle.disabled=true; label.textContent='Loading…'; status.textContent='Checking global email setting…';
+  try{
+    const {data,error}=await supabaseClient.from('global_email_settings').select('enabled,updated_at').eq('id',1).maybeSingle();
+    if(error) throw error;
+    if(!data){toggle.checked=false;label.textContent='OFF · Emails Disabled';status.textContent='Global setting row not found. Run the Global Email Alerts SQL setup before enabling notifications.';return;}
+    toggle.checked=data.enabled===true;
+    label.textContent=toggle.checked?'ON · Emails Enabled':'OFF · Emails Disabled';
+    status.textContent=toggle.checked?'Global test-publish email alerts are ON. All students with an email address are eligible.':'Global test-publish email alerts are OFF. No student test notification emails will be sent.';
+  }catch(e){
+    toggle.checked=false; label.textContent='Setting unavailable';
+    status.textContent='Could not load setting: '+(e.message||String(e))+' · Confirm global_email_settings table and admin SELECT access.';
+  }finally{toggle.disabled=false;}
+}
+
+async function vkAdminSetGlobalEmailAlerts(enabled){
+  const toggle=document.getElementById('vkGlobalEmailToggle');
+  const label=document.getElementById('vkGlobalEmailToggleLabel');
+  const status=document.getElementById('vkGlobalEmailStatus');
+  if(!toggle||!label||!status||!supabaseClient) return;
+  const requested=!!enabled; toggle.disabled=true; status.textContent='Saving global email setting…';
+  try{
+    const {data,error}=await supabaseClient.rpc('vk_admin_set_global_email_alerts',{p_enabled:requested});
+    if(error) throw error;
+    await vkAdminLoadGlobalEmailAlerts();
+    status.textContent=requested?'Saved: Global test-publish email alerts are ON.':'Saved: Global test-publish email alerts are OFF. Pending/failed notification queue handling follows the deployed Edge Function.';
+  }catch(e){
+    toggle.checked=!requested;
+    label.textContent=toggle.checked?'ON · Emails Enabled':'OFF · Emails Disabled';
+    status.textContent='Could not save setting: '+(e.message||String(e))+' · Check that vk_admin_set_global_email_alerts RPC and its admin policy are installed.';
+    toggle.disabled=false;
+  }
+}
+
 async function openAdminMockBuilder(){
     const allowed = await refreshVkAdminAccess();
     if(!allowed){
@@ -9067,6 +9116,7 @@ async function openAdminMockBuilder(){
         return;
     }
     showPage("vkAdminMockBuilder");
+    await vkAdminLoadGlobalEmailAlerts();
     // Initialize Topic Wise panel for normal Admin-button navigation as well.
     await window.vkEnsureTopicWiseAdminPanel();
     await vkLoadCategoryManager();
