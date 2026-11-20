@@ -16129,13 +16129,13 @@ function vkTWRenderPreview(questions){
  if(badge)badge.textContent=(questions?.length||0)+' questions';if(!box)return;
  if(!questions?.length){box.innerHTML='<div class="vk-tw-preview-empty">Upload an Excel file to preview questions here.</div>';return;}
  const answerLabel=v=>{const x=String(v??'').trim().toUpperCase();return ({A:'Option A',B:'Option B',C:'Option C',D:'Option D','OPTION A':'Option A','OPTION B':'Option B','OPTION C':'Option C','OPTION D':'Option D'})[x]||x||'—';};
- box.innerHTML=questions.slice(0,20).map((q,i)=>`<article class="vk-tw-preview-question">
+ box.innerHTML=questions.map((q,i)=>`<article class="vk-tw-preview-question">
   <div class="vk-tw-preview-qhead"><span>Question ${i+1}</span><small>${Number(q.marks??1)} mark${Number(q.marks??1)===1?'':'s'}</small></div>
   <div class="vk-tw-preview-qtext">${vkAdminEscape(q.question_text||'')}</div>
   <div class="vk-tw-preview-options"><div><b>Option A</b><span>${vkAdminEscape(q.option_a||'')}</span></div><div><b>Option B</b><span>${vkAdminEscape(q.option_b||'')}</span></div><div><b>Option C</b><span>${vkAdminEscape(q.option_c||'')}</span></div><div><b>Option D</b><span>${vkAdminEscape(q.option_d||'')}</span></div></div>
   <div class="vk-tw-preview-meta"><span><b>Correct answer:</b> ${vkAdminEscape(answerLabel(q.correct_option))}</span><span><b>Negative marks:</b> ${vkAdminEscape(q.negative_marks??document.getElementById('vkTWNegativeMarks')?.value??'0')}</span></div>
   ${q.explanation?`<div class="vk-tw-preview-explanation"><b>Answer explanation</b><p>${vkAdminEscape(q.explanation)}</p></div>`:''}
- </article>`).join('')+(questions.length>20?`<div class="vk-tw-preview-more">Showing first 20 of ${questions.length} questions.</div>`:'');
+ </article>`).join('');
 }
 function vkTWSetMode(editing){const action=document.getElementById('vkTWAction');if(action){action.value=editing?'edit':'create';}const wrap=document.getElementById('vkTWExistingWrap');if(wrap)wrap.hidden=!editing;const del=document.getElementById('vkTWDelete');if(del)del.disabled=!editing;const pub=document.getElementById('vkTWPublish');if(pub)pub.textContent=editing?'Publish Changes':'Publish';}
 function vkTWActionChanged(){const editing=document.getElementById('vkTWAction').value==='edit';document.getElementById('vkTWExistingWrap').hidden=!editing;if(!editing){document.getElementById('vkTWExisting').value='';vkTWSetMode(false);}else{vkTWSetMode(true);}}
@@ -16831,7 +16831,7 @@ body:has(#examPage.active) > footer{
 #vkTopicWiseSharedAdmin .vk-tw-questions-heading h3{margin:0;color:#17356f;font-size:16px}
 #vkTopicWiseSharedAdmin #vkTWQuestionBadge{background:#fff1e9;color:#b64a16;border:1px solid #ffd0b8;border-radius:20px;padding:4px 9px;font-size:11px;font-weight:800}
 #vkTopicWiseSharedAdmin .vk-tw-questions-heading>span{font-size:12px;color:#64748b}
-#vkTopicWiseSharedAdmin .vk-tw-question-preview{margin-top:12px;max-height:260px;overflow:auto;border:1px solid #e1e8f3;border-radius:10px;padding:12px;background:#fbfcff;color:#334b6e;font-size:12px;line-height:1.55}
+#vkTopicWiseSharedAdmin .vk-tw-question-preview{margin-top:12px;max-height:none;overflow:visible;border:1px solid #e1e8f3;border-radius:10px;padding:12px;background:#fbfcff;color:#334b6e;font-size:12px;line-height:1.55}
 #vkTopicWiseSharedAdmin .vk-tw-question-item{padding:9px 4px;border-bottom:1px solid #e8edf5}
 #vkTopicWiseSharedAdmin .vk-tw-question-item:last-child{border-bottom:0}
 #vkTopicWiseSharedAdmin .vk-tw-action-bar{display:flex;gap:10px;flex-wrap:wrap;padding:14px;margin:14px 0;background:#f7f9fd;border:1px solid #e0e8f4;border-radius:13px}
