@@ -16805,6 +16805,15 @@ document.addEventListener('DOMContentLoaded',()=>{
 </style>
 <!-- NOTE: Student topic-wise release/payment remains gated by the existing release guard. -->
 
+</style>
+<style id="vk-topicwise-admin-stage1-visibility">
+/* Stage 1: expose the existing Topic Wise management panel only inside the Admin Mock Test Builder. */
+#vkAdminMockBuilder #vkTopicWiseSharedAdmin,
+#vkAdminMockBuilder #vkTopicWiseSharedAdmin[hidden] {
+  display: block !important;
+}
+</style>
+
 </body>
 
 </html>
