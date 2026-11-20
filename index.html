@@ -1,4 +1,4 @@
-                <!DOCTYPE html>
+                 <!DOCTYPE html>
 <html lang="en">
 <head>
 
@@ -3374,6 +3374,11 @@ body.dark-mode .vk-theme-toggle{background:#243247;color:#f8fafc;border-color:#4
 @media(max-width:650px){.vk-tw-preview-options{grid-template-columns:1fr}.vk-tw-preview-question{padding:12px}}
 </style>
 
+
+<style id="vk-restored-police-dsc-banks-cards-v18">
+#vkHomepageExamCards .vk-restored-course-card{cursor:pointer;--vk-card-color:#2563eb;}
+#vkHomepageExamCards .vk-restored-course-card .vk-card-art{color:#fff;}
+</style>
 </head>
 
 
@@ -3528,6 +3533,30 @@ Select an examination and start your preparation.
     <p>AP High Court Recruitment Exams</p>
     <div class="vk-card-features"><span>☑ High Court Exam</span><span>▥ Paid Test Series</span></div>
     <button class="vk-card-button" type="button">Explore High Court <b>➜</b></button>
+  </article>
+  <article class="vk-exam-card vk-appsc-card" onclick="openCourse('Police')">
+    <div class="vk-card-top"><span class="vk-card-emblem">👮</span></div>
+    <div class="vk-card-art vk-appsc-art">🚔</div>
+    <h3>Police</h3>
+    <p>Police recruitment examination preparation</p>
+    <div class="vk-card-features"><span>☑ Free Mock Tests</span></div>
+    <button class="vk-card-button" type="button">Explore Police <b>➜</b></button>
+  </article>
+  <article class="vk-exam-card vk-appsc-card" onclick="openCourse('DSC')">
+    <div class="vk-card-top"><span class="vk-card-emblem">🎓</span></div>
+    <div class="vk-card-art vk-appsc-art">📚</div>
+    <h3>DSC</h3>
+    <p>Teacher recruitment examination preparation</p>
+    <div class="vk-card-features"><span>☑ Free Mock Tests</span></div>
+    <button class="vk-card-button" type="button">Explore DSC <b>➜</b></button>
+  </article>
+  <article class="vk-exam-card vk-appsc-card" onclick="openCourse('Banks')">
+    <div class="vk-card-top"><span class="vk-card-emblem">🏦</span></div>
+    <div class="vk-card-art vk-appsc-art">💳</div>
+    <h3>Banks</h3>
+    <p>Banking examinations and recruitment tests</p>
+    <div class="vk-card-features"><span>☑ Free Mock Tests</span></div>
+    <button class="vk-card-button" type="button">Explore Banks <b>➜</b></button>
   </article>
 </div>
 
@@ -5575,12 +5604,17 @@ async function openFreeMocks(addHistory = true){
         }
     }
 
-    const fallbackCourses = [["Endowment Officer","🛕"],["APPSC","🏛️"]];
-    let courses = fallbackCourses;
+    const fallbackCourses = [["Endowment Officer","🛕"],["APPSC","🏛️"],["Police","👮"],["DSC","🎓"],["Banks","🏦"]];
+    let courses = fallbackCourses.slice();
     try {
         if (supabaseClient) {
             const {data,error} = await supabaseClient.from("courses").select("name,icon,is_active,display_order").eq("is_active",true).order("display_order",{ascending:true});
-            if (!error && Array.isArray(data) && data.length) courses = data.map(c=>[c.name,c.icon || (c.name.includes("Endowment")?"🛕":"🏛️")]);
+            if (!error && Array.isArray(data) && data.length) {
+                courses = data.map(c=>[c.name,c.icon || (c.name.includes("Endowment")?"🛕":({APPSC:"🏛️",Police:"👮",DSC:"🎓",Banks:"🏦"}[c.name]||"🏛️"))]);
+                fallbackCourses.forEach(required=>{
+                    if(!courses.some(existing=>String(existing[0]).trim().toLowerCase()===required[0].toLowerCase())) courses.push(required);
+                });
+            }
         }
     } catch(e) { console.warn("Dynamic free mock categories unavailable; using fallback.",e); }
 
@@ -9170,37 +9204,44 @@ async function vkLoadHomepageCards(){
   const grid=document.getElementById('vkHomepageExamCards');
   if(!grid||!supabaseClient)return;
   const {data,error}=await supabaseClient.from('courses')
-    .select('id,name,icon,is_active,homepage_visible,homepage_description,homepage_color,homepage_image_url,homepage_display_order')
-    .eq('is_active',true).eq('homepage_visible',true)
+    .select('id,name,icon,is_active,homepage_visible,homepage_description,homepage_color,homepage_image_url,homepage_display_order,display_order')
+    .eq('is_active',true)
     .order('homepage_display_order',{ascending:true}).order('display_order',{ascending:true});
   if(error){console.warn('Homepage cards could not be loaded; keeping built-in fallback cards.',error);return;}
-  const rows=data||[];
-  if(!rows.length){grid.innerHTML='<div class="vk-home-empty">Exam categories will appear here when enabled by the administrator.</div>';return;}
+  const allRows=data||[];
+  const visibleRows=allRows.filter(c=>c.homepage_visible===true);
+  const required=[
+    {name:'APPSC',icon:'🏛️',homepage_description:'Andhra Pradesh Public Service Commission Exams',homepage_color:'#2563eb'},
+    {name:'Endowment Officer',icon:'🛕',homepage_description:'AP Endowments Department Exam',homepage_color:'#2563eb'},
+    {name:'High Court',icon:'⚖️',homepage_description:'AP High Court Recruitment Exams',homepage_color:'#2563eb'},
+    {name:'Police',icon:'👮',homepage_description:'Police recruitment examination preparation',homepage_color:'#2563eb'},
+    {name:'DSC',icon:'🎓',homepage_description:'Teacher recruitment examination preparation',homepage_color:'#2563eb'},
+    {name:'Banks',icon:'🏦',homepage_description:'Banking examinations and recruitment tests',homepage_color:'#2563eb'}
+  ];
+  const coreRows=required.map(f=>visibleRows.find(c=>String(c.name||'').trim().toLowerCase()===f.name.toLowerCase())||allRows.find(c=>String(c.name||'').trim().toLowerCase()===f.name.toLowerCase())||f);
+  const extraRows=visibleRows.filter(c=>!required.some(f=>String(c.name||'').trim().toLowerCase()===f.name.toLowerCase()));
+  const homepageRows=coreRows.concat(extraRows);
+  if(!homepageRows.length)return;
   const safe=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  grid.innerHTML=rows.map(c=>{
+  const iconDefaults={APPSC:'🏛️','Endowment Officer':'🛕','High Court':'⚖️',Police:'👮',DSC:'🎓',Banks:'🏦'};
+  grid.innerHTML=homepageRows.map(c=>{
     const rawName=String(c.name||'').trim();
     const name=safe(rawName);
     const description=safe(c.homepage_description||'Explore exam preparation, mock tests and study materials.');
-    const icon=/^https?:\/\//i.test(c.icon||'')?`<img class="vk-home-dynamic-icon" src="${safe(c.icon)}" alt="">`:safe(c.icon||'🎓');
+    const rawIcon=c.icon||iconDefaults[rawName]||'🎓';
+    const icon=/^https?:\/\//i.test(rawIcon)?`<img class="vk-home-dynamic-icon" src="${safe(rawIcon)}" alt="">`:safe(rawIcon);
     const image=c.homepage_image_url?`<img class="vk-home-dynamic-image" src="${safe(c.homepage_image_url)}" alt="">`:'';
     const open=`role="button" tabindex="0" data-course="${name}" onclick="openCourse(this.dataset.course)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openCourse(this.dataset.course)}"`;
     const action=`<button class="vk-card-button" type="button" onclick="event.stopPropagation();openCourse(this.closest('[data-course]').dataset.course)">Explore ${name} <b>➜</b></button>`;
-
-    // Preserve the established premium layouts for the current core categories.
-    if(rawName==='APPSC'){
-      return `<article class="vk-exam-card vk-appsc-card" ${open}><div class="vk-card-top"><span class="vk-card-emblem">${icon}</span></div>${image}<div class="vk-card-art vk-appsc-art">🏢</div><h3>${name}</h3><p>${description}</p><div class="vk-card-features"><span>☑ Screening Test</span></div>${action}</article>`;
-    }
-    if(rawName==='Endowment Officer'){
-      return `<article class="vk-exam-card vk-endowment-card" ${open}><div class="vk-crown">♛</div><div class="vk-paid-label">★ PAID TEST SERIES</div><div class="vk-card-art vk-temple-art">${icon}</div>${image}<h3>Endowment<br>Officer</h3><p>${description}</p><div class="vk-card-features"><span>▣ Real Exam<br>(CBT Mode)</span><span>▱ Full-Length<br>Tests (150 Q)</span><span>▥ Detailed<br>Analysis</span></div><button class="vk-card-button vk-paid-button" type="button" onclick="event.stopPropagation();openCourse(this.closest('[data-course]').dataset.course)">Start Paid Test Series <b>➜</b></button></article>`;
-    }
-    if(rawName==='High Court'){
-      return `<article class="vk-exam-card vk-court-card" ${open}><div class="vk-card-top"><span class="vk-card-emblem">${icon}</span></div>${image}<div class="vk-card-art vk-court-art">🏛</div><h3>${name}</h3><p>${description}</p><div class="vk-card-features"><span>☑ High Court Exam</span><span>▥ Paid Test Series</span></div>${action}</article>`;
-    }
-
+    if(rawName==='APPSC')return `<article class="vk-exam-card vk-appsc-card" ${open}><div class="vk-card-top"><span class="vk-card-emblem">${icon}</span></div>${image}<div class="vk-card-art vk-appsc-art">🏢</div><h3>${name}</h3><p>${description}</p><div class="vk-card-features"><span>☑ Screening Test</span></div>${action}</article>`;
+    if(rawName==='Endowment Officer')return `<article class="vk-exam-card vk-endowment-card" ${open}><div class="vk-crown">♛</div><div class="vk-paid-label">★ PAID TEST SERIES</div><div class="vk-card-art vk-temple-art">${icon}</div>${image}<h3>Endowment<br>Officer</h3><p>${description}</p><div class="vk-card-features"><span>▣ Real Exam<br>(CBT Mode)</span><span>▱ Full-Length<br>Tests (150 Q)</span><span>▥ Detailed<br>Analysis</span></div><button class="vk-card-button vk-paid-button" type="button" onclick="event.stopPropagation();openCourse(this.closest('[data-course]').dataset.course)">Start Paid Test Series <b>➜</b></button></article>`;
+    if(rawName==='High Court')return `<article class="vk-exam-card vk-court-card" ${open}><div class="vk-card-top"><span class="vk-card-emblem">${icon}</span></div>${image}<div class="vk-card-art vk-court-art">🏛</div><h3>${name}</h3><p>${description}</p><div class="vk-card-features"><span>☑ High Court Exam</span><span>▥ Paid Test Series</span></div>${action}</article>`;
     const color=/^#[0-9a-f]{6}$/i.test(c.homepage_color||'')?c.homepage_color:'#2563eb';
-    return `<article class="vk-exam-card vk-dynamic-exam-card" style="--vk-card-color:${color}" ${open}><div class="vk-dynamic-card-icon">${icon}</div>${image}<h3>${name}</h3><p>${description}</p>${action}</article>`;
+    const art={Police:'🚔',DSC:'📚',Banks:'💳'}[rawName]||iconDefaults[rawName]||'🎓';
+    return `<article class="vk-exam-card vk-appsc-card vk-restored-course-card" style="--vk-card-color:${color}" ${open}><div class="vk-card-top"><span class="vk-card-emblem">${icon}</span></div>${image}<div class="vk-card-art vk-appsc-art">${art}</div><h3>${name}</h3><p>${description}</p><div class="vk-card-features"><span>☑ Free Mock Tests</span></div>${action}</article>`;
   }).join('');
 }
+
 async function vkToggleCategory(id,active){const {error}=await supabaseClient.from('courses').update({is_active:active}).eq('id',id);if(error){alert(error.message);return}await vkLoadCategoryManager();await vkLoadHomepageCards()}
 async function vkDeleteCategory(id){
   const c=(window.__vkCourses||[]).find(x=>x.id===id);if(!c)return;
