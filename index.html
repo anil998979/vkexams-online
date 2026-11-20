@@ -17145,3 +17145,8 @@ body:has(#examPage.active) > footer{
   window.vkTopicLoadStudent=async function(){ notifyStudentNotReleased(); return false; };
 })();
 </script>
+
+<!-- v19: Temporarily hide Topic Wise Test Management from Admin Panel UI only. -->
+<style id="vk-topicwise-admin-panel-temporary-hide-v19">
+  #vkTopicWiseSharedAdmin { display: none !important; }
+</style>
