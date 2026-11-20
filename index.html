@@ -16191,12 +16191,28 @@ function vkTWGetFormData(){let questions=[];try{questions=JSON.parse(document.ge
 function vkTWValidateForm(d){if(!d.courseId||!d.topic){vkTWStatus('Select a course and enter the Topic Name.',true);return false;}if(!Number.isInteger(d.duration)||d.duration<1||d.duration>600){vkTWStatus('Duration must be 1–600 minutes.',true);return false;}if(!Number.isFinite(d.negativeMarks)||d.negativeMarks<0||d.negativeMarks>5){vkTWStatus('Negative marks must be a number between 0 and 5.',true);return false;}if(!Array.isArray(d.questions)||d.questions.length<1||d.questions.length>500||d.questions.length!==d.count){vkTWStatus('Upload an Excel file with exactly '+d.count+' valid questions. Current imported count: '+(d.questions?.length||0),true);return false;}return true;}
 function vkTWSaveDraft(){const d=vkTWGetFormData();if(!d.courseId||!d.topic){vkTWStatus('Select a course and enter the Topic Name before saving a draft.',true);return;}if(!Array.isArray(d.questions)||!d.questions.length){vkTWStatus('Import the questions from Excel before saving this draft.',true);return;}const draft={...d,savedAt:new Date().toISOString()};try{localStorage.setItem('vkTopicWiseAdminDraftV1',JSON.stringify(draft));document.getElementById('vkTWRestoreDraft').hidden=false;vkTWStatus('Draft saved on this device only. It is not uploaded online and students cannot see it.');}catch(e){vkTWStatus('Could not save draft in this browser: '+(e.message||e),true);}}
 function vkTWRestoreDraft(){try{const d=JSON.parse(localStorage.getItem('vkTopicWiseAdminDraftV1')||'null');if(!d){vkTWStatus('No saved draft found on this device.',true);return;}document.getElementById('vkTWCourse').value=d.courseId||'';document.getElementById('vkTWTitle').value=d.paper||'Paper - 1';document.getElementById('vkTWTopic').value=d.topic||'';document.getElementById('vkTWDuration').value=d.duration||30;document.getElementById('vkTWNegativeMarks').value=Number.isFinite(Number(d.negativeMarks))?d.negativeMarks:0.333333;document.getElementById('vkTWCount').value=d.count||d.questions?.length||25;document.getElementById('vkTWQuestions').value=JSON.stringify(d.questions||[]);vkTWRenderPreview(d.questions||[]);document.getElementById('vkTWImportSummary').textContent=(d.questions?.length||0)+' questions restored from this device draft.';document.getElementById('vkTWAction').value=d.editId?'edit':'create';document.getElementById('vkTWExistingWrap').hidden=!d.editId;if(d.editId)document.getElementById('vkTWExisting').value=d.editId;vkTWSetMode(!!d.editId);vkTWStatus('Saved draft restored from this device.');}catch(e){vkTWStatus('Could not restore draft: '+(e.message||e),true);}}
+function vkTWExtractReturnedTestId(payload){
+ const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+ const seen=new Set();
+ function scan(v,depth){
+  if(depth>5||v==null)return null;
+  if(typeof v==='string'){const x=v.trim();return uuid.test(x)?x:null;}
+  if(typeof v!=='object'||seen.has(v))return null;seen.add(v);
+  if(Array.isArray(v)){for(const item of v){const got=scan(item,depth+1);if(got)return got;}return null;}
+  for(const k of ['test_id','id','vk_admin_create_topic_wise_test','vk_admin_update_topic_wise_test','result','data']){
+   if(Object.prototype.hasOwnProperty.call(v,k)){const got=scan(v[k],depth+1);if(got)return got;}
+  }
+  for(const value of Object.values(v)){const got=scan(value,depth+1);if(got)return got;}
+  return null;
+ }
+ return scan(payload,0);
+}
 async function vkTWPublishTest(){
  if(!await refreshVkAdminAccess()){vkTWStatus('Admin access required.',true);return;}
  const d=vkTWGetFormData();if(!vkTWValidateForm(d))return;const editId=d.action==='edit'?d.editId:'';if(d.action==='edit'&&!editId){vkTWStatus('Select an existing Topic Wise test to edit.',true);return;}
  if(!confirm(editId?'Publish the updated test online?':'Publish this Topic Wise test online?'))return;
  const btn=document.getElementById('vkTWPublish'),old=btn.textContent;btn.disabled=true;btn.textContent='Publishing…';
- try{const topicQuestions=d.questions.map(q=>({...q,negative_marks:d.negativeMarks}));const args={p_topic_name:d.topic,p_title:d.paper,p_duration_minutes:d.duration,p_questions:topicQuestions};let r;if(editId){args.p_test_id=editId;r=await supabaseClient.rpc('vk_admin_update_topic_wise_test',args);}else{args.p_course_id=d.courseId;r=await supabaseClient.rpc('vk_admin_create_topic_wise_test',args);}if(r.error)throw r.error;window.vkTWLastPublishedTestId=typeof r.data==='string'?r.data:(r.data?.test_id||r.data?.id||null);localStorage.removeItem('vkTopicWiseAdminDraftV1');document.getElementById('vkTWRestoreDraft').hidden=true;vkTWStatus('Published successfully to the shared exam database. Student visibility still follows the current Topic Wise access controls.');vkTWClearForm();}
+ try{const topicQuestions=d.questions.map(q=>({...q,negative_marks:d.negativeMarks}));const args={p_topic_name:d.topic,p_title:d.paper,p_duration_minutes:d.duration,p_questions:topicQuestions};let r;if(editId){args.p_test_id=editId;r=await supabaseClient.rpc('vk_admin_update_topic_wise_test',args);}else{args.p_course_id=d.courseId;r=await supabaseClient.rpc('vk_admin_create_topic_wise_test',args);}if(r.error)throw r.error;window.vkTWLastPublishedTestId=vkTWExtractReturnedTestId(r.data); if(!window.vkTWLastPublishedTestId){throw new Error('Publish RPC completed but returned an unrecognized Test ID format: '+JSON.stringify(r.data).slice(0,500));}localStorage.removeItem('vkTopicWiseAdminDraftV1');document.getElementById('vkTWRestoreDraft').hidden=true;vkTWStatus('Published successfully to the shared exam database. Student visibility still follows the current Topic Wise access controls.');vkTWClearForm();}
  catch(e){vkTWStatus('Publish failed: '+(e.message||e),true);}finally{btn.disabled=false;btn.textContent=old;}
 }
 async function vkTWDeleteTest(){
