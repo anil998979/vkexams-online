@@ -16925,3 +16925,95 @@ body:has(#examPage.active) > footer{
 #vkTopicWiseSharedAdmin .vk-tw-negative-hint{display:block!important;margin-top:2px!important;color:#64748b!important;font-size:11px!important;font-weight:500!important;line-height:1.4!important}
 #vkTopicWiseSharedAdmin #vkTWNegativeMarks{font-variant-numeric:tabular-nums}
 </style>
+
+\n<!-- VK ADMIN-ONLY TOPIC WISE STUDENT-PAGE PREVIEW v14 -->
+<script id="vk-topicwise-admin-student-preview-v14">
+(function(){
+  let adminPreviewAuthorized=false;
+  function notifyStudentNotReleased(){
+    const msg='Topic Wise Tests are not published for students yet. Please check again later.';
+    if(typeof window.toast==='function') window.toast(msg);
+    else if(typeof window.showToast==='function') window.showToast(msg);
+    else window.alert(msg);
+  }
+  function esc(v){ return typeof window.vkTopicEsc==='function' ? window.vkTopicEsc(v) : String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+  // Home card opens the student-facing Topic Wise page for Admin preview only.
+  window.vkTopicOpenPackage = async function(){
+    let admin=false;
+    try { admin = typeof window.refreshVkAdminAccess==='function' ? await window.refreshVkAdminAccess() : false; }
+    catch(e){ console.warn('Admin check failed',e); }
+    adminPreviewAuthorized=!!admin;
+    if(!admin){ notifyStudentNotReleased(); return false; }
+    if(typeof window.showPage==='function') window.showPage('vkTopicPackagePage');
+    if(typeof window.vkPushContextRoute==='function') window.vkPushContextRoute('vkTopicPackagePage');
+    await window.vkTopicLoadAdminPreview();
+    return true;
+  };
+
+  // Admin preview reads the configured package even before it is activated/published.
+  // It renders the same Paper > Topic > Test layout as the student page, but disables actions.
+  window.vkTopicLoadAdminPreview = async function(){
+    const host=document.getElementById('vkTopicPaperArea');
+    if(!host || !window.supabaseClient){ if(host) host.innerHTML='<p class="vk-topic-loading">Supabase connection is not available.</p>'; return false; }
+    host.innerHTML='<p class="vk-topic-loading">Loading Topic Wise student-page preview…</p>';
+    if(typeof window.vkTopicSetMessage==='function') window.vkTopicSetMessage('');
+    const buy=document.getElementById('vkTopicBuyButton');
+    if(buy){ buy.style.display='none'; buy.disabled=true; }
+    const countdown=document.getElementById('vkTopicCountdown'); if(countdown) countdown.hidden=true;
+    const access=document.getElementById('vkTopicAccessStatus');
+    if(access) access.textContent='ADMIN PREVIEW · NOT VISIBLE TO STUDENTS';
+    const price=document.querySelector('.vk-topic-page-price');
+    try{
+      const {data:pkgs,error:pkgErr}=await window.supabaseClient.from('packages')
+        .select('id,name,description,price,duration_days,is_active,package_type,created_at')
+        .eq('name','Complete Topic-wise Test Package').eq('package_type','custom')
+        .order('created_at',{ascending:false}).limit(1);
+      if(pkgErr) throw pkgErr;
+      const pkg=(pkgs||[])[0]||null;
+      if(!pkg){ host.innerHTML='<p class="vk-topic-loading">No Topic-wise package structure has been created yet. Create/save the package structure first, then return here to preview it.</p>'; return false; }
+      window.vkTopicPackage=pkg;
+      if(price) price.innerHTML='ADMIN PREVIEW <small>· '+(pkg.is_active?'Package active':'Package not published')+'</small>';
+      const {data:papers,error:paperErr}=await window.supabaseClient.from('package_papers')
+        .select('id,package_id,name,display_order,is_active').eq('package_id',pkg.id)
+        .eq('is_active',true).order('display_order');
+      if(paperErr) throw paperErr;
+      const paperIds=(papers||[]).map(p=>p.id);
+      let topics=[],assignments=[],tests=[];
+      if(paperIds.length){ const r=await window.supabaseClient.from('package_topics')
+        .select('id,paper_id,name,display_order,is_active').in('paper_id',paperIds)
+        .eq('is_active',true).order('display_order'); if(r.error) throw r.error; topics=r.data||[]; }
+      const topicIds=topics.map(t=>t.id);
+      if(topicIds.length){ const r=await window.supabaseClient.from('package_topic_tests')
+        .select('id,topic_id,test_id,display_order,is_active').in('topic_id',topicIds)
+        .eq('is_active',true).order('display_order'); if(r.error) throw r.error; assignments=r.data||[]; }
+      const testIds=[...new Set(assignments.map(a=>a.test_id).filter(Boolean))];
+      if(testIds.length){ const r=await window.supabaseClient.from('tests')
+        .select('id,title,test_number,is_active,test_series_id').in('id',testIds); if(r.error) throw r.error; tests=r.data||[]; }
+      const testMap=new Map(tests.map(t=>[t.id,t]));
+      const structure=(papers||[]).map(p=>({...p,topics:topics.filter(t=>t.paper_id===p.id).map(t=>({...t,tests:assignments.filter(a=>a.topic_id===t.id).map(a=>({...a,test:testMap.get(a.test_id)})).filter(a=>!!a.test)}))}));
+      window.vkTopicStructure=structure;
+      window.vkTopicPackagePurchase=null;
+      const total=structure.reduce((n,p)=>n+p.topics.reduce((m,t)=>m+t.tests.length,0),0);
+      host.innerHTML=structure.length ? structure.map(p=>`<section class="vk-topic-paper-card"><h2>${esc(p.name)}</h2>${p.topics.length?p.topics.map(t=>`<div class="vk-topic-topic"><div class="vk-topic-topic-head">${esc(t.name)}</div>${t.tests.length?t.tests.map(a=>`<div class="vk-topic-test-row"><span>${esc(a.test.title||('Test '+a.test.test_number))} <small style="margin-left:8px;color:${a.test.is_active?'#16804a':'#b45309'};font-weight:800">${a.test.is_active?'Published':'Draft / Inactive'}</small></span><button type="button" disabled title="Admin preview only">Preview only</button></div>`).join(''):'<div class="vk-topic-test-row">Tests will be added soon.</div>'}</div>`).join(''):'<p class="vk-topic-loading">Topics have not been added to this paper yet.</p>'}</section>`).join(''):'<p class="vk-topic-loading">Paper / Topic structure has not been added yet.</p>';
+      const note=document.createElement('div'); note.className='vk-topic-message'; note.style.cssText='display:block;margin-top:14px;padding:12px 14px;border-radius:12px;background:#eef4ff;color:#234b87;font-weight:700';
+      note.textContent=`Admin-only preview · ${structure.length} papers · ${topics.length} topics · ${total} assigned tests. Students cannot access this page until release is enabled.`;
+      host.appendChild(note);
+      return true;
+    }catch(e){ console.error('Topic Wise Admin preview load failed',e); host.innerHTML='<p class="vk-topic-loading">Could not load the Topic Wise preview: '+esc(e.message||e)+'</p>'; return false; }
+  };
+
+  // Prevent any non-admin route from opening the preview page directly.
+  const originalShowPage=window.showPage;
+  if(typeof originalShowPage==='function'){
+    window.showPage=function(page,...args){
+      if(page==='vkTopicPackagePage'){
+        if(!adminPreviewAuthorized){ notifyStudentNotReleased(); return; }
+      }
+      return originalShowPage.call(this,page,...args);
+    };
+  }
+  // Keep the existing student loader blocked throughout the pre-release phase.
+  window.vkTopicLoadStudent=async function(){ notifyStudentNotReleased(); return false; };
+})();
+</script>
