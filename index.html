@@ -16509,10 +16509,10 @@ async function vkTWLoadExistingTests(){
   if(se)throw se;
   const ids=(series||[]).map(x=>x.id);
   if(!ids.length){select.innerHTML='<option value="">No Topic Tests found</option>';window.vkTWTests=[];return;}
-  const {data,error}=await supabaseClient.from('tests').select('id,title,test_number,test_series_id,is_active').in('test_series_id',ids).order('created_at',{ascending:false});
+  const {data,error}=await supabaseClient.from('tests').select('id,title,test_number,test_series_id,is_active').in('test_series_id',ids).eq('is_active',true).order('created_at',{ascending:false});
   if(error)throw error;
   window.vkTWTests=data||[];
-  select.innerHTML='<option value="">Select an existing Topic Test</option>'+window.vkTWTests.map(t=>`<option value="${t.id}">${vkTopicEsc(t.title||('Topic Test '+t.test_number))} · ${t.is_active?'Published':'Inactive'}</option>`).join('');
+  select.innerHTML='<option value="">Select an existing Topic Test</option>'+window.vkTWTests.map(t=>`<option value="${t.id}">${vkTopicEsc(t.title||('Topic Test '+t.test_number))} · Published</option>`).join('');
  }catch(e){select.innerHTML='<option value="">Could not load Topic Tests</option>';vkTWStatus('Existing Topic Test list failed: '+(e.message||e),true);}
 }
 async function vkTWSelectExisting(){
