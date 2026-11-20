@@ -4174,14 +4174,15 @@ id="solutions">
           <div id="vkTWDetailsBody" class="vk-tw-card-body">
             <div class="vk-tw-shared-grid vk-tw-reference-layout">
               <label>Test Action<select id="vkTWAction" onchange="vkTWActionChanged()"><option value="create">Create New Topic Test</option><option value="edit">Edit Existing Topic Test</option></select></label>
-              <label>Package<select id="vkTWCourse"><option value="">Loading saved packages…</option></select></label>
-              <label>Select Paper<select id="vkTWTitle"><option value="">Select package first</option></select></label>
+              <label>Package<select id="vkTWPackageSelect"><option value="">Loading packages…</option></select></label>
+              <label>Select Paper<select id="vkTWTitle" disabled><option value="">Select package first</option></select></label>
+              <select id="vkTWCourse" hidden aria-hidden="true" tabindex="-1"><option value="">Select course</option></select>
               <label id="vkTWExistingWrap" class="vk-tw-wide" hidden>Select Existing Topic Test<select id="vkTWExisting" onchange="vkTWSelectExisting()"><option value="">Select an existing test</option></select></label>
               <label>Topic Name<input id="vkTWTopic" maxlength="150" placeholder="e.g. Ramayanam"></label>
               <label>Duration (minutes)<input id="vkTWDuration" type="number" min="1" max="600" value="30"></label>
               <label>Negative marks per wrong answer<input id="vkTWNegativeMarks" type="number" min="0" max="5" step="0.000001" value="0.333333" inputmode="decimal" placeholder="e.g. 0.333333"><small class="vk-tw-negative-hint">0.333333 = 1/3 mark · 0.25 = 1/4 mark · 0 = No negative marks</small></label>
               <label>Question count (1–500)<input id="vkTWCount" type="number" min="1" max="500" value="25"></label>
-
+              
             </div>
           </div>
         </section>
@@ -5193,9 +5194,6 @@ if(
         );
 
 }
-
-// Expose the initialized client for later admin/student preview modules.
-window.supabaseClient = supabaseClient;
 
 
 /* =====================================================
@@ -16695,6 +16693,112 @@ document.addEventListener('DOMContentLoaded',()=>{
   },true);
 })();
 </script>
+
+<script id="vk-topicwise-package-paper-binding-v20">
+(function(){
+  const PACKAGE_NAMES=['Endowment Officer','APPSC','High Court'];
+  let loadSeq=0, publishBusy=false;
+  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  function status(msg,bad=false){if(typeof window.vkTWStatus==='function')window.vkTWStatus(msg,bad);}
+  function selectedPackage(){return document.getElementById('vkTWPackageSelect')?.selectedOptions?.[0]||null;}
+  async function loadPapers(){
+    const seq=++loadSeq, pkgSel=document.getElementById('vkTWPackageSelect'), paperSel=document.getElementById('vkTWTitle');
+    const courseSel=document.getElementById('vkTWCourse');
+    if(!pkgSel||!paperSel||!window.supabaseClient&&!supabaseClient)return;
+    const sb=(typeof supabaseClient!=='undefined'&&supabaseClient)||window.supabaseClient;
+    const pkgId=pkgSel.value; paperSel.disabled=true; paperSel.innerHTML='<option value="">Loading papers…</option>';
+    if(!pkgId){paperSel.innerHTML='<option value="">Select package first</option>';if(courseSel)courseSel.value='';return;}
+    try{
+      const {data:pkg,error:pkgErr}=await sb.from('packages').select('id,name').eq('id',pkgId).eq('package_type','custom').single();
+      if(pkgErr)throw pkgErr;
+      const {data:courses,error:courseErr}=await sb.from('courses').select('id,name').eq('name',pkg.name).limit(1);
+      if(courseErr)throw courseErr;
+      if(seq!==loadSeq||pkgSel.value!==pkgId)return;
+      if(courseSel)courseSel.value=courses?.[0]?.id||'';
+      if(!courses?.[0])throw new Error('No matching course record found for '+pkg.name+'.');
+      const {data:papers,error}=await sb.from('package_papers').select('id,name,display_order').eq('package_id',pkgId).eq('is_active',true).order('display_order',{ascending:true});
+      if(error)throw error;
+      if(seq!==loadSeq||pkgSel.value!==pkgId)return;
+      paperSel.innerHTML='<option value="">Select Paper</option>'+(papers||[]).map(p=>`<option value="${esc(p.name)}" data-paper-id="${esc(p.id)}">${esc(p.name)}</option>`).join('');
+      paperSel.disabled=!(papers||[]).length;
+      if(!papers?.length)paperSel.innerHTML='<option value="">No active Papers in this Package</option>';
+    }catch(e){if(seq!==loadSeq)return;paperSel.innerHTML='<option value="">Paper loading failed</option>';paperSel.disabled=true;status('Package/Paper loading failed: '+(e.message||e),true);console.error('Topic Wise Package/Paper binding:',e);}
+  }
+  async function loadPackages(){
+    const pkgSel=document.getElementById('vkTWPackageSelect');
+    if(!pkgSel)return;
+    const sb=(typeof supabaseClient!=='undefined'&&supabaseClient)||window.supabaseClient;
+    if(!sb){pkgSel.innerHTML='<option value="">Database connection unavailable</option>';return;}
+    const keep=pkgSel.value;
+    pkgSel.disabled=true;
+    try{
+      const {data,error}=await sb.from('packages').select('id,name,is_active,package_type').eq('package_type','custom').eq('is_active',true).in('name',PACKAGE_NAMES).order('name',{ascending:true});
+      if(error)throw error;
+      const rows=data||[];
+      const order=['Endowment Officer','APPSC','High Court'];
+      rows.sort((a,b)=>order.indexOf(a.name)-order.indexOf(b.name));
+      pkgSel.innerHTML='<option value="">Select package</option>'+rows.map(p=>`<option value="${esc(p.id)}">${esc(p.name)}</option>`).join('');
+      pkgSel.disabled=false;
+      if(keep&&rows.some(p=>p.id===keep))pkgSel.value=keep;
+      else if(rows.length===1)pkgSel.value=rows[0].id;
+      await loadPapers();
+      if(!rows.length)status('No active Topic-wise Packages found. Check the three custom Package records.',true);
+    }catch(e){pkgSel.innerHTML='<option value="">Could not load packages</option>';pkgSel.disabled=true;status('Package loading failed: '+(e.message||e),true);}
+  }
+  // Keep the old course loader API for existing page initializers, but prevent it from replacing Package UI.
+  window.vkTWLoadCourses=loadPackages;
+  document.addEventListener('change',e=>{
+    if(e.target?.id==='vkTWPackageSelect')loadPapers();
+  });
+  // Remove legacy course and separate-topic controls from the visible form.
+  function setup(){
+    const course=document.getElementById('vkTWCourse');if(course){course.hidden=true;course.setAttribute('aria-hidden','true');}
+    const legacy=document.querySelector('#vkTopicWiseSharedAdmin .vk-tw-package-topic-compat');if(legacy)legacy.remove();
+    const pkg=document.getElementById('vkTWPackageSelect');if(pkg&&!pkg.dataset.bound){pkg.dataset.bound='1';}
+    loadPackages();
+  }
+  const priorEnsure=window.vkEnsureTopicWiseAdminPanel;
+  window.vkEnsureTopicWiseAdminPanel=async function(){if(typeof priorEnsure==='function')await priorEnsure.apply(this,arguments);await setup();};
+  document.addEventListener('DOMContentLoaded',()=>{
+    const panel=document.getElementById('vkTopicWiseSharedAdmin');
+    if(panel){const observer=new MutationObserver(()=>{if(panel.style.display!=='none'&&panel.offsetParent!==null)setup();});observer.observe(panel,{attributes:true,attributeFilter:['style','class']});}
+  });
+  const originalPublish=window.vkTWPublishTest;
+  window.vkTWPublishTest=async function(){
+    if(publishBusy)return;
+    const pkgId=document.getElementById('vkTWPackageSelect')?.value||'';
+    const paperSel=document.getElementById('vkTWTitle');
+    const paperId=paperSel?.selectedOptions?.[0]?.dataset?.paperId||'';
+    const paperName=paperSel?.value||'';
+    const topicName=document.getElementById('vkTWTopic')?.value?.trim()||'';
+    const isCreate=document.getElementById('vkTWAction')?.value!=='edit';
+    if(isCreate&&(!pkgId||!paperId||!paperName||!topicName)){status('Select a Package, its Paper, and enter the Topic Name before publishing.',true);return;}
+    publishBusy=true;
+    try{
+      window.vkTWLastPublishedTestId=null;
+      await originalPublish();
+      if(!isCreate)return;
+      const testId=window.vkTWLastPublishedTestId;
+      if(!testId){status('Test was submitted, but the publish RPC did not return a Test ID. No Topic mapping was created; please share the RPC result/error before retrying.',true);return;}
+      const sb=(typeof supabaseClient!=='undefined'&&supabaseClient)||window.supabaseClient;
+      const {data:found,error:findErr}=await sb.from('package_topics').select('id').eq('paper_id',paperId).eq('name',topicName).maybeSingle();
+      if(findErr)throw findErr;
+      let topicId=found?.id;
+      if(!topicId){const ins=await sb.from('package_topics').insert({paper_id:paperId,name:topicName,display_order:1,is_active:true}).select('id').single();if(ins.error)throw ins.error;topicId=ins.data.id;}
+      const {data:assignment,error:assignFindErr}=await sb.from('package_topic_tests').select('id').eq('topic_id',topicId).eq('test_id',testId).maybeSingle();
+      if(assignFindErr)throw assignFindErr;
+      if(!assignment){const a=await sb.from('package_topic_tests').insert({topic_id:topicId,test_id:testId,display_order:1,is_active:true});if(a.error)throw a.error;}
+      const m=await sb.from('package_tests').upsert({package_id:pkgId,test_id:testId},{onConflict:'package_id,test_id',ignoreDuplicates:true});if(m.error)throw m.error;
+      status('Published and assigned successfully: '+selectedPackage()?.textContent+' → '+paperName+' → '+topicName+'.');
+    }catch(e){status('Test publish/mapping needs attention: '+(e.message||e),true);console.error('Topic Wise publish mapping:',e);}
+    finally{publishBusy=false;}
+  };
+  // Initial load and SPA/admin navigation loads are safe to repeat; selection is preserved.
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setup,{once:true});else setTimeout(setup,0);
+})();
+</script>
+
+<style id="vk-topicwise-package-binding-v20-css">#vkTopicWiseSharedAdmin #vkTWCourse{display:none!important}#vkTopicWiseSharedAdmin #vkTWPackageTopic{display:none!important}</style>
 </body>
 
 </html>
@@ -17105,153 +17209,5 @@ body:has(#examPage.active) > footer{
   }
   // Keep the existing student loader blocked throughout the pre-release phase.
   window.vkTopicLoadStudent=async function(){ notifyStudentNotReleased(); return false; };
-})();
-</script>
-
-
-<!-- VK TOPIC-WISE PACKAGE-FIRST ASSIGNMENT (v17 - paper loading fix) -->
-<style id="vk-tw-package-first-v17">
-#vkTopicWiseSharedAdmin .vk-tw-package-topic-compat{display:none!important}
-#vkTopicWiseSharedAdmin #vkTWCourse{border-color:#8ba8d8;background:#fff}
-#vkTopicWiseSharedAdmin .vk-tw-reference-layout label small{display:block;color:#526581;font-weight:500;line-height:1.45;margin-top:4px}
-</style>
-<script id="vk-tw-package-first-v17-js">
-(function(){
- const $=id=>document.getElementById(id);
- let packages=[], courses=[], papers=[];
- function status(msg,bad){if(typeof window.vkTWStatus==='function')window.vkTWStatus(msg,!!bad);else if($('vkTWStatus'))$('vkTWStatus').textContent=msg;}
- function esc(v){return typeof window.vkTopicEsc==='function'?window.vkTopicEsc(v):String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
- function inferCourse(packageName){
-   const n=String(packageName||'').toLowerCase();
-   if(/high\s*court|court/.test(n)) return courses.find(c=>/high\s*court/i.test(c.name));
-   if(/appsc|andhra\s*pradesh\s*public\s*service/.test(n)) return courses.find(c=>/appsc/i.test(c.name));
-   if(/endowment|temple/.test(n)) return courses.find(c=>/endowment/i.test(c.name));
-   return null;
- }
- async function loadPackages(keep){
-   const sel=$('vkTWCourse'); if(!sel||!window.supabaseClient)return;
-   sel.innerHTML='<option value="">Loading packages…</option>';
-   try{
-     const [pr,cr]=await Promise.all([
-       supabaseClient.from('packages').select('id,name,package_type,is_active,created_at').eq('package_type','custom').order('created_at',{ascending:false}),
-       supabaseClient.from('courses').select('id,name').order('name')
-     ]);
-     if(pr.error)throw pr.error;if(cr.error)throw cr.error;
-     packages=pr.data||[];courses=cr.data||[];
-     sel.innerHTML='<option value="">Select package</option>'+packages.map(p=>`<option value="${p.id}">${esc(p.name)}${p.is_active?' · Published':' · Draft'}</option>`).join('');
-     if(keep&&packages.some(p=>p.id===keep))sel.value=keep;
-     await loadPapers();
-   }catch(e){sel.innerHTML='<option value="">Packages could not be loaded</option>';status('Package list could not load: '+(e.message||e),true);}
- }
- function defaultPapersForPackage(packageName){
-   const n=String(packageName||'').toLowerCase().replace(/[^a-z0-9]+/g,' ' ).trim();
-   if(/high\s*court|highcourt|court/.test(n)) return ['Highcourt Exam'];
-   if(/appsc|andhra\s*pradesh\s*public\s*service/.test(n)) return ['Screening Test','Mains Test'];
-   if(/endowment|temple/.test(n)) return ['Paper 1','Paper 2'];
-   return [];
- }
- async function ensurePackageDefaultPapers(pkgId,packageName){
-   const expected=defaultPapersForPackage(packageName); if(!expected.length)return;
-   const existing=await supabaseClient.from('package_papers').select('id,name,display_order,is_active').eq('package_id',pkgId).order('display_order');
-   if(existing.error)throw existing.error;
-   const rows=existing.data||[];
-   for(let i=0;i<expected.length;i++){
-     const name=expected[i];
-     if(rows.some(p=>String(p.name||'').trim().toLowerCase()===name.toLowerCase()))continue;
-     const ins=await supabaseClient.from('package_papers').insert({package_id:pkgId,name,display_order:(i+1)*10,is_active:true}).select('id,name,display_order,is_active').single();
-     if(ins.error)throw new Error('Could not create default paper "'+name+'": '+ins.error.message);
-     rows.push(ins.data);
-   }
-   return rows;
- }
- async function loadPapers(keep){
-   const pkgId=$('vkTWCourse')?.value, sel=$('vkTWTitle');if(!sel)return;
-   if(!pkgId){papers=[];sel.innerHTML='<option value="">Select package first</option>';return;}
-   try{
-     sel.innerHTML='<option value="">Loading papers…</option>';
-     const pkg=packages.find(p=>p.id===pkgId);
-     // Automatically establish the standard paper structure for the selected exam package.
-     await ensurePackageDefaultPapers(pkgId,pkg?.name||'');
-     const r=await supabaseClient.from('package_papers').select('id,name,display_order,is_active').eq('package_id',pkgId).order('display_order');
-     if(r.error)throw r.error;papers=r.data||[];
-     sel.innerHTML='<option value="">Select Paper</option>'+papers.map(p=>`<option value="${p.id}">${esc(p.name)}${p.is_active===false?' · Inactive (will be enabled on publish)':''}</option>`).join('');
-     if(keep&&papers.some(p=>p.id===keep))sel.value=keep;
-     if(!papers.length)sel.innerHTML='<option value="">No papers configured for this package</option>';
-   }catch(e){sel.innerHTML='<option value="">Paper list could not be loaded</option>';status('Package papers could not load: '+(e.message||e),true);}
- }
- function getData(){
-   let questions=[];try{questions=JSON.parse($('vkTWQuestions')?.value||'[]')}catch(e){}
-   const pkg=packages.find(p=>p.id===$('vkTWCourse')?.value);
-   const course=inferCourse(pkg?.name);
-   return {packageId:pkg?.id||'',packageName:pkg?.name||'',courseId:course?.id||'',paperId:$('vkTWTitle')?.value||'',paper:(papers.find(p=>p.id===$('vkTWTitle')?.value)?.name)||'',topic:$('vkTWTopic')?.value.trim()||'',duration:Number($('vkTWDuration')?.value),negativeMarks:Number($('vkTWNegativeMarks')?.value),count:Number($('vkTWCount')?.value),action:$('vkTWAction')?.value,editId:$('vkTWExisting')?.value,questions};
- }
- function validate(d){
-   if(!d.packageId){status('Select a Package.',true);return false;}
-   if(!d.paperId){status('Select a Paper from the selected Package.',true);return false;}
-   if(!d.topic){status('Enter the Topic Name.',true);return false;}
-   if(!d.courseId){status('This package name does not identify its exam Course (APPSC / Endowment Officer / High Court). Please use a package name that includes the course name, or contact admin to map it.',true);return false;}
-   if(!Number.isInteger(d.duration)||d.duration<1||d.duration>600){status('Duration must be 1–600 minutes.',true);return false;}
-   if(!Number.isFinite(d.negativeMarks)||d.negativeMarks<0||d.negativeMarks>5){status('Negative marks must be between 0 and 5.',true);return false;}
-   if(!Array.isArray(d.questions)||d.questions.length<1||d.questions.length>500||d.questions.length!==d.count){status('Upload exactly '+d.count+' valid questions. Imported: '+(d.questions?.length||0),true);return false;}
-   return true;
- }
- async function getOrCreateTopic(d){
-   const q=await supabaseClient.from('package_topics').select('id').eq('paper_id',d.paperId).eq('name',d.topic).eq('is_active',true).maybeSingle();
-   if(q.error)throw q.error;if(q.data)return q.data.id;
-   const orderR=await supabaseClient.from('package_topics').select('display_order').eq('paper_id',d.paperId).order('display_order',{ascending:false}).limit(1);
-   if(orderR.error)throw orderR.error;
-   const next=(Number(orderR.data?.[0]?.display_order)||0)+1;
-   const ins=await supabaseClient.from('package_topics').insert({paper_id:d.paperId,name:d.topic,display_order:next,is_active:true}).select('id').single();
-   if(ins.error)throw ins.error;return ins.data.id;
- }
- function extractId(data){
-   if(typeof data==='string')return data;
-   if(Array.isArray(data)&&data.length){const x=data[0];return x?.test_id||x?.id||null;}
-   return data?.test_id||data?.id||data?.[0]?.test_id||data?.[0]?.id||null;
- }
- async function publish(){
-   if(!await refreshVkAdminAccess()){status('Admin access required.',true);return;}
-   const d=getData();if(!validate(d))return;
-   const editId=d.action==='edit'?d.editId:'';
-   if(d.action==='edit'&&!editId){status('Select an existing Topic Wise test to edit.',true);return;}
-   if(!confirm(editId?'Publish the updated test and link it to the selected Package → Paper → Topic?':'Publish this test and automatically create/link the selected Package → Paper → Topic?'))return;
-   const btn=$('vkTWPublish'),old=btn?.textContent;if(btn){btn.disabled=true;btn.textContent='Publishing…';}
-   try{
-     const qs=d.questions.map(q=>({...q,negative_marks:d.negativeMarks}));
-     const args={p_topic_name:d.topic,p_title:d.paper,p_duration_minutes:d.duration,p_questions:qs};let r;
-     if(editId){args.p_test_id=editId;r=await supabaseClient.rpc('vk_admin_update_topic_wise_test',args);}
-     else{args.p_course_id=d.courseId;r=await supabaseClient.rpc('vk_admin_create_topic_wise_test',args);}
-     if(r.error)throw r.error;
-     const testId=editId||extractId(r.data);
-     if(!testId)throw new Error('Test was saved by the RPC, but it did not return a test ID. Automatic Package assignment was stopped to avoid linking the wrong test. Please share the RPC result with admin support.');
-     // The admin explicitly selected this package/paper for publishing.
-     // Ensure the selected paper is active so it can appear in the admin preview
-     // and student-facing package structure when that release is enabled.
-     const paperState=await supabaseClient.from('package_papers').update({is_active:true}).eq('id',d.paperId).eq('package_id',d.packageId);
-     if(paperState.error)throw paperState.error;
-     const topicId=await getOrCreateTopic(d);
-     const check=await supabaseClient.from('package_topic_tests').select('id,is_active').eq('topic_id',topicId).eq('test_id',testId).maybeSingle();
-     if(check.error)throw check.error;
-     if(check.data){if(!check.data.is_active){const up=await supabaseClient.from('package_topic_tests').update({is_active:true}).eq('id',check.data.id);if(up.error)throw up.error;}}
-     else{const ins=await supabaseClient.from('package_topic_tests').insert({topic_id:topicId,test_id:testId,display_order:1,is_active:true});if(ins.error)throw ins.error;}
-     const map=await supabaseClient.from('package_tests').upsert({package_id:d.packageId,test_id:testId},{onConflict:'package_id,test_id',ignoreDuplicates:true});if(map.error)throw map.error;
-     window.vkTWLastPublishedTestId=testId;
-     localStorage.removeItem('vkTopicWiseAdminDraftV1');if($('vkTWRestoreDraft'))$('vkTWRestoreDraft').hidden=true;
-     status('Published and assigned successfully: '+d.packageName+' → '+d.paper+' → '+d.topic+'.');
-     if(typeof window.vkTWClearForm==='function')window.vkTWClearForm();
-     await loadPackages(d.packageId);if($('vkTWTitle'))$('vkTWTitle').value=d.paperId;
-   }catch(e){status('Publish/assignment failed: '+(e.message||e),true);}
-   finally{if(btn){btn.disabled=false;btn.textContent=old||'Publish Test';}}
- }
- window.vkTWLoadPackageTopics=async()=>loadPackages($('vkTWCourse')?.value||'');
- window.vkTWGetFormData=getData;
- window.vkTWValidateForm=validate;
- window.vkTWPublishTest=publish;
- window.vkTWRestoreDraft=function(){try{const d=JSON.parse(localStorage.getItem('vkTopicWiseAdminDraftV1')||'null');if(!d)throw new Error('No saved draft found.');loadPackages(d.packageId||d.courseId).then(()=>{if(d.paperId)$('vkTWTitle').value=d.paperId;else if(d.paper)$('vkTWTitle').value=Array.from($('vkTWTitle').options).find(o=>o.textContent===d.paper)?.value||'';$('vkTWTopic').value=d.topic||'';$('vkTWDuration').value=d.duration||30;$('vkTWNegativeMarks').value=d.negativeMarks??0.333333;$('vkTWCount').value=d.count||d.questions?.length||25;$('vkTWQuestions').value=JSON.stringify(d.questions||[]);if(typeof vkTWRenderPreview==='function')vkTWRenderPreview(d.questions||[]);$('vkTWAction').value=d.editId?'edit':'create';$('vkTWExistingWrap').hidden=!d.editId;if(d.editId)$('vkTWExisting').value=d.editId;status('Saved draft restored.');});}catch(e){status(e.message||e,true);}};
- const originalClear=window.vkTWClearForm;
- window.vkTWClearForm=function(){if(originalClear)originalClear();if($('vkTWCourse'))$('vkTWCourse').value='';if($('vkTWTitle'))$('vkTWTitle').innerHTML='<option value="">Select package first</option>';loadPackages();};
- document.addEventListener('change',e=>{if(e.target?.id==='vkTWCourse')loadPapers();});
- if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>loadPackages(),{once:true});else loadPackages();
- window.addEventListener('load',()=>loadPackages($('vkTWCourse')?.value||''),{once:true});
 })();
 </script>
