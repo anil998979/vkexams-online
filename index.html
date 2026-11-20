@@ -9117,13 +9117,24 @@ async function openAdminMockBuilder(){
         return;
     }
     showPage("vkAdminMockBuilder");
-    await vkAdminLoadGlobalEmailAlerts();
-    // Initialize Topic Wise panel for normal Admin-button navigation as well.
-    await window.vkEnsureTopicWiseAdminPanel();
-    await vkLoadCategoryManager();
-    await vkCpInit();
-    vkAdminOnTestTypeChange();
-    if(!document.getElementById("vkAdminQuestions").children.length){
+
+    // Start Topic Wise initialization immediately. Do not make its visibility
+    // wait for unrelated Email Settings / Category / Test Series requests.
+    const topicWiseTask = (typeof window.vkEnsureTopicWiseAdminPanel === "function")
+        ? window.vkEnsureTopicWiseAdminPanel()
+        : Promise.resolve();
+    const emailTask = (typeof vkAdminLoadGlobalEmailAlerts === "function")
+        ? vkAdminLoadGlobalEmailAlerts()
+        : Promise.resolve();
+
+    await Promise.allSettled([topicWiseTask, emailTask]);
+    await Promise.allSettled([
+        typeof vkLoadCategoryManager === "function" ? vkLoadCategoryManager() : Promise.resolve(),
+        typeof vkCpInit === "function" ? vkCpInit() : Promise.resolve()
+    ]);
+    if(typeof vkAdminOnTestTypeChange === "function") vkAdminOnTestTypeChange();
+    const questions = document.getElementById("vkAdminQuestions");
+    if(questions && !questions.children.length && typeof vkAdminAddQuestion === "function"){
         vkAdminAddQuestion();
     }
 }
@@ -16117,7 +16128,7 @@ window.vkEnsureTopicWiseAdminPanel = async function(){
     }
     panel.style.display = "block";
     if(typeof vkTWLoadCourses === "function") await vkTWLoadCourses();
-    if(typeof vkTWLoad === "function") 
+    if(typeof vkTWLoad === "function") await vkTWLoad();
     panel.dataset.routeInit = "ready";
   }catch(error){
     panel.style.display = "block";
@@ -16799,6 +16810,45 @@ document.addEventListener('DOMContentLoaded',()=>{
 </script>
 
 <style id="vk-topicwise-package-binding-v20-css">#vkTopicWiseSharedAdmin #vkTWCourse{display:none!important}#vkTopicWiseSharedAdmin #vkTWPackageTopic{display:none!important}</style>
+
+
+<!-- VK ADMIN TOPIC-WISE IMMEDIATE INIT / DEDUPE FIX v21 -->
+<script id="vk-topicwise-admin-immediate-init-v21">
+(function(){
+  const previous = window.vkEnsureTopicWiseAdminPanel;
+  let inFlight = null;
+  window.vkEnsureTopicWiseAdminPanel = function(){
+    if(inFlight) return inFlight;
+    inFlight = (async function(){
+      const panel = document.getElementById('vkTopicWiseSharedAdmin');
+      if(!panel) return false;
+      try {
+        const allowed = typeof window.refreshVkAdminAccess === 'function'
+          ? await window.refreshVkAdminAccess() : false;
+        if(!allowed){ panel.style.display='none'; return false; }
+        panel.style.display='block';
+        panel.dataset.routeInit='loading';
+        if(typeof previous === 'function') await previous.apply(this, arguments);
+        // The final v20 package binding replaces the legacy course loader.
+        if(typeof window.vkTWLoadCourses === 'function') await window.vkTWLoadCourses();
+        if(typeof window.vkTWLoad === 'function') await window.vkTWLoad();
+        panel.style.display='block';
+        panel.dataset.routeInit='ready';
+        return true;
+      } catch(error) {
+        console.error('Topic Wise immediate admin initialization failed:', error);
+        panel.style.display='block';
+        panel.dataset.routeInit='error';
+        const status=document.getElementById('vkTWStatus');
+        if(status) status.textContent='Topic Wise panel could not load: '+(error?.message||error);
+        return false;
+      }
+    })().finally(function(){ inFlight=null; });
+    return inFlight;
+  };
+})();
+</script>
+
 </body>
 
 </html>
