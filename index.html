@@ -17140,18 +17140,40 @@ body:has(#examPage.active) > footer{
      await loadPapers();
    }catch(e){sel.innerHTML='<option value="">Packages could not be loaded</option>';status('Package list could not load: '+(e.message||e),true);}
  }
+ function defaultPapersForPackage(packageName){
+   const n=String(packageName||'').toLowerCase().replace(/[^a-z0-9]+/g,' ' ).trim();
+   if(/high\s*court|highcourt|court/.test(n)) return ['Highcourt Exam'];
+   if(/appsc|andhra\s*pradesh\s*public\s*service/.test(n)) return ['Screening Test','Mains Test'];
+   if(/endowment|temple/.test(n)) return ['Paper 1','Paper 2'];
+   return [];
+ }
+ async function ensurePackageDefaultPapers(pkgId,packageName){
+   const expected=defaultPapersForPackage(packageName); if(!expected.length)return;
+   const existing=await supabaseClient.from('package_papers').select('id,name,display_order,is_active').eq('package_id',pkgId).order('display_order');
+   if(existing.error)throw existing.error;
+   const rows=existing.data||[];
+   for(let i=0;i<expected.length;i++){
+     const name=expected[i];
+     if(rows.some(p=>String(p.name||'').trim().toLowerCase()===name.toLowerCase()))continue;
+     const ins=await supabaseClient.from('package_papers').insert({package_id:pkgId,name,display_order:(i+1)*10,is_active:true}).select('id,name,display_order,is_active').single();
+     if(ins.error)throw new Error('Could not create default paper "'+name+'": '+ins.error.message);
+     rows.push(ins.data);
+   }
+   return rows;
+ }
  async function loadPapers(keep){
    const pkgId=$('vkTWCourse')?.value, sel=$('vkTWTitle');if(!sel)return;
    if(!pkgId){papers=[];sel.innerHTML='<option value="">Select package first</option>';return;}
    try{
-     // Admin assignment must list every paper saved under the selected package.
-     // Older package structures may contain papers with is_active=false or NULL;
-     // filtering only is_active=true caused the dropdown to appear empty.
+     sel.innerHTML='<option value="">Loading papers…</option>';
+     const pkg=packages.find(p=>p.id===pkgId);
+     // Automatically establish the standard paper structure for the selected exam package.
+     await ensurePackageDefaultPapers(pkgId,pkg?.name||'');
      const r=await supabaseClient.from('package_papers').select('id,name,display_order,is_active').eq('package_id',pkgId).order('display_order');
      if(r.error)throw r.error;papers=r.data||[];
      sel.innerHTML='<option value="">Select Paper</option>'+papers.map(p=>`<option value="${p.id}">${esc(p.name)}${p.is_active===false?' · Inactive (will be enabled on publish)':''}</option>`).join('');
      if(keep&&papers.some(p=>p.id===keep))sel.value=keep;
-     if(!papers.length)sel.innerHTML='<option value="">No Papers saved in this package — add Paper structure first</option>';
+     if(!papers.length)sel.innerHTML='<option value="">No papers configured for this package</option>';
    }catch(e){sel.innerHTML='<option value="">Paper list could not be loaded</option>';status('Package papers could not load: '+(e.message||e),true);}
  }
  function getData(){
