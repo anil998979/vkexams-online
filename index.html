@@ -5277,7 +5277,8 @@ function vkTopicwiseBlockStudent(action='access'){
 }
 function vkTopicwiseHideStudentEntryPoints(){
   if(!VK_TOPICWISE_ADMIN_ONLY)return;
-  document.querySelectorAll('.vk-eo-topicwise').forEach(el=>el.style.display='none');
+  // Keep the home Topic Wise card visible: students need to see the feature,
+  // while its click handler explains that it has not been released yet.
   ['vkTopicPackagePage'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});
   const buy=document.getElementById('vkTopicBuyButton');if(buy){buy.disabled=true;buy.style.display='none';}
   document.querySelectorAll('.vk-ip-buy-plan,.vk-ip-view-series').forEach(el=>{el.disabled=true;el.style.display='none';});
@@ -16549,6 +16550,61 @@ document.addEventListener('DOMContentLoaded',()=>{
 @media(max-width:760px){#vkTopicWiseSharedAdmin .vk-tw-reference-layout{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:13px!important}}
 @media(max-width:520px){#vkTopicWiseSharedAdmin .vk-tw-reference-layout{grid-template-columns:1fr!important}}
 </style>
+
+
+<!-- VK TOPIC-WISE ADMIN ENTRY / STUDENT RELEASE NOTICE FIX -->
+<script id="vk-topicwise-admin-entry-fix-v13">
+(function(){
+  function showNotReleasedMessage(){
+    const message='Topic Wise Tests are not published for students yet. Please check again later.';
+    if(typeof window.toast==='function') window.toast(message);
+    else if(typeof window.showToast==='function') window.showToast(message);
+    else window.alert(message);
+  }
+  window.vkTopicOpenPackage = async function(){
+    try{
+      // The feature remains in admin-only testing until a separate release approval.
+      const isAdmin = (typeof window.refreshVkAdminAccess==='function')
+        ? await window.refreshVkAdminAccess()
+        : false;
+      if(!isAdmin){
+        showNotReleasedMessage();
+        return false;
+      }
+      if(typeof window.showPage==='function') window.showPage('vkAdminMockBuilder');
+      const panel=document.getElementById('vkTopicWiseSharedAdmin');
+      if(!panel){
+        window.alert('Topic Wise Test Management panel could not be found. Please refresh the admin page.');
+        return false;
+      }
+      panel.style.display='block';
+      if(typeof window.vkEnsureTopicWiseAdminPanel==='function'){
+        await window.vkEnsureTopicWiseAdminPanel();
+      }
+      // Ensure visibility after the panel initializer has completed.
+      panel.style.display='block';
+      const body=document.getElementById('vkTWBody');
+      if(body) body.hidden=false;
+      const toggle=document.getElementById('vkTWToggle');
+      if(toggle){toggle.textContent='⌃';toggle.setAttribute('aria-expanded','true');}
+      if(typeof window.vkTWLoadCourses==='function') await window.vkTWLoadCourses();
+      if(typeof window.vkTWLoad==='function') await window.vkTWLoad();
+      panel.scrollIntoView({behavior:'smooth',block:'start'});
+      return true;
+    }catch(error){
+      console.error('Topic Wise admin entry failed:',error);
+      const message='Topic Wise Test Management could not be opened: '+(error?.message||error);
+      if(typeof window.toast==='function') window.toast(message); else window.alert(message);
+      return false;
+    }
+  };
+  // The student-facing package page must remain unavailable during admin review.
+  window.vkTopicLoadStudent = async function(){
+    showNotReleasedMessage();
+    return false;
+  };
+})();
+</script>
 </body>
 
 </html>
