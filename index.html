@@ -17106,13 +17106,13 @@ body:has(#examPage.active) > footer{
 </script>
 
 
-<!-- VK TOPIC-WISE PACKAGE-FIRST ASSIGNMENT (v16) -->
-<style id="vk-tw-package-first-v16">
+<!-- VK TOPIC-WISE PACKAGE-FIRST ASSIGNMENT (v17 - paper loading fix) -->
+<style id="vk-tw-package-first-v17">
 #vkTopicWiseSharedAdmin .vk-tw-package-topic-compat{display:none!important}
 #vkTopicWiseSharedAdmin #vkTWCourse{border-color:#8ba8d8;background:#fff}
 #vkTopicWiseSharedAdmin .vk-tw-reference-layout label small{display:block;color:#526581;font-weight:500;line-height:1.45;margin-top:4px}
 </style>
-<script id="vk-tw-package-first-v16-js">
+<script id="vk-tw-package-first-v17-js">
 (function(){
  const $=id=>document.getElementById(id);
  let packages=[], courses=[], papers=[];
@@ -17144,11 +17144,14 @@ body:has(#examPage.active) > footer{
    const pkgId=$('vkTWCourse')?.value, sel=$('vkTWTitle');if(!sel)return;
    if(!pkgId){papers=[];sel.innerHTML='<option value="">Select package first</option>';return;}
    try{
-     const r=await supabaseClient.from('package_papers').select('id,name,display_order,is_active').eq('package_id',pkgId).eq('is_active',true).order('display_order');
+     // Admin assignment must list every paper saved under the selected package.
+     // Older package structures may contain papers with is_active=false or NULL;
+     // filtering only is_active=true caused the dropdown to appear empty.
+     const r=await supabaseClient.from('package_papers').select('id,name,display_order,is_active').eq('package_id',pkgId).order('display_order');
      if(r.error)throw r.error;papers=r.data||[];
-     sel.innerHTML='<option value="">Select Paper</option>'+papers.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('');
+     sel.innerHTML='<option value="">Select Paper</option>'+papers.map(p=>`<option value="${p.id}">${esc(p.name)}${p.is_active===false?' · Inactive (will be enabled on publish)':''}</option>`).join('');
      if(keep&&papers.some(p=>p.id===keep))sel.value=keep;
-     if(!papers.length)sel.innerHTML='<option value="">No active Papers in this package</option>';
+     if(!papers.length)sel.innerHTML='<option value="">No Papers saved in this package — add Paper structure first</option>';
    }catch(e){sel.innerHTML='<option value="">Paper list could not be loaded</option>';status('Package papers could not load: '+(e.message||e),true);}
  }
  function getData(){
@@ -17196,6 +17199,11 @@ body:has(#examPage.active) > footer{
      if(r.error)throw r.error;
      const testId=editId||extractId(r.data);
      if(!testId)throw new Error('Test was saved by the RPC, but it did not return a test ID. Automatic Package assignment was stopped to avoid linking the wrong test. Please share the RPC result with admin support.');
+     // The admin explicitly selected this package/paper for publishing.
+     // Ensure the selected paper is active so it can appear in the admin preview
+     // and student-facing package structure when that release is enabled.
+     const paperState=await supabaseClient.from('package_papers').update({is_active:true}).eq('id',d.paperId).eq('package_id',d.packageId);
+     if(paperState.error)throw paperState.error;
      const topicId=await getOrCreateTopic(d);
      const check=await supabaseClient.from('package_topic_tests').select('id,is_active').eq('topic_id',topicId).eq('test_id',testId).maybeSingle();
      if(check.error)throw check.error;
