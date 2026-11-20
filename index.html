@@ -4139,21 +4139,20 @@ id="solutions">
 
     <!-- ADMIN-ONLY TOPIC WISE TESTS: uses shared tests/questions/attempts engine; no package/payment flow -->
     <section id="vkTopicWiseSharedAdmin" class="vk-tw-shared-panel" style="display:none" aria-label="Admin Topic Wise Test Management">
-      <div class="vk-tw-shared-head"><div class="vk-tw-heading-copy"><span>ADMIN CONTROL PANEL · SHARED EXAM ENGINE</span><div class="vk-tw-title-line"><h2>Topic Wise Test Management</h2><button type="button" id="vkTWToggle" class="vk-tw-collapse" aria-expanded="true" aria-controls="vkTWBody" onclick="vkTWTogglePanel()" aria-label="Collapse Topic Wise Test Management">⌃</button></div><p>Create drafts privately and publish approved Topic Wise tests.</p></div></div>
+      <div class="vk-tw-shared-head"><div class="vk-tw-heading-copy"><span>ADMIN CONTROL PANEL · SHARED EXAM ENGINE</span><div class="vk-tw-title-line"><h2>Topic Wise Test Management</h2><button type="button" id="vkTWToggle" class="vk-tw-collapse" aria-expanded="true" aria-controls="vkTWBody" onclick="vkTWTogglePanel()" aria-label="Collapse Topic Wise Test Management">Collapse −</button></div><p>Create drafts privately and publish approved Topic Wise tests.</p></div></div>
       <div id="vkTWBody">
-        <section class="vk-tw-card vk-tw-details-card">
-          <button type="button" class="vk-tw-card-toggle" id="vkTWDetailsToggle" aria-expanded="true" aria-controls="vkTWDetailsBody" onclick="vkTWToggleSection('vkTWDetailsBody','vkTWDetailsToggle')"><span>Test Details</span><b>⌃</b></button>
+        <section class="vk-tw-details-card vk-tw-reference-details">
           <div id="vkTWDetailsBody" class="vk-tw-card-body">
-            <div class="vk-tw-shared-grid">
-              <label>Select Paper<select id="vkTWTitle"><option value="Paper - 1">Paper 1</option><option value="Paper - 2">Paper 2</option></select></label>
-              <label>Topic Name<input id="vkTWTopic" maxlength="150" placeholder="e.g. Ramayanam"></label>
+            <div class="vk-tw-shared-grid vk-tw-reference-layout">
+              <label>Test Action<select id="vkTWAction" onchange="vkTWActionChanged()"><option value="create">Create New Topic Test</option><option value="edit">Edit Existing Topic Test</option></select></label>
               <label>Course<select id="vkTWCourse"><option value="">Select course</option></select></label>
-              <label>Package Topic<select id="vkTWPackageTopic"><option value="">Select a saved package/topic</option></select></label>
+              <label>Select Paper<select id="vkTWTitle"><option value="Paper - 1">Paper 1</option><option value="Paper - 2">Paper 2</option></select></label>
+              <label id="vkTWExistingWrap" class="vk-tw-wide" hidden>Select Existing Topic Test<select id="vkTWExisting" onchange="vkTWSelectExisting()"><option value="">Select an existing test</option></select></label>
+              <label>Topic Name<input id="vkTWTopic" maxlength="150" placeholder="e.g. Ramayanam"></label>
               <label>Duration (minutes)<input id="vkTWDuration" type="number" min="1" max="600" value="30"></label>
               <label>Negative marks per wrong answer<input id="vkTWNegativeMarks" type="number" min="0" max="5" step="0.000001" value="0.333333" inputmode="decimal" placeholder="e.g. 0.333333"><small class="vk-tw-negative-hint">0.333333 = 1/3 mark · 0.25 = 1/4 mark · 0 = No negative marks</small></label>
               <label>Question count (1–500)<input id="vkTWCount" type="number" min="1" max="500" value="25"></label>
-              <label>Test Action<select id="vkTWAction" onchange="vkTWActionChanged()"><option value="create">Create New Topic Test</option><option value="edit">Edit Existing Topic Test</option></select></label>
-              <label id="vkTWExistingWrap" class="vk-tw-wide" hidden>Select Existing Topic Test<select id="vkTWExisting" onchange="vkTWSelectExisting()"><option value="">Select an existing test</option></select></label>
+              <label class="vk-tw-package-topic-compat" hidden>Package Topic<select id="vkTWPackageTopic"><option value="">Select a saved package/topic</option></select></label>
             </div>
           </div>
         </section>
@@ -16521,6 +16520,20 @@ document.addEventListener('DOMContentLoaded',()=>{
  }
 });
 </script>
+
+<style id="vk-topicwise-reference-layout-v8">
+#vkTopicWiseSharedAdmin .vk-tw-reference-details{margin:0!important;padding:0!important;border:0!important;background:transparent!important;box-shadow:none!important}
+#vkTopicWiseSharedAdmin .vk-tw-reference-layout{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:16px 18px!important;align-items:start!important}
+#vkTopicWiseSharedAdmin .vk-tw-reference-layout label{min-width:0!important}
+#vkTopicWiseSharedAdmin .vk-tw-reference-layout #vkTWExistingWrap{grid-column:1/-1!important}
+#vkTopicWiseSharedAdmin .vk-tw-reference-layout .vk-tw-package-topic-compat{display:none!important}
+#vkTopicWiseSharedAdmin .vk-tw-title-line{align-items:center!important}
+#vkTopicWiseSharedAdmin .vk-tw-title-line h2{letter-spacing:.2px!important}
+#vkTopicWiseSharedAdmin .vk-tw-card-toggle{min-height:42px!important}
+#vkTopicWiseSharedAdmin .vk-tw-excel-card .vk-tw-card-toggle span{font-weight:850!important}
+@media(max-width:760px){#vkTopicWiseSharedAdmin .vk-tw-reference-layout{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:13px!important}}
+@media(max-width:520px){#vkTopicWiseSharedAdmin .vk-tw-reference-layout{grid-template-columns:1fr!important}}
+</style>
 </body>
 
 </html>
