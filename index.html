@@ -3355,6 +3355,25 @@ body.dark-mode .vk-theme-toggle{background:#243247;color:#f8fafc;border-color:#4
 #vkTopicPackageAdmin button{cursor:pointer}
 @media(max-width:700px){#vkTopicPackageAdmin .vk-topic-admin-form{grid-template-columns:1fr}#vkTopicPackageAdmin .vk-topic-admin-add-row{grid-template-columns:1fr 1fr}#vkTopicPackageAdmin .vk-topic-admin-wide{grid-column:1/-1}}
 </style>
+
+<style id="vk-topicwise-preview-reference-style">
+#vkTWToggle.vk-tw-collapse{width:38px;height:38px;min-width:38px;padding:0;border:1px solid #d7e2f3;border-radius:10px;background:#f8fbff;color:#17458a;font-size:22px;font-weight:900;line-height:1;cursor:pointer;display:inline-grid;place-items:center}
+.vk-tw-preview-question{border:1px solid #dbe5f3;border-radius:14px;background:#fbfcff;padding:15px 16px;margin:12px 0;box-shadow:0 4px 14px rgba(30,64,120,.045)}
+.vk-tw-preview-qhead{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-bottom:10px;margin-bottom:12px;border-bottom:1px solid #e3eaf5}
+.vk-tw-preview-qhead span{display:inline-flex;align-items:center;padding:5px 10px;border:1px solid #ffc8b8;border-radius:20px;background:#fff;color:#b9381c;font-size:12px;font-weight:900}
+.vk-tw-preview-qhead small{color:#64748b;font-weight:800}
+.vk-tw-preview-qtext{font-weight:800;color:#17345f;line-height:1.6;margin:0 0 13px;white-space:pre-wrap}
+.vk-tw-preview-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.vk-tw-preview-options>div{min-width:0;display:grid;gap:6px}
+.vk-tw-preview-options b,.vk-tw-preview-meta b,.vk-tw-preview-explanation b{font-size:12px;color:#17345f}
+.vk-tw-preview-options span{display:block;min-height:38px;padding:9px 11px;border:1px solid #cbdaf0;border-radius:9px;background:#fff;color:#334155;font-size:13px;line-height:1.45;white-space:pre-wrap;overflow-wrap:anywhere}
+.vk-tw-preview-meta{display:flex;flex-wrap:wrap;gap:10px 22px;margin-top:13px;padding-top:11px;border-top:1px solid #e5ebf5;color:#334155;font-size:12px}
+.vk-tw-preview-explanation{margin-top:12px;padding:10px 12px;border-radius:9px;background:#f2f6fc;color:#475569;font-size:12px}
+.vk-tw-preview-explanation p{margin:5px 0 0;line-height:1.55;white-space:pre-wrap}
+.vk-tw-preview-empty,.vk-tw-preview-more{padding:13px;border-radius:9px;background:#f7f9fd;color:#64748b;font-size:13px}
+@media(max-width:650px){.vk-tw-preview-options{grid-template-columns:1fr}.vk-tw-preview-question{padding:12px}}
+</style>
+
 </head>
 
 
@@ -4139,7 +4158,7 @@ id="solutions">
 
     <!-- ADMIN-ONLY TOPIC WISE TESTS: uses shared tests/questions/attempts engine; no package/payment flow -->
     <section id="vkTopicWiseSharedAdmin" class="vk-tw-shared-panel" style="display:none" aria-label="Admin Topic Wise Test Management">
-      <div class="vk-tw-shared-head"><div class="vk-tw-heading-copy"><span>ADMIN CONTROL PANEL · SHARED EXAM ENGINE</span><div class="vk-tw-title-line"><h2>Topic Wise Test Management</h2><button type="button" id="vkTWToggle" class="vk-tw-collapse" aria-expanded="true" aria-controls="vkTWBody" onclick="vkTWTogglePanel()" aria-label="Collapse Topic Wise Test Management">Collapse −</button></div><p>Create drafts privately and publish approved Topic Wise tests.</p></div></div>
+      <div class="vk-tw-shared-head"><div class="vk-tw-heading-copy"><span>ADMIN CONTROL PANEL · SHARED EXAM ENGINE</span><div class="vk-tw-title-line"><h2>Topic Wise Test Management</h2><button type="button" id="vkTWToggle" class="vk-tw-collapse" aria-expanded="true" aria-controls="vkTWBody" onclick="vkTWTogglePanel()" aria-label="Collapse Topic Wise Test Management">⌃</button></div><p>Create drafts privately and publish approved Topic Wise tests.</p></div></div>
       <div id="vkTWBody">
         <section class="vk-tw-details-card vk-tw-reference-details">
           <div id="vkTWDetailsBody" class="vk-tw-card-body">
@@ -16075,7 +16094,7 @@ window.vkEnsureTopicWiseAdminPanel = async function(){
 var vkTWTests = window.vkTWTests || []; window.vkTWTests = vkTWTests;
 function vkTWTogglePanel(){
  const body=document.getElementById('vkTWBody'),btn=document.getElementById('vkTWToggle');
- if(!body||!btn)return;const willOpen=body.hidden;body.hidden=!willOpen;btn.textContent=willOpen?'Collapse −':'Expand +';btn.setAttribute('aria-expanded',String(willOpen));
+ if(!body||!btn)return;const willOpen=body.hidden;body.hidden=!willOpen;btn.textContent=willOpen?'⌃':'⌄';btn.setAttribute('aria-expanded',String(willOpen));btn.setAttribute('aria-label',willOpen?'Collapse Topic Wise Test Management':'Expand Topic Wise Test Management');
 }
 function vkTWDownloadTemplate(){
  if(!window.XLSX){vkTWStatus('Excel library is not available. Refresh the page and try again.',true);return;}
@@ -16105,7 +16124,19 @@ async function vkTWImportExcel(){
 }
 function vkTWStatus(message,isError=false){const el=document.getElementById('vkTWStatus');if(el){el.className='vk-tw-shared-status';el.style.color=isError?'#fecaca':'#fde68a';el.textContent=message||'';}}
 function vkTWToggleSection(bodyId,buttonId){const body=document.getElementById(bodyId),btn=document.getElementById(buttonId);if(!body||!btn)return;const open=body.hidden;body.hidden=!open;btn.setAttribute('aria-expanded',String(open));btn.querySelector('b').textContent=open?'⌃':'⌄';}
-function vkTWRenderPreview(questions){const box=document.getElementById('vkTWQuestionPreview'),badge=document.getElementById('vkTWQuestionBadge');if(badge)badge.textContent=(questions?.length||0)+' questions';if(!box)return;if(!questions?.length){box.textContent='Upload an Excel file to preview questions here.';return;}box.innerHTML=questions.slice(0,20).map((q,i)=>`<div class="vk-tw-question-item"><b>Q${i+1}.</b> ${vkAdminEscape(q.question_text)}<br><small>A. ${vkAdminEscape(q.option_a)} · B. ${vkAdminEscape(q.option_b)} · C. ${vkAdminEscape(q.option_c)} · D. ${vkAdminEscape(q.option_d)} · Answer: ${vkAdminEscape(q.correct_option)}</small></div>`).join('')+(questions.length>20?`<div class="vk-tw-question-item">Showing first 20 of ${questions.length} questions.</div>`:'');}
+function vkTWRenderPreview(questions){
+ const box=document.getElementById('vkTWQuestionPreview'),badge=document.getElementById('vkTWQuestionBadge');
+ if(badge)badge.textContent=(questions?.length||0)+' questions';if(!box)return;
+ if(!questions?.length){box.innerHTML='<div class="vk-tw-preview-empty">Upload an Excel file to preview questions here.</div>';return;}
+ const answerLabel=v=>{const x=String(v??'').trim().toUpperCase();return ({A:'Option A',B:'Option B',C:'Option C',D:'Option D','OPTION A':'Option A','OPTION B':'Option B','OPTION C':'Option C','OPTION D':'Option D'})[x]||x||'—';};
+ box.innerHTML=questions.slice(0,20).map((q,i)=>`<article class="vk-tw-preview-question">
+  <div class="vk-tw-preview-qhead"><span>Question ${i+1}</span><small>${Number(q.marks??1)} mark${Number(q.marks??1)===1?'':'s'}</small></div>
+  <div class="vk-tw-preview-qtext">${vkAdminEscape(q.question_text||'')}</div>
+  <div class="vk-tw-preview-options"><div><b>Option A</b><span>${vkAdminEscape(q.option_a||'')}</span></div><div><b>Option B</b><span>${vkAdminEscape(q.option_b||'')}</span></div><div><b>Option C</b><span>${vkAdminEscape(q.option_c||'')}</span></div><div><b>Option D</b><span>${vkAdminEscape(q.option_d||'')}</span></div></div>
+  <div class="vk-tw-preview-meta"><span><b>Correct answer:</b> ${vkAdminEscape(answerLabel(q.correct_option))}</span><span><b>Negative marks:</b> ${vkAdminEscape(q.negative_marks??document.getElementById('vkTWNegativeMarks')?.value??'0')}</span></div>
+  ${q.explanation?`<div class="vk-tw-preview-explanation"><b>Answer explanation</b><p>${vkAdminEscape(q.explanation)}</p></div>`:''}
+ </article>`).join('')+(questions.length>20?`<div class="vk-tw-preview-more">Showing first 20 of ${questions.length} questions.</div>`:'');
+}
 function vkTWSetMode(editing){const action=document.getElementById('vkTWAction');if(action){action.value=editing?'edit':'create';}const wrap=document.getElementById('vkTWExistingWrap');if(wrap)wrap.hidden=!editing;const del=document.getElementById('vkTWDelete');if(del)del.disabled=!editing;const pub=document.getElementById('vkTWPublish');if(pub)pub.textContent=editing?'Publish Changes':'Publish';}
 function vkTWActionChanged(){const editing=document.getElementById('vkTWAction').value==='edit';document.getElementById('vkTWExistingWrap').hidden=!editing;if(!editing){document.getElementById('vkTWExisting').value='';vkTWSetMode(false);}else{vkTWSetMode(true);}}
 function vkTWClearForm(){document.getElementById('vkTWAction').value='create';document.getElementById('vkTWExistingWrap').hidden=true;document.getElementById('vkTWExisting').value='';document.getElementById('vkTWTitle').value='Paper - 1';document.getElementById('vkTWTopic').value='';document.getElementById('vkTWCourse').value='';document.getElementById('vkTWDuration').value=30;document.getElementById('vkTWNegativeMarks').value='0.333333';document.getElementById('vkTWCount').value=25;document.getElementById('vkTWQuestions').value='';document.getElementById('vkTWExcelFile').value='';document.getElementById('vkTWImportSummary').textContent='No Excel file imported yet.';vkTWRenderPreview([]);vkTWSetMode(false);vkTWStatus('New topic test. Import the Excel questions, then Save Draft or Publish.');}
