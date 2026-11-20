@@ -9378,7 +9378,7 @@ document.addEventListener('change',e=>{if(e.target&&e.target.id==='vkCatIconFile
 document.addEventListener('change',e=>{if(e.target&&e.target.id==='vkHomeCardImage'){const f=e.target.files&&e.target.files[0],p=document.getElementById('vkHomeCardImagePreview');if(!f){p.hidden=true;return}if(!['image/png','image/jpeg','image/webp'].includes(f.type)||f.size>2*1024*1024){alert('Choose PNG/JPG/WEBP up to 2 MB.');e.target.value='';p.hidden=true;return}p.src=URL.createObjectURL(f);p.hidden=false}});
 
 
-const VK_ADMIN_ALLOWED_COURSES = ["APPSC","Endowment Officer","High Court"];
+const VK_ADMIN_ALLOWED_COURSES = ["APPSC","Endowment Officer","High Court","Police","DSC","Banks"];
 
 function vkAdminPaidSeriesOptions(courseName){
     const options = {
@@ -16733,6 +16733,49 @@ document.addEventListener('DOMContentLoaded',()=>{
   },true);
 })();
 </script>
+
+<script id="vk-admin-six-course-loader-v20">
+(function(){
+  let loading=false;
+  let lastLoadedAt=0;
+  function builderIsVisible(){
+    const panel=document.getElementById('vkAdminMockBuilder');
+    if(!panel) return false;
+    return panel.classList.contains('active') || panel.offsetParent!==null ||
+      (location.hash||'').replace(/^#/,'').split('?')[0]==='vkAdminMockBuilder';
+  }
+  async function ensureSixCourses(){
+    if(loading || !builderIsVisible()) return;
+    const select=document.getElementById('vkAdminCourse');
+    if(!select) return;
+    const hasOptions=select.options && Array.from(select.options).some(o=>o.value && !/Loading|Unable/i.test(o.textContent));
+    if(hasOptions && Date.now()-lastLoadedAt<15000) return;
+    if(typeof window.vkAdminLoadCourses!=='function' || !(window.supabaseClient || (typeof supabaseClient!=='undefined'&&supabaseClient))) return;
+    loading=true;
+    try{ await window.vkAdminLoadCourses(); lastLoadedAt=Date.now(); }
+    catch(e){ console.error('Six-course admin selector load failed:',e); }
+    finally{ loading=false; }
+  }
+  function schedule(){ setTimeout(ensureSixCourses,250); setTimeout(ensureSixCourses,900); }
+  document.addEventListener('DOMContentLoaded',schedule);
+  window.addEventListener('hashchange',schedule);
+  document.addEventListener('click',e=>{
+    if(e.target.closest('[onclick*="vkAdminMockBuilder"], [data-page="vkAdminMockBuilder"], a[href*="vkAdminMockBuilder"]')) schedule();
+  },true);
+  const observer=new MutationObserver(()=>{ if(builderIsVisible()) schedule(); });
+  function startObserver(){
+    const target=document.getElementById('vkAdminMockBuilder') || document.body;
+    if(target) observer.observe(target,{attributes:true,attributeFilter:['class','style'],childList:true,subtree:true});
+    schedule();
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',startObserver,{once:true});
+  else startObserver();
+  // Also catch delayed Supabase initialization when the Admin page is already open.
+  let attempts=0;
+  const retry=setInterval(()=>{ attempts++; if(builderIsVisible()) ensureSixCourses(); if(attempts>=30) clearInterval(retry); },500);
+})();
+</script>
+
 </body>
 
 </html>
