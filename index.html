@@ -4418,6 +4418,7 @@ id="solutions">
         <div class="vk-admin-field" id="vkAdminTopicWrap">
           <label for="vkAdminTopic">Topic Name</label>
           <input id="vkAdminTopic" type="text" maxlength="120" placeholder="e.g. Ramayanam">
+          <p class="vk-admin-hint" id="vkAdminPaidTopicHint" style="display:none">Enter the exact syllabus Topic Name for this Paper. This field is required when creating a Topic Wise Paid Test.</p>
         </div>
         <div class="vk-admin-field">
           <label for="vkAdminDuration">Duration (minutes)</label>
@@ -9474,6 +9475,25 @@ function vkAdminPaidQuestionRuleText(courseName){
     return `${courseName === "High Court" ? "High Court" : courseName || "Paid"} Paid Tests require exactly ${expected} questions.`;
 }
 
+function vkAdminIsEndowmentTopicWiseCourse(){
+    const courseName = String(document.getElementById("vkAdminCourse")?.value || "").trim();
+    return courseName.toLowerCase() === "endowment topic wise test series";
+}
+
+function vkAdminUpdateTopicNameVisibility(){
+    const wrap = document.getElementById("vkAdminTopicWrap");
+    const input = document.getElementById("vkAdminTopic");
+    if(!wrap) return;
+    const isPaid = document.getElementById("vkAdminTestType")?.value === "paid";
+    const isCreate = document.getElementById("vkAdminPaidMode")?.value !== "edit";
+    const show = isPaid && isCreate && vkAdminIsEndowmentTopicWiseCourse();
+    wrap.style.display = show ? "block" : "none";
+    if(input) input.required = show;
+    const hint = document.getElementById("vkAdminPaidTopicHint");
+    if(hint) hint.style.display = show ? "block" : "none";
+    if(show && input) input.placeholder = "Enter the syllabus topic name (e.g. Ramayanam)";
+}
+
 function vkAdminOnTestTypeChange(){
     const type=document.getElementById("vkAdminTestType")?.value || "free";
     const paid=type==="paid";
@@ -9502,6 +9522,7 @@ function vkAdminOnTestTypeChange(){
         if(freeWrap) freeWrap.style.display="none";
         if(freeWarning) freeWarning.style.display="none";
         vkAdminPaidModeChanged();
+        setTimeout(vkAdminUpdateTopicNameVisibility, 0);
     } else {
         const existingWrap=document.getElementById("vkAdminExistingTestWrap");
         if(existingWrap) existingWrap.style.display="none";
@@ -9700,6 +9721,7 @@ async function vkAdminOnCourseChanged(){
     } else if(document.getElementById("vkAdminFreeMode")?.value==="edit"){
         await vkAdminLoadFreeTests();
     }
+    vkAdminUpdateTopicNameVisibility();
 }
 
 async function vkAdminPaidModeChanged(){
@@ -9721,6 +9743,7 @@ async function vkAdminPaidModeChanged(){
         if(host) host.innerHTML="";
         vkAdminAddQuestion();
     }
+    vkAdminUpdateTopicNameVisibility();
 }
 
 async function vkAdminLoadPaidSeriesAndTests(){
@@ -9943,8 +9966,9 @@ async function vkAdminPublishTest(){
     : "";
     const cards = Array.from(document.querySelectorAll("#vkAdminQuestions .vk-admin-question"));
 
-   if(!courseName || (!isPaid && freeMode!=="edit" && !topicName)){
-    vkAdminShowStatus(isPaid?"Select a course.":"Select a course and enter a topic name.",true); return;
+   const requiresPaidTopicName = isPaid && courseName.toLowerCase() === "endowment topic wise test series" && paidMode === "create";
+   if(!courseName || (!isPaid && freeMode!=="edit" && !topicName) || (requiresPaidTopicName && !topicName)){
+    vkAdminShowStatus(requiresPaidTopicName ? "Select a course and enter the Topic Name." : (isPaid?"Select a course.":"Select a course and enter a topic name."),true); return;
 }
 
 if(!isPaid && freeMode === "edit" && !freeEditTopicName){
