@@ -5233,6 +5233,11 @@ if(
             SUPABASE_ANON_KEY
         );
 
+    // Publish the initialized client globally for the Topic-wise student/admin modules.
+    // The main application uses the top-level lexical variable, while later modules
+    // explicitly check window.supabaseClient before loading their pages.
+    window.supabaseClient = supabaseClient;
+
 }
 
 
