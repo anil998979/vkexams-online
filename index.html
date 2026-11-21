@@ -6215,28 +6215,6 @@ function openCourse(course, addHistory = true){
             `;
             options.insertAdjacentElement("afterend", featureStrip);
         }
-    }else if(course === "Endowment Topic Wise Test Series"){
-        coursePage.classList.remove("vk-eo-premium");
-        options.className = "choice-grid vk-topic-paper-choice-grid";
-        options.innerHTML = `
-            <article class="vk-topic-paper-card vk-topic-paper-one" role="button" tabindex="0"
-                 onclick="vkTopicOpenPaperCard('PAPER1')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();vkTopicOpenPaperCard('PAPER1');}">
-                <div class="vk-topic-paper-icon">📘</div>
-                <span class="vk-topic-paper-kicker">TOPIC-WISE PRACTICE</span>
-                <h2>Paper-1</h2>
-                <p>Paper-1 Topic Wise Test Series</p>
-                <span class="vk-topic-paper-cta">Explore Paper-1 Topics <b>→</b></span>
-            </article>
-            <article class="vk-topic-paper-card vk-topic-paper-two" role="button" tabindex="0"
-                 onclick="vkTopicOpenPaperCard('PAPER2')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();vkTopicOpenPaperCard('PAPER2');}">
-                <div class="vk-topic-paper-icon">📙</div>
-                <span class="vk-topic-paper-kicker">TOPIC-WISE PRACTICE</span>
-                <h2>Paper-2</h2>
-                <p>Paper-2 Topic Wise Test Series</p>
-                <span class="vk-topic-paper-cta">Explore Paper-2 Topics <b>→</b></span>
-            </article>
-        `;
-        document.getElementById("vkEoFeatureStrip")?.remove();
     }else{
         coursePage.classList.remove("vk-eo-premium");
         options.className = "choice-grid";
@@ -9245,7 +9223,7 @@ async function vkLoadHomepageCards(){
   const homepageRows=coreRows.concat(extraRows);
   if(!homepageRows.length)return;
   const safe=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  const iconDefaults={APPSC:'🏛️','Endowment Officer':'🛕','High Court':'⚖️',Police:'👮',DSC:'🎓',Banks:'🏦','Endowment Topic Wise Test Series':'🛕'};
+  const iconDefaults={APPSC:'🏛️','Endowment Officer':'🛕','High Court':'⚖️',Police:'👮',DSC:'🎓',Banks:'🏦'};
   grid.innerHTML=homepageRows.map(c=>{
     const rawName=String(c.name||'').trim();
     const name=safe(rawName);
@@ -9255,7 +9233,6 @@ async function vkLoadHomepageCards(){
     const image=c.homepage_image_url?`<img class="vk-home-dynamic-image" src="${safe(c.homepage_image_url)}" alt="">`:'';
     const open=`role="button" tabindex="0" data-course="${name}" onclick="openCourse(this.dataset.course)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openCourse(this.dataset.course)}"`;
     const action=`<button class="vk-card-button" type="button" onclick="event.stopPropagation();openCourse(this.closest('[data-course]').dataset.course)">Explore ${name} <b>➜</b></button>`;
-    if(rawName==='Endowment Topic Wise Test Series')return `<article class="vk-exam-card vk-endowment-topic-banner" ${open}><div class="vk-etb-ornament" aria-hidden="true">🪔　🛕　🪔</div><div class="vk-etb-copy"><span class="vk-etb-kicker">SPECIAL TOPIC-WISE PREPARATION</span><h3>Endowment Topic Wise<br>Test Series</h3><p>${description||'Prepare topic by topic with Paper-1 and Paper-2 practice tests.'}</p><div class="vk-etb-papers"><span>Paper-1 Topics</span><span>Paper-2 Topics</span></div><button class="vk-card-button vk-etb-button" type="button" onclick="event.stopPropagation();openCourse(this.closest('[data-course]').dataset.course)">Explore Topic Tests <b>➜</b></button></div><div class="vk-etb-art" aria-hidden="true">${image}<div class="vk-etb-gopuram">🛕</div><div class="vk-etb-lamps">🪔　🪔</div></div></article>`;
     if(rawName==='APPSC')return `<article class="vk-exam-card vk-appsc-card" ${open}><div class="vk-card-top"><span class="vk-card-emblem">${icon}</span></div>${image}<div class="vk-card-art vk-appsc-art">🏢</div><h3>${name}</h3><p>${description}</p><div class="vk-card-features"><span>☑ Screening Test</span></div>${action}</article>`;
     if(rawName==='Endowment Officer')return `<article class="vk-exam-card vk-endowment-card" ${open}><div class="vk-crown">♛</div><div class="vk-paid-label">★ PAID TEST SERIES</div><div class="vk-card-art vk-temple-art">${icon}</div>${image}<h3>Endowment<br>Officer</h3><p>${description}</p><div class="vk-card-features"><span>▣ Real Exam<br>(CBT Mode)</span><span>▱ Full-Length<br>Tests (150 Q)</span><span>▥ Detailed<br>Analysis</span></div><button class="vk-card-button vk-paid-button" type="button" onclick="event.stopPropagation();openCourse(this.closest('[data-course]').dataset.course)">Start Paid Test Series <b>➜</b></button></article>`;
     if(rawName==='High Court')return `<article class="vk-exam-card vk-court-card" ${open}><div class="vk-card-top"><span class="vk-card-emblem">${icon}</span></div>${image}<div class="vk-card-art vk-court-art">🏛</div><h3>${name}</h3><p>${description}</p><div class="vk-card-features"><span>☑ High Court Exam</span><span>▥ Paid Test Series</span></div>${action}</article>`;
@@ -15850,28 +15827,6 @@ window.addEventListener('pageshow',()=>{if(location.hash.startsWith('#vkTopicPac
 </script>
 
 
-<style id="vk-topic-paper-choice-css">
-.vk-topic-paper-choice-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-top:18px}
-.vk-topic-paper-card{position:relative;min-height:210px;padding:25px 22px;border-radius:18px;background:linear-gradient(140deg,#fff 0%,#f7faff 100%);border:1px solid #d8e4f5;box-shadow:0 10px 26px rgba(34,70,130,.10);cursor:pointer;overflow:hidden;transition:transform .18s ease,box-shadow .18s ease}
-.vk-topic-paper-card:active{transform:scale(.985)}.vk-topic-paper-card:focus-visible{outline:3px solid #f2b84b;outline-offset:3px}
-.vk-topic-paper-one{border-top:5px solid #2865d9}.vk-topic-paper-two{border-top:5px solid #b65a28}
-.vk-topic-paper-icon{font-size:35px;margin-bottom:12px}.vk-topic-paper-kicker{font-size:10px;font-weight:900;letter-spacing:1px;color:#64748b}.vk-topic-paper-card h2{font-size:24px;color:#183b70;margin:7px 0}.vk-topic-paper-card p{font-size:14px;color:#53657d;margin:0 0 20px}.vk-topic-paper-cta{display:inline-flex;align-items:center;gap:10px;padding:10px 15px;border-radius:10px;background:#245a91;color:#fff;font-weight:800;font-size:12px}.vk-topic-paper-two .vk-topic-paper-cta{background:#a64b24}
-@media(max-width:560px){.vk-topic-paper-choice-grid{grid-template-columns:1fr;gap:12px}.vk-topic-paper-card{min-height:170px;padding:20px}}
-</style>
-<script id="vk-topic-paper-card-actions">
-function vkTopicOpenPaperCard(paperCode){
-  // Route into the existing topic-wise package view; paper-specific filtering is handled there.
-  if(typeof vkTopicOpenPackage==='function'){
-    window.vkTopicSelectedPaper=paperCode;
-    vkTopicOpenPackage();
-  }else if(typeof vkIpStudentLoad==='function'){
-    window.vkTopicSelectedPaper=paperCode;
-    vkIpStudentLoad();
-  }else{
-    alert('Topic-wise tests are being configured. Please try again shortly.');
-  }
-}
-</script>
 <style id="vk-independent-package-css">
 .vk-independent-admin{margin:22px 0;padding:22px;background:#fff;border:1px solid #d6e2f3;border-radius:18px;box-shadow:0 8px 24px rgba(31,55,100,.06)}
 .vk-ip-head{display:flex;justify-content:space-between;gap:16px;align-items:center;margin-bottom:18px}.vk-ip-head span{font-size:10px;font-weight:900;letter-spacing:1px;color:#315bd0}.vk-ip-head h2{font-size:22px;color:#172b4d;margin:4px 0}.vk-ip-head p,.vk-ip-hint{font-size:13px;color:#64748b}.vk-ip-icon{font-size:32px;background:#eef2ff;padding:12px;border-radius:14px}
@@ -16828,36 +16783,6 @@ document.addEventListener('DOMContentLoaded',()=>{
 })();
 </script>
 
-
-
-<!-- VK Exams: seventh category full-width topic-wise banner (presentation-only integration) -->
-<style id="vk-endowment-topic-banner-v1">
-#home #vkHomepageExamCards .vk-endowment-topic-banner{grid-column:1/-1;min-height:250px;padding:0;display:grid;grid-template-columns:minmax(0,1.35fr) minmax(220px,.65fr);align-items:stretch;gap:0;overflow:hidden;border:1px solid #e8c98d;background:radial-gradient(circle at 82% 18%,rgba(255,224,155,.55),transparent 27%),linear-gradient(112deg,#4b1715 0%,#7b2920 48%,#b66b32 100%);box-shadow:0 14px 30px rgba(89,35,22,.2)}
-#home #vkHomepageExamCards .vk-endowment-topic-banner:hover{transform:translateY(-4px);box-shadow:0 20px 34px rgba(89,35,22,.28)}
-#home .vk-endowment-topic-banner .vk-etb-copy{position:relative;z-index:2;padding:25px 30px;align-self:center}
-#home .vk-endowment-topic-banner .vk-etb-kicker{display:inline-block;padding:6px 10px;border:1px solid rgba(255,226,170,.55);border-radius:99px;color:#ffe8b8;font-size:10px;font-weight:950;letter-spacing:1.2px}
-#home .vk-endowment-topic-banner h3{color:#fff4dd;font-size:clamp(25px,3vw,38px);line-height:1.08;margin:12px 0 8px}
-#home .vk-endowment-topic-banner p{color:#ffe9ce;max-width:620px;min-height:0;margin:0 0 13px}
-#home .vk-endowment-topic-banner .vk-etb-papers{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 16px}
-#home .vk-endowment-topic-banner .vk-etb-papers span{padding:7px 11px;border-radius:8px;background:rgba(255,238,204,.14);border:1px solid rgba(255,229,184,.38);color:#fff2d8;font-size:12px;font-weight:850}
-#home .vk-endowment-topic-banner .vk-etb-button{background:#ffdf9b;color:#572018;border:1px solid #ffe9bf;box-shadow:0 5px 14px rgba(35,12,8,.2)}
-#home .vk-endowment-topic-banner .vk-etb-art{position:relative;min-height:220px;display:flex;align-items:center;justify-content:center;background:linear-gradient(90deg,rgba(75,23,21,.08),rgba(255,218,151,.16))}
-#home .vk-endowment-topic-banner .vk-etb-gopuram{font-size:clamp(90px,13vw,155px);filter:drop-shadow(0 9px 9px rgba(30,8,5,.28));transform:translateY(5px)}
-#home .vk-endowment-topic-banner .vk-etb-lamps{position:absolute;bottom:18px;right:12%;font-size:26px;letter-spacing:5px}
-#home .vk-endowment-topic-banner .vk-etb-art img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.18;mix-blend-mode:screen}
-@media(max-width:600px){#home #vkHomepageExamCards .vk-endowment-topic-banner{grid-template-columns:1fr;min-height:0}#home .vk-endowment-topic-banner .vk-etb-copy{padding:21px 18px 10px}#home .vk-endowment-topic-banner .vk-etb-art{min-height:115px}#home .vk-endowment-topic-banner .vk-etb-gopuram{font-size:85px}#home .vk-endowment-topic-banner .vk-etb-lamps{bottom:8px;right:20%}}
-</style>
-<!-- NOTE: Student topic-wise release/payment remains gated by the existing release guard. -->
-
-</style>
-<style id="vk-topicwise-admin-stage1-visibility">
-/* Stage 1: expose the existing Topic Wise management panel only inside the Admin Mock Test Builder. */
-#vkAdminMockBuilder #vkTopicWiseSharedAdmin,
-#vkAdminMockBuilder #vkTopicWiseSharedAdmin[hidden] {
-  display: block !important;
-}
-</style>
-
 </body>
 
 </html>
@@ -17276,3 +17201,23 @@ body:has(#examPage.active) > footer{
   #vkTopicWiseSharedAdmin { display: none !important; }
 </style>
  
+
+
+<!-- VK EXAMS: use the single Test Management workflow; retire the separate Topic Wise Test Management panel. -->
+<style id="vk-topicwise-admin-panel-retired-v20">
+  #vkTopicWiseSharedAdmin { display: none !important; visibility: hidden !important; pointer-events: none !important; }
+</style>
+<script id="vk-topicwise-admin-panel-retired-v20-js">
+(function () {
+  function hideSeparateTopicPanel() {
+    var panel = document.getElementById('vkTopicWiseSharedAdmin');
+    if (panel) { panel.hidden = true; panel.style.setProperty('display', 'none', 'important'); }
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', hideSeparateTopicPanel);
+  else hideSeparateTopicPanel();
+  window.addEventListener('load', hideSeparateTopicPanel);
+  var observer = new MutationObserver(hideSeparateTopicPanel);
+  observer.observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ['style', 'class'] });
+  window.addEventListener('pagehide', function () { observer.disconnect(); }, { once: true });
+})();
+</script>
