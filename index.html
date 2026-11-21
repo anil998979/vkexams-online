@@ -5306,8 +5306,8 @@ const $ = id =>
 /* TOPIC-WISE TEMPORARY RELEASE GATE
    Admin-only testing phase. Student access and all Topic Wise payments are disabled.
    Server-side RLS/RPC enforcement must be applied separately before deployment. */
-const VK_TOPICWISE_ADMIN_ONLY = true;
-const VK_TOPICWISE_PAYMENT_ENABLED = false;
+const VK_TOPICWISE_ADMIN_ONLY = false;
+const VK_TOPICWISE_PAYMENT_ENABLED = true;
 function vkTopicwiseBlockStudent(action='access'){
   console.warn('Topic Wise is temporarily restricted to Admin-only testing:', action);
   if(typeof vkTopicAdminStatus==='function') vkTopicAdminStatus('Admin-only testing is active. Student access and payments are disabled.');
@@ -16783,6 +16783,106 @@ document.addEventListener('DOMContentLoaded',()=>{
 })();
 </script>
 
+
+
+<!-- VK TOPIC-WISE STUDENT RELEASE + TWO-PAPER FLOW -->
+<style id="vk-topicwise-student-release-v1">
+/* Devotional full-width home banner for the seventh category */
+#vkHomepageExamCards .vk-exam-card[onclick*="Endowment Topic Wise Test Series"],
+#vkHomepageExamCards .vk-exam-card[data-course="Endowment Topic Wise Test Series"]{
+  grid-column:1/-1!important;min-height:178px!important;display:grid!important;grid-template-columns:92px 1fr auto!important;align-items:center!important;gap:18px!important;padding:24px 30px!important;position:relative!important;overflow:hidden!important;
+  background:radial-gradient(circle at 88% 18%,rgba(255,224,143,.38),transparent 24%),linear-gradient(112deg,#4b1716 0%,#7b2920 38%,#a34b24 68%,#d18a3a 100%)!important;
+  border:2px solid #e9c27a!important;border-radius:22px!important;color:#fff!important;box-shadow:0 14px 30px rgba(92,34,20,.25)!important;
+}
+#vkHomepageExamCards .vk-exam-card[onclick*="Endowment Topic Wise Test Series"]:before,
+#vkHomepageExamCards .vk-exam-card[data-course="Endowment Topic Wise Test Series"]:before{content:"🛕";grid-column:1;grid-row:1/5;font-size:68px;filter:drop-shadow(0 5px 8px #32100c88);text-align:center}
+#vkHomepageExamCards .vk-exam-card[onclick*="Endowment Topic Wise Test Series"] h3,
+#vkHomepageExamCards .vk-exam-card[data-course="Endowment Topic Wise Test Series"] h3{grid-column:2;color:#fff!important;font-size:clamp(21px,3vw,30px)!important;margin:0!important}
+#vkHomepageExamCards .vk-exam-card[onclick*="Endowment Topic Wise Test Series"] p,
+#vkHomepageExamCards .vk-exam-card[data-course="Endowment Topic Wise Test Series"] p{grid-column:2;color:#ffefd7!important;font-size:14px!important;margin:0!important}
+#vkHomepageExamCards .vk-exam-card[onclick*="Endowment Topic Wise Test Series"] .vk-card-button,
+#vkHomepageExamCards .vk-exam-card[data-course="Endowment Topic Wise Test Series"] .vk-card-button{grid-column:3;grid-row:1/5;align-self:center;background:linear-gradient(100deg,#fff1c7,#ffe3a0)!important;color:#69251c!important;border:1px solid #f4d18b!important;font-weight:950!important;white-space:nowrap}
+#vkHomepageExamCards .vk-exam-card[onclick*="Endowment Topic Wise Test Series"] .vk-card-art,
+#vkHomepageExamCards .vk-exam-card[data-course="Endowment Topic Wise Test Series"] .vk-card-art{display:none!important}
+#vkHomepageExamCards .vk-exam-card[onclick*="Endowment Topic Wise Test Series"] .vk-card-features,
+#vkHomepageExamCards .vk-exam-card[data-course="Endowment Topic Wise Test Series"] .vk-card-features{grid-column:2;color:#ffedc5!important}
+#vkIndependentPackageDetail .vk-ip-paper-chooser{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin:22px 0}
+#vkIndependentPackageDetail .vk-ip-paper-choice{min-height:175px;padding:23px;border-radius:21px;border:2px solid #e6c27c;background:linear-gradient(145deg,#fff9e9,#f5e5c8);box-shadow:0 10px 24px #61351c18;text-align:left;cursor:pointer;color:#632b1c}
+#vkIndependentPackageDetail .vk-ip-paper-choice.paper2{background:linear-gradient(145deg,#fff1df,#f9d9bd);border-color:#d99a58;color:#7a351b}
+#vkIndependentPackageDetail .vk-ip-paper-choice .symbol{font-size:34px;display:block;margin-bottom:10px}
+#vkIndependentPackageDetail .vk-ip-paper-choice strong{display:block;font-size:22px;font-weight:950}
+#vkIndependentPackageDetail .vk-ip-paper-choice small{display:block;margin-top:7px;font-weight:750;color:#77564a}
+#vkIndependentPackageDetail .vk-ip-paper-choice em{display:inline-block;margin-top:15px;font-style:normal;font-weight:900;color:#8a3b1f}
+#vkIndependentPackageDetail .vk-ip-student-topic-view{margin:20px 0;padding:20px;border-radius:20px;background:#fffaf1;border:1px solid #ead3a9}
+#vkIndependentPackageDetail .vk-ip-student-topic-view h2{color:#71301e}
+#vkIndependentPackageDetail .vk-ip-student-topic-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px;margin:10px 0;background:white;border:1px solid #eadcc5;border-radius:14px}
+#vkIndependentPackageDetail .vk-ip-student-topic-row strong{color:#36251e}
+#vkIndependentPackageDetail .vk-ip-student-topic-row button{border:0;border-radius:10px;padding:10px 15px;background:linear-gradient(100deg,#7b2c1d,#b66b2b);color:white;font-weight:900;white-space:nowrap}
+#vkIndependentPackageDetail .vk-ip-student-back{border:0;border-radius:10px;padding:9px 14px;background:#f1e3ce;color:#67311f;font-weight:900;margin-bottom:12px}
+@media(max-width:650px){#vkHomepageExamCards .vk-exam-card[onclick*="Endowment Topic Wise Test Series"],#vkHomepageExamCards .vk-exam-card[data-course="Endowment Topic Wise Test Series"]{grid-template-columns:58px 1fr!important;padding:18px!important;gap:10px!important}#vkHomepageExamCards .vk-exam-card[onclick*="Endowment Topic Wise Test Series"]:before,#vkHomepageExamCards .vk-exam-card[data-course="Endowment Topic Wise Test Series"]:before{font-size:46px}#vkHomepageExamCards .vk-exam-card[onclick*="Endowment Topic Wise Test Series"] .vk-card-button,#vkHomepageExamCards .vk-exam-card[data-course="Endowment Topic Wise Test Series"] .vk-card-button{grid-column:2;grid-row:auto;justify-self:start}#vkIndependentPackageDetail .vk-ip-paper-chooser{grid-template-columns:1fr}#vkIndependentPackageDetail .vk-ip-student-topic-row{align-items:flex-start;flex-direction:column}#vkIndependentPackageDetail .vk-ip-student-topic-row button{width:100%}}
+</style>
+<script id="vk-topicwise-student-release-v1-js">
+(function(){
+  const COURSE='Endowment Topic Wise Test Series';
+  let activePackage=null, activePapers=[], activeTopics=[], activePurchase=null;
+  function setText(id,value){const el=document.getElementById(id);if(el)el.textContent=value;}
+  function esc(v){return typeof vkIpEsc==='function'?vkIpEsc(v):String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+  function ensureBanner(){
+    const grid=document.getElementById('vkHomepageExamCards');if(!grid)return;
+    let card=grid.querySelector('[onclick*="Endowment Topic Wise Test Series"], [data-course="Endowment Topic Wise Test Series"]');
+    if(card){card.classList.add('vk-topicwise-devotional-banner');card.dataset.course=COURSE;return;}
+    card=document.createElement('article');card.className='vk-exam-card vk-topicwise-devotional-banner';card.dataset.course=COURSE;card.setAttribute('role','button');card.tabIndex=0;
+    card.innerHTML='<h3>Endowment Topic Wise Test Series</h3><p>Paper-1 &amp; Paper-2 · Syllabus-based topic tests · Secure online practice</p><div class="vk-card-features"><span>🛕 Temple System</span><span>📘 Topic-wise Tests</span></div><button class="vk-card-button" type="button">Explore Topic Wise Tests <b>➜</b></button>';
+    card.addEventListener('click',openTopicWise);card.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openTopicWise();}});grid.appendChild(card);
+  }
+  async function getPackage(){
+    const {data,error}=await supabaseClient.from('vk_independent_packages').select('*').eq('package_code','ENDOWMENT').eq('is_archived',false).order('created_at',{ascending:false}).limit(10);
+    if(error)throw error;
+    return (data||[]).find(p=>p.is_published===true)||null;
+  }
+  async function openTopicWise(){
+    if(!supabaseClient){alert('Service is loading. Please refresh and try again.');return;}
+    if(typeof showPage==='function')showPage('vkIndependentPackageDetail');
+    const host=document.getElementById('vkIpStudentDetail');if(!host)return;
+    host.innerHTML='<div class="vk-ip-loading">Loading Paper-1 and Paper-2…</div>';
+    try{const p=await getPackage();if(!p){host.innerHTML='<div class="vk-ip-error"><strong>Topic-wise package is not published yet.</strong><p>Please check again later.</p></div>';return;}await window.vkIpOpenStudentPackage(p.id);}
+    catch(e){host.innerHTML='<div class="vk-ip-error">Unable to load package: '+esc(e.message||e)+'</div>';}
+  }
+  window.vkTopicOpenPackage=openTopicWise;
+  window.vkIpOpenPackages=openTopicWise;
+  window.vkIpBackToPackages=function(){if(typeof showHome==='function')showHome();};
+  window.openCourse=(function(original){return function(course,addHistory=true){if(course===COURSE){openTopicWise();return;}return original.apply(this,arguments);};})(window.openCourse);
+
+  window.vkIpStudentLoad=async function(){await openTopicWise();};
+  window.vkIpOpenStudentPackage=async function(id){
+    if(!supabaseClient)throw new Error('Supabase is not ready.');
+    if(typeof showPage==='function')showPage('vkIndependentPackageDetail');
+    const host=document.getElementById('vkIpStudentDetail');host.innerHTML='<div class="vk-ip-loading">Loading syllabus topics…</div>';
+    try{
+      const pr=await supabaseClient.from('vk_independent_packages').select('*').eq('id',id).single();if(pr.error)throw pr.error;activePackage=pr.data;
+      const ur=await supabaseClient.auth.getUser();if(ur.error)throw ur.error;const user=ur.data?.user;
+      activePurchase=null;
+      if(user){const q=await supabaseClient.from('vk_independent_purchases').select('*').eq('package_id',id).eq('user_id',user.id).eq('payment_status','paid').gt('expires_at',new Date().toISOString()).order('expires_at',{ascending:false}).limit(1);if(q.error)throw q.error;activePurchase=q.data?.[0]||null;}
+      const pp=await supabaseClient.from('vk_independent_papers').select('*').eq('package_id',id).eq('is_active',true).order('display_order');if(pp.error)throw pp.error;activePapers=(pp.data||[]).filter(p=>/paper\s*[-–]?\s*[12]/i.test(p.name)).slice(0,2);
+      if(activePapers.length!==2)throw new Error('Paper-1 and Paper-2 must both be created and published in Admin before students can buy this package.');
+      const tt=await supabaseClient.from('vk_independent_topics').select('*').in('paper_id',activePapers.map(p=>p.id)).eq('is_active',true).order('display_order');if(tt.error)throw tt.error;activeTopics=tt.data||[];
+      window.vkIpActivePackageId=id;window.vkIpActivePurchase=!!activePurchase;
+      const price=Number(activePackage.price||29),days=Number(activePackage.duration_days||5);
+      host.innerHTML=`<section class="vk-ip-series-hero"><div class="vk-ip-series-tag">🛕 VK EXAMS · ENDOWMENT TOPIC WISE</div><h1>Endowment Topic Wise Test Series</h1><p>Choose your paper and practice syllabus-based topics.</p><div class="vk-ip-hero-bottom"><strong>₹${price.toLocaleString('en-IN')}</strong><span>${days} Days · Access to Paper-1 &amp; Paper-2</span></div>${activePurchase?`<div class="vk-ip-access-success">✓ PLAN ACTIVE · Valid until ${new Date(activePurchase.expires_at).toLocaleString('en-IN')}</div>`:`<small class="vk-ip-secure-note">Select a paper and topic. Buy the plan when you are ready to unlock all tests.</small>`}</section><div class="vk-ip-paper-chooser">${activePapers.map((p,i)=>`<button type="button" class="vk-ip-paper-choice ${i?'paper2':''}" onclick="vkIpShowPaper('${p.id}')"><span class="symbol">${i?'📙':'📘'}</span><strong>${esc(p.name)}</strong><small>${activeTopics.filter(t=>t.paper_id===p.id).length} syllabus topics</small><em>View Topics →</em></button>`).join('')}</div><div id="vkIpStudentPaperTopics"></div><div id="vkIpTopicTests" class="vk-ip-topic-tests"></div>`;
+    }catch(e){host.innerHTML='<div class="vk-ip-error">'+esc(e.message||e)+'</div>';}
+  };
+  window.vkIpShowPaper=function(paperId){
+    const paper=activePapers.find(p=>p.id===paperId);if(!paper)return;
+    const topics=activeTopics.filter(t=>t.paper_id===paperId);const box=document.getElementById('vkIpStudentPaperTopics');if(!box)return;
+    box.innerHTML=`<section class="vk-ip-student-topic-view"><button class="vk-ip-student-back" onclick="document.getElementById('vkIpStudentPaperTopics').innerHTML='';document.getElementById('vkIpTopicTests').innerHTML='';">← Back to Papers</button><h2>${esc(paper.name)} · Topics</h2>${topics.map((t,i)=>`<div class="vk-ip-student-topic-row"><strong>${String(i+1).padStart(2,'0')}. ${esc(t.name)}</strong>${activePurchase?`<button onclick="vkIpOpenTopic('${t.id}')">View Tests →</button>`:`<button onclick="vkIpBuy('${activePackage.id}')">🔒 Buy Plan · ₹${Number(activePackage.price||29)}</button>`}</div>`).join('')||'<p>No active topics are published for this paper yet.</p>'}</section>`;
+    box.scrollIntoView({behavior:'smooth',block:'start'});
+  };
+  // Ensure the seventh card is restyled if it is added asynchronously by the homepage loader.
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',ensureBanner);else ensureBanner();
+  window.addEventListener('load',ensureBanner);setTimeout(ensureBanner,1200);setTimeout(ensureBanner,3000);
+})();
+</script>
+
 </body>
 
 </html>
@@ -17201,23 +17301,3 @@ body:has(#examPage.active) > footer{
   #vkTopicWiseSharedAdmin { display: none !important; }
 </style>
  
-
-
-<!-- VK EXAMS: use the single Test Management workflow; retire the separate Topic Wise Test Management panel. -->
-<style id="vk-topicwise-admin-panel-retired-v20">
-  #vkTopicWiseSharedAdmin { display: none !important; visibility: hidden !important; pointer-events: none !important; }
-</style>
-<script id="vk-topicwise-admin-panel-retired-v20-js">
-(function () {
-  function hideSeparateTopicPanel() {
-    var panel = document.getElementById('vkTopicWiseSharedAdmin');
-    if (panel) { panel.hidden = true; panel.style.setProperty('display', 'none', 'important'); }
-  }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', hideSeparateTopicPanel);
-  else hideSeparateTopicPanel();
-  window.addEventListener('load', hideSeparateTopicPanel);
-  var observer = new MutationObserver(hideSeparateTopicPanel);
-  observer.observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ['style', 'class'] });
-  window.addEventListener('pagehide', function () { observer.disconnect(); }, { once: true });
-})();
-</script>
