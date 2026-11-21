@@ -9437,7 +9437,9 @@ function vkAdminUpdatePaidSeriesControl(){
 async function vkAdminLoadCourses(){
     const select = document.getElementById("vkAdminCourse");
     if(!select || !supabaseClient) return;
-    select.innerHTML = '<option value="">Loading courses...</option>';
+    // Preserve the administrator's current selection during any legitimate reload.
+    const previouslySelected = String(select.value || "").trim();
+    const hadUsableOptions = !!(select.options && Array.from(select.options).some(o=>o.value && !/Loading|Unable/i.test(o.textContent)));
     try{
         const {data,error} = await supabaseClient.from("courses").select("name").in("name",VK_ADMIN_ALLOWED_COURSES).order("name",{ascending:true});
         if(error) throw error;
@@ -9445,9 +9447,12 @@ async function vkAdminLoadCourses(){
         const ordered = VK_ADMIN_ALLOWED_COURSES.filter(name=>available.has(name));
         select.innerHTML = '<option value="">Select course</option>' +
             ordered.map(name => `<option value="${vkAdminEscape(name)}">${vkAdminEscape(name)}</option>`).join("");
-        if(available.has("Endowment Officer")) select.value="Endowment Officer";
+        if(previouslySelected && available.has(previouslySelected)) select.value=previouslySelected;
+        else if(hadUsableOptions && previouslySelected) select.value="";
+        else if(available.has("Endowment Officer")) select.value="Endowment Officer";
         else if(ordered.length) select.value=ordered[0];
         vkAdminUpdatePaidSeriesControl();
+        if(typeof window.vkAdminUpdateTopicNameVisibility==='function') window.vkAdminUpdateTopicNameVisibility();
     }catch(error){
         console.error("Admin course load failed:",error);
         select.innerHTML = '<option value="">Unable to load courses</option>';
@@ -16790,7 +16795,9 @@ document.addEventListener('DOMContentLoaded',()=>{
     const select=document.getElementById('vkAdminCourse');
     if(!select) return;
     const hasOptions=select.options && Array.from(select.options).some(o=>o.value && !/Loading|Unable/i.test(o.textContent));
-    if(hasOptions && Date.now()-lastLoadedAt<15000) return;
+    // Do not periodically reload an already populated selector: that used to
+    // reset the user's chosen seventh course back to the default Endowment Officer.
+    if(hasOptions) return;
     if(typeof window.vkAdminLoadCourses!=='function' || !(window.supabaseClient || (typeof supabaseClient!=='undefined'&&supabaseClient))) return;
     loading=true;
     try{ await window.vkAdminLoadCourses(); lastLoadedAt=Date.now(); }
