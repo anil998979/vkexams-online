@@ -16947,9 +16947,7 @@ document.addEventListener('DOMContentLoaded',()=>{
 #vkIndependentPackageDetail .vk22-question p{margin:6px 0;font-weight:800;color:#38251e}
 #vkIndependentPackageDetail .vk22-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;color:#5b5148;font-size:13px}
 #vkIndependentPackageDetail .vk22-note{padding:12px 14px;border-radius:12px;background:#fff4dc;color:#74401f;font-weight:700;margin:12px 0}
-@media(max-width:650px){#vkIndependentPackageDetail .vk22-paper-grid,#vkIndependentPackageDetail .vk22-tests{grid-template-columns:1fr}#vkIndependentPackageDetail .vk22-paper{min-height:140px}}
-</style>
-<script id="vk-topicwise-student-grid-v22-script">
+#vkIndependentPackageDetail .vk22-topic-block{margin:18px 0;padding:16px;border:1px solid #ead6b6;border-radius:16px;background:linear-gradient(135deg,#fffdf8,#fff7e9)}#vkIndependentPackageDetail .vk22-t<script id="vk-topicwise-student-grid-v22-script">
 (function(){
   const COURSE='Endowment Topic Wise Test Series';
   const sample={
@@ -16976,24 +16974,24 @@ document.addEventListener('DOMContentLoaded',()=>{
   function show(){if(typeof window.showPage==='function')window.showPage('vkIndependentPackageDetail');}
   function packagePrice(){return Number(pkg?.price||29)}
   async function loadPackage(){
-    const {data,error}=await window.supabaseClient.from('vk_independent_packages').select('*').eq('is_archived',false).order('created_at',{ascending:false}).limit(30);
+    const {data,error}=await supabaseClient.from('vk_independent_packages').select('*').eq('is_archived',false).order('created_at',{ascending:false}).limit(30);
     if(error)throw error;
     const rows=data||[];
     pkg=rows.find(x=>x.package_code==='ENDOWMENT' && x.is_published===true) || rows.find(x=>x.is_published===true && /endowment|topic/i.test(x.name||'')) || rows.find(x=>x.package_code==='ENDOWMENT') || rows.find(x=>/endowment|topic/i.test(x.name||'')) || rows[0] || null;
     if(!pkg){papers=[{id:'sample-paper-1',name:'Paper-1 Topic Wise Tests',display_order:1},{id:'sample-paper-2',name:'Paper-2 Topic Wise Tests',display_order:2}];return;}
     if(!pkg.is_published && !pkg.is_active && pkg.is_archived)pkg=null;
     if(!pkg){papers=[{id:'sample-paper-1',name:'Paper-1 Topic Wise Tests',display_order:1},{id:'sample-paper-2',name:'Paper-2 Topic Wise Tests',display_order:2}];return;}
-    const auth=await window.supabaseClient.auth.getUser();
+    const auth=await supabaseClient.auth.getUser();
     const u=auth.data?.user;
-    if(u){const pr=await window.supabaseClient.from('vk_independent_purchases').select('*').eq('package_id',pkg.id).eq('user_id',u.id).eq('payment_status','paid').gt('expires_at',new Date().toISOString()).order('expires_at',{ascending:false}).limit(1);if(pr.error)throw pr.error;purchase=pr.data?.[0]||null;}
-    const pp=await window.supabaseClient.from('vk_independent_papers').select('*').eq('package_id',pkg.id).eq('is_active',true).order('display_order');if(pp.error)throw pp.error;
+    if(u){const pr=await supabaseClient.from('vk_independent_purchases').select('*').eq('package_id',pkg.id).eq('user_id',u.id).eq('payment_status','paid').gt('expires_at',new Date().toISOString()).order('expires_at',{ascending:false}).limit(1);if(pr.error)throw pr.error;purchase=pr.data?.[0]||null;}
+    const pp=await supabaseClient.from('vk_independent_papers').select('*').eq('package_id',pkg.id).eq('is_active',true).order('display_order');if(pp.error)throw pp.error;
     papers=pp.data||[];
     if(!papers.length) papers=[{id:'sample-paper-1',name:'Paper-1 Topic Wise Tests',display_order:1},{id:'sample-paper-2',name:'Paper-2 Topic Wise Tests',display_order:2}];
     const ids=papers.filter(x=>!String(x.id).startsWith('sample-')).map(x=>x.id);
     topics=[];realTests=[];
-    if(ids.length){const tr=await window.supabaseClient.from('vk_independent_topics').select('*').in('paper_id',ids).eq('is_active',true).order('display_order');if(tr.error)throw tr.error;topics=tr.data||[];}
+    if(ids.length){const tr=await supabaseClient.from('vk_independent_topics').select('*').in('paper_id',ids).eq('is_active',true).order('display_order');if(tr.error)throw tr.error;topics=tr.data||[];}
     const tids=topics.map(x=>x.id);
-    if(tids.length){const ts=await window.supabaseClient.from('vk_independent_tests').select('*').in('topic_id',tids).eq('is_active',true).order('display_order');if(ts.error)throw ts.error;realTests=ts.data||[];}
+    if(tids.length){const ts=await supabaseClient.from('vk_independent_tests').select('*').in('topic_id',tids).eq('is_active',true).order('display_order');if(ts.error)throw ts.error;realTests=ts.data||[];}
   }
   function render(){
     const host=$('vkIpStudentDetail');if(!host)return;
@@ -17007,16 +17005,31 @@ document.addEventListener('DOMContentLoaded',()=>{
     const paperTopics=topics.filter(t=>t.paper_id===paper.id);
     const actual=realTests.filter(t=>paperTopics.some(tp=>tp.id===t.topic_id));
     const demo=sample[key];
-    const host=$('vk22PaperContent');const preview=$('vk22TestPreview');if(preview)preview.innerHTML='';
-    const cards=actual.length?actual.map((t,i)=>({id:t.id,name:t.name||t.title||`Topic Test ${i+1}`,topic:paperTopics.find(x=>x.id===t.topic_id)?.name||'Syllabus Topic',count:Number(t.question_count||25),demo:false})):demo.map(t=>({...t,demo:true,count:2}));
-    host.innerHTML=`<section class="vk22-section"><button class="vkIp-student-back" onclick="document.getElementById('vk22PaperContent').innerHTML='';document.getElementById('vk22TestPreview').innerHTML='';">← Back to Papers</button><h2 style="color:#702d1c;margin:12px 0 4px">${is2?'Paper-2':'Paper-1'} · Topic-wise Tests</h2><p style="color:#80634f">${paperTopics.length?paperTopics.map(t=>esc(t.name)).join(' · '):'Syllabus-based sample practice tests'}</p><div class="vk22-tests">${cards.map((t,i)=>`<article class="vk22-test"><span class="vk22-pill">${t.demo?'SAMPLE PREVIEW':'PUBLISHED TEST'}</span><h3>${esc(t.name)}</h3><p style="margin:4px 0;color:#755b48">${esc(t.topic||'Topic-wise practice')}</p><small>${t.count} Questions · ${t.demo?'2 sample questions':'Full test'}</small><div style="margin-top:13px"><button onclick="${t.demo?`window.vk22Preview('${key}',${i})`:`window.vk22OpenRealTest('${t.id}')`}">${t.demo?'View Sample Questions':(purchase?'Start Test':'View Test')}</button></div></article>`).join('')}</div>${!purchase?`<div class="vk22-note">🔒 Buy the plan to unlock all published tests across Paper-1 and Paper-2. ${live?`<button class="vk22-buy" onclick="vkIpBuy('${pkg.id}')">Buy Plan · ₹${packagePrice()}</button>`:'Payment will be enabled after the package is published.'}</div>`:''}</section>`;
+    const host=$('vk22PaperContent'),preview=$('vk22TestPreview');if(!host)return;if(preview)preview.innerHTML='';
+    let topicSections='';
+    if(paperTopics.length){
+      topicSections=paperTopics.map((topic,ti)=>{
+        const topicTests=actual.filter(t=>t.topic_id===topic.id);
+        const cards=topicTests.map((t,i)=>`<article class="vk22-test"><span class="vk22-pill">PUBLISHED TEST</span><h3>${esc(t.name||t.title||`Topic Test ${i+1}`)}</h3><small>${Number(t.question_count||25)} Questions · Full test</small><div style="margin-top:13px"><button onclick="window.vk22OpenRealTest('${esc(t.id)}')">${purchase?'Start Test':'View Test'}</button></div></article>`).join('');
+        return `<section class="vk22-topic-block"><header><span class="vk22-topic-number">TOPIC ${String(ti+1).padStart(2,'0')}</span><h3>${esc(topic.name)}</h3></header><div class="vk22-tests">${cards||'<p class="vk22-empty-topic">Tests for this topic will appear here once published by Admin.</p>'}</div></section>`;
+      }).join('');
+    }else{
+      topicSections=demo.map((t,i)=>`<section class="vk22-topic-block"><header><span class="vk22-topic-number">SAMPLE TOPIC ${String(i+1).padStart(2,'0')}</span><h3>${esc(t.topic)}</h3></header><div class="vk22-tests"><article class="vk22-test"><span class="vk22-pill">SAMPLE PREVIEW</span><h3>${esc(t.name)}</h3><small>2 Sample Questions</small><div style="margin-top:13px"><button onclick="window.vk22Preview('${key}',${i})">View Sample Questions</button></div></article></div></section>`).join('');
+    }
+    host.innerHTML=`<section class="vk22-section"><button class="vkIp-student-back" onclick="document.getElementById('vk22PaperContent').innerHTML='';document.getElementById('vk22TestPreview').innerHTML='';">← Back to Papers</button><h2 style="color:#702d1c;margin:12px 0 4px">${is2?'Paper-2':'Paper-1'} · Topic-wise Tests</h2><p style="color:#80634f">Select a topic to view its published tests.</p>${topicSections}${!purchase?`<div class="vk22-note">🔒 Buy the plan to unlock all published tests across Paper-1 and Paper-2. ${pkg?`<button class="vk22-buy" onclick="vkIpBuy('${pkg.id}')">Buy Plan · ₹${packagePrice()}</button>`:'Payment will be enabled after the package is published.'}</div>`:''}</section>`;
     host.scrollIntoView({behavior:'smooth',block:'start'});
   };
   window.vk22Preview=function(key,i){const t=sample[key][i],host=$('vk22TestPreview');host.innerHTML=`<section class="vk22-section"><h2 style="color:#702d1c">${esc(t.name)} · Sample Questions</h2><div class="vk22-note">Sample preview only. These 2 demo questions are not saved as a live exam.</div>${t.qs.map((q,n)=>`<div class="vk22-question"><p>Q${n+1}. ${esc(q.q)}</p><div class="vk22-options">${q.a.map((a,j)=>`<span>${'ABCD'[j]}. ${esc(a)}</span>`).join('')}</div><details style="margin-top:9px;color:#17734b"><summary>Show answer</summary>Correct answer: ${q.correct}</details></div>`).join('')}<button class="vkIp-student-back" onclick="document.getElementById('vk22TestPreview').innerHTML='';">Close Preview</button></section>`;host.scrollIntoView({behavior:'smooth',block:'start'});};
   window.vk22OpenRealTest=async function(id){if(!purchase){alert('Please buy the plan to unlock this test.');return;}await window.vkIpStartTest(id);};
-  async function open(){show();const host=$('vkIpStudentDetail');if(!host)return;host.innerHTML='<div class="vk-ip-loading">Loading Paper-1 and Paper-2…</div>';try{if(!window.supabaseClient)throw Error('Student service is still loading. Please refresh.');await loadPackage();render();}catch(e){host.innerHTML=`<div class="vk-ip-error">Unable to load the Topic-wise page: ${esc(e.message||e)}</div>`;}}
+  async function open(){show();const host=$('vkIpStudentDetail');if(!host)return;host.innerHTML='<div class="vk-ip-loading">Loading Paper-1 and Paper-2…</div>';try{if(!supabaseClient)throw Error('Student service is still loading. Please refresh.');await loadPackage();render();}catch(e){host.innerHTML=`<div class="vk-ip-error">Unable to load the Topic-wise page: ${esc(e.message||e)}</div>`;}}
   window.vkTopicOpenPackage=open;window.vkIpOpenPackages=open;window.vkIpStudentLoad=open;
   window.openCourse=(function(old){return function(course,...args){if(course===COURSE){open();return;}return old.apply(this,args);};})(window.openCourse||function(){});
+  window.vkIpBackToPackages=function(){if(typeof window.showHome==='function')window.showHome();else if(typeof window.showPage==='function')window.showPage('home');};
+  function restore(){const route=(location.hash||'').replace(/^#/,'').split('?')[0];if(route==='vkIndependentPackageDetail')open();}
+  window.addEventListener('hashchange',restore);window.addEventListener('popstate',restore);
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',restore,{once:true});else setTimeout(restore,100);
+})();
+</script>E){open();return;}return old.apply(this,args);};})(window.openCourse||function(){});
   window.vkIpBackToPackages=function(){if(typeof window.showHome==='function')window.showHome();else if(typeof window.showPage==='function')window.showPage('home');};
   function restore(){const route=(location.hash||'').replace(/^#/,'').split('?')[0];if(route==='vkIndependentPackageDetail')open();}
   window.addEventListener('hashchange',restore);window.addEventListener('popstate',restore);
