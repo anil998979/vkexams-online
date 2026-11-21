@@ -1,4 +1,4 @@
-                  <!DOCTYPE html>
+                 <!DOCTYPE html>
 <html lang="en">
 <head>
 
@@ -17204,7 +17204,7 @@ body:has(#examPage.active) > footer{
 #vkTopicWiseSharedAdmin #vkTWNegativeMarks{font-variant-numeric:tabular-nums}
 </style>
 
-\n<!-- VK ADMIN-ONLY TOPIC WISE STUDENT-PAGE PREVIEW v16 -->
+<!-- VK ADMIN-ONLY TOPIC WISE STUDENT-PAGE PREVIEW v16 -->
 <script id="vk-topicwise-admin-student-preview-v14">
 (function(){
   let adminPreviewAuthorized=false;
@@ -17301,3 +17301,51 @@ body:has(#examPage.active) > footer{
   #vkTopicWiseSharedAdmin { display: none !important; }
 </style>
  
+
+
+<!-- VK TOPIC-WISE STUDENT RELEASE ROUTE FIX v20 -->
+<script id="vk-topicwise-student-release-route-v20">
+(function(){
+  // The independent-package student flow is the live flow for this category.
+  // Earlier admin-preview scripts replaced vkTopicOpenPackage and blocked the
+  // legacy custom-package page. Restore the independent student entry point.
+  window.vkTopicOpenPackage = async function(){
+    try {
+      if (typeof window.vkIpStudentLoad === 'function') {
+        await window.vkIpStudentLoad();
+        return true;
+      }
+      if (typeof window.vkIpOpenStudentPackage === 'function' && window.supabaseClient) {
+        const { data, error } = await window.supabaseClient
+          .from('vk_independent_packages')
+          .select('id')
+          .eq('package_code','ENDOWMENT')
+          .eq('is_published',true)
+          .eq('is_archived',false)
+          .order('created_at',{ascending:false})
+          .limit(1);
+        if (error) throw error;
+        if (!data || !data.length) throw new Error('Topic-wise package is not published yet.');
+        await window.vkIpOpenStudentPackage(data[0].id);
+        return true;
+      }
+      throw new Error('Topic-wise student page is still loading. Please refresh once.');
+    } catch (e) {
+      console.error('Topic-wise student page could not open:', e);
+      const host = document.getElementById('vkIpStudentDetail');
+      if (host) host.innerHTML = '<div class="vk-ip-error">' +
+        String(e && e.message ? e.message : e).replace(/[&<>"']/g, c =>
+          ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])) +
+        '</div>';
+      else if (typeof window.toast === 'function') window.toast(e.message || String(e));
+      return false;
+    }
+  };
+  // Keep the category's back navigation and student loader aligned.
+  window.vkIpOpenPackages = window.vkTopicOpenPackage;
+  window.vkIpBackToPackages = function(){
+    if (typeof window.showHome === 'function') window.showHome();
+    else if (typeof window.showPage === 'function') window.showPage('home');
+  };
+})();
+</script>
