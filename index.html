@@ -4416,9 +4416,9 @@ id="solutions">
           <div class="vk-bulk-error">Warning: Saving changes updates the selected live Paid Test questions. The Test ID and question IDs are preserved, but students may see the revised question text and answers when reviewing that test. Take a database backup before editing.</div>
         </div>
         <div class="vk-admin-field" id="vkAdminTopicWrap">
-          <label for="vkAdminTopic">Topic Name</label>
-          <input id="vkAdminTopic" type="text" maxlength="120" placeholder="e.g. Ramayanam">
-          <p class="vk-admin-hint" id="vkAdminPaidTopicHint" style="display:none">Enter the exact syllabus Topic Name for this Paper. This field is required when creating a Topic Wise Paid Test.</p>
+          <label for="vkAdminTopic">Admin Topic Name</label>
+          <input id="vkAdminTopic" type="text" maxlength="120" autocomplete="off" placeholder="Type any topic name (e.g. Ramayanam, Mahabharatam, Hindu Philosophy)">
+          <p class="vk-admin-hint" id="vkAdminPaidTopicHint" style="display:none">Type the topic name exactly as you want students to see it. You can create a new topic here; it will be added under the selected Paper automatically. If the same topic already exists (ignoring capitalization and extra spaces), the test will be added under that topic.</p>
         </div>
         <div class="vk-admin-field">
           <label for="vkAdminDuration">Duration (minutes)</label>
@@ -9499,6 +9499,10 @@ function vkAdminIsEndowmentTopicWiseCourse(){
     return courseName.toLowerCase() === "endowment topic wise test series";
 }
 
+document.addEventListener("blur",function(e){
+    if(e.target&&e.target.id==="vkAdminTopic") e.target.value=String(e.target.value||"").replace(/\s+/g," ").trim();
+},true);
+
 function vkAdminUpdateTopicNameVisibility(){
     const wrap = document.getElementById("vkAdminTopicWrap");
     const input = document.getElementById("vkAdminTopic");
@@ -10012,14 +10016,21 @@ async function vkAdminPublishIndependentTopicWiseTest(paperName,topicName,durati
         .eq("package_id",packageId).eq("name",independentPaper).eq("is_active",true).maybeSingle();
     if(paperResult.error) throw paperResult.error;
     if(!paperResult.data) throw new Error(independentPaper+" is not configured in the Independent Package.");
-    let topicResult=await supabaseClient.from("vk_independent_topics").select("id,display_order")
-        .eq("paper_id",paperResult.data.id).eq("name",topicName).eq("is_active",true).maybeSingle();
-    if(topicResult.error) throw topicResult.error;
+    const cleanTopicName=String(topicName||"").replace(/\s+/g," ").trim();
+    if(!cleanTopicName) throw new Error("Enter the Topic Name exactly as you want it displayed to students.");
+    // Admin may type any topic name. Reuse an existing topic in this Paper
+    // when its name matches after trimming/collapsing spaces and ignoring case.
+    const existingTopics=await supabaseClient.from("vk_independent_topics").select("id,name,display_order")
+        .eq("paper_id",paperResult.data.id).eq("is_active",true).order("display_order",{ascending:true});
+    if(existingTopics.error) throw existingTopics.error;
+    const normalizedTopicName=cleanTopicName.toLocaleLowerCase();
+    const matchedTopic=(existingTopics.data||[]).find(t=>String(t.name||"").replace(/\s+/g," ").trim().toLocaleLowerCase()===normalizedTopicName);
+    let topicResult={data:matchedTopic||null,error:null};
     if(!topicResult.data){
         const lastTopic=await supabaseClient.from("vk_independent_topics").select("display_order")
             .eq("paper_id",paperResult.data.id).order("display_order",{ascending:false}).limit(1);
         if(lastTopic.error) throw lastTopic.error;
-        const newTopic=await supabaseClient.from("vk_independent_topics").insert({paper_id:paperResult.data.id,name:topicName,display_order:(lastTopic.data?.[0]?.display_order||0)+1,is_active:true}).select("id,display_order").single();
+        const newTopic=await supabaseClient.from("vk_independent_topics").insert({paper_id:paperResult.data.id,name:cleanTopicName,display_order:(lastTopic.data?.[0]?.display_order||0)+1,is_active:true}).select("id,display_order,name").single();
         if(newTopic.error) throw newTopic.error;
         topicResult={data:newTopic.data,error:null};
     }
@@ -10028,7 +10039,7 @@ async function vkAdminPublishIndependentTopicWiseTest(paperName,topicName,durati
     if(lastTest.error) throw lastTest.error;
     const testOrder=(lastTest.data?.[0]?.display_order||0)+1;
     const totalMarks=questions.reduce((sum,q)=>sum+Number(q.marks||1),0);
-    const testName=topicName+" - Test "+testOrder;
+    const testName=cleanTopicName+" - Test "+testOrder;
     const testInsert=await supabaseClient.from("vk_independent_tests").insert({
         topic_id:topicResult.data.id,name:testName,duration_minutes:duration,total_marks:totalMarks,
         negative_marks:negativeMarks,question_count:questions.length,display_order:testOrder,is_active:false
