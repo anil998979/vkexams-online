@@ -5165,6 +5165,16 @@ aria-live="polite">
   </div>
 </div>
 
+<!-- Independent Topic-wise student page: this container was missing in v20. -->
+<div id="vkIndependentPackageDetail" class="page vk-independent-student-page">
+  <div class="container">
+    <button type="button" class="back" onclick="showHome()">← Back to Home</button>
+    <div id="vkIpStudentDetail" aria-live="polite">
+      <div class="vk-ip-loading">Loading Endowment Topic Wise Test Series…</div>
+    </div>
+  </div>
+</div>
+
 <footer>
 
 <h3>
@@ -17347,5 +17357,32 @@ body:has(#examPage.active) > footer{
     if (typeof window.showHome === 'function') window.showHome();
     else if (typeof window.showPage === 'function') window.showPage('home');
   };
+
+  // Restore the independent student page after a browser refresh or back/forward navigation.
+  async function restoreIndependentStudentRoute(){
+    const route=(window.location.hash||'').replace(/^#/,'').split('?')[0];
+    if(route!=='vkIndependentPackageDetail') return;
+    try {
+      if(window.__vkAuthInitialization && typeof window.__vkAuthInitialization.then==='function') {
+        await window.__vkAuthInitialization;
+      }
+      if(typeof window.vkIpStudentLoad==='function') await window.vkIpStudentLoad();
+      else if(typeof window.vkTopicOpenPackage==='function') await window.vkTopicOpenPackage();
+    } catch(e) {
+      console.error('Could not restore Topic Wise page:',e);
+      const host=document.getElementById('vkIpStudentDetail');
+      if(host) host.innerHTML='<div class="vk-ip-error">Could not restore this page. Please return Home and open the category again.</div>';
+    }
+  }
+  window.addEventListener('popstate',restoreIndependentStudentRoute);
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',restoreIndependentStudentRoute,{once:true});
+  else setTimeout(restoreIndependentStudentRoute,0);
 })();
 </script>
+
+<style id="vk-independent-student-page-fix-v21">
+#vkIndependentPackageDetail{min-height:calc(100vh - 70px);}
+#vkIndependentPackageDetail .container{max-width:1120px;padding-top:28px;padding-bottom:42px;}
+#vkIndependentPackageDetail .vk-ip-loading{padding:22px;border:1px solid #ead8b8;border-radius:14px;background:#fffaf1;color:#71301e;font-weight:700;}
+#vkIndependentPackageDetail .vk-ip-error{padding:18px;border:1px solid #fecaca;border-radius:14px;background:#fff7f7;color:#991b1b;}
+</style>
