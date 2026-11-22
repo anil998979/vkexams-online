@@ -5144,6 +5144,18 @@ aria-live="polite">
   </div>
 </div>
 
+<!-- Independent Topic-wise exam page: required by vkIpStartTest/vkIpSubmitTest. -->
+<div id="vkIndependentExamPage" class="page vk-independent-student-page">
+  <div class="container">
+    <button type="button" class="back" onclick="vkIpBackToPackages()">← Back to Tests</button>
+    <section class="vk-v26-tests" aria-live="polite">
+      <div id="vkIpExamHost">
+        <div class="vk-ip-loading">Preparing your exam…</div>
+      </div>
+    </section>
+  </div>
+</div>
+
 <footer>
 
 <h3>
@@ -16194,7 +16206,7 @@ async function vkIpOpenTopic(id){
   host.scrollIntoView({behavior:'smooth',block:'start'});
 }
 async function vkIpStartTest(id){try{const {data:test,error}=await supabaseClient.from('vk_independent_tests').select('*').eq('id',id).eq('is_active',true).single();if(error)throw error;const {data:questions,error:qe}=await supabaseClient.from('vk_independent_questions').select('id,question_text,option_a,option_b,option_c,option_d,display_order').eq('test_id',id).eq('is_active',true).order('display_order');if(qe)throw qe;if(!questions?.length)throw Error('No questions uploaded for this test.');if(questions.length<1||questions.length>1000||questions.length!==Number(test.question_count))throw Error('This test is not ready. It must contain 1–1,000 questions and the saved question count must match.');vkIpCurrentTest=test;vkIpCurrentQuestions=questions;showPage('vkIndependentExamPage');const host=document.getElementById('vkIpExamHost');host.innerHTML=`<h2>${vkIpEsc(test.name)}</h2><p>${questions.length} Questions · ${test.duration_minutes} Minutes</p><form id="vkIpExamForm">${questions.map((q,i)=>`<div class="vk-ip-exam-q"><strong>Q${i+1}. ${vkIpEsc(q.question_text)}</strong>${['A','B','C','D'].map(k=>`<label><input type="radio" name="q_${q.id}" value="${k}"> ${k}. ${vkIpEsc(q['option_'+k.toLowerCase()])}</label>`).join('')}</div>`).join('')}<button type="button" class="vk-ip-buy" onclick="vkIpSubmitTest()">Submit Test</button></form>`;}catch(e){alert(e.message||e);}}
-async function vkIpSubmitTest(){try{const form=document.getElementById('vkIpExamForm');const answers={};vkIpCurrentQuestions.forEach(q=>{answers[q.id]=form.querySelector(`input[name="q_${q.id}"]:checked`)?.value||null;});const {data:result,error:saveError}=await supabaseClient.rpc('vk_independent_submit_attempt',{p_test_id:vkIpCurrentTest.id,p_answers:answers});if(saveError)throw saveError;document.getElementById('vkIpExamHost').innerHTML=`<div class="vk-ip-result"><h2>Test Submitted</h2><h3>Score: ${result.score} / ${result.total_marks}</h3><p>Correct: ${result.correct_answers} · Wrong: ${result.wrong_answers} · Unanswered: ${result.unanswered}</p><p>Percentage: ${result.percentage}%</p></div><button class="vk-ip-buy" onclick="vkIpBackToPackages()">Back to Packages</button>`;}catch(e){alert('Could not submit test: '+e.message);}}
+async function vkIpSubmitTest(){try{const form=document.getElementById('vkIpExamForm');if(!form)throw Error('Exam form is not available. Please reopen the test.');const answers={};vkIpCurrentQuestions.forEach(q=>{answers[q.id]=form.querySelector(`input[name="q_${q.id}"]:checked`)?.value||null;});const {data:result,error:saveError}=await supabaseClient.rpc('vk_independent_submit_attempt',{p_test_id:vkIpCurrentTest.id,p_answers:answers});if(saveError)throw saveError;const resultHost=document.getElementById('vkIpExamHost');if(!resultHost)throw Error('Result screen is unavailable.');resultHost.innerHTML=`<div class="vk-ip-result"><h2>Test Submitted</h2><h3>Score: ${result.score} / ${result.total_marks}</h3><p>Correct: ${result.correct_answers} · Wrong: ${result.wrong_answers} · Unanswered: ${result.unanswered}</p><p>Percentage: ${result.percentage}%</p></div><button class="vk-ip-buy" onclick="vkIpBackToPackages()">Back to Packages</button>`;}catch(e){alert('Could not submit test: '+e.message);}}
 
 
 
@@ -17750,7 +17762,7 @@ body:has(#examPage.active) > footer{
  window.vkIpStudentLoad=window.vkIpOpenPackages;
  window.vkIpOpenStudentPackage=async function(id){return window.vkIpOpenPackages();};
  const oldStart=window.vkIpStartTest;
- window.vkIpStartTest=async function(id){try{isAdmin=await checkAdmin();await refreshPurchase();if(!isAdmin&&!purchase){alert('Please buy the ₹29 package to unlock exam attempts.');return;}const q=await supabaseClient.from('vk_independent_tests').select('*').eq('id',id).eq('is_active',true).single();if(q.error)throw q.error;const r=await supabaseClient.from('vk_independent_questions').select('id,question_text,option_a,option_b,option_c,option_d,display_order').eq('test_id',id).eq('is_active',true).order('display_order');if(r.error)throw r.error;if(!r.data?.length||r.data.length>1000||r.data.length!==Number(q.data.question_count))throw Error('Test is not ready: verify its 1–1,000 questions and question count.');window.vkIpCurrentTest=q.data;window.vkIpCurrentQuestions=r.data;vkIpCurrentTest=q.data;vkIpCurrentQuestions=r.data;showPage('vkIndependentExamPage');const host=document.getElementById('vkIpExamHost');host.innerHTML=`<h2>${esc(q.data.name)}</h2><p>${r.data.length} Questions · ${q.data.duration_minutes} Minutes</p><form id="vkIpExamForm">${r.data.map((x,i)=>`<div class="vk-ip-exam-q"><strong>Q${i+1}. ${esc(x.question_text)}</strong>${['A','B','C','D'].map(k=>`<label><input type="radio" name="q_${x.id}" value="${k}"> ${k}. ${esc(x['option_'+k.toLowerCase()])}</label>`).join('')}</div>`).join('')}<button type="button" class="vk-ip-buy" onclick="vkIpSubmitTest()">Submit Test</button></form>`;}catch(e){alert(e.message||String(e));}};
+ window.vkIpStartTest=async function(id){try{isAdmin=await checkAdmin();await refreshPurchase();if(!isAdmin&&!purchase){alert('Please buy the ₹29 package to unlock exam attempts.');return;}const q=await supabaseClient.from('vk_independent_tests').select('*').eq('id',id).eq('is_active',true).single();if(q.error)throw q.error;const r=await supabaseClient.from('vk_independent_questions').select('id,question_text,option_a,option_b,option_c,option_d,display_order').eq('test_id',id).eq('is_active',true).order('display_order');if(r.error)throw r.error;if(!r.data?.length||r.data.length>1000||r.data.length!==Number(q.data.question_count))throw Error('Test is not ready: verify its 1–1,000 questions and question count.');window.vkIpCurrentTest=q.data;window.vkIpCurrentQuestions=r.data;vkIpCurrentTest=q.data;vkIpCurrentQuestions=r.data;showPage('vkIndependentExamPage');const host=document.getElementById('vkIpExamHost');if(!host)throw Error('Exam screen is unavailable. Please refresh the page and try again.');host.innerHTML=`<h2>${esc(q.data.name)}</h2><p>${r.data.length} Questions · ${q.data.duration_minutes} Minutes</p><form id="vkIpExamForm">${r.data.map((x,i)=>`<div class="vk-ip-exam-q"><strong>Q${i+1}. ${esc(x.question_text)}</strong>${['A','B','C','D'].map(k=>`<label><input type="radio" name="q_${x.id}" value="${k}"> ${k}. ${esc(x['option_'+k.toLowerCase()])}</label>`).join('')}</div>`).join('')}<button type="button" class="vk-ip-buy" onclick="vkIpSubmitTest()">Submit Test</button></form>`;}catch(e){alert(e.message||String(e));}};
 })();
 </script>
 
