@@ -1,4 +1,4 @@
-                      <!DOCTYPE html>
+                       <!DOCTYPE html>
 <html lang="en">
 <head>
 
@@ -3534,30 +3534,6 @@ Select an examination and start your preparation.
     <div class="vk-card-features"><span>☑ High Court Exam</span><span>▥ Paid Test Series</span></div>
     <button class="vk-card-button" type="button">Explore High Court <b>➜</b></button>
   </article>
-  <article class="vk-exam-card vk-appsc-card" onclick="openCourse('Police')">
-    <div class="vk-card-top"><span class="vk-card-emblem">👮</span></div>
-    <div class="vk-card-art vk-appsc-art">🚔</div>
-    <h3>Police</h3>
-    <p>Police recruitment examination preparation</p>
-    <div class="vk-card-features"><span>☑ Free Mock Tests</span></div>
-    <button class="vk-card-button" type="button">Explore Police <b>➜</b></button>
-  </article>
-  <article class="vk-exam-card vk-appsc-card" onclick="openCourse('DSC')">
-    <div class="vk-card-top"><span class="vk-card-emblem">🎓</span></div>
-    <div class="vk-card-art vk-appsc-art">📚</div>
-    <h3>DSC</h3>
-    <p>Teacher recruitment examination preparation</p>
-    <div class="vk-card-features"><span>☑ Free Mock Tests</span></div>
-    <button class="vk-card-button" type="button">Explore DSC <b>➜</b></button>
-  </article>
-  <article class="vk-exam-card vk-appsc-card" onclick="openCourse('Banks')">
-    <div class="vk-card-top"><span class="vk-card-emblem">🏦</span></div>
-    <div class="vk-card-art vk-appsc-art">💳</div>
-    <h3>Banks</h3>
-    <p>Banking examinations and recruitment tests</p>
-    <div class="vk-card-features"><span>☑ Free Mock Tests</span></div>
-    <button class="vk-card-button" type="button">Explore Banks <b>➜</b></button>
-  </article>
 </div>
 
 <!-- VK Exams responsive AdSense display unit: placed above Why VK Exams -->
@@ -5621,7 +5597,7 @@ async function openFreeMocks(addHistory = true){
         }
     }
 
-    const fallbackCourses = [["Endowment Officer","🛕"],["APPSC","🏛️"],["Police","👮"],["DSC","🎓"],["Banks","🏦"]];
+    const fallbackCourses = [["Endowment Officer","🛕"],["APPSC","🏛️"]];
     let courses = fallbackCourses.slice();
     try {
         if (supabaseClient) {
@@ -9231,16 +9207,13 @@ async function vkLoadHomepageCards(){
     {name:'APPSC',icon:'🏛️',homepage_description:'Andhra Pradesh Public Service Commission Exams',homepage_color:'#2563eb'},
     {name:'Endowment Officer',icon:'🛕',homepage_description:'AP Endowments Department Exam',homepage_color:'#2563eb'},
     {name:'High Court',icon:'⚖️',homepage_description:'AP High Court Recruitment Exams',homepage_color:'#2563eb'},
-    {name:'Police',icon:'👮',homepage_description:'Police recruitment examination preparation',homepage_color:'#2563eb'},
-    {name:'DSC',icon:'🎓',homepage_description:'Teacher recruitment examination preparation',homepage_color:'#2563eb'},
-    {name:'Banks',icon:'🏦',homepage_description:'Banking examinations and recruitment tests',homepage_color:'#2563eb'}
   ];
   const coreRows=required.map(f=>visibleRows.find(c=>String(c.name||'').trim().toLowerCase()===f.name.toLowerCase())||allRows.find(c=>String(c.name||'').trim().toLowerCase()===f.name.toLowerCase())||f);
   const extraRows=visibleRows.filter(c=>!required.some(f=>String(c.name||'').trim().toLowerCase()===f.name.toLowerCase()));
   const homepageRows=coreRows.concat(extraRows);
   if(!homepageRows.length)return;
   const safe=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  const iconDefaults={APPSC:'🏛️','Endowment Officer':'🛕','High Court':'⚖️',Police:'👮',DSC:'🎓',Banks:'🏦'};
+  const iconDefaults={APPSC:'🏛️','Endowment Officer':'🛕','High Court':'⚖️'};
   grid.innerHTML=homepageRows.map(c=>{
     const rawName=String(c.name||'').trim();
     const name=safe(rawName);
@@ -9254,7 +9227,7 @@ async function vkLoadHomepageCards(){
     if(rawName==='Endowment Officer')return `<article class="vk-exam-card vk-endowment-card" ${open}><div class="vk-crown">♛</div><div class="vk-paid-label">★ PAID TEST SERIES</div><div class="vk-card-art vk-temple-art">${icon}</div>${image}<h3>Endowment<br>Officer</h3><p>${description}</p><div class="vk-card-features"><span>▣ Real Exam<br>(CBT Mode)</span><span>▱ Full-Length<br>Tests (150 Q)</span><span>▥ Detailed<br>Analysis</span></div><button class="vk-card-button vk-paid-button" type="button" onclick="event.stopPropagation();openCourse(this.closest('[data-course]').dataset.course)">Start Paid Test Series <b>➜</b></button></article>`;
     if(rawName==='High Court')return `<article class="vk-exam-card vk-court-card" ${open}><div class="vk-card-top"><span class="vk-card-emblem">${icon}</span></div>${image}<div class="vk-card-art vk-court-art">🏛</div><h3>${name}</h3><p>${description}</p><div class="vk-card-features"><span>☑ High Court Exam</span><span>▥ Paid Test Series</span></div>${action}</article>`;
     const color=/^#[0-9a-f]{6}$/i.test(c.homepage_color||'')?c.homepage_color:'#2563eb';
-    const art={Police:'🚔',DSC:'📚',Banks:'💳'}[rawName]||iconDefaults[rawName]||'🎓';
+    const art=iconDefaults[rawName]||'🎓';
     return `<article class="vk-exam-card vk-appsc-card vk-restored-course-card" style="--vk-card-color:${color}" ${open}><div class="vk-card-top"><span class="vk-card-emblem">${icon}</span></div>${image}<div class="vk-card-art vk-appsc-art">${art}</div><h3>${name}</h3><p>${description}</p><div class="vk-card-features"><span>☑ Free Mock Tests</span></div>${action}</article>`;
   }).join('');
 }
@@ -9395,7 +9368,7 @@ document.addEventListener('change',e=>{if(e.target&&e.target.id==='vkCatIconFile
 document.addEventListener('change',e=>{if(e.target&&e.target.id==='vkHomeCardImage'){const f=e.target.files&&e.target.files[0],p=document.getElementById('vkHomeCardImagePreview');if(!f){p.hidden=true;return}if(!['image/png','image/jpeg','image/webp'].includes(f.type)||f.size>2*1024*1024){alert('Choose PNG/JPG/WEBP up to 2 MB.');e.target.value='';p.hidden=true;return}p.src=URL.createObjectURL(f);p.hidden=false}});
 
 
-const VK_ADMIN_ALLOWED_COURSES = ["APPSC","Endowment Officer","High Court","Police","DSC","Banks","Endowment Topic Wise Test Series"];// Seventh homepage category; keep this label identical to courses.name.
+const VK_ADMIN_ALLOWED_COURSES = ["APPSC","Endowment Officer","High Court","Endowment Topic Wise Test Series"];// Seventh homepage category; keep this label identical to courses.name.
 window.VK_ADMIN_ALLOWED_COURSES = VK_ADMIN_ALLOWED_COURSES;
 
 function vkAdminPaidSeriesOptions(courseName){
@@ -17761,6 +17734,22 @@ body:has(#examPage.active) > footer{
 </script>
 
 <!-- VK Exams update: independent Endowment test deletion uses vk_admin_delete_endowment_topic_test; source index (30).html -->
+
+<section id="vkIndependentExamPage" class="page" aria-label="Computer Based Test"><div id="vkIpExamHost"></div></section>
+
+
+<script id="vk-homepage-remove-unwanted-categories">
+(function(){
+ const unwanted=['Police','DSC','Banks'];
+ function clean(){
+  document.querySelectorAll('.vk-exam-card').forEach(card=>{const t=(card.innerText||'').trim();if(unwanted.some(n=>new RegExp('\\b'+n+'\\b','i').test(t)))card.remove();});
+ }
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',clean);else clean();
+ const mo=new MutationObserver(clean);if(document.body)mo.observe(document.body,{childList:true,subtree:true});
+ setTimeout(()=>mo.disconnect(),12000);
+})();
+</script>
+
 <script id="vk-cbt-result-analytics-controller-v1">
 (function(){
 'use strict';
@@ -17779,13 +17768,25 @@ function renderInstructions(test,questions){const host=$('vkIpExamHost');host.in
 function begin(){const host=$('vkIpExamHost');state={test:window.vkIpCurrentTest,questions:window.vkIpCurrentQuestions,answers:{},review:{},visited:[true,...Array(window.vkIpCurrentQuestions.length-1).fill(false)],index:0,startedAt:Date.now(),deadline:Date.now()+Math.max(1,Number(window.vkIpCurrentTest.duration_minutes)||30)*60000};host.innerHTML=`<section class="vk-cbt-shell"><header class="vk-cbt-top"><div><b>VK EXAMS</b><small>${esc(state.test.name)}</small></div><div id="vkCbtTimerBox">TIME LEFT <strong id="vkCbtTimer">--:--</strong></div></header><div class="vk-cbt-main"><main class="vk-cbt-work"><div id="vkCbtQuestion"></div><footer class="vk-cbt-actions"><button id="vkCbtReview" class="vk-cbt-review" onclick="window.vkCbtMark()">Mark for Review & Next</button><button class="vk-cbt-clear" onclick="window.vkCbtClear()">Clear Response</button><span></span><button id="vkCbtPrev" onclick="window.vkCbtGo(${0})">Previous</button><button id="vkCbtNext" class="vk-cbt-primary" onclick="window.vkCbtNext()">Save & Next</button></footer></main><aside class="vk-cbt-sidebar"><div class="vk-cbt-user">EXAM PROGRESS</div><div class="vk-cbt-counts"><span><i class="answered"></i><b id="vkCbtAnswered">0</b> Answered</span><span><i class="notanswered"></i><b id="vkCbtNotAnswered">0</b> Not Answered</span><span><i class="review"></i><b id="vkCbtMarked">0</b> Marked</span><span><i class="unvisited"></i><b id="vkCbtNotVisited">0</b> Not Visited</span></div><h3>Question Palette</h3><div id="vkCbtPalette" class="vk-cbt-palette"></div><button class="vk-cbt-submit" onclick="window.vkCbtSubmit()">Submit Exam</button></aside></div></section>`;window.vkCbtGo=go;window.vkCbtAnswer=saveAnswer;window.vkCbtNext=()=>{if(state.index<state.questions.length-1)go(state.index+1);else palette();};window.vkCbtMark=()=>{state.review[state.index]=true;if(state.index<state.questions.length-1)go(state.index+1);else draw();};window.vkCbtClear=()=>{delete state.answers[state.questions[state.index].id];draw();};window.vkCbtSubmit=()=>submit(false);draw();tick();timer=setInterval(tick,1000);}
 function chartBar(label,value,max,cls){const pct=max>0?Math.max(0,Math.min(100,value/max*100)):0;return `<div class="vk-result-bar-row"><div><b>${esc(label)}</b><strong>${value}</strong></div><div class="vk-result-track"><i class="${cls}" style="width:${pct}%"></i></div></div>`;}
 async function showResult(r,timeout){const total=Number(r.total_marks)||Number(state.test.total_marks)||0,score=Number(r.score)||0,pct=total>0?Math.max(0,Math.min(100,Number(r.percentage)||score/total*100)):0,correct=Number(r.correct_answers)||0,wrong=Number(r.wrong_answers)||0,unanswered=Number(r.unanswered)||0,elapsed=Number(r.time_taken_seconds)||Math.floor((Date.now()-state.startedAt)/1000);const host=$('vkIpExamHost');host.innerHTML=`<section class="vk-result-dashboard"><header class="vk-result-hero"><span>VK EXAMS · PERFORMANCE REPORT</span><h1>Exam Result</h1><p>${esc(state.test.name)}</p><div class="vk-result-score"><strong>${score.toFixed(2)}</strong><span>/ ${total.toFixed(2)} Marks</span></div><div class="vk-result-gauge"><div style="--pct:${pct}%"><b>${pct.toFixed(1)}%</b></div></div><p>${timeout?'Time expired. Your exam was submitted automatically.':'Your examination has been submitted successfully.'}</p></header><div class="vk-result-stats"><article><small>Correct</small><b>${correct}</b></article><article><small>Wrong</small><b>${wrong}</b></article><article><small>Unanswered</small><b>${unanswered}</b></article><article><small>Time Taken</small><b>${Math.floor(elapsed/60)}m ${elapsed%60}s</b></article></div><section class="vk-result-panel"><h2>Performance Analytics</h2><p class="vk-result-muted">Question-wise performance breakdown</p>${chartBar('Correct Answers',correct,state.questions.length,'correct')}${chartBar('Wrong Answers',wrong,state.questions.length,'wrong')}${chartBar('Unanswered',unanswered,state.questions.length,'blank')}<div class="vk-result-comparison"><div><span>Your Score</span><b>${score.toFixed(2)} / ${total.toFixed(2)}</b></div><div class="vk-result-track large"><i class="score" style="width:${pct}%"></i></div><small>${pct.toFixed(1)}% of maximum marks</small></div></section><section class="vk-result-panel"><h2>Score Distribution</h2><div class="vk-result-columns"><div><div class="vk-result-column"><i style="height:${pct}%"></i></div><b>Your Score</b><small>${score.toFixed(2)}</small></div><div><div class="vk-result-column max"><i style="height:100%"></i></div><b>Maximum</b><small>${total.toFixed(2)}</small></div></div></section><div class="vk-result-actions"><button onclick="window.vkIpBackToPackages()">Back to Test Series</button></div></section>`;stopTimer();}
-async function submit(timeout){if(!state||submitting)return;if(!timeout&&!confirm('Are you sure you want to submit the examination? You cannot change your answers after submission.'))return;submitting=true;stopTimer();const btn=document.querySelector('.vk-cbt-submit');if(btn){btn.disabled=true;btn.textContent='Submitting…';}try{const duration=Math.max(0,Math.floor((Date.now()-state.startedAt)/1000));const {data:r,error}=await supabaseClient.rpc('vk_independent_submit_attempt',{p_test_id:state.test.id,p_answers:state.answers,p_duration_seconds:duration});if(error)throw error;await showResult(r||{},timeout);}catch(e){submitting=false;if(btn){btn.disabled=false;btn.textContent='Submit Exam';}alert('Could not submit exam: '+(e.message||e));}}
+async function submit(timeout){if(!state||submitting)return;if(!timeout&&!confirm('Are you sure you want to submit the examination? You cannot change your answers after submission.'))return;submitting=true;stopTimer();const btn=document.querySelector('.vk-cbt-submit');if(btn){btn.disabled=true;btn.textContent='Submitting…';}try{const duration=Math.max(0,Math.floor((Date.now()-state.startedAt)/1000));const {data:r,error}=await supabaseClient.rpc('vk_independent_submit_attempt',{p_test_id:state.test.id,p_answers:state.answers});if(error)throw error;await showResult(r||{},timeout);}catch(e){submitting=false;if(btn){btn.disabled=false;btn.textContent='Submit Exam';}alert('Could not submit exam: '+(e.message||e));}}
 const style=`<style id="vk-cbt-result-analytics-v1">
 #vkIndependentExamPage{background:#f5f8fc!important;padding:18px!important}#vkIpExamHost{max-width:1440px;margin:0 auto;color:#172033;font-family:Arial,sans-serif}.vk-cbt-instructions,.vk-result-dashboard{background:#fff;border:1px solid #d9e2ef;border-radius:16px;box-shadow:0 8px 28px #1e3a8a10;padding:24px}.vk-cbt-brand{background:#155ca7;color:#fff;padding:16px 20px;border-radius:8px;font-weight:900}.vk-cbt-brand span{float:right;font-size:12px}.vk-cbt-instructions h1{font-size:28px;color:#245b99}.vk-cbt-sub{color:#64748b}.vk-cbt-instruction-list{border:1px solid #dbe5f0;border-radius:12px;padding:18px;margin:16px 0}.vk-cbt-instruction-list li{margin:10px 0;line-height:1.55}.vk-cbt-legend{display:flex;gap:14px;flex-wrap:wrap}.vk-cbt-legend span,.vk-cbt-counts span{display:flex;align-items:center;gap:7px;font-size:13px}.vk-cbt-legend i,.vk-cbt-counts i{width:18px;height:18px;border-radius:4px;display:inline-block;border:1px solid #b8c2ce}.vk-cbt-legend i.answered,.vk-cbt-counts i.answered{background:#32a852;border-color:#278842}.vk-cbt-legend i.notanswered,.vk-cbt-counts i.notanswered{background:#e34a32;border-color:#c53b28}.vk-cbt-legend i.review,.vk-cbt-counts i.review{background:#9560d9;border-color:#7d48c4;border-radius:50%}.vk-cbt-legend i.unvisited,.vk-cbt-counts i.unvisited{background:#fff}.vk-cbt-exam-summary{display:flex;gap:24px;flex-wrap:wrap;padding:15px;background:#f2f6fb;border-radius:10px;margin-top:18px}.vk-cbt-primary,.vk-cbt-submit{background:#1769aa;color:#fff;border:0;border-radius:7px;padding:12px 20px;font-weight:800;cursor:pointer}.vk-cbt-secondary{margin-left:10px;background:#edf2f7;border:1px solid #ccd6e2;border-radius:7px;padding:12px 18px}.vk-cbt-shell{background:#fff;border:1px solid #d1dce9;box-shadow:0 6px 24px #17255412}.vk-cbt-top{background:#333;color:#fff;display:flex;justify-content:space-between;align-items:center;padding:12px 18px}.vk-cbt-top small{display:block;color:#dbeafe;margin-top:4px}.vk-cbt-top #vkCbtTimerBox{font-weight:700}#vkCbtTimer{color:#e53935;font-size:20px;margin-left:8px}#vkCbtTimerBox.warning #vkCbtTimer{color:#ff4b32}.vk-cbt-main{display:grid;grid-template-columns:minmax(0,1fr) 310px;min-height:620px}.vk-cbt-work{padding:18px;display:flex;flex-direction:column;min-width:0}.vk-cbt-qhead{display:flex;justify-content:space-between;gap:12px;background:#4b83bd;color:#fff;padding:12px;border-radius:4px;font-weight:800}.vk-cbt-qtext{font-size:18px;line-height:1.6;margin:24px 0}.vk-cbt-options{display:grid;gap:10px}.vk-cbt-option{display:flex;align-items:flex-start;gap:10px;padding:11px;border-radius:7px;cursor:pointer;border:1px solid transparent}.vk-cbt-option:hover,.vk-cbt-option.selected{background:#f0f6ff;border-color:#8ab2df}.vk-cbt-option input{margin-top:4px}.vk-cbt-actions{margin-top:auto;padding-top:24px;border-top:1px solid #e2e8f0;display:flex;gap:8px;flex-wrap:wrap;align-items:center}.vk-cbt-actions span{flex:1}.vk-cbt-actions button{padding:10px 12px;border:1px solid #cbd5e1;border-radius:5px;background:#f8fafc;font-weight:700}.vk-cbt-actions .vk-cbt-review{background:#8c5ac8;color:#fff;border:0}.vk-cbt-actions .vk-cbt-clear{background:#fff;color:#475569}.vk-cbt-actions button:disabled{opacity:.4}.vk-cbt-sidebar{background:#e8f5fc;border-left:1px solid #b8c9d9;padding:16px}.vk-cbt-user{font-weight:900;color:#24517b;padding:8px 0 15px}.vk-cbt-counts{display:grid;grid-template-columns:1fr 1fr;gap:12px 6px}.vk-cbt-counts b{min-width:20px;text-align:center}.vk-cbt-sidebar h3{background:#4b83bd;color:#fff;padding:10px;margin:18px -16px 12px}.vk-cbt-palette{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}.vk-cbt-palette button{height:34px;border:1px solid #aab6c3;border-radius:5px;background:#fff;color:#182230;font-weight:800;position:relative}.vk-cbt-palette button.notanswered{background:#e34a32;color:#fff;border-color:#c53b28}.vk-cbt-palette button.answered{background:#32a852;color:#fff;border-color:#278842}.vk-cbt-palette button.review{background:#9560d9;color:#fff;border-color:#7d48c4;border-radius:50%}.vk-cbt-palette button.current{outline:3px solid #f3b43f;outline-offset:1px}.vk-cbt-palette button i{position:absolute;right:-3px;top:-6px;font-size:11px;background:#fff;color:#16853b;border-radius:50%;padding:1px 3px}.vk-cbt-submit{width:100%;margin-top:20px;background:#1677b8}.vk-result-hero{background:linear-gradient(125deg,#143e70,#2678b8);color:#fff;text-align:center;padding:28px;border-radius:14px}.vk-result-hero>span{font-size:12px;letter-spacing:1.5px;opacity:.85}.vk-result-hero h1{font-size:30px;margin:8px}.vk-result-score{display:flex;align-items:baseline;justify-content:center;gap:8px;margin:16px}.vk-result-score strong{font-size:48px}.vk-result-score span{font-size:18px}.vk-result-gauge{width:116px;height:116px;margin:8px auto;border-radius:50%;background:conic-gradient(#43d18b var(--pct),#ffffff38 0);display:grid;place-items:center}.vk-result-gauge>div{width:88px;height:88px;background:#1b568a;border-radius:50%;display:grid;place-items:center;font-size:20px;font-weight:900}.vk-result-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:16px 0}.vk-result-stats article{background:#fff;border:1px solid #e0e7ef;border-radius:12px;padding:16px;text-align:center}.vk-result-stats small{display:block;color:#64748b}.vk-result-stats b{font-size:25px;color:#1e4f80}.vk-result-panel{background:#fff;border:1px solid #e0e7ef;border-radius:13px;padding:20px;margin:14px 0}.vk-result-panel h2{margin:0 0 5px;color:#193f68}.vk-result-muted,.vk-result-panel small{color:#64748b}.vk-result-bar-row{margin:18px 0}.vk-result-bar-row>div:first-child{display:flex;justify-content:space-between;margin-bottom:7px}.vk-result-track{height:13px;background:#edf1f5;border-radius:20px;overflow:hidden}.vk-result-track i{height:100%;display:block;border-radius:20px}.vk-result-track i.correct{background:#31a85b}.vk-result-track i.wrong{background:#e05245}.vk-result-track i.blank{background:#9aa7b6}.vk-result-track i.score{background:linear-gradient(90deg,#2563eb,#20b981)}.vk-result-comparison{background:#f7faff;padding:15px;border-radius:10px;margin-top:20px}.vk-result-comparison>div:first-child{display:flex;justify-content:space-between;margin-bottom:9px}.vk-result-track.large{height:18px}.vk-result-columns{display:flex;justify-content:center;align-items:end;gap:70px;height:220px;padding:20px}.vk-result-columns>div{text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px}.vk-result-column{height:145px;width:58px;background:#edf1f5;border-radius:9px 9px 0 0;display:flex;align-items:end;overflow:hidden}.vk-result-column i{display:block;width:100%;background:linear-gradient(180deg,#32b779,#2467bd);border-radius:8px 8px 0 0}.vk-result-column.max i{background:#9aa7b6}.vk-result-actions{text-align:center;margin:20px}.vk-result-actions button{border:0;border-radius:9px;background:#245eb2;color:#fff;padding:13px 22px;font-weight:800}@media(max-width:760px){.vk-cbt-main{grid-template-columns:1fr}.vk-cbt-sidebar{border-left:0;border-top:1px solid #b8c9d9}.vk-cbt-palette{grid-template-columns:repeat(8,1fr)}.vk-result-stats{grid-template-columns:repeat(2,1fr)}.vk-cbt-actions span{display:none}.vk-cbt-actions button{flex:1}.vk-cbt-instructions,.vk-result-dashboard{padding:14px}.vk-cbt-legend{gap:10px}}
 </style>`;
 window.vkCbtBegin=begin;
-const oldStart=window.vkIpStartTest;
-window.vkIpStartTest=async function(id){try{if(typeof oldStart!=='function')throw Error('Exam launcher is unavailable.');await oldStart(id);const test=window.vkIpCurrentTest,questions=window.vkIpCurrentQuestions;if(!test||!Array.isArray(questions)||!questions.length)return;state={test,questions};showPage('vkIndependentExamPage');renderInstructions(test,questions);}catch(e){alert(e.message||String(e));}};
+window.vkIpStartTest=async function(id){try{
+  if(!window.vkIpActivePurchase){alert('Please buy the plan to unlock this test.');return;}
+  const testQ=await supabaseClient.from('vk_independent_tests').select('*').eq('id',id).eq('is_active',true).single();
+  if(testQ.error)throw testQ.error;
+  const questionQ=await supabaseClient.from('vk_independent_questions').select('id,question_text,option_a,option_b,option_c,option_d,display_order').eq('test_id',id).eq('is_active',true).order('display_order');
+  if(questionQ.error)throw questionQ.error;
+  const test=testQ.data,questions=questionQ.data||[];
+  if(!questions.length||questions.length>1000||questions.length!==Number(test.question_count))throw Error('Test is not ready. Verify the uploaded questions and saved question count.');
+  window.vkIpCurrentTest=test;window.vkIpCurrentQuestions=questions;state={test,questions};
+  let page=document.getElementById('vkIndependentExamPage');
+  if(!page){page=document.createElement('section');page.id='vkIndependentExamPage';page.className='page';document.querySelector('main')?.appendChild(page)||document.body.appendChild(page);}
+  if(!document.getElementById('vkIpExamHost'))page.innerHTML='<div id="vkIpExamHost"></div>';
+  showPage('vkIndependentExamPage');renderInstructions(test,questions);
+}catch(e){alert(e.message||String(e));}};
 if(!document.getElementById('vk-cbt-result-analytics-v1'))document.head.insertAdjacentHTML('beforeend',style);
 })();
 
