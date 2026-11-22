@@ -4369,14 +4369,6 @@ id="solutions">
             <option value="edit">Edit Existing Paid Test</option>
           </select>
         </div>
-        <div class="vk-admin-field" id="vkTopicTestPackageWrap" style="display:none;grid-column:1/-1">
-          <label for="vkTopicTestPackage">Add this Paid Test to Topic-wise Package</label>
-          <div class="vk-admin-grid" style="grid-template-columns:1fr 1fr;gap:12px">
-            <select id="vkTopicTestPackage" onchange="vkTopicTestLoadTopics()"><option value="">Do not add to a package</option></select>
-            <select id="vkTopicTestPackageTopic" disabled><option value="">Select package first</option></select>
-          </div>
-          <p class="vk-admin-hint">When a package and topic are selected, the newly published Paid Test is automatically added to that topic and the package's test list. Existing test builder and Excel upload remain unchanged.</p>
-        </div>
         <div class="vk-admin-field" id="vkAdminExistingTestWrap" style="display:none">
           <label for="vkAdminExistingTest">Select Existing Paid Test</label>
           <select id="vkAdminExistingTest" onchange="vkAdminLoadPaidTestForEdit()">
@@ -4392,7 +4384,7 @@ id="solutions">
           <div class="vk-bulk-error">Warning: Saving changes updates the selected live Paid Test questions. The Test ID and question IDs are preserved, but students may see the revised question text and answers when reviewing that test. Take a database backup before editing.</div>
         </div>
         <div class="vk-admin-field" id="vkAdminTopicWrap">
-          <label for="vkAdminTopic">Topic Name</label>
+          <label for="vkAdminTopic">Test Name (same as Topic Name)</label>
           <input id="vkAdminTopic" type="text" maxlength="120" placeholder="e.g. Ramayanam">
           <p class="vk-admin-hint" id="vkAdminPaidTopicHint" style="display:none">Enter the exact syllabus Topic Name for this Paper. This field is required when creating a Topic Wise Paid Test.</p>
         </div>
@@ -4463,7 +4455,6 @@ id="solutions">
     <div class="vk-admin-panel">
       <div class="vk-admin-actions">
         <button type="button" id="vkAdminPublishBtn" class="vk-admin-btn vk-admin-btn-primary" onclick="vkAdminPublishTest()">Publish Test</button>
-        <button type="button" id="vkAdminPublishIndependentPackageBtn" class="vk-admin-btn vk-admin-btn-secondary" style="display:none" onclick="vkAdminPublishIndependentPackage()">Publish Topic-wise Package</button>
         <button type="button" class="vk-admin-btn vk-admin-btn-secondary" onclick="vkAdminResetBuilder()">Clear Form</button>
       </div>
       <div id="vkAdminStatus" class="vk-admin-status" role="status" aria-live="polite"></div>
@@ -9479,13 +9470,12 @@ function vkAdminUpdateTopicNameVisibility(){
     if(!wrap) return;
     const isPaid = document.getElementById("vkAdminTestType")?.value === "paid";
     const isCreate = document.getElementById("vkAdminPaidMode")?.value !== "edit";
-    const show = isPaid && isCreate && vkAdminIsEndowmentTopicWiseCourse();
+    const isEndowment = isPaid && vkAdminIsEndowmentTopicWiseCourse();
+    const show = isEndowment && (isCreate || document.getElementById("vkAdminPaidMode")?.value === "edit");
     wrap.style.display = show ? "block" : "none";
-    if(input) input.required = show;
+    if(input) input.required = isEndowment && isCreate;
     const hint = document.getElementById("vkAdminPaidTopicHint");
     if(hint) hint.style.display = show ? "block" : "none";
-    const packagePublishButton=document.getElementById("vkAdminPublishIndependentPackageBtn");
-    if(packagePublishButton) packagePublishButton.style.display=(isPaid && vkAdminIsEndowmentTopicWiseCourse())?"inline-flex":"none";
     if(show && input) input.placeholder = "Enter the syllabus topic name (e.g. Ramayanam)";
 }
 
@@ -9501,8 +9491,8 @@ function vkAdminOnTestTypeChange(){
     const paidModeWrap=document.getElementById("vkAdminPaidModeWrap");
     if(paidModeWrap) paidModeWrap.style.display=paid?"block":"none";
     const topicPackageWrap=document.getElementById("vkTopicTestPackageWrap");
-    if(topicPackageWrap) topicPackageWrap.style.display=paid?"block":"none";
-    if(paid && typeof vkTopicTestLoadPackages==='function') vkTopicTestLoadPackages();
+    if(topicPackageWrap) topicPackageWrap.style.display=(paid && !vkAdminIsEndowmentTopicWiseCourse())?"block":"none";
+    if(paid && !vkAdminIsEndowmentTopicWiseCourse() && typeof vkTopicTestLoadPackages==='function') vkTopicTestLoadPackages();
     const freeModeWrap=document.getElementById("vkAdminFreeModeWrap");
     if(freeModeWrap) freeModeWrap.style.display=paid?"none":"block";
     if(hint) hint.textContent=paid
@@ -9747,8 +9737,25 @@ async function vkAdminLoadPaidSeriesAndTests(){
     const testSelect=document.getElementById("vkAdminExistingTest");
     if(!courseName||!paperName||!testSelect)return;
     if(courseName === "Endowment Topic Wise Test Series"){
-        testSelect.innerHTML="<option value=\"\">Independent Topic-wise tests are managed as new tests here.</option>";
-        vkAdminPaidTestsCache=[];
+        testSelect.innerHTML='<option value="">Loading Endowment tests...</option>';
+        try{
+            const pkg=await supabaseClient.from("vk_independent_packages").select("id").eq("package_code","ENDOWMENT").eq("is_archived",false).order("created_at",{ascending:false}).limit(1).maybeSingle();
+            if(pkg.error) throw pkg.error;
+            if(!pkg.data) throw new Error("Endowment Topic Wise package was not found.");
+            const paperLabel=String(paperName).includes("2")?"Paper-II":"Paper-I";
+            const paper=await supabaseClient.from("vk_independent_papers").select("id").eq("package_id",pkg.data.id).eq("name",paperLabel).eq("is_active",true).maybeSingle();
+            if(paper.error) throw paper.error;
+            if(!paper.data) throw new Error(paperLabel+" was not found.");
+            const topics=await supabaseClient.from("vk_independent_topics").select("id,name").eq("paper_id",paper.data.id).eq("is_active",true);
+            if(topics.error) throw topics.error;
+            const topicMap=new Map((topics.data||[]).map(t=>[t.id,t.name]));
+            const topicIds=[...topicMap.keys()];
+            let tests=[];
+            if(topicIds.length){const q=await supabaseClient.from("vk_independent_tests").select("id,name,topic_id,question_count,duration_minutes,total_marks,negative_marks,is_active,created_at").in("topic_id",topicIds).order("created_at",{ascending:false});if(q.error)throw q.error;tests=q.data||[];}
+            vkAdminPaidTestsCache=tests.map(t=>({...t,title:topicMap.get(t.topic_id)||t.name,is_free:false}));
+            testSelect.innerHTML='<option value="">Select an existing test</option>'+vkAdminPaidTestsCache.map(t=>`<option value="${t.id}">${vkAdminEscape(t.title)} · ${t.is_active?"Published":"Draft"}</option>`).join("");
+            if(!tests.length)testSelect.innerHTML='<option value="">No existing tests found for '+paperLabel+'</option>';
+        }catch(e){console.error("Endowment test list load failed",e);testSelect.innerHTML='<option value="">Unable to load Endowment tests</option>';vkAdminShowStatus(e.message||String(e),true);}
         return;
     }
     try{
@@ -9795,6 +9802,30 @@ async function vkAdminLoadPaidTestForEdit(){
     const id=document.getElementById("vkAdminExistingTest")?.value;
     if(!id)return;
     try{
+        if(vkAdminIsEndowmentTopicWiseCourse()){
+            vkAdminShowStatus("Loading selected Endowment test...",false);
+            const tr=await supabaseClient.from("vk_independent_tests").select("*").eq("id",id).single();
+            if(tr.error)throw tr.error;
+            const test=tr.data;
+            const topic=await supabaseClient.from("vk_independent_topics").select("name,paper_id").eq("id",test.topic_id).single();
+            if(topic.error)throw topic.error;
+            const qr=await supabaseClient.from("vk_independent_questions").select("*").eq("test_id",id).order("display_order");
+            if(qr.error)throw qr.error;
+            const qrows=qr.data||[];const qids=qrows.map(q=>q.id);let keyRows=[];
+            if(qids.length){const kr=await supabaseClient.from("vk_independent_question_keys").select("question_id,correct_option").in("question_id",qids);if(kr.error)throw kr.error;keyRows=kr.data||[];}
+            const keyMap=new Map(keyRows.map(k=>[k.question_id,k.correct_option]));
+            if(qrows.length<1||qrows.length>1000||qrows.some(q=>!keyMap.has(q.id)))throw new Error("The selected test must have 1–1,000 questions and a correct answer key for every question.");
+            vkAdminEditingPaidTestId=id;
+            const topicInput=document.getElementById("vkAdminTopic");if(topicInput)topicInput.value=topic.data.name;
+            document.getElementById("vkAdminDuration").value=test.duration_minutes||30;
+            document.getElementById("vkAdminNegative").value=test.negative_marks??0;
+            const host=document.getElementById("vkAdminQuestions");host.innerHTML="";
+            qrows.forEach(q=>{vkAdminAddQuestion();const card=host.lastElementChild;Object.entries({question_text:q.question_text,option_a:q.option_a,option_b:q.option_b,option_c:q.option_c,option_d:q.option_d,correct_option:keyMap.get(q.id),explanation:q.explanation,marks:(Number(test.total_marks)||qrows.length)/qrows.length}).forEach(([field,value])=>{const el=card.querySelector(`[data-field="${field}"]`);if(el)el.value=value??"";});});
+            vkAdminUpdateQuestionLabels();
+            vkAdminShowStatus(`Loaded ${qrows.length} questions for ${topic.data.name}. Edit and click Save Existing Paid Test.`,false);
+            document.getElementById("vkAdminPublishBtn").textContent="Save Existing Paid Test";
+            return;
+        }
         vkAdminShowStatus("Loading existing paid test...",false);
         const {data,error}=await supabaseClient.rpc("vk_admin_get_paid_test_for_edit",{p_test_id:id});
         if(error)throw error;
@@ -10005,7 +10036,7 @@ async function vkAdminPublishIndependentTopicWiseTest(paperName,topicName,durati
     if(lastTest.error) throw lastTest.error;
     const testOrder=(lastTest.data?.[0]?.display_order||0)+1;
     const totalMarks=questions.reduce((sum,q)=>sum+Number(q.marks||1),0);
-    const testName=topicName+" - Test "+testOrder;
+    const testName=topicName;
     const testInsert=await supabaseClient.from("vk_independent_tests").insert({
         topic_id:topicResult.data.id,name:testName,duration_minutes:duration,total_marks:totalMarks,
         negative_marks:negativeMarks,question_count:questions.length,display_order:testOrder,is_active:false
@@ -10134,13 +10165,30 @@ if(!isPaid && freeMode === "edit" && !freeEditTopicName){
     vkAdminShowStatus("Publishing test and saving questions...",false);
     try{
         if(isIndependentTopicWise){
-            if(paidMode==="edit") throw new Error("Editing an existing Independent Topic-wise test is not enabled in this builder. Create a new test; existing student attempts and results remain unchanged.");
-            const created=await vkAdminPublishIndependentTopicWiseTest(paperName,topicName,duration,negativeMarks,questions);
-            vkAdminShowStatus(`Published to Independent Topic-wise Package: ${created.title}. Paper: ${created.paper}. Questions: ${created.question_count}.`,false);
+            if(paidMode==="edit"){
+                const totalMarks=questions.reduce((sum,q)=>sum+Number(q.marks||1),0);
+                const updated=await supabaseClient.rpc("vk_admin_update_endowment_topic_test",{
+                    p_test_id:vkAdminEditingPaidTestId,
+                    p_name:topicName || (vkAdminPaidTestsCache.find(t=>String(t.id)===String(vkAdminEditingPaidTestId))?.title||"Endowment Test"),
+                    p_duration_minutes:duration,
+                    p_total_marks:totalMarks,
+                    p_negative_marks:negativeMarks,
+                    p_questions:questions.map(q=>({question_text:q.question_text,option_a:q.option_a,option_b:q.option_b,option_c:q.option_c,option_d:q.option_d,correct_option:q.correct_option,explanation:q.explanation||""}))
+                });
+                if(updated.error)throw updated.error;
+                vkAdminShowStatus(`Existing Endowment test updated successfully. ${questions.length} questions saved; the same Test ID is retained.`,false);
+            }else{
+                const created=await vkAdminPublishIndependentTopicWiseTest(paperName,topicName,duration,negativeMarks,questions);
+                vkAdminShowStatus(`Published Endowment test: ${created.title}. ${created.paper}. Questions: ${created.question_count}.`,false);
+            }
             const courseSelect=document.getElementById("vkAdminCourse");
             const publishedCourse=courseSelect?.value;
+            const paperSelect=document.getElementById("vkAdminPaper");const selectedPaper=paperSelect?.value;
             vkAdminResetBuilder();
+            vkAdminEditingPaidTestId=null;
             if(courseSelect&&publishedCourse) courseSelect.value=publishedCourse;
+            if(paperSelect&&selectedPaper)paperSelect.value=selectedPaper;
+            await vkAdminLoadPaidSeriesAndTests();
             vkAdminOnTestTypeChange();
             return;
         }
@@ -17707,44 +17755,7 @@ body:has(#examPage.active) > footer{
 </script>
 
 
-<style id="vk-independent-admin-manager-style">
-#vkIndAdminManager{grid-column:1/-1;border:1px solid #dbe4f0;border-radius:16px;padding:16px;margin:12px 0;background:#f8fbff;color:#1e293b}#vkIndAdminManager h3{margin:0 0 10px}#vkIndAdminManager .vkia-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}#vkIndAdminManager input,#vkIndAdminManager select,#vkIndAdminManager textarea{width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:9px;background:white;color:#0f172a;box-sizing:border-box}#vkIndAdminManager button{border:0;border-radius:9px;padding:10px 13px;background:#2458cb;color:white;font-weight:700;cursor:pointer;margin:4px 4px 4px 0}#vkIndAdminManager button.danger{background:#b42318}#vkIndAdminManager .vkia-q{background:white;border:1px solid #dbe4f0;border-radius:12px;padding:12px;margin:10px 0}#vkIndAdminManager .vkia-q label{display:block;font-size:12px;font-weight:700;margin:6px 0 3px}#vkIndAdminManager .vkia-muted{color:#64748b;font-size:13px}@media(max-width:600px){#vkIndAdminManager .vkia-grid{grid-template-columns:1fr}}
-</style>
-<script id="vk-independent-admin-manager-v2">
-(function(){
- 'use strict';
- const $=id=>document.getElementById(id), esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
- let packageId=null, selectedTest=null, loadedQuestions=[], selectedTopicId=null, stagedQuestions=[];
- const say=(m,bad=false)=>{const el=$('vkiaStatus');if(el){el.textContent=m;el.style.color=bad?'#b42318':'#166534';}};
- async function admin(){if(typeof refreshVkAdminAccess==='function')return await refreshVkAdminAccess();const r=await supabaseClient.rpc('vk_is_exam_admin');return !r.error&&r.data===true;}
- async function getPackage(){const r=await supabaseClient.from('vk_independent_packages').select('id,name').eq('package_code','ENDOWMENT').eq('is_archived',false).order('created_at',{ascending:false}).limit(1).maybeSingle();if(r.error)throw r.error;if(!r.data)throw Error('Endowment Topic Wise package not found.');packageId=r.data.id;return r.data;}
- function paperName(){const v=$('vkAdminPaper')?.value||'Paper 1';return /2/.test(v)?'Paper-II':'Paper-I';}
- async function currentPaper(){await getPackage();const pr=await supabaseClient.from('vk_independent_papers').select('id').eq('package_id',packageId).eq('name',paperName()).maybeSingle();if(pr.error)throw pr.error;if(!pr.data)throw Error(paperName()+' not found.');return pr.data;}
- async function loadTopics(){try{if(!await admin())throw Error('Admin permission required.');const pr=await currentPaper();const r=await supabaseClient.from('vk_independent_topics').select('id,name,display_order,is_active').eq('paper_id',pr.id).eq('is_active',true).order('display_order');if(r.error)throw r.error;const topics=r.data||[];const sel=$('vkiaTopicSelect');if(!sel)return;sel.innerHTML='<option value="">Select a topic ('+topics.length+' available)</option>'+topics.map(t=>`<option value="${t.id}">${esc(t.name)}</option>`).join('');const host=$('vkiaTopicAdminList');if(host)host.innerHTML=topics.map(t=>`<div class="vkia-topic-row"><span><strong>${esc(t.name)}</strong> <small>Order ${Number(t.display_order)||0}</small></span><span><button type="button" onclick="vkIA.renameTopic('${t.id}')">Edit</button> <button type="button" class="danger" onclick="vkIA.removeTopic('${t.id}')">Remove</button></span></div>`).join('')||'<p class="vkia-muted">No active topics in this paper yet.</p>';selectedTopicId='';$('vkiaTestSelect').innerHTML='<option value="">Select a topic first</option>';$('vkiaEditor').innerHTML='';selectedTest=null;say('Loaded '+topics.length+' active topics for '+paperName()+'.');}catch(e){say(e.message||String(e),true);}}
- async function createTopic(){try{if(!await admin())throw Error('Admin permission required.');const name=$('vkiaNewTopicName')?.value.trim();if(!name)throw Error('Enter a topic name.');const pr=await currentPaper();const dup=await supabaseClient.from('vk_independent_topics').select('id').eq('paper_id',pr.id).eq('is_active',true).ilike('name',name).limit(1);if(dup.error)throw dup.error;if(dup.data?.length)throw Error('An active topic with this name already exists in '+paperName()+'.');const last=await supabaseClient.from('vk_independent_topics').select('display_order').eq('paper_id',pr.id).order('display_order',{ascending:false}).limit(1);if(last.error)throw last.error;const order=(Number(last.data?.[0]?.display_order)||0)+1;const ins=await supabaseClient.from('vk_independent_topics').insert({paper_id:pr.id,name,display_order:order,is_active:true}).select('id').single();if(ins.error)throw ins.error;$('vkiaNewTopicName').value='';await loadTopics();say('New topic created in '+paperName()+'.');}catch(e){say(e.message||String(e),true);}}
- async function renameTopic(id){try{if(!await admin())throw Error('Admin permission required.');const q=await supabaseClient.from('vk_independent_topics').select('name').eq('id',id).single();if(q.error)throw q.error;const name=prompt('Edit topic name:',q.data.name);if(name===null)return;if(!name.trim())throw Error('Topic name cannot be empty.');const u=await supabaseClient.from('vk_independent_topics').update({name:name.trim()}).eq('id',id);if(u.error)throw u.error;await loadTopics();say('Topic name updated.');}catch(e){say(e.message||String(e),true);}}
- async function removeTopic(id){try{if(!await admin())throw Error('Admin permission required.');const q=await supabaseClient.from('vk_independent_topics').select('name').eq('id',id).single();if(q.error)throw q.error;if(!confirm('Remove topic “'+q.data.name+'” from both Admin and Student topic lists? Existing tests, attempts and results will be preserved in the database history.'))return;const u=await supabaseClient.from('vk_independent_topics').update({is_active:false}).eq('id',id);if(u.error)throw u.error;if(selectedTopicId===id){selectedTopicId=null;$('vkiaEditor').innerHTML='';selectedTest=null;}$('vkiaTestSelect').innerHTML='<option value="">Select a topic first</option>';await loadTopics();say('Topic removed from Admin and Student lists. Historical records were preserved.');}catch(e){say(e.message||String(e),true);}}
- async function loadTests(){try{if(!await admin())throw Error('Admin permission required.');const topicId=$('vkiaTopicSelect')?.value;if(!topicId){say('Select a topic first.',true);return;}selectedTopicId=topicId;const r=await supabaseClient.from('vk_independent_tests').select('id,name,topic_id,question_count,duration_minutes,total_marks,negative_marks,is_active,display_order,created_at').eq('topic_id',topicId).eq('is_active',true).order('created_at',{ascending:false});if(r.error)throw r.error;const tests=r.data||[];const sel=$('vkiaTestSelect');sel.innerHTML='<option value="">Select an existing test ('+tests.length+' available)</option>'+tests.map(t=>`<option value="${t.id}">${esc(t.name)} · ${t.question_count||0} Q · ${t.is_active?'Active':'Removed'}</option>`).join('');$('vkiaEditor').innerHTML='';selectedTest=null;say('Loaded '+tests.length+' tests for selected topic.');}catch(e){say(e.message||String(e),true);}}
- async function loadOne(){try{if(!await admin())throw Error('Admin permission required.');const id=$('vkiaTestSelect')?.value;if(!id){$('vkiaEditor').innerHTML='';selectedTest=null;return;}const t=await supabaseClient.from('vk_independent_tests').select('*').eq('id',id).eq('is_active',true).single();if(t.error)throw t.error;selectedTest=t.data;const qr=await supabaseClient.from('vk_independent_questions').select('*').eq('test_id',id).order('display_order');if(qr.error)throw qr.error;const qs=qr.data||[];const ids=qs.map(x=>x.id);let keys=[];if(ids.length){const kr=await supabaseClient.from('vk_independent_question_keys').select('question_id,correct_option').in('question_id',ids);if(kr.error)throw kr.error;keys=kr.data||[];}const km=new Map(keys.map(x=>[x.question_id,x.correct_option]));loadedQuestions=qs.map(x=>({...x,correct_option:km.get(x.id)||''}));stagedQuestions=[];$('vkiaEditor').innerHTML=`<div class="vkia-grid"><div><label>Test Name</label><input id="vkiaName" value="${esc(t.data.name)}"></div><div><label>Duration (minutes)</label><input id="vkiaDuration" type="number" min="1" value="${Number(t.data.duration_minutes)||30}"></div><div><label>Total Marks</label><input id="vkiaMarks" type="number" min="1" value="${Number(t.data.total_marks)||qs.length}"></div><div><label>Negative Marks</label><input id="vkiaNegative" type="number" min="0" step="0.000001" value="${Number(t.data.negative_marks)||0}"></div></div><button onclick="vkIA.saveTest()">Save Test Details</button><button class="danger" onclick="vkIA.removeTest()">Remove Entire Test</button><h3>Current Questions (${qs.length}/1000)</h3><p class="vkia-muted">Edit individual questions or permanently delete them. Excel Replace deletes all current question rows and answer keys only after the replacement upload has passed validation.</p>${loadedQuestions.map((q,i)=>`<div class="vkia-q" data-qid="${q.id}"><strong>Question ${i+1}</strong><label>Question</label><textarea data-f="question_text" rows="2">${esc(q.question_text)}</textarea><div class="vkia-grid">${['a','b','c','d'].map(k=>`<div><label>Option ${k.toUpperCase()}</label><input data-f="option_${k}" value="${esc(q['option_'+k])}"></div>`).join('')}<div><label>Correct Answer</label><select data-f="correct_option">${['A','B','C','D'].map(k=>`<option ${q.correct_option===k?'selected':''}>${k}</option>`).join('')}</select></div></div><label>Explanation</label><textarea data-f="explanation" rows="2">${esc(q.explanation||'')}</textarea><button onclick="vkIA.saveQuestion('${q.id}',this)">Save Question</button><button class="danger" onclick="vkIA.deleteQuestion('${q.id}')">Delete Question</button></div>`).join('')||'<p>No questions yet.</p>'}<h3>Add New Question</h3><div class="vkia-q"><label>Question</label><textarea id="vkiaNewQ" rows="2"></textarea><div class="vkia-grid">${['a','b','c','d'].map(k=>`<div><label>Option ${k.toUpperCase()}</label><input id="vkiaNew${k.toUpperCase()}"></div>`).join('')}<div><label>Correct Answer</label><select id="vkiaNewCorrect"><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option></select></div></div><label>Explanation</label><textarea id="vkiaNewExplanation" rows="2"></textarea><button onclick="vkIA.addQuestion()">Add Question</button></div><h3>Excel / CSV — Replace Existing Questions</h3><p class="vkia-muted">Upload a complete replacement set (1–1,000 questions). Preview and validate it before confirming. Existing attempts/results are retained; old question-level solutions are not retained.</p><input id="vkiaReplaceFile" type="file" accept=".xlsx,.xls,.csv" onchange="vkIA.previewReplace(event)"><div id="vkiaReplacePreview"></div>`;say('Loaded '+qs.length+' questions.');}catch(e){say(e.message||String(e),true);}}
- async function renumber(testId){const r=await supabaseClient.from('vk_independent_questions').select('id').eq('test_id',testId).order('display_order');if(r.error)throw r.error;for(let i=0;i<(r.data||[]).length;i++){const u=await supabaseClient.from('vk_independent_questions').update({display_order:i+1}).eq('id',r.data[i].id);if(u.error)throw u.error;}const c=await supabaseClient.from('vk_independent_tests').update({question_count:(r.data||[]).length}).eq('id',testId);if(c.error)throw c.error;}
- async function saveTest(){try{if(!selectedTest)throw Error('Select a test.');if(!await admin())throw Error('Admin permission required.');const name=$('vkiaName').value.trim(),duration=Number($('vkiaDuration').value),marks=Number($('vkiaMarks').value),negative=Number($('vkiaNegative').value);if(!name||duration<1||marks<1||negative<0)throw Error('Enter valid test details.');const r=await supabaseClient.from('vk_independent_tests').update({name,duration_minutes:duration,total_marks:marks,negative_marks:negative}).eq('id',selectedTest.id);if(r.error)throw r.error;selectedTest={...selectedTest,name,duration_minutes:duration,total_marks:marks,negative_marks:negative};say('Test details saved.');}catch(e){say(e.message||String(e),true);}}
- async function saveQuestion(id,btn){try{if(!await admin())throw Error('Admin permission required.');const card=btn.closest('[data-qid]'),get=f=>card.querySelector(`[data-f="${f}"]`).value.trim();const row={question_text:get('question_text'),option_a:get('option_a'),option_b:get('option_b'),option_c:get('option_c'),option_d:get('option_d'),explanation:get('explanation')};const answer=get('correct_option');if(Object.values(row).slice(0,5).some(x=>!x)||!['A','B','C','D'].includes(answer))throw Error('Question, four options and correct answer are required.');const u=await supabaseClient.from('vk_independent_questions').update(row).eq('id',id);if(u.error)throw u.error;const k=await supabaseClient.from('vk_independent_question_keys').upsert({question_id:id,correct_option:answer},{onConflict:'question_id'});if(k.error)throw k.error;say('Question updated.');}catch(e){say(e.message||String(e),true);}}
- async function deleteQuestion(id){if(!confirm('Permanently delete this question and its Answer Key? Historical attempt score summaries will remain, but this question will no longer have a solution record.'))return;try{if(!await admin())throw Error('Admin permission required.');const a=await supabaseClient.from('vk_independent_question_keys').delete().eq('question_id',id);if(a.error)throw a.error;const b=await supabaseClient.from('vk_independent_questions').delete().eq('id',id);if(b.error)throw b.error;await renumber(selectedTest.id);await loadOne();say('Question and Answer Key permanently deleted; remaining questions renumbered.');}catch(e){say(e.message||String(e),true);}}
- async function addQuestion(){try{if(!selectedTest)throw Error('Select a test.');if(!await admin())throw Error('Admin permission required.');if(loadedQuestions.length>=1000)throw Error('Maximum 1,000 questions reached.');const v=id=>$(id).value.trim();const q={test_id:selectedTest.id,question_text:v('vkiaNewQ'),option_a:v('vkiaNewA'),option_b:v('vkiaNewB'),option_c:v('vkiaNewC'),option_d:v('vkiaNewD'),explanation:v('vkiaNewExplanation'),display_order:loadedQuestions.length+1,is_active:true};const answer=$('vkiaNewCorrect').value;if(!q.question_text||!q.option_a||!q.option_b||!q.option_c||!q.option_d)throw Error('Enter question and all four options.');const ins=await supabaseClient.from('vk_independent_questions').insert(q).select('id').single();if(ins.error)throw ins.error;const key=await supabaseClient.from('vk_independent_question_keys').insert({question_id:ins.data.id,correct_option:answer});if(key.error){await supabaseClient.from('vk_independent_questions').delete().eq('id',ins.data.id);throw key.error;}await renumber(selectedTest.id);await loadOne();say('Question added with Answer Key.');}catch(e){say(e.message||String(e),true);}}
- function parseFileRows(rows){return rows.map(r=>{const get=(...names)=>{const k=Object.keys(r).find(x=>names.includes(x.trim().toLowerCase()));return k?r[k]:''};return {question_text:String(get('question','question_text')).trim(),option_a:String(get('option a','option_a','a')).trim(),option_b:String(get('option b','option_b','b')).trim(),option_c:String(get('option c','option_c','c')).trim(),option_d:String(get('option d','option_d','d')).trim(),correct_option:String(get('correct option','correct_option','answer')).trim().toUpperCase(),explanation:String(get('explanation')||'').trim()};}).filter(x=>x.question_text);}
- async function previewReplace(ev){try{stagedQuestions=[];const f=ev.target.files?.[0];if(!f)return;if(!window.XLSX)throw Error('Excel reader is unavailable.');const wb=XLSX.read(await f.arrayBuffer(),{type:'array'});const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:''});const norm=parseFileRows(rows);if(!norm.length||norm.length>1000)throw Error('Replacement file must contain 1–1,000 questions.');const bad=norm.findIndex(x=>!x.option_a||!x.option_b||!x.option_c||!x.option_d||!['A','B','C','D'].includes(x.correct_option));if(bad>=0)throw Error('Invalid row '+(bad+2)+': all four options and a correct answer A/B/C/D are required.');stagedQuestions=norm;$('vkiaReplacePreview').innerHTML=`<div class="vkia-q"><strong>Validated replacement: ${norm.length} questions</strong><p>Current set: ${loadedQuestions.length} questions. Confirming will permanently delete the current question and answer-key rows and insert this replacement set. Existing attempt score summaries remain.</p><button class="danger" onclick="vkIA.confirmReplace()">Confirm Permanent Replace</button><button type="button" onclick="vkIA.cancelReplace()">Cancel</button></div>`;say('Preview ready: '+norm.length+' valid questions. No database rows changed yet.');}catch(e){stagedQuestions=[];say(e.message||String(e),true);}}
- async function confirmReplace(){if(!selectedTest||!stagedQuestions.length)throw Error('Select a test and validate an Excel file first.');if(!confirm('FINAL CONFIRMATION: Permanently delete all '+loadedQuestions.length+' current questions and Answer Keys, then replace them with '+stagedQuestions.length+' new questions? Existing student score results will remain; old question-wise solutions will not.'))return;try{if(!await admin())throw Error('Admin permission required.');say('Replacing questions safely…');const payload=stagedQuestions.map(x=>({question_text:x.question_text,option_a:x.option_a,option_b:x.option_b,option_c:x.option_c,option_d:x.option_d,correct_option:x.correct_option,explanation:x.explanation}));const r=await supabaseClient.rpc('vk_independent_replace_test_questions',{p_test_id:selectedTest.id,p_questions:payload});if(r.error)throw r.error;stagedQuestions=[];await loadOne();say('Replacement completed. Old questions and Answer Keys were permanently deleted; only the new questions are active. Historical score results remain.');}catch(e){say(e.message||String(e),true);}}
- function cancelReplace(){stagedQuestions=[];if($('vkiaReplacePreview'))$('vkiaReplacePreview').innerHTML='';if($('vkiaReplaceFile'))$('vkiaReplaceFile').value='';say('Replacement cancelled. No database changes were made.');}
- async function removeTest(){if(!selectedTest)return;if(!confirm('PERMANENT DELETE: This will permanently delete this Endowment topic test, all its questions and answer keys, and all associated student attempts/results/solutions. This cannot be undone. Continue?'))return;try{if(!await admin())throw Error('Admin permission required.');const r=await supabaseClient.rpc('vk_admin_delete_endowment_topic_test',{p_test_id:selectedTest.id});if(r.error)throw r.error;selectedTest=null;$('vkiaEditor').innerHTML='';await loadTopics();say('Test, questions, answer keys, and associated attempt/result records were permanently deleted.');}catch(e){say(e.message||String(e),true);}}
- function mount(){const wrap=$('vkAdminExistingTestWrap');if(!wrap||$('vkIndAdminManager'))return;const box=document.createElement('div');box.id='vkIndAdminManager';box.innerHTML=`<h3>🛕 Endowment Topic-wise Test Manager</h3><p class="vkia-muted">Manage topics and tests for the selected Paper. Removing a topic permanently deletes its linked test and all associated student attempts/results/solutions.</p><section class="vkia-topic-tools"><h4>Topic Management · ${esc(paperName())}</h4><div class="vkia-topic-create"><input id="vkiaNewTopicName" type="text" maxlength=180 placeholder="Enter new topic name"><button type="button" onclick="vkIA.createTopic()">＋ Create Topic</button></div><div id="vkiaTopicAdminList"></div></section><label>Select Active Topic</label><select id="vkiaTopicSelect" onchange="vkIA.loadTests()"><option value="">Loading topics…</option></select><label>Select Existing Active Test</label><select id="vkiaTestSelect" onchange="vkIA.loadOne()"><option value="">Select a topic first</option></select><button type="button" onclick="vkIA.loadTopics()">Refresh Topic List</button><div id="vkiaEditor"></div><p id="vkiaStatus" role="status" class="vkia-muted"></p>`;wrap.insertAdjacentElement('afterend',box);}
- window.vkIA={loadTopics,loadTests,loadOne,saveTest,saveQuestion,deleteQuestion,addQuestion,previewReplace,confirmReplace,cancelReplace,removeTest,createTopic,renameTopic,removeTopic};
- const oldLoad=window.vkAdminLoadPaidSeriesAndTests;
- window.vkAdminLoadPaidSeriesAndTests=async function(){if(($('vkAdminCourse')?.value||'')==='Endowment Topic Wise Test Series'){mount();const sel=$('vkAdminExistingTest');if(sel)sel.innerHTML='<option value="">Use Topic-wise Test Manager below</option>';await loadTopics();return;}if(typeof oldLoad==='function')return oldLoad.apply(this,arguments);};
- document.addEventListener('DOMContentLoaded',()=>{mount();});
-})();
-</script>
 
-<!-- VK Exams update: independent Endowment test deletion uses vk_admin_delete_endowment_topic_test; source index (30).html -->
 </body>
 </html>
  
