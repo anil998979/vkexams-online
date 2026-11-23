@@ -17806,6 +17806,191 @@ body:has(#examPage.active) > footer{
 })();
 </script>
 
+
+<!-- VK EXAMS FIX: provide the missing independent exam page and instructions flow -->
+<script id="vk-independent-exam-page-fix">
+(function () {
+  function ensureExamPage() {
+    let page = document.getElementById("vkIndependentExamPage");
+    if (!page) {
+      page = document.createElement("section");
+      page.id = "vkIndependentExamPage";
+      page.className = "page";
+      page.innerHTML = '<div class="container" style="max-width:1100px"><div id="vkIpExamHost"></div></div>';
+      document.body.appendChild(page);
+    } else if (!document.getElementById("vkIpExamHost")) {
+      const container = page.querySelector(".container") || page;
+      const host = document.createElement("div");
+      host.id = "vkIpExamHost";
+      container.appendChild(host);
+    }
+    return document.getElementById("vkIpExamHost");
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? "").replace(/[&<>"']/g, function (c) {
+      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+    });
+  }
+
+  function renderInstructions(test, questions) {
+    const host = ensureExamPage();
+    if (!host) {
+      alert("Exam page could not be created. Please refresh and try again.");
+      return;
+    }
+    const minutes = Math.max(1, Number(test.duration_minutes) || 30);
+    host.innerHTML = `
+      <section style="max-width:850px;margin:28px auto;background:#fff;border:1px solid #dbe3ef;border-radius:16px;padding:26px;box-shadow:0 8px 25px rgba(15,23,42,.08)">
+        <div style="font-size:12px;font-weight:900;letter-spacing:1px;color:#2563eb">VK EXAMS · EXAM INSTRUCTIONS</div>
+        <h1 style="margin:10px 0 8px;color:#172033">${escapeHtml(test.name || "Online Examination")}</h1>
+        <p style="color:#64748b;margin-bottom:18px">Please read the instructions carefully before starting the examination.</p>
+        <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:18px 0">
+          <div style="padding:14px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px"><small style="color:#64748b">TOTAL QUESTIONS</small><strong style="display:block;font-size:22px">${questions.length}</strong></div>
+          <div style="padding:14px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px"><small style="color:#64748b">DURATION</small><strong style="display:block;font-size:22px">${minutes} Minutes</strong></div>
+        </div>
+        <ol style="padding-left:22px;line-height:1.9;color:#334155">
+          <li>The examination timer starts after you click “I Agree & Start Exam”.</li>
+          <li>Select one answer for each question. You may change your answer before submission.</li>
+          <li>Do not refresh or close the examination page while attempting the test.</li>
+          <li>Click “Submit Exam” after completing the examination. The test will be submitted automatically when time expires.</li>
+        </ol>
+        <label style="display:flex;align-items:flex-start;gap:10px;margin-top:20px;padding:14px;background:#eff6ff;border-radius:10px;color:#1e3a8a">
+          <input id="vkIpAgreeCheckbox" type="checkbox" style="width:18px;height:18px;margin-top:2px">
+          <span>I have read and understood the examination instructions.</span>
+        </label>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:18px">
+          <button type="button" onclick="window.vkIpCancelInstructions()" style="padding:12px 18px;border:1px solid #cbd5e1;border-radius:9px;background:#fff;font-weight:800">Back</button>
+          <button type="button" id="vkIpAgreeStartButton" onclick="window.vkIpAgreeAndStart()" disabled style="padding:12px 20px;border:0;border-radius:9px;background:#2563eb;color:#fff;font-weight:900;opacity:.55">I Agree & Start Exam →</button>
+        </div>
+      </section>`;
+    const checkbox = document.getElementById("vkIpAgreeCheckbox");
+    const button = document.getElementById("vkIpAgreeStartButton");
+    checkbox.addEventListener("change", function () {
+      button.disabled = !checkbox.checked;
+      button.style.opacity = checkbox.checked ? "1" : ".55";
+    });
+  }
+
+  function renderExam() {
+    const test = window.vkIpCurrentTest;
+    const questions = window.vkIpCurrentQuestions || [];
+    const host = ensureExamPage();
+    if (!test || !questions.length || !host) {
+      alert("Exam data is missing. Please reopen the test.");
+      return;
+    }
+    const durationSeconds = Math.max(1, Number(test.duration_minutes) || 30) * 60;
+    window.vkIpExamSecondsLeft = durationSeconds;
+    host.innerHTML = `
+      <section style="max-width:1100px;margin:18px auto">
+        <header style="position:sticky;top:0;z-index:10;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:16px;background:#fff;border:1px solid #dbe3ef;border-radius:12px;box-shadow:0 4px 14px rgba(15,23,42,.06)">
+          <div><strong style="font-size:18px">${escapeHtml(test.name || "Online Examination")}</strong><div style="font-size:13px;color:#64748b">${questions.length} Questions</div></div>
+          <div style="font-weight:900;color:#dc2626;font-size:20px">Time Left: <span id="vkIpExamTimer">--:--</span></div>
+        </header>
+        <form id="vkIpExamForm" style="display:grid;gap:14px;margin-top:16px">
+          ${questions.map(function(q,i){return `
+            <article style="background:#fff;border:1px solid #dbe3ef;border-radius:12px;padding:18px">
+              <strong style="display:block;margin-bottom:12px;color:#172033">Q${i+1}. ${escapeHtml(q.question_text)}</strong>
+              ${["A","B","C","D"].map(function(k){const value=q["option_"+k.toLowerCase()];return `<label style="display:flex;align-items:flex-start;gap:10px;padding:10px;margin-top:7px;border:1px solid #e2e8f0;border-radius:8px;cursor:pointer"><input type="radio" name="q_${escapeHtml(q.id)}" value="${k}" style="margin-top:3px"><span>${k}. ${escapeHtml(value)}</span></label>`;}).join("")}
+            </article>`;}).join("")}
+          <button type="button" onclick="window.vkIpSubmitTestFixed(false)" style="padding:14px 22px;border:0;border-radius:10px;background:#16a34a;color:#fff;font-weight:900;font-size:16px">Submit Exam</button>
+        </form>
+      </section>`;
+    window.clearInterval(window.vkIpExamTimer);
+    window.vkIpExamTimer = window.setInterval(function () {
+      const seconds = window.vkIpExamSecondsLeft;
+      const timer = document.getElementById("vkIpExamTimer");
+      if (!timer) { window.clearInterval(window.vkIpExamTimer); return; }
+      timer.textContent = Math.floor(seconds / 60) + ":" + String(seconds % 60).padStart(2, "0");
+      if (seconds <= 0) {
+        window.clearInterval(window.vkIpExamTimer);
+        window.vkIpSubmitTestFixed(true);
+      } else {
+        window.vkIpExamSecondsLeft -= 1;
+      }
+    }, 1000);
+  }
+
+  window.vkIpAgreeAndStart = function () {
+    const checkbox = document.getElementById("vkIpAgreeCheckbox");
+    if (!checkbox || !checkbox.checked) return;
+    renderExam();
+  };
+
+  window.vkIpCancelInstructions = function () {
+    window.clearInterval(window.vkIpExamTimer);
+    if (typeof window.vkIpOpenPackages === "function") window.vkIpOpenPackages();
+    else if (typeof window.showPage === "function") window.showPage("vkIndependentPackageDetail");
+  };
+
+  window.vkIpStartTest = async function (id) {
+    try {
+      if (!window.supabaseClient) throw new Error("Supabase is not ready. Please refresh and try again.");
+      const {data: test, error: testError} = await window.supabaseClient
+        .from("vk_independent_tests").select("*").eq("id", id).eq("is_active", true).single();
+      if (testError) throw testError;
+      const {data: questions, error: questionsError} = await window.supabaseClient
+        .from("vk_independent_questions")
+        .select("id,question_text,option_a,option_b,option_c,option_d,display_order")
+        .eq("test_id", id).eq("is_active", true).order("display_order");
+      if (questionsError) throw questionsError;
+      if (!questions || !questions.length) throw new Error("No questions are available for this test yet.");
+      if (questions.length > 300 || questions.length !== Number(test.question_count)) {
+        throw new Error("This test is not ready. Please verify its question count in Admin.");
+      }
+      window.vkIpCurrentTest = test;
+      window.vkIpCurrentQuestions = questions;
+      ensureExamPage();
+      if (typeof window.showPage === "function") window.showPage("vkIndependentExamPage");
+      renderInstructions(test, questions);
+    } catch (error) {
+      console.error("VK independent exam start error:", error);
+      alert(error && error.message ? error.message : String(error));
+    }
+  };
+
+  window.vkIpSubmitTestFixed = async function (autoSubmitted) {
+    const form = document.getElementById("vkIpExamForm");
+    const test = window.vkIpCurrentTest;
+    const questions = window.vkIpCurrentQuestions || [];
+    if (!form || !test || !questions.length) {
+      alert("Exam form is not available. Please refresh and try again.");
+      return;
+    }
+    window.clearInterval(window.vkIpExamTimer);
+    const answers = {};
+    questions.forEach(function (q) {
+      const selected = form.querySelector('input[name="q_' + CSS.escape(String(q.id)) + '"]:checked');
+      answers[q.id] = selected ? selected.value : null;
+    });
+    const submitButtons = form.querySelectorAll("button");
+    submitButtons.forEach(function (button) { button.disabled = true; });
+    try {
+      const {data: result, error} = await window.supabaseClient.rpc("vk_independent_submit_attempt", {
+        p_test_id: test.id,
+        p_answers: answers
+      });
+      if (error) throw error;
+      const host = ensureExamPage();
+      host.innerHTML = `
+        <section style="max-width:760px;margin:40px auto;padding:28px;background:#fff;border:1px solid #dbe3ef;border-radius:16px;text-align:center">
+          <h1 style="color:#15803d">Exam Submitted Successfully</h1>
+          <p style="margin:10px 0;color:#64748b">${autoSubmitted ? "Your time expired and the exam was submitted automatically." : "Your answers have been submitted."}</p>
+          <h2 style="font-size:32px;margin:18px 0">Score: ${escapeHtml(result?.score ?? "—")} / ${escapeHtml(result?.total_marks ?? "—")}</h2>
+          <p>Correct: ${escapeHtml(result?.correct_answers ?? "—")} · Wrong: ${escapeHtml(result?.wrong_answers ?? "—")} · Unanswered: ${escapeHtml(result?.unanswered ?? "—")}</p>
+          <p>Percentage: ${escapeHtml(result?.percentage ?? "—")}%</p>
+          <button type="button" onclick="window.vkIpCancelInstructions()" style="margin-top:20px;padding:12px 20px;border:0;border-radius:9px;background:#2563eb;color:#fff;font-weight:900">Back to Test Series</button>
+        </section>`;
+    } catch (error) {
+      console.error("VK independent exam submit error:", error);
+      alert("Could not submit the exam: " + (error.message || String(error)));
+      submitButtons.forEach(function (button) { button.disabled = false; });
+    }
+  };
+})();
+</script>
+
 </body>
 </html>
  
