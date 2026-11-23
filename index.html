@@ -17693,39 +17693,10 @@ body:has(#examPage.active) > footer{
 #vkIbpsCbt .ib-modalbody li{margin:8px 0}
 #vkIbpsCbt .ib-modalfoot{padding:14px 20px;border-top:1px solid #d5dce5;text-align:right}
 @media(max-width:850px){#vkIbpsCbt .ib-layout{grid-template-columns:1fr}#vkIbpsCbt .ib-palette{grid-template-columns:repeat(6,1fr);max-height:230px}#vkIbpsCbt .ib-question{padding:16px;font-size:16px}}
-
-#vkIbpsCbt .ib-result-wrap{max-width:1120px;margin:28px auto;padding:24px}
-#vkIbpsCbt .ib-result-head{display:flex;align-items:center;gap:16px;background:#eaf7ef;border:1px solid #b8e2c5;border-radius:10px;padding:18px 22px;margin-bottom:18px}
-#vkIbpsCbt .ib-result-check{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;background:#16834a;color:white;font-size:28px;font-weight:900}
-#vkIbpsCbt .ib-result-head h1{margin:0;color:#166534;font-size:24px}#vkIbpsCbt .ib-result-head p{margin:5px 0 0;color:#475569}
-#vkIbpsCbt .ib-result-score{display:flex;align-items:center;gap:30px;background:white;border:1px solid #d5dce5;border-radius:10px;padding:24px;margin-bottom:22px}
-#vkIbpsCbt .ib-score-gauge{width:150px;height:150px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(#16834a var(--score),#e5eaf0 0);flex:none}
-#vkIbpsCbt .ib-score-gauge>div{width:116px;height:116px;border-radius:50%;background:white;display:flex;align-items:center;justify-content:center;flex-direction:column}
-#vkIbpsCbt .ib-score-gauge strong{font-size:28px;color:#172033}#vkIbpsCbt .ib-score-gauge small{font-size:12px;color:#64748b}
-#vkIbpsCbt .ib-muted{font-size:11px;font-weight:800;letter-spacing:1px;color:#64748b}
-#vkIbpsCbt .ib-score-main h2{font-size:34px;margin:5px 0;color:#172033}#vkIbpsCbt .ib-score-main h2 small{font-size:18px;color:#64748b}
-#vkIbpsCbt .ib-score-main p{margin:5px 0 12px;color:#475569}
-#vkIbpsCbt .ib-performance{display:inline-block;padding:6px 12px;border-radius:20px;background:#eaf2fb;color:#174b83;font-weight:800;font-size:13px}
-#vkIbpsCbt .ib-result-title{font-size:20px;margin:22px 0 12px}
-#vkIbpsCbt .ib-result-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
-#vkIbpsCbt .ib-result-kpis>div,#vkIbpsCbt .ib-result-card{background:#fff;border:1px solid #d5dce5;border-radius:9px;padding:17px}
-#vkIbpsCbt .ib-result-kpis small{display:block;color:#64748b;font-weight:700}
-#vkIbpsCbt .ib-result-kpis strong{display:block;font-size:28px;margin-top:8px}
-#vkIbpsCbt .ib-result-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-#vkIbpsCbt .ib-result-card h3{margin:0 0 16px;font-size:16px}
-#vkIbpsCbt .ib-donut{width:160px;height:160px;margin:8px auto 18px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(#159653 0 var(--c),#d94b43 var(--c) calc(var(--c) + var(--w)),#94a3b8 0)}
-#vkIbpsCbt .ib-donut>div{width:112px;height:112px;border-radius:50%;background:white;display:flex;flex-direction:column;align-items:center;justify-content:center}
-#vkIbpsCbt .ib-donut b{font-size:26px}#vkIbpsCbt .ib-donut small{color:#64748b}
-#vkIbpsCbt .ib-result-legend{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;font-size:12px;color:#475569}
-#vkIbpsCbt .ib-result-legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px}
-#vkIbpsCbt .ib-summary-row{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid #edf0f4;color:#475569}
-#vkIbpsCbt .ib-summary-row b{color:#172033}
-#vkIbpsCbt .ib-result-actions{text-align:center;margin:22px 0}
-@media(max-width:700px){#vkIbpsCbt .ib-result-wrap{padding:12px}#vkIbpsCbt .ib-result-score{flex-direction:column;text-align:center}#vkIbpsCbt .ib-result-kpis{grid-template-columns:repeat(2,1fr)}#vkIbpsCbt .ib-result-grid{grid-template-columns:1fr}}
 </style>
 <script id="vk-ibps-independent-cbt-runtime">
 (function(){
-  let test=null, questions=[], answers={}, states=[], current=0, seconds=0, totalSeconds=0, timer=null, submitted=false, marked={};
+  let test=null, questions=[], answers={}, states=[], current=0, seconds=0, timer=null, submitted=false, marked={};
   const $=id=>document.getElementById(id);
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   function paletteClass(i){if(marked[i]&&answers[i])return 'ib-reviewanswered';if(marked[i])return 'ib-review';if(answers[i])return 'ib-answered';return states[i]?'ib-notanswered':'ib-notvisited';}
@@ -17734,9 +17705,9 @@ body:has(#examPage.active) > footer{
     root=document.createElement('div');root.id='vkIbpsCbt';root.innerHTML=`
       <header class="ib-top"><div><div class="ib-brand">VK EXAMS · COMPUTER BASED TEST</div><div class="ib-meta" id="ibCandidate">Candidate: Logged-in Student</div></div><div class="ib-meta" id="ibTestName"></div><div class="ib-timer" id="ibTimer">00:00</div></header>
       <div class="ib-sub"><span>Question Paper</span><span id="ibProgress"></span><button class="ib-grey" onclick="window.vkIbpsShowInstructions()">Instructions</button></div>
-      <main class="ib-layout"><section class="ib-panel"><div class="ib-qhead"><span id="ibQNo"></span><span>Marks are evaluated according to the test settings</span></div><div class="ib-question" id="ibQuestion"></div><div class="ib-actions"><button class="ib-orange" onclick="window.vkIbpsMarkNext()">Mark for Review &amp; Next</button><button class="ib-grey" onclick="window.vkIbpsClear()">Clear Response</button><button class="ib-grey" onclick="window.vkIbpsPrev()">Previous</button><button class="ib-blue" onclick="window.vkIbpsNext()">Save &amp; Next</button></div></section>
+      <main class="ib-layout"><section class="ib-panel"><div class="ib-qhead"><span id="ibQNo"></span><span>+1 Mark&nbsp;&nbsp; | &nbsp;&nbsp;Negative marking as per test rules</span></div><div class="ib-question" id="ibQuestion"></div><div class="ib-actions"><button class="ib-orange" onclick="window.vkIbpsMarkNext()">Mark for Review &amp; Next</button><button class="ib-grey" onclick="window.vkIbpsClear()">Clear Response</button><button class="ib-grey" onclick="window.vkIbpsPrev()">Previous</button><button class="ib-blue" onclick="window.vkIbpsNext()">Save &amp; Next</button></div></section>
       <aside class="ib-panel"><div class="ib-side-title">Question Palette</div><div class="ib-legend"><span><i class="ib-dot ib-answered"></i> Answered</span><span><i class="ib-dot ib-notanswered"></i> Not Answered</span><span><i class="ib-dot ib-notvisited"></i> Not Visited</span><span><i class="ib-dot ib-review"></i> Marked for Review</span></div><div class="ib-palette" id="ibPalette"></div><div class="ib-submitrow"><button class="ib-green" style="width:100%" onclick="window.vkIbpsSubmit()">Submit / Finish Test</button></div></aside></main>
-      <div class="ib-instructions" id="ibInstructions"><div class="ib-modal"><div class="ib-modalhead" style="display:flex;justify-content:space-between;align-items:center"><span>Instructions</span><select id="ibInstructionLang" aria-label="Instruction language" onchange="window.vkIbpsInstructionLanguage(this.value)" style="padding:7px;border-radius:4px"><option value="en">View In English</option><option value="te">తెలుగు</option></select></div><div class="ib-modalbody" id="ibInstructionBody"><h3 style="text-align:center;color:#2765a8;margin:0 0 12px">Instructions</h3><p style="text-align:center"><b><u>Please read the instructions carefully</u></b></p><h4>A. General Instructions</h4><ol><li>The examination contains <b id="ibInstructionCount"></b> questions. The timer starts only after you click “I Agree”.</li><li>The countdown timer is displayed at the top of the examination screen. When the timer reaches zero, the test will be submitted automatically.</li><li>Use the Question Palette to move directly to any question.</li><li><b>Grey:</b> Not Visited; <b>Red:</b> Not Answered; <b>Green:</b> Answered; <b>Purple:</b> Marked for Review; <b>Blue:</b> Answered and Marked for Review.</li><li>“Mark for Review &amp; Next” saves the selected response, marks the question for review and moves to the next question.</li><li>“Clear Response” removes the selected option for the current question.</li><li>“Save &amp; Next” saves the selected response and moves to the next question.</li><li>You may submit the test from the Submit / Finish Test button. Review your responses before final submission.</li><li>After final submission, your score and performance summary will be displayed.</li></ol><h4>B. Important</h4><p>Do not refresh or close the examination window while the test is in progress. Ensure a stable internet connection.</p></div><div class="ib-modalfoot" style="position:sticky;bottom:0;background:#fff"><button class="ib-blue" onclick="window.vkIbpsBegin()">I Agree &amp; Start Exam</button></div></div></div>`;
+      <div class="ib-instructions" id="ibInstructions"><div class="ib-modal"><div class="ib-modalhead">General Instructions</div><div class="ib-modalbody"><p><b>Please read the following instructions carefully before starting the examination.</b></p><ol><li>This examination contains <b id="ibInstructionCount"></b> questions.</li><li>Select one option for each question. Your selected response is saved as you navigate.</li><li>Use the Question Palette to move directly to any question.</li><li>Green indicates Answered; Red indicates Not Answered; Grey indicates Not Visited; Purple indicates Marked for Review.</li><li>Use “Mark for Review &amp; Next” to mark a question and move forward.</li><li>Click “Submit / Finish Test” after completing the examination. You may submit from any question, including the last question.</li></ol></div><div class="ib-modalfoot"><button class="ib-blue" onclick="window.vkIbpsBegin()">I have read the instructions. Start Exam</button></div></div></div>`;
     document.body.appendChild(root);
   }
   function render(){
@@ -17752,14 +17723,6 @@ body:has(#examPage.active) > footer{
   function stopTimer(){if(timer){clearInterval(timer);timer=null;}}
   function updateTimer(){const m=Math.floor(seconds/60),s=seconds%60;$('ibTimer').textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');if(seconds<=0){stopTimer();window.vkIbpsSubmit(true);}}
   window.vkIbpsShowInstructions=()=>{const x=$('ibInstructions');if(x)x.style.display='grid';};
-  window.vkIbpsInstructionLanguage=lang=>{
-    const body=$('ibInstructionBody');if(!body)return;
-    if(lang==='te'){
-      body.innerHTML=`<h3 style="text-align:center;color:#2765a8;margin:0 0 12px">పరీక్ష సూచనలు</h3><p style="text-align:center"><b><u>పరీక్ష ప్రారంభించే ముందు సూచనలను జాగ్రత్తగా చదవండి</u></b></p><h4>అ. సాధారణ సూచనలు</h4><ol><li>ఈ పరీక్షలో <b>${questions.length}</b> ప్రశ్నలు ఉంటాయి. “I Agree” బటన్ నొక్కిన తర్వాత మాత్రమే టైమర్ ప్రారంభమవుతుంది.</li><li>పరీక్ష సమయం పైభాగంలో కనిపిస్తుంది. సమయం ముగిసినప్పుడు పరీక్ష ఆటోమేటిక్‌గా submit అవుతుంది.</li><li>ఏ ప్రశ్నకైనా వెళ్లడానికి Question Palette ఉపయోగించండి.</li><li><b>బూడిద:</b> చూడని ప్రశ్న; <b>ఎరుపు:</b> సమాధానం ఇవ్వని ప్రశ్న; <b>ఆకుపచ్చ:</b> సమాధానం ఇచ్చిన ప్రశ్న; <b>ఊదా:</b> Review కోసం గుర్తించిన ప్రశ్న; <b>నీలం:</b> సమాధానం ఇచ్చి Review చేసిన ప్రశ్న.</li><li>“Mark for Review &amp; Next” ద్వారా ప్రశ్నను Review కోసం గుర్తించి తదుపరి ప్రశ్నకు వెళ్లవచ్చు.</li><li>“Clear Response” ద్వారా ప్రస్తుత ప్రశ్నలో ఎంచుకున్న సమాధానాన్ని తొలగించవచ్చు.</li><li>“Save &amp; Next” ద్వారా సమాధానాన్ని సేవ్ చేసి తదుపరి ప్రశ్నకు వెళ్లవచ్చు.</li><li>పరీక్ష పూర్తయ్యాక “Submit / Finish Test” నొక్కండి. Submit చేసే ముందు సమాధానాలను పరిశీలించండి.</li><li>పరీక్ష Submit అయిన తర్వాత మీ మార్కులు మరియు పనితీరు విశ్లేషణ కనిపిస్తుంది.</li></ol><h4>ఆ. ముఖ్య గమనిక</h4><p>పరీక్ష జరుగుతున్నప్పుడు పేజీని Refresh చేయకండి లేదా మూసివేయకండి. ఇంటర్నెట్ కనెక్షన్ స్థిరంగా ఉండేలా చూసుకోండి.</p>`;
-    } else {
-      body.innerHTML=`<h3 style="text-align:center;color:#2765a8;margin:0 0 12px">Instructions</h3><p style="text-align:center"><b><u>Please read the instructions carefully</u></b></p><h4>A. General Instructions</h4><ol><li>The examination contains <b>${questions.length}</b> questions. The timer starts only after you click “I Agree”.</li><li>The countdown timer is displayed at the top of the examination screen. When the timer reaches zero, the test will be submitted automatically.</li><li>Use the Question Palette to move directly to any question.</li><li><b>Grey:</b> Not Visited; <b>Red:</b> Not Answered; <b>Green:</b> Answered; <b>Purple:</b> Marked for Review; <b>Blue:</b> Answered and Marked for Review.</li><li>“Mark for Review &amp; Next” saves the selected response, marks the question for review and moves to the next question.</li><li>“Clear Response” removes the selected option for the current question.</li><li>“Save &amp; Next” saves the selected response and moves to the next question.</li><li>You may submit the test from the Submit / Finish Test button. Review your responses before final submission.</li><li>After final submission, your score and performance summary will be displayed.</li></ol><h4>B. Important</h4><p>Do not refresh or close the examination window while the test is in progress. Ensure a stable internet connection.</p>`;
-    }
-  };
   window.vkIbpsBegin=()=>{$('ibInstructions').style.display='none';render();updateTimer();if(!timer)timer=setInterval(()=>{seconds--;updateTimer();},1000);};
   window.vkIbpsChoose=k=>{answers[current]=k;render();};
   window.vkIbpsGo=i=>{current=i;render();};
@@ -17775,33 +17738,9 @@ body:has(#examPage.active) > footer{
     try{
       const {data:result,error}=await supabaseClient.rpc('vk_independent_submit_attempt',{p_test_id:test.id,p_answers:payload});
       if(error)throw error;
-      const score=Number(result.score)||0,total=Number(result.total_marks)||Number(test.total_marks)||0,pct=Math.max(0,Math.min(100,Number(result.percentage)||0));
-      const correct=Number(result.correct_answers)||0,wrong=Number(result.wrong_answers)||0,unanswered=Number(result.unanswered)||0;
-      const attempted=correct+wrong,accuracy=attempted?Math.round(correct/attempted*100):0;
-      const elapsed=Math.max(0,totalSeconds-seconds),fmt=t=>String(Math.floor(t/60)).padStart(2,'0')+':'+String(t%60).padStart(2,'0');
-      const denom=Math.max(1,correct+wrong+unanswered);
-      $('vkIbpsCbt').innerHTML=`<div class="ib-result-wrap">
-        <div class="ib-result-head"><div class="ib-result-check">✓</div><div><h1>Test Submitted Successfully</h1><p>Your responses have been submitted and evaluated.</p></div></div>
-        <section class="ib-result-score">
-          <div class="ib-score-gauge" style="--score:${pct}%"><div><strong>${pct.toFixed(1)}%</strong><small>Overall Score</small></div></div>
-          <div class="ib-score-main"><span class="ib-muted">YOUR SCORE</span><h2>${esc(score)} <small>/ ${esc(total)}</small></h2><p>${esc(test.name||'Endowment Topic Wise Test')}</p><span class="ib-performance">${pct>=80?'Excellent Performance':pct>=60?'Good Performance':pct>=40?'Keep Practising':'Needs More Practice'}</span></div>
-        </section>
-        <h2 class="ib-result-title">Performance Analytics</h2>
-        <section class="ib-result-kpis">
-          <div><small>Correct Answers</small><strong style="color:#159653">${correct}</strong></div>
-          <div><small>Wrong Answers</small><strong style="color:#d94b43">${wrong}</strong></div>
-          <div><small>Unanswered</small><strong style="color:#64748b">${unanswered}</strong></div>
-          <div><small>Accuracy</small><strong style="color:#1769aa">${accuracy}%</strong></div>
-        </section>
-        <section class="ib-result-grid">
-          <div class="ib-result-card"><h3>Response Distribution</h3><div class="ib-donut" style="--c:${correct/denom*100}%;--w:${wrong/denom*100}%"><div><b>${correct+wrong}</b><small>Attempted</small></div></div><div class="ib-result-legend"><span><i style="background:#159653"></i>Correct (${correct})</span><span><i style="background:#d94b43"></i>Wrong (${wrong})</span><span><i style="background:#94a3b8"></i>Unanswered (${unanswered})</span></div></div>
-          <div class="ib-result-card"><h3>Test Summary</h3><div class="ib-summary-row"><span>Total Questions</span><b>${questions.length}</b></div><div class="ib-summary-row"><span>Attempted</span><b>${attempted}</b></div><div class="ib-summary-row"><span>Time Taken</span><b>${fmt(elapsed)}</b></div><div class="ib-summary-row"><span>Time Allowed</span><b>${fmt(totalSeconds)}</b></div><div class="ib-summary-row"><span>Marked for Review</span><b>${Object.values(marked).filter(Boolean).length}</b></div></div>
-        </section>
-        <div class="ib-result-actions"><button class="ib-blue" onclick="window.vkIbpsBackToSeries()">Back to Test Series</button></div>
-      </div>`;
+      $('vkIbpsCbt').innerHTML=`<div style="max-width:720px;margin:8vh auto;background:white;padding:32px;border-radius:10px;text-align:center"><h1 style="color:#1769aa">Test Submitted Successfully</h1><h2>Score: ${esc(result.score)} / ${esc(result.total_marks)}</h2><p>Correct: ${esc(result.correct_answers)} · Wrong: ${esc(result.wrong_answers)} · Unanswered: ${esc(result.unanswered)}</p><p>Percentage: ${esc(result.percentage)}%</p><button class="ib-blue" onclick="window.vkIpBackToPackages()">Back to Test Series</button></div>`;
     }catch(e){submitted=false;alert('Could not submit test: '+(e.message||e));}
   };
-  window.vkIbpsBackToSeries=()=>{const node=$('vkIbpsCbt');if(node)node.remove();if(typeof window.vkIpBackToPackages==='function')window.vkIpBackToPackages();else if(typeof window.showPage==='function')window.showPage('home');};
   window.vkIpStartTest=async function(id){
     try{
       if(!window.supabaseClient)throw new Error('Student service is still loading. Please refresh.');
@@ -17810,7 +17749,7 @@ body:has(#examPage.active) > footer{
       if(!qs||!qs.length)throw new Error('No questions uploaded for this test.');
       if(qs.length>500||qs.length!==Number(t.question_count))throw new Error('Test question count does not match the published test. Please contact Admin.');
       test=t;questions=qs;answers={};marked={};states=qs.map(()=>false);current=0;submitted=false;
-      seconds=Math.max(1,Number(t.duration_minutes)||30)*60;totalSeconds=seconds;
+      seconds=Math.max(1,Number(t.duration_minutes)||30)*60;
       mount();render();
     }catch(e){alert(e.message||String(e));}
   };
