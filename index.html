@@ -17872,6 +17872,11 @@ body:has(#examPage.active) > footer{
     });
   }
 
+  let vkIpCurrentIndex = 0;
+  let vkIpAnswers = {};
+  let vkIpReview = {};
+  let vkIpPaused = false;
+
   function renderExam() {
     const test = window.vkIpCurrentTest;
     const questions = window.vkIpCurrentQuestions || [];
@@ -17880,37 +17885,177 @@ body:has(#examPage.active) > footer{
       alert("Exam data is missing. Please reopen the test.");
       return;
     }
-    const durationSeconds = Math.max(1, Number(test.duration_minutes) || 30) * 60;
-    window.vkIpExamSecondsLeft = durationSeconds;
-    host.innerHTML = `
-      <section style="max-width:1100px;margin:18px auto">
-        <header style="position:sticky;top:0;z-index:10;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:16px;background:#fff;border:1px solid #dbe3ef;border-radius:12px;box-shadow:0 4px 14px rgba(15,23,42,.06)">
-          <div><strong style="font-size:18px">${escapeHtml(test.name || "Online Examination")}</strong><div style="font-size:13px;color:#64748b">${questions.length} Questions</div></div>
-          <div style="font-weight:900;color:#dc2626;font-size:20px">Time Left: <span id="vkIpExamTimer">--:--</span></div>
-        </header>
-        <form id="vkIpExamForm" style="display:grid;gap:14px;margin-top:16px">
-          ${questions.map(function(q,i){return `
-            <article style="background:#fff;border:1px solid #dbe3ef;border-radius:12px;padding:18px">
-              <strong style="display:block;margin-bottom:12px;color:#172033">Q${i+1}. ${escapeHtml(q.question_text)}</strong>
-              ${["A","B","C","D"].map(function(k){const value=q["option_"+k.toLowerCase()];return `<label style="display:flex;align-items:flex-start;gap:10px;padding:10px;margin-top:7px;border:1px solid #e2e8f0;border-radius:8px;cursor:pointer"><input type="radio" name="q_${escapeHtml(q.id)}" value="${k}" style="margin-top:3px"><span>${k}. ${escapeHtml(value)}</span></label>`;}).join("")}
-            </article>`;}).join("")}
-          <button type="button" onclick="window.vkIpSubmitTestFixed(false)" style="padding:14px 22px;border:0;border-radius:10px;background:#16a34a;color:#fff;font-weight:900;font-size:16px">Submit Exam</button>
-        </form>
-      </section>`;
     window.clearInterval(window.vkIpExamTimer);
+    vkIpCurrentIndex = 0;
+    vkIpAnswers = {};
+    vkIpReview = {};
+    vkIpPaused = false;
+    window.vkIpExamSecondsLeft = Math.max(1, Number(test.duration_minutes) || 30) * 60;
+
+    host.innerHTML = `
+      <div class="vk-ip-hall">
+        <header class="vk-ip-hall-top">
+          <div class="vk-ip-hall-title">
+            <strong>${escapeHtml(test.name || "Online Examination")}</strong>
+            <span>Question <b id="vkIpCurrentNo">1</b> of ${questions.length}</span>
+          </div>
+          <div class="vk-ip-hall-stats">
+            <span>● Attempted: <b id="vkIpAttempted">0</b> / ${questions.length}</span>
+            <b id="vkIpPercent">0%</b>
+            <span>Review: <b id="vkIpReviewCount">0</b></span>
+            <span>Left: <b id="vkIpRemaining">${questions.length}</b></span>
+            <span class="vk-ip-saved">Saved ✓</span>
+          </div>
+          <div class="vk-ip-hall-tools">
+            <button type="button" class="vk-ip-tool" id="vkIpPauseBtn" onclick="window.vkIpTogglePause()">Ⅱ Pause</button>
+            <div class="vk-ip-clock"><small>TIME LEFT</small><strong id="vkIpExamTimer">--:--</strong></div>
+            <button type="button" class="vk-ip-submit-top" onclick="window.vkIpSubmitTestFixed(false)">Submit</button>
+          </div>
+        </header>
+
+        <div class="vk-ip-hall-layout">
+          <main class="vk-ip-hall-main">
+            <div class="vk-ip-hall-notice"><b>▣ Exam Hall Mode:</b> Answer the question and use the question navigator to review your progress.</div>
+            <section class="vk-ip-question-card">
+              <div class="vk-ip-question-kicker">MULTIPLE CHOICE QUESTION</div>
+              <div class="vk-ip-question-marks">Select one correct answer</div>
+              <h2 id="vkIpQuestionText"></h2>
+              <form id="vkIpExamForm">
+                <div id="vkIpOptionList"></div>
+              </form>
+              <div class="vk-ip-question-actions">
+                <button type="button" id="vkIpPrev" onclick="window.vkIpMoveQuestion(-1)">← Previous</button>
+                <button type="button" class="primary" id="vkIpNext" onclick="window.vkIpMoveQuestion(1)">Save & Next →</button>
+              </div>
+              <div class="vk-ip-question-footer">
+                <button type="button" class="link" onclick="window.vkIpClearAnswer()">Clear answer</button>
+                <div>
+                  <button type="button" onclick="window.vkIpToggleReview()">⚑ Mark for review</button>
+                  <button type="button" onclick="window.vkIpSubmitTestFixed(false)">Submit / Finish test</button>
+                </div>
+              </div>
+            </section>
+          </main>
+          <aside class="vk-ip-navigator">
+            <div class="vk-ip-nav-heading"><b>QUESTION NAVIGATOR</b><span>${questions.length} total</span></div>
+            <div class="vk-ip-nav-stats">
+              <div><strong id="vkIpNavAnswered">0</strong><small>Answered</small></div>
+              <div><strong id="vkIpNavReview">0</strong><small>Review</small></div>
+              <div><strong id="vkIpNavRemaining">${questions.length}</strong><small>Remaining</small></div>
+            </div>
+            <div class="vk-ip-palette" id="vkIpQuestionPalette"></div>
+            <div class="vk-ip-legend"><span><i class="answered"></i> Answered</span><span><i class="review"></i> Marked for review</span><span><i></i> Not answered</span></div>
+            <button type="button" class="vk-ip-submit-side" onclick="window.vkIpSubmitTestFixed(false)">Submit / Finish test</button>
+          </aside>
+        </div>
+      </div>`;
+
+    window.vkIpRenderQuestion();
+    window.vkIpUpdateStats();
+    const firstTimer = document.getElementById("vkIpExamTimer");
+    if (firstTimer) {
+      const firstMinutes = Math.floor(window.vkIpExamSecondsLeft / 60);
+      const firstSeconds = window.vkIpExamSecondsLeft % 60;
+      firstTimer.textContent = String(firstMinutes).padStart(2, "0") + ":" + String(firstSeconds).padStart(2, "0");
+    }
     window.vkIpExamTimer = window.setInterval(function () {
-      const seconds = window.vkIpExamSecondsLeft;
-      const timer = document.getElementById("vkIpExamTimer");
-      if (!timer) { window.clearInterval(window.vkIpExamTimer); return; }
-      timer.textContent = Math.floor(seconds / 60) + ":" + String(seconds % 60).padStart(2, "0");
-      if (seconds <= 0) {
+      if (vkIpPaused) return;
+      if (window.vkIpExamSecondsLeft <= 0) {
         window.clearInterval(window.vkIpExamTimer);
         window.vkIpSubmitTestFixed(true);
-      } else {
-        window.vkIpExamSecondsLeft -= 1;
+        return;
+      }
+      window.vkIpExamSecondsLeft -= 1;
+      const timer = document.getElementById("vkIpExamTimer");
+      if (timer) {
+        const m = Math.floor(window.vkIpExamSecondsLeft / 60);
+        const sec = window.vkIpExamSecondsLeft % 60;
+        timer.textContent = String(m).padStart(2, "0") + ":" + String(sec).padStart(2, "0");
       }
     }, 1000);
   }
+
+  window.vkIpRenderQuestion = function () {
+    const q = (window.vkIpCurrentQuestions || [])[vkIpCurrentIndex];
+    if (!q) return;
+    const title = document.getElementById("vkIpQuestionText");
+    const no = document.getElementById("vkIpCurrentNo");
+    const opts = document.getElementById("vkIpOptionList");
+    if (!title || !opts) return;
+    if (no) no.textContent = String(vkIpCurrentIndex + 1);
+    title.textContent = "Q" + (vkIpCurrentIndex + 1) + ". " + (q.question_text || "");
+    opts.innerHTML = ["A","B","C","D"].map(function (k) {
+      const chosen = vkIpAnswers[q.id] === k;
+      return `<label class="vk-ip-answer ${chosen ? "selected" : ""}">
+        <span class="vk-ip-option-letter">${k}</span>
+        <input type="radio" name="vkIpSelectedOption" value="${k}" ${chosen ? "checked" : ""} onchange="window.vkIpChooseAnswer('${k}')">
+        <span>${escapeHtml(q["option_" + k.toLowerCase()] || "")}</span>
+      </label>`;
+    }).join("");
+    const prev = document.getElementById("vkIpPrev");
+    const next = document.getElementById("vkIpNext");
+    if (prev) prev.disabled = vkIpCurrentIndex === 0;
+    if (next) next.textContent = vkIpCurrentIndex === (window.vkIpCurrentQuestions.length - 1) ? "Finish →" : "Save & Next →";
+    const reviewButton = document.querySelector(".vk-ip-question-footer button[onclick='window.vkIpToggleReview()']");
+    if (reviewButton) reviewButton.textContent = vkIpReview[q.id] ? "★ Marked for review" : "⚑ Mark for review";
+    window.vkIpUpdateStats();
+  };
+
+  window.vkIpChooseAnswer = function (value) {
+    const q = window.vkIpCurrentQuestions[vkIpCurrentIndex];
+    if (!q) return;
+    vkIpAnswers[q.id] = value;
+    window.vkIpRenderQuestion();
+  };
+  window.vkIpMoveQuestion = function (delta) {
+    const next = vkIpCurrentIndex + delta;
+    if (next >= 0 && next < window.vkIpCurrentQuestions.length) {
+      vkIpCurrentIndex = next;
+      window.vkIpRenderQuestion();
+    } else if (next >= window.vkIpCurrentQuestions.length) {
+      window.vkIpSubmitTestFixed(false);
+    }
+  };
+  window.vkIpJumpQuestion = function (index) {
+    if (index < 0 || index >= window.vkIpCurrentQuestions.length) return;
+    vkIpCurrentIndex = index;
+    window.vkIpRenderQuestion();
+  };
+  window.vkIpClearAnswer = function () {
+    const q = window.vkIpCurrentQuestions[vkIpCurrentIndex];
+    if (q) delete vkIpAnswers[q.id];
+    window.vkIpRenderQuestion();
+  };
+  window.vkIpToggleReview = function () {
+    const q = window.vkIpCurrentQuestions[vkIpCurrentIndex];
+    if (q) vkIpReview[q.id] = !vkIpReview[q.id];
+    window.vkIpRenderQuestion();
+  };
+  window.vkIpTogglePause = function () {
+    vkIpPaused = !vkIpPaused;
+    const button = document.getElementById("vkIpPauseBtn");
+    if (button) button.textContent = vkIpPaused ? "▶ Resume" : "Ⅱ Pause";
+  };
+  window.vkIpUpdateStats = function () {
+    const questions = window.vkIpCurrentQuestions || [];
+    const total = questions.length;
+    const answered = Object.keys(vkIpAnswers).length;
+    const review = Object.values(vkIpReview).filter(Boolean).length;
+    const remaining = total - answered;
+    const put = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value; };
+    put("vkIpAttempted", answered);
+    put("vkIpPercent", (total ? Math.round(answered / total * 100) : 0) + "%");
+    put("vkIpReviewCount", review);
+    put("vkIpRemaining", remaining);
+    put("vkIpNavAnswered", answered);
+    put("vkIpNavReview", review);
+    put("vkIpNavRemaining", remaining);
+    const palette = document.getElementById("vkIpQuestionPalette");
+    if (palette) palette.innerHTML = questions.map((q, i) => {
+      const cls = [i === vkIpCurrentIndex ? "current" : "", vkIpAnswers[q.id] ? "answered" : "", vkIpReview[q.id] ? "review" : ""].filter(Boolean).join(" ");
+      return `<button type="button" class="${cls}" onclick="window.vkIpJumpQuestion(${i})">${i + 1}</button>`;
+    }).join("");
+  };
 
   window.vkIpAgreeAndStart = function () {
     const checkbox = document.getElementById("vkIpAgreeCheckbox");
@@ -17961,8 +18106,7 @@ body:has(#examPage.active) > footer{
     window.clearInterval(window.vkIpExamTimer);
     const answers = {};
     questions.forEach(function (q) {
-      const selected = form.querySelector('input[name="q_' + CSS.escape(String(q.id)) + '"]:checked');
-      answers[q.id] = selected ? selected.value : null;
+      answers[q.id] = vkIpAnswers[q.id] || null;
     });
     const submitButtons = form.querySelectorAll("button");
     submitButtons.forEach(function (button) { button.disabled = true; });
@@ -17975,7 +18119,7 @@ body:has(#examPage.active) > footer{
       const host = ensureExamPage();
       host.innerHTML = `
         <section style="max-width:760px;margin:40px auto;padding:28px;background:#fff;border:1px solid #dbe3ef;border-radius:16px;text-align:center">
-          <h1 style="color:#15803d">Exam Submitted Successfully</h1>
+          <h1 style="color:#1d4ed8">Exam Submitted Successfully</h1>
           <p style="margin:10px 0;color:#64748b">${autoSubmitted ? "Your time expired and the exam was submitted automatically." : "Your answers have been submitted."}</p>
           <h2 style="font-size:32px;margin:18px 0">Score: ${escapeHtml(result?.score ?? "—")} / ${escapeHtml(result?.total_marks ?? "—")}</h2>
           <p>Correct: ${escapeHtml(result?.correct_answers ?? "—")} · Wrong: ${escapeHtml(result?.wrong_answers ?? "—")} · Unanswered: ${escapeHtml(result?.unanswered ?? "—")}</p>
@@ -17990,6 +18134,79 @@ body:has(#examPage.active) > footer{
   };
 })();
 </script>
+
+
+<style id="vk-independent-exam-blue-hall-style">
+#vkIndependentExamPage{background:#f4f7fc!important;min-height:calc(100vh - 60px);padding:14px 18px 36px}
+#vkIndependentExamPage>.container{max-width:none!important;padding:0!important}
+#vkIndependentExamPage .vk-ip-hall{max-width:1500px;margin:0 auto;color:#14233d;font-family:inherit}
+#vkIndependentExamPage .vk-ip-hall-top{display:grid;grid-template-columns:minmax(220px,1fr) auto auto;align-items:center;gap:18px;background:#fff;border:1px solid #d7e2f2;border-radius:14px;padding:12px 16px;box-shadow:0 3px 12px rgba(24,55,105,.06)}
+#vkIndependentExamPage .vk-ip-hall-title{display:grid;gap:5px;font-size:13px}
+#vkIndependentExamPage .vk-ip-hall-title strong{font-size:14px;color:#18325d}
+#vkIndependentExamPage .vk-ip-hall-title span{font-size:12px;color:#475569}
+#vkIndependentExamPage .vk-ip-hall-stats{display:flex;align-items:center;gap:13px;padding:9px 14px;border:1px solid #dbe5f3;border-radius:30px;font-size:11px;color:#334155;white-space:nowrap}
+#vkIndependentExamPage .vk-ip-hall-stats>b{padding:4px 7px;background:#eff6ff;color:#1d4ed8;border-radius:6px}
+#vkIndependentExamPage .vk-ip-saved{font-weight:800;color:#0f766e}
+#vkIndependentExamPage .vk-ip-hall-tools{display:flex;align-items:center;gap:8px}
+#vkIndependentExamPage .vk-ip-tool,#vkIndependentExamPage .vk-ip-clock{border:1px solid #d7e2f2;border-radius:10px;background:#fff;padding:9px 12px;color:#18325d;font-size:12px;font-weight:800}
+#vkIndependentExamPage .vk-ip-clock{display:grid;text-align:center;gap:2px;min-width:74px}
+#vkIndependentExamPage .vk-ip-clock small{font-size:8px;letter-spacing:1px;color:#64748b}
+#vkIndependentExamPage .vk-ip-clock strong{font-size:16px;color:#1d4ed8}
+#vkIndependentExamPage .vk-ip-submit-top,#vkIndependentExamPage .vk-ip-submit-side{border:0;border-radius:10px;background:#2457c5;color:#fff;padding:11px 17px;font-weight:900;cursor:pointer}
+#vkIndependentExamPage .vk-ip-hall-layout{display:grid;grid-template-columns:minmax(0,1fr) 285px;gap:18px;margin-top:18px;align-items:start}
+#vkIndependentExamPage .vk-ip-hall-main{min-width:0}
+#vkIndependentExamPage .vk-ip-hall-notice{padding:13px 16px;border:1px solid #cbdcf8;background:#edf4ff;color:#234477;border-radius:11px;font-size:12px;margin-bottom:12px}
+#vkIndependentExamPage .vk-ip-question-card{background:#fff;border:1px solid #d7e2f2;border-radius:17px;padding:22px;box-shadow:0 3px 10px rgba(24,55,105,.06)}
+#vkIndependentExamPage .vk-ip-question-kicker{font-size:10px;font-weight:900;letter-spacing:1px;color:#2457c5}
+#vkIndependentExamPage .vk-ip-question-marks{font-size:11px;color:#64748b;margin-top:4px}
+#vkIndependentExamPage #vkIpQuestionText{font-size:18px;line-height:1.65;color:#172b4d;margin:18px 0 22px}
+#vkIndependentExamPage .vk-ip-answer{display:flex;align-items:center;gap:12px;padding:13px 14px;margin:10px 0;border:1px solid #d8e2f0;border-radius:11px;cursor:pointer;color:#1e3558;font-size:13px;line-height:1.5}
+#vkIndependentExamPage .vk-ip-answer:hover,#vkIndependentExamPage .vk-ip-answer.selected{border-color:#4776d0;background:#f1f6ff}
+#vkIndependentExamPage .vk-ip-option-letter{display:grid;place-items:center;flex:none;width:27px;height:27px;border-radius:8px;background:#edf3ff;color:#2457c5;font-size:11px;font-weight:900}
+#vkIndependentExamPage .vk-ip-answer input{accent-color:#2457c5;flex:none}
+#vkIndependentExamPage .vk-ip-question-actions{display:flex;justify-content:space-between;gap:10px;margin-top:18px}
+#vkIndependentExamPage .vk-ip-question-actions button,#vkIndependentExamPage .vk-ip-question-footer button{padding:10px 15px;border:1px solid #d7e2f2;border-radius:9px;background:#fff;color:#24416d;font-size:12px;font-weight:800;cursor:pointer}
+#vkIndependentExamPage .vk-ip-question-actions button.primary{background:#172b4d;color:#fff;border-color:#172b4d}
+#vkIndependentExamPage .vk-ip-question-actions button:disabled{opacity:.4;cursor:not-allowed}
+#vkIndependentExamPage .vk-ip-question-footer{display:flex;justify-content:space-between;align-items:center;gap:12px;border-top:1px solid #e5ebf4;margin-top:18px;padding-top:14px}
+#vkIndependentExamPage .vk-ip-question-footer>div{display:flex;gap:8px;flex-wrap:wrap}
+#vkIndependentExamPage .vk-ip-question-footer button.link{border:0;color:#315fba;padding-left:0}
+#vkIndependentExamPage .vk-ip-navigator{background:#fff;border:1px solid #d7e2f2;border-radius:14px;padding:14px;position:sticky;top:12px}
+#vkIndependentExamPage .vk-ip-nav-heading{display:flex;justify-content:space-between;gap:8px;font-size:10px;color:#31527e;letter-spacing:.7px}
+#vkIndependentExamPage .vk-ip-nav-heading span{letter-spacing:0;color:#64748b}
+#vkIndependentExamPage .vk-ip-nav-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:12px 0}
+#vkIndependentExamPage .vk-ip-nav-stats div{display:grid;gap:3px;text-align:center;padding:10px 3px;background:#f3f6fb;border-radius:9px}
+#vkIndependentExamPage .vk-ip-nav-stats strong{font-size:18px;color:#2457c5}
+#vkIndependentExamPage .vk-ip-nav-stats small{font-size:9px;color:#64748b}
+#vkIndependentExamPage .vk-ip-palette{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}
+#vkIndependentExamPage .vk-ip-palette button{height:35px;border:1px solid #d7e2f2;border-radius:8px;background:#eff3f8;color:#18325d;font-size:11px;font-weight:900;cursor:pointer}
+#vkIndependentExamPage .vk-ip-palette button.current{background:#172b4d;border:2px solid #8eb3ff;color:#fff}
+#vkIndependentExamPage .vk-ip-palette button.answered{background:#dbeafe;border-color:#93b7f2;color:#1d4ed8}
+#vkIndependentExamPage .vk-ip-palette button.review{background:#fff0c2;border-color:#f5cf66;color:#8a5a00}
+#vkIndependentExamPage .vk-ip-palette button.current.answered{background:#172b4d;color:#fff}
+#vkIndependentExamPage .vk-ip-legend{display:flex;flex-wrap:wrap;gap:8px;margin:13px 0;padding-top:10px;border-top:1px solid #e5ebf4;font-size:9px;color:#64748b}
+#vkIndependentExamPage .vk-ip-legend span{display:flex;align-items:center;gap:4px}
+#vkIndependentExamPage .vk-ip-legend i{width:7px;height:7px;border-radius:2px;background:#e2e8f0}
+#vkIndependentExamPage .vk-ip-legend i.answered{background:#93c5fd}
+#vkIndependentExamPage .vk-ip-legend i.review{background:#f5cf66}
+#vkIndependentExamPage .vk-ip-submit-side{width:100%;font-size:12px}
+@media(max-width:900px){
+ #vkIndependentExamPage .vk-ip-hall-top{grid-template-columns:1fr auto}
+ #vkIndependentExamPage .vk-ip-hall-stats{grid-column:1/-1;grid-row:2;justify-content:center;flex-wrap:wrap}
+ #vkIndependentExamPage .vk-ip-hall-layout{grid-template-columns:1fr}
+ #vkIndependentExamPage .vk-ip-navigator{position:static;order:2}
+}
+@media(max-width:560px){
+ #vkIndependentExamPage{padding:8px}
+ #vkIndependentExamPage .vk-ip-hall-top{grid-template-columns:1fr;padding:11px}
+ #vkIndependentExamPage .vk-ip-hall-tools{justify-content:space-between}
+ #vkIndependentExamPage .vk-ip-hall-stats{grid-column:auto;grid-row:auto;gap:8px;border-radius:12px}
+ #vkIndependentExamPage .vk-ip-question-card{padding:14px}
+ #vkIndependentExamPage #vkIpQuestionText{font-size:16px}
+ #vkIndependentExamPage .vk-ip-question-footer{align-items:flex-start;flex-direction:column}
+ #vkIndependentExamPage .vk-ip-palette{grid-template-columns:repeat(5,minmax(0,1fr))}
+}
+</style>
 
 </body>
 </html>
