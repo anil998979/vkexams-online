@@ -5145,7 +5145,7 @@ aria-live="polite">
 <!-- Independent Topic-wise student page: this container was missing in v20. -->
 <div id="vkIndependentPackageDetail" class="page vk-independent-student-page">
   <div class="container">
-    <button type="button" class="back" onclick="showHome()">← Back to Home</button>
+    <button type="button" class="back" onclick="window.vkTopicWiseBack()">← Back</button>
     <div id="vkIpStudentDetail" aria-live="polite">
       <div class="vk-ip-loading">Loading Endowment Topic Wise Test Series…</div>
     </div>
@@ -5256,8 +5256,6 @@ let lastResult = null;
    let currentFreeMockTestId = null;
 let currentFreeMockNumber = null;
 let currentAttemptId = null;
-let vkIndependentTopicExamMode = false;
-let vkIndependentTopicTestId = null;
    let freeMockStarting = false;
    let testSubmitted = false;
 
@@ -13882,56 +13880,10 @@ function closeLastQuestionPopup(){
 
 }
 /* =====================================================
-   INDEPENDENT TOPIC-WISE EXAM SUBMISSION
-   Uses the existing CBT interface, but keeps grading on the
-   dedicated server-side RPC for vk_independent_tests.
-===================================================== */
-async function submitIndependentTopicExam(timeout = false){
-    if(!vkIndependentTopicExamMode || !vkIndependentTopicTestId || !examQuestions.length || testSubmitted) return;
-    const submitButtons=document.querySelectorAll('.hall-submit,.navigator-submit');
-    submitButtons.forEach(b=>{b.disabled=true;b.textContent='Submitting…';});
-    try{
-        const answers={};
-        examQuestions.forEach((q,i)=>{
-            const selected=userAnswers[i];
-            answers[q.id]=(selected===null||selected===undefined)?null:['A','B','C','D'][Number(selected)];
-        });
-        const {data,error}=await supabaseClient.rpc('vk_independent_submit_attempt',{
-            p_test_id:vkIndependentTopicTestId,
-            p_answers:answers
-        });
-        if(error) throw error;
-        const result=Array.isArray(data)?(data[0]||{}):(data||{});
-        const score=Number(result.score??0);
-        const total=Number(result.total_marks??examQuestions.reduce((n,q)=>n+Number(q.marks||1),0));
-        const percentage=Number(result.percentage??(total>0?score/total*100:0));
-        const correct=Number(result.correct_answers??0);
-        const wrong=Number(result.wrong_answers??0);
-        const unanswered=Number(result.unanswered??examQuestions.length-userAnswers.filter(v=>v!==null&&v!==undefined).length);
-        testSubmitted=true;
-        clearInterval(timerInterval);
-        lastResult={attemptId:null,questions:examQuestions,answers:[...userAnswers],score,total,percentage,correct,wrong,unanswered,title:$('examTitle')?.textContent||'Endowment Topic Wise Test',timeout};
-        const scoreNode=$('scoreText');if(scoreNode)scoreNode.textContent=score+' / '+total;
-        const message=$('resultMessage');if(message)message.textContent='You scored '+Math.round(percentage)+'%.'+(timeout?' Time expired and the test was auto-submitted.':'');
-        renderVkProfessionalResult(lastResult);
-        if(typeof restoreLiveResultActions==='function')restoreLiveResultActions();
-        showPage('resultPage');
-    }catch(error){
-        console.error('Independent Topic Wise exam submission failed:',error);
-        if(typeof toast==='function')toast(error?.message||'Unable to submit the test. Please try again.');
-        submitButtons.forEach(b=>{b.disabled=false;b.textContent='Submit';});
-    }
-}
-
-/* =====================================================
    SUBMIT
 ===================================================== */
 
 async function submitExam(timeout = false){
-
-    if(vkIndependentTopicExamMode){
-        return submitIndependentTopicExam(timeout);
-    }
 
     if(!examQuestions.length){
         return;
@@ -17798,46 +17750,13 @@ body:has(#examPage.active) > footer{
  window.vkV26BuyForTopic=function(){window.vkV26PendingTopic=null;vkIpBuy(pkg.id);};
  window.vkV26AfterPurchase=async function(){window.vkV26PendingTopic=null;await refreshPurchase();if(chosenPaper)await renderTopics(chosenPaper);};
  window.vkV26OpenPaper=renderTopics;window.vkV26BackToPapers=renderPaperChooser;
+ window.vkTopicWiseBack=function(){if(chosenPaper){chosenPaper=null;renderPaperChooser();return;}if(typeof window.showHome==='function')window.showHome();else if(typeof window.showPage==='function')window.showPage('home');};
  window.vkTopicOpenPackage=async function(){return window.vkIpOpenPackages();};
  window.vkIpOpenPackages=async function(){try{if(!window.supabaseClient)throw Error('Supabase is not ready. Refresh and try again.');isAdmin=await checkAdmin();pkg=await getPackage();if(!pkg)throw Error('Topic-wise package is not published yet.');await refreshPurchase();const r=await supabaseClient.from('vk_independent_papers').select('*').eq('package_id',pkg.id).eq('is_active',true).order('display_order');if(r.error)throw r.error;papers=r.data||[];const tr=papers.length?await supabaseClient.from('vk_independent_topics').select('*').in('paper_id',papers.map(p=>p.id)).eq('is_active',true).order('display_order'):{data:[],error:null};if(tr.error)throw tr.error;topics=tr.data||[];if(papers.length<2){if(!isAdmin)throw Error('The Paper-1 and Paper-2 topic structure is being prepared. Please check again soon.');}if(typeof showPage==='function')showPage('vkIndependentPackageDetail');renderPaperChooser();return true;}catch(e){console.error(e);const host=document.getElementById('vkIpStudentDetail');if(host)host.innerHTML='<div class="vk-ip-error">'+esc(e.message||e)+'</div>';return false;}};
  window.vkIpStudentLoad=window.vkIpOpenPackages;
  window.vkIpOpenStudentPackage=async function(id){return window.vkIpOpenPackages();};
- window.vkIpStartTest=async function(id){
-   try{
-     if(!window.supabaseClient)throw Error('Supabase is not ready. Please refresh and try again.');
-     isAdmin=await checkAdmin();
-     await refreshPurchase();
-     if(!isAdmin&&!purchase){alert('Please buy the ₹29 package to unlock exam attempts.');return;}
-     const q=await supabaseClient.from('vk_independent_tests').select('*').eq('id',id).eq('is_active',true).single();
-     if(q.error)throw q.error;
-     const r=await supabaseClient.from('vk_independent_questions').select('id,question_text,option_a,option_b,option_c,option_d,display_order').eq('test_id',id).eq('is_active',true).order('display_order');
-     if(r.error)throw r.error;
-     const questions=r.data||[];
-     if(!questions.length||questions.length>500||questions.length!==Number(q.data.question_count))throw Error('Test is not ready: verify its 1–500 questions and saved question count.');
-     if(!document.getElementById('examPage')||!document.getElementById('questionText')||!document.getElementById('options'))throw Error('The VK Exams CBT page is incomplete. Please restore the original examPage markup.');
-     window.vkIpCurrentTest=q.data;window.vkIpCurrentQuestions=questions;
-     vkIpCurrentTest=q.data;vkIpCurrentQuestions=questions;
-     vkIndependentTopicExamMode=true;vkIndependentTopicTestId=id;
-     currentFreeMockTestId=null;currentFreeMockNumber=null;currentAttemptId=null;
-     currentCourse='Endowment Topic Wise Test Series';currentQuestionIndex=0;
-     examQuestions=questions.map((x,i)=>({id:x.id,number:i+1,q:x.question_text,o:[x.option_a,x.option_b,x.option_c,x.option_d],marks:1,negative:0,correctOption:'',explanation:''}));
-     userAnswers=new Array(examQuestions.length).fill(null);
-     examReviewFlags=new Array(examQuestions.length).fill(false);
-     examBookmarkedQuestions=new Set();examPaletteHidden=false;examPaused=false;testSubmitted=false;
-     timeLeft=Math.max(1,Number(q.data.duration_minutes)||30)*60;
-     clearInterval(timerInterval);
-     const shell=document.querySelector('.exam-hall-shell');if(shell)shell.classList.add('paid-theme');
-     const title=document.getElementById('examTitle');if(title){title.textContent=q.data.name||'Endowment Topic Wise Test';title.dataset.fullTitle=title.textContent;}
-     const toggle=document.getElementById('paletteToggleText');if(toggle)toggle.textContent='Hide Palette';
-     const nav=document.getElementById('examQuestionNavigator');if(nav)nav.classList.remove('hidden');
-     const body=document.querySelector('.exam-hall-body');if(body)body.classList.remove('palette-hidden');
-     const submitButtons=document.querySelectorAll('.hall-submit,.navigator-submit');submitButtons.forEach(b=>{b.disabled=false;b.textContent=b.classList.contains('hall-submit')?'Submit':'Submit / Finish test';});
-     showPage('examPage');
-     renderQuestion();renderTimer();
-     history.replaceState({vkPage:'examPage',vkIndependentTopic:true,testId:id},'', '#examPage?topicTest='+encodeURIComponent(id));
-     timerInterval=window.setInterval(function(){if(timeLeft>0&&!examPaused){timeLeft--;renderTimer();}if(timeLeft<=0){clearInterval(timerInterval);submitExam(true);}},1000);
-   }catch(e){console.error('Could not start independent Topic Wise exam:',e);alert(e.message||String(e));}
- };
+ const oldStart=window.vkIpStartTest;
+ window.vkIpStartTest=async function(id){try{isAdmin=await checkAdmin();await refreshPurchase();if(!isAdmin&&!purchase){alert('Please buy the ₹29 package to unlock exam attempts.');return;}const q=await supabaseClient.from('vk_independent_tests').select('*').eq('id',id).eq('is_active',true).single();if(q.error)throw q.error;const r=await supabaseClient.from('vk_independent_questions').select('id,question_text,option_a,option_b,option_c,option_d,display_order').eq('test_id',id).eq('is_active',true).order('display_order');if(r.error)throw r.error;if(!r.data?.length||r.data.length>300||r.data.length!==Number(q.data.question_count))throw Error('Test is not ready: verify its 1–300 questions and question count.');window.vkIpCurrentTest=q.data;window.vkIpCurrentQuestions=r.data;vkIpCurrentTest=q.data;vkIpCurrentQuestions=r.data;showPage('vkIndependentExamPage');const host=document.getElementById('vkIpExamHost');host.innerHTML=`<h2>${esc(q.data.name)}</h2><p>${r.data.length} Questions · ${q.data.duration_minutes} Minutes</p><form id="vkIpExamForm">${r.data.map((x,i)=>`<div class="vk-ip-exam-q"><strong>Q${i+1}. ${esc(x.question_text)}</strong>${['A','B','C','D'].map(k=>`<label><input type="radio" name="q_${x.id}" value="${k}"> ${k}. ${esc(x['option_'+k.toLowerCase()])}</label>`).join('')}</div>`).join('')}<button type="button" class="vk-ip-buy" onclick="vkIpSubmitTest()">Submit Test</button></form>`;}catch(e){alert(e.message||String(e));}};
 })();
 </script>
 
