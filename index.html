@@ -2510,42 +2510,6 @@ body > footer p{
 @media(max-width:800px){.exam-hall-topbar{position:relative;padding:10px;gap:8px}.exam-hall-titlebox{width:100%;max-width:none}.exam-hall-progress{order:0;width:100%;max-width:none;overflow:auto;justify-content:flex-start}.exam-hall-actions{width:100%;justify-content:space-between;flex-wrap:wrap}.hall-tool{padding:0 8px}.exam-hall-body{display:flex;flex-direction:column}.exam-question-navigator{border-left:0;border-top:1px solid #dce5ef;min-height:300px}.question-palette{grid-template-columns:repeat(6,minmax(0,1fr))}.exam-hall-main{padding:12px}.exam-hall-notice{flex-wrap:wrap}.notice-secondary{display:none}.exam-question-panel{padding:16px;border-radius:16px}.exam-question-panel h2{font-size:16px}.question-utility-row{align-items:flex-start;flex-direction:column}.question-utility-actions{width:100%}.question-utility-actions button{flex:1;padding:9px 6px}.exam-hall-footer{padding:6px 9px}.exam-hall-footer .footer-hide-nav{display:none}}
 @media(max-width:440px){.hall-tool{font-size:9px;height:38px}.hall-timer{height:38px;min-width:65px}.hall-submit{padding:11px}.exam-hall-progress{font-size:9px;gap:7px;padding:8px}.question-meta{align-items:flex-start}.language-switch button{padding:7px;font-size:10px}.question-palette{grid-template-columns:repeat(5,minmax(0,1fr))}.exam-hall-notice{font-size:10px}.exam-hall-notice button{margin-left:0}}
 
-
-/* CLASSIC CBT PALETTE STATES + INSTRUCTIONS DIALOG */
-.question-palette button.not-visited{background:#eef1f5;border-color:#cbd2dc;color:#475569}
-.question-palette button.visited-unanswered{background:#e64b24;border-color:#c83d1c;color:#fff}
-.question-palette button.answered{background:#68b82e;border-color:#4d9f1c;color:#fff}
-.question-palette button.review{background:#9254d8;border-color:#7540b8;color:#fff}
-.question-palette button.answered-review{background:#9254d8;border-color:#7540b8;color:#fff;position:relative}
-.question-palette button.answered-review:after{content:"✓";position:absolute;right:2px;top:-5px;font-size:10px;color:#18a058;text-shadow:0 1px #fff}
-.question-palette button.current{outline:3px solid #a8c7fa;outline-offset:1px;box-shadow:0 0 0 1px #fff inset}
-.exam-instructions-overlay{display:none;position:fixed;inset:0;z-index:30000;background:rgba(0,0,0,.72);align-items:center;justify-content:center;padding:20px}
-.exam-instructions-overlay.open{display:flex}
-.exam-instructions-dialog{width:min(760px,96vw);max-height:min(88vh,850px);background:#fff;border:1px solid #d5dce5;box-shadow:0 18px 60px rgba(0,0,0,.35);display:flex;flex-direction:column;color:#222;font-family:Arial,Helvetica,sans-serif}
-.exam-instructions-head{display:flex;align-items:center;justify-content:space-between;background:#3169ad;color:#fff;padding:10px 14px;font-size:18px;font-weight:800;flex:0 0 auto}
-.exam-instructions-close{border:1px solid rgba(255,255,255,.8);background:transparent;color:#fff;width:36px;height:34px;font-size:28px;line-height:24px;font-weight:700;cursor:pointer}
-.exam-instructions-content{padding:16px 28px 24px;overflow:auto;line-height:1.55;font-size:14px}
-.exam-instructions-content h3{text-align:center;color:#3169ad;font-size:20px;margin:0 0 8px}
-.exam-instructions-content .instruction-underline{text-align:center;text-decoration:underline;font-weight:800;margin:12px 0}
-.exam-instructions-language{display:flex;justify-content:flex-end;align-items:center;gap:6px;margin:0 0 12px}
-.exam-instructions-language select{padding:4px 7px;border:1px solid #9ca3af;background:#fff;color:#111}
-.exam-instructions-content h4{font-size:15px;margin:16px 0 6px}
-.exam-instructions-content ol{padding-left:24px}
-.exam-instructions-content li{padding-left:3px;margin:0 0 9px}
-.instruction-state{display:inline-grid;place-items:center;width:31px;height:29px;margin:0 8px 0 0;border-radius:5px;font-weight:800;color:#fff}
-.instruction-state.not-visited{background:#aeb6c2;color:#172033}
-.instruction-state.not-answered{background:#e64b24}
-.instruction-state.answered{background:#68b82e}
-.instruction-state.review{background:#9254d8;border-radius:50%}
-.instruction-state.answered-review{background:#9254d8;border-radius:50%;position:relative}
-.instruction-state.answered-review:after{content:"✓";position:absolute;right:-3px;top:-7px;color:#18a058;font-size:13px;text-shadow:0 1px #fff}
-.exam-instructions-foot{padding:10px 16px;border-top:1px solid #e5e7eb;display:flex;justify-content:flex-end;flex:0 0 auto}
-.exam-instructions-foot button{background:#3169ad;color:#fff;border:0;border-radius:4px;padding:10px 22px;font-weight:800;cursor:pointer}
-.exam-hall-actions .hall-instructions{background:#3169ad;color:#fff;border-color:#3169ad}
-.question-step-controls button.last-submit{background:#b88632!important;border-color:#b88632!important;color:#fff!important}
-.exam-hall-footer .footer-next.last-submit{background:#b88632!important;border-color:#b88632!important;color:#fff!important}
-@media(max-width:600px){.exam-instructions-overlay{padding:8px}.exam-instructions-dialog{max-height:94vh}.exam-instructions-content{padding:12px 16px;font-size:13px}.exam-instructions-head{font-size:16px}}
-
 /* =====================================================
    PAID CBT PREMIUM THEME — scoped to paid exams only
    Free Mock Tests retain the original blue/teal theme.
@@ -2582,12 +2546,6 @@ body > footer p{
 .exam-hall-shell.paid-theme .exam-question-navigator{background:#f8fafc;border-left-color:#d5dce6}
 .exam-hall-shell.paid-theme .navigator-stats>div{background:#edf1f6}
 .exam-hall-shell.paid-theme .navigator-stats strong{color:#9b702d}
-.exam-hall-shell.paid-theme .question-palette button.not-visited{background:#eef1f5;border-color:#cbd2dc;color:#475569}
-.exam-hall-shell.paid-theme .question-palette button.visited-unanswered{background:#e64b24;border-color:#c83d1c;color:#fff}
-.exam-hall-shell.paid-theme .question-palette button.answered{background:#68b82e;border-color:#4d9f1c;color:#fff}
-.exam-hall-shell.paid-theme .question-palette button.review,
-.exam-hall-shell.paid-theme .question-palette button.answered-review{background:#9254d8;border-color:#7540b8;color:#fff}
-.exam-hall-shell.paid-theme .hall-tool.hall-instructions{background:#3169ad;border-color:#3169ad;color:#fff}
 .exam-hall-shell.paid-theme .question-palette button.current{background:#17263d;color:#f4d58d;border-color:#b88632;box-shadow:0 0 0 3px #f4e4bd}
 .exam-hall-shell.paid-theme .question-palette button.answered{background:#d9f3e7;border-color:#a8d9c0;color:#176747}
 .exam-hall-shell.paid-theme .question-palette button.review{background:#fff0c9;border-color:#e8c875;color:#805a1d}
@@ -3926,7 +3884,6 @@ class="test-list">
 
       <div class="exam-hall-actions">
         <button type="button" class="hall-tool" onclick="toggleQuestionPalette()">▤ <span id="paletteToggleText">Hide Palette</span></button>
-        <button type="button" class="hall-tool hall-instructions" onclick="openExamInstructions()">ⓘ Instructions</button>
         <button type="button" class="hall-tool" onclick="toggleExamPause()" id="pauseExamButton">Ⅱ Pause</button>
         <div class="hall-timer"><small>TIME LEFT</small><strong id="timer">15:00</strong></div>
         <button type="button" class="hall-submit" onclick="submitExam()">Submit</button>
@@ -3992,43 +3949,11 @@ class="test-list">
     <footer class="exam-hall-footer">
       <button type="button" class="footer-previous" onclick="previousQuestion()">← Previous</button>
       <button type="button" class="footer-hide-nav" onclick="toggleQuestionPalette()">▣ Hide Navigator <span id="footerQuestionPosition">1/30</span></button>
-      <button type="button" id="footerNextButton" class="footer-next" onclick="nextQuestion()">Save &amp; next →</button>
+      <button type="button" class="footer-next" onclick="nextQuestion()">Save &amp; next →</button>
     </footer>
   </div>
 </div>
 
-<!-- CLASSIC CBT INSTRUCTIONS DIALOG -->
-<div id="examInstructionsOverlay" class="exam-instructions-overlay" role="dialog" aria-modal="true" aria-labelledby="examInstructionsTitle">
-  <div class="exam-instructions-dialog">
-    <div class="exam-instructions-head"><span id="examInstructionsTitle">Instructions</span><button type="button" class="exam-instructions-close" onclick="closeExamInstructions()" aria-label="Close instructions">×</button></div>
-    <div class="exam-instructions-content">
-      <h3 id="examInstructionsHeading">Instructions</h3>
-      <div class="exam-instructions-language"><label for="examInstructionLanguage">View In</label><select id="examInstructionLanguage" onchange="setExamInstructionLanguage(this.value)"><option value="en">English</option><option value="te">తెలుగు</option></select></div>
-      <div id="examInstructionsText">
-        <p class="instruction-underline">Please read the instructions carefully.</p>
-        <h4>A. General Instructions</h4>
-        <ol>
-          <li>The server clock controls the countdown timer. The exam will end automatically when the time runs out.</li>
-          <li>The question palette shows the status of every question:
-            <p><span class="instruction-state not-visited">1</span> You have not visited the question yet.</p>
-            <p><span class="instruction-state not-answered">2</span> You have visited but have not answered the question.</p>
-            <p><span class="instruction-state answered">3</span> You have answered the question.</p>
-            <p><span class="instruction-state review">4</span> You have not answered and marked the question for review.</p>
-            <p><span class="instruction-state answered-review">5</span> You have answered and marked the question for review.</p>
-          </li>
-          <li>Marked for Review is a reminder. If an answer is selected, it will be considered for evaluation.</li>
-          <li>Select an answer and use Save &amp; Next to save it and move to the next question.</li>
-          <li>Use Mark for Review to revisit a question. You can move between questions using the palette.</li>
-          <li>Use Clear Response to remove the selected answer from the current question.</li>
-          <li>Before finishing, review your answers and click Submit / Finish Test. Submission is final.</li>
-        </ol>
-        <h4>B. Navigation</h4>
-        <ol><li>Use Previous to return to the previous question.</li><li>You may select any question number in the palette to navigate directly.</li><li>Answered, not answered, not visited and review statuses are shown using different colours.</li></ol>
-      </div>
-    </div>
-    <div class="exam-instructions-foot"><button type="button" onclick="closeExamInstructions()">I have read the instructions</button></div>
-  </div>
-</div>
 
 <!-- =====================================================
      RESULT PAGE
@@ -5220,7 +5145,7 @@ aria-live="polite">
 <!-- Independent Topic-wise student page: this container was missing in v20. -->
 <div id="vkIndependentPackageDetail" class="page vk-independent-student-page">
   <div class="container">
-    <button type="button" class="back" onclick="window.vkTopicWiseBack()">← Back</button>
+    <button type="button" class="back" onclick="showHome()">← Back to Home</button>
     <div id="vkIpStudentDetail" aria-live="polite">
       <div class="vk-ip-loading">Loading Endowment Topic Wise Test Series…</div>
     </div>
@@ -5331,6 +5256,8 @@ let lastResult = null;
    let currentFreeMockTestId = null;
 let currentFreeMockNumber = null;
 let currentAttemptId = null;
+let vkIndependentTopicExamMode = false;
+let vkIndependentTopicTestId = null;
    let freeMockStarting = false;
    let testSubmitted = false;
 
@@ -5349,7 +5276,6 @@ function saveFreeMockExamState(){
         questionIndex: currentQuestionIndex,
         timeLeft: timeLeft,
         reviewFlags: examReviewFlags,
-        visitedFlags: examVisitedFlags,
         bookmarkedQuestions: Array.from(examBookmarkedQuestions || []),
         language: examLanguage || "te",
         attemptId: currentAttemptId,
@@ -7568,8 +7494,6 @@ async function startPaidTest(testNumber){
 
         currentQuestionIndex = 0;
         examReviewFlags = new Array(examQuestions.length).fill(false);
-        examVisitedFlags = new Array(examQuestions.length).fill(false);
-        examVisitedFlags[0] = true;
         examBookmarkedQuestions = new Set();
         examPaletteHidden = false;
         examPaused = false;
@@ -7625,8 +7549,8 @@ async function startPaidTest(testNumber){
         );
 
         renderQuestion();
+
         renderTimer();
-        openExamInstructions();
 
 
         /* =========================================
@@ -13596,10 +13520,6 @@ if (!testData) {
         examReviewFlags = restoreState && Array.isArray(restoreState.reviewFlags)
             ? examQuestions.map((q, i) => !!restoreState.reviewFlags[i])
             : new Array(examQuestions.length).fill(false);
-        examVisitedFlags = restoreState && Array.isArray(restoreState.visitedFlags)
-            ? examQuestions.map((q, i) => !!restoreState.visitedFlags[i])
-            : new Array(examQuestions.length).fill(false);
-        examVisitedFlags[currentQuestionIndex] = true;
         examBookmarkedQuestions = new Set(restoreState?.bookmarkedQuestions || []);
         examLanguage = restoreState?.language === "en" ? "en" : "te";
 
@@ -13630,7 +13550,6 @@ if (!testData) {
         renderQuestion();
         renderTimer();
         saveFreeMockExamState();
-        openExamInstructions();
 
 
         /* =========================================
@@ -13716,7 +13635,6 @@ function renderTimer(){
 
 
 let examReviewFlags = [];
-let examVisitedFlags = [];
 let examBookmarkedQuestions = new Set();
 let examPaletteHidden = false;
 let examPaused = false;
@@ -13737,13 +13655,8 @@ function updateExamHallStats(){
     const palette=$("questionPalette");
     if(palette){
         palette.innerHTML=examQuestions.map((q,i)=>{
-            const answered=userAnswers[i]!==null&&userAnswers[i]!==undefined;
-            const reviewed=!!examReviewFlags[i];
-            const visited=!!examVisitedFlags[i];
-            let stateClass=!visited?"not-visited":(answered?(reviewed?"answered-review":"answered"):(reviewed?"review":"visited-unanswered"));
-            const cls=[stateClass,i===currentQuestionIndex?"current":""].filter(Boolean).join(" ");
-            const stateLabel=!visited?"Not visited":(answered?(reviewed?"Answered and marked for review":"Answered"):(reviewed?"Marked for review":"Not answered"));
-            return `<button type="button" class="${cls}" onclick="jumpToQuestion(${i})" aria-label="Question ${i+1}: ${stateLabel}">${i+1}</button>`;
+            const cls=[i===currentQuestionIndex?"current":"",userAnswers[i]!==null&&userAnswers[i]!==undefined?"answered":"",examReviewFlags[i]?"review":""].filter(Boolean).join(" ");
+            return `<button type="button" class="${cls}" onclick="jumpToQuestion(${i})" aria-label="Go to question ${i+1}">${i+1}</button>`;
         }).join("");
     }
     const reviewButton=$("reviewQuestionButton");
@@ -13755,7 +13668,6 @@ function updateExamHallStats(){
 function jumpToQuestion(index){
     if(index<0 || index>=examQuestions.length) return;
     currentQuestionIndex=index;
-    examVisitedFlags[index]=true;
     renderQuestion();
 }
 function toggleQuestionReview(){
@@ -13802,7 +13714,6 @@ function toggleExamPause(){
 function renderQuestion(){
     const q=examQuestions[currentQuestionIndex];
     if(!q) return;
-    examVisitedFlags[currentQuestionIndex]=true;
 
     const title=$("examTitle");
     if(title && !title.dataset.fullTitle) title.dataset.fullTitle=title.textContent;
@@ -13829,19 +13740,8 @@ function renderQuestion(){
 
     const previousButton=$("questionPreviousButton");
     const nextButton=$("questionNextButton");
-    const footerNextButton=$("footerNextButton");
-    const isLastQuestion=currentQuestionIndex===total-1;
     if(previousButton) previousButton.disabled=currentQuestionIndex===0;
-    if(nextButton){
-        nextButton.textContent=isLastQuestion?"Submit / Finish Test":"Save & Next →";
-        nextButton.classList.toggle("last-submit",isLastQuestion);
-        nextButton.setAttribute("onclick",isLastQuestion?"submitExam()":"nextQuestion()");
-    }
-    if(footerNextButton){
-        footerNextButton.textContent=isLastQuestion?"Submit / Finish Test":"Save & next →";
-        footerNextButton.classList.toggle("last-submit",isLastQuestion);
-        footerNextButton.setAttribute("onclick",isLastQuestion?"submitExam()":"nextQuestion()");
-    }
+    if(nextButton) nextButton.textContent=currentQuestionIndex===total-1?"Finish Test →":"Save & Next →";
     const englishButton=$("languageEnglishButton");
     const teluguButton=$("languageTeluguButton");
     if(englishButton) englishButton.classList.toggle("active",examLanguage==="en");
@@ -13892,17 +13792,6 @@ function setExamLanguage(language){
     if(teluguButton) teluguButton.classList.toggle("active",examLanguage==="te");
     renderQuestion();
 }
-
-/* =====================================================
-   CLASSIC CBT INSTRUCTIONS
-===================================================== */
-const examInstructionCopy={
- en:`<p class="instruction-underline">Please read the instructions carefully.</p><h4>A. General Instructions</h4><ol><li>The server clock controls the countdown timer. The exam will end automatically when the time runs out.</li><li>The question palette shows each question status:<p><span class="instruction-state not-visited">1</span> You have not visited the question yet.</p><p><span class="instruction-state not-answered">2</span> You have visited but have not answered the question.</p><p><span class="instruction-state answered">3</span> You have answered the question.</p><p><span class="instruction-state review">4</span> You have not answered and marked the question for review.</p><p><span class="instruction-state answered-review">5</span> You have answered and marked the question for review.</p></li><li>Marked for Review is a reminder. If an answer is selected, it will be considered for evaluation.</li><li>Select an answer and use Save &amp; Next to save it and move to the next question.</li><li>Use Mark for Review to revisit a question. You can move between questions using the palette.</li><li>Use Clear Response to remove the selected answer from the current question.</li><li>Review your answers and click Submit / Finish Test. Submission is final.</li></ol><h4>B. Navigation</h4><ol><li>Use Previous to return to the previous question.</li><li>Select any question number in the palette to navigate directly.</li><li>Answered, not answered, not visited and review statuses are shown using different colours.</li></ol>`,
- te:`<p class="instruction-underline">దయచేసి పరీక్ష సూచనలను జాగ్రత్తగా చదవండి.</p><h4>A. సాధారణ సూచనలు</h4><ol><li>పరీక్ష సమయం సర్వర్ గడియారం ఆధారంగా నడుస్తుంది. సమయం పూర్తయినప్పుడు పరీక్ష ఆటోమేటిక్‌గా ముగుస్తుంది.</li><li>Question Paletteలో ప్రతి ప్రశ్న స్థితి ఈ విధంగా కనిపిస్తుంది:<p><span class="instruction-state not-visited">1</span> మీరు ఇంకా ఈ ప్రశ్నను చూడలేదు.</p><p><span class="instruction-state not-answered">2</span> ప్రశ్నను చూశారు, కానీ సమాధానం ఇవ్వలేదు.</p><p><span class="instruction-state answered">3</span> మీరు ప్రశ్నకు సమాధానం ఇచ్చారు.</p><p><span class="instruction-state review">4</span> సమాధానం ఇవ్వకుండా Review కోసం గుర్తించారు.</p><p><span class="instruction-state answered-review">5</span> సమాధానం ఇచ్చి Review కోసం గుర్తించారు.</p></li><li>Marked for Review అనేది గుర్తు కోసం మాత్రమే. సమాధానం ఎంచుకుంటే అది మూల్యాంకనంలో పరిగణించబడుతుంది.</li><li>సమాధానం ఎంచుకున్న తర్వాత Save &amp; Next నొక్కి తదుపరి ప్రశ్నకు వెళ్లండి.</li><li>తర్వాత పరిశీలించాల్సిన ప్రశ్నకు Mark for Review ఉపయోగించండి. Palette ద్వారా ఏ ప్రశ్నకైనా వెళ్లవచ్చు.</li><li>ప్రస్తుత సమాధానాన్ని తొలగించడానికి Clear Response ఉపయోగించండి.</li><li>సమాధానాలను పరిశీలించిన తర్వాత Submit / Finish Test నొక్కండి. Submit చేసిన తర్వాత పరీక్ష ముగుస్తుంది.</li></ol><h4>B. ప్రశ్నల మధ్య మారడం</h4><ol><li>మునుపటి ప్రశ్నకు వెళ్లడానికి Previous నొక్కండి.</li><li>Paletteలో ప్రశ్న సంఖ్యను నొక్కి నేరుగా ఆ ప్రశ్నకు వెళ్లవచ్చు.</li><li>Answered, Not Answered, Not Visited, Review స్థితులు వేర్వేరు రంగులతో కనిపిస్తాయి.</li></ol>`
-};
-function openExamInstructions(){const overlay=$("examInstructionsOverlay");if(overlay){overlay.classList.add("open");setExamInstructionLanguage($("examInstructionLanguage")?.value||"en");}}
-function closeExamInstructions(){const overlay=$("examInstructionsOverlay");if(overlay)overlay.classList.remove("open");}
-function setExamInstructionLanguage(language){const lang=language==="te"?"te":"en";const target=$("examInstructionsText");if(target)target.innerHTML=examInstructionCopy[lang];const heading=$("examInstructionsHeading");if(heading)heading.textContent=lang==="te"?"పరీక్ష సూచనలు":"Instructions";const title=$("examInstructionsTitle");if(title)title.textContent=lang==="te"?"సూచనలు":"Instructions";}
 
 /* =====================================================
    SAVE ANSWER
@@ -13960,8 +13849,19 @@ function nextQuestion(){
         return;
     }
 
-    // The final question has an explicit Submit / Finish Test action.
-    submitExam();
+    // LAST QUESTION
+    const popup =
+        document.getElementById(
+            "lastQuestionPopup"
+        );
+
+    if(popup){
+
+        popup.classList.add("active");
+
+        popup.style.display = "flex";
+
+    }
 
 }
 
@@ -13982,10 +13882,56 @@ function closeLastQuestionPopup(){
 
 }
 /* =====================================================
+   INDEPENDENT TOPIC-WISE EXAM SUBMISSION
+   Uses the existing CBT interface, but keeps grading on the
+   dedicated server-side RPC for vk_independent_tests.
+===================================================== */
+async function submitIndependentTopicExam(timeout = false){
+    if(!vkIndependentTopicExamMode || !vkIndependentTopicTestId || !examQuestions.length || testSubmitted) return;
+    const submitButtons=document.querySelectorAll('.hall-submit,.navigator-submit');
+    submitButtons.forEach(b=>{b.disabled=true;b.textContent='Submitting…';});
+    try{
+        const answers={};
+        examQuestions.forEach((q,i)=>{
+            const selected=userAnswers[i];
+            answers[q.id]=(selected===null||selected===undefined)?null:['A','B','C','D'][Number(selected)];
+        });
+        const {data,error}=await supabaseClient.rpc('vk_independent_submit_attempt',{
+            p_test_id:vkIndependentTopicTestId,
+            p_answers:answers
+        });
+        if(error) throw error;
+        const result=Array.isArray(data)?(data[0]||{}):(data||{});
+        const score=Number(result.score??0);
+        const total=Number(result.total_marks??examQuestions.reduce((n,q)=>n+Number(q.marks||1),0));
+        const percentage=Number(result.percentage??(total>0?score/total*100:0));
+        const correct=Number(result.correct_answers??0);
+        const wrong=Number(result.wrong_answers??0);
+        const unanswered=Number(result.unanswered??examQuestions.length-userAnswers.filter(v=>v!==null&&v!==undefined).length);
+        testSubmitted=true;
+        clearInterval(timerInterval);
+        lastResult={attemptId:null,questions:examQuestions,answers:[...userAnswers],score,total,percentage,correct,wrong,unanswered,title:$('examTitle')?.textContent||'Endowment Topic Wise Test',timeout};
+        const scoreNode=$('scoreText');if(scoreNode)scoreNode.textContent=score+' / '+total;
+        const message=$('resultMessage');if(message)message.textContent='You scored '+Math.round(percentage)+'%.'+(timeout?' Time expired and the test was auto-submitted.':'');
+        renderVkProfessionalResult(lastResult);
+        if(typeof restoreLiveResultActions==='function')restoreLiveResultActions();
+        showPage('resultPage');
+    }catch(error){
+        console.error('Independent Topic Wise exam submission failed:',error);
+        if(typeof toast==='function')toast(error?.message||'Unable to submit the test. Please try again.');
+        submitButtons.forEach(b=>{b.disabled=false;b.textContent='Submit';});
+    }
+}
+
+/* =====================================================
    SUBMIT
 ===================================================== */
 
 async function submitExam(timeout = false){
+
+    if(vkIndependentTopicExamMode){
+        return submitIndependentTopicExam(timeout);
+    }
 
     if(!examQuestions.length){
         return;
@@ -17852,13 +17798,46 @@ body:has(#examPage.active) > footer{
  window.vkV26BuyForTopic=function(){window.vkV26PendingTopic=null;vkIpBuy(pkg.id);};
  window.vkV26AfterPurchase=async function(){window.vkV26PendingTopic=null;await refreshPurchase();if(chosenPaper)await renderTopics(chosenPaper);};
  window.vkV26OpenPaper=renderTopics;window.vkV26BackToPapers=renderPaperChooser;
- window.vkTopicWiseBack=function(){if(chosenPaper){chosenPaper=null;renderPaperChooser();return;}if(typeof window.showHome==='function')window.showHome();else if(typeof window.showPage==='function')window.showPage('home');};
  window.vkTopicOpenPackage=async function(){return window.vkIpOpenPackages();};
  window.vkIpOpenPackages=async function(){try{if(!window.supabaseClient)throw Error('Supabase is not ready. Refresh and try again.');isAdmin=await checkAdmin();pkg=await getPackage();if(!pkg)throw Error('Topic-wise package is not published yet.');await refreshPurchase();const r=await supabaseClient.from('vk_independent_papers').select('*').eq('package_id',pkg.id).eq('is_active',true).order('display_order');if(r.error)throw r.error;papers=r.data||[];const tr=papers.length?await supabaseClient.from('vk_independent_topics').select('*').in('paper_id',papers.map(p=>p.id)).eq('is_active',true).order('display_order'):{data:[],error:null};if(tr.error)throw tr.error;topics=tr.data||[];if(papers.length<2){if(!isAdmin)throw Error('The Paper-1 and Paper-2 topic structure is being prepared. Please check again soon.');}if(typeof showPage==='function')showPage('vkIndependentPackageDetail');renderPaperChooser();return true;}catch(e){console.error(e);const host=document.getElementById('vkIpStudentDetail');if(host)host.innerHTML='<div class="vk-ip-error">'+esc(e.message||e)+'</div>';return false;}};
  window.vkIpStudentLoad=window.vkIpOpenPackages;
  window.vkIpOpenStudentPackage=async function(id){return window.vkIpOpenPackages();};
- const oldStart=window.vkIpStartTest;
- window.vkIpStartTest=async function(id){try{isAdmin=await checkAdmin();await refreshPurchase();if(!isAdmin&&!purchase){alert('Please buy the ₹29 package to unlock exam attempts.');return;}const q=await supabaseClient.from('vk_independent_tests').select('*').eq('id',id).eq('is_active',true).single();if(q.error)throw q.error;const r=await supabaseClient.from('vk_independent_questions').select('id,question_text,option_a,option_b,option_c,option_d,display_order').eq('test_id',id).eq('is_active',true).order('display_order');if(r.error)throw r.error;if(!r.data?.length||r.data.length>300||r.data.length!==Number(q.data.question_count))throw Error('Test is not ready: verify its 1–300 questions and question count.');window.vkIpCurrentTest=q.data;window.vkIpCurrentQuestions=r.data;vkIpCurrentTest=q.data;vkIpCurrentQuestions=r.data;showPage('vkIndependentExamPage');const host=document.getElementById('vkIpExamHost');host.innerHTML=`<h2>${esc(q.data.name)}</h2><p>${r.data.length} Questions · ${q.data.duration_minutes} Minutes</p><form id="vkIpExamForm">${r.data.map((x,i)=>`<div class="vk-ip-exam-q"><strong>Q${i+1}. ${esc(x.question_text)}</strong>${['A','B','C','D'].map(k=>`<label><input type="radio" name="q_${x.id}" value="${k}"> ${k}. ${esc(x['option_'+k.toLowerCase()])}</label>`).join('')}</div>`).join('')}<button type="button" class="vk-ip-buy" onclick="vkIpSubmitTest()">Submit Test</button></form>`;}catch(e){alert(e.message||String(e));}};
+ window.vkIpStartTest=async function(id){
+   try{
+     if(!window.supabaseClient)throw Error('Supabase is not ready. Please refresh and try again.');
+     isAdmin=await checkAdmin();
+     await refreshPurchase();
+     if(!isAdmin&&!purchase){alert('Please buy the ₹29 package to unlock exam attempts.');return;}
+     const q=await supabaseClient.from('vk_independent_tests').select('*').eq('id',id).eq('is_active',true).single();
+     if(q.error)throw q.error;
+     const r=await supabaseClient.from('vk_independent_questions').select('id,question_text,option_a,option_b,option_c,option_d,display_order').eq('test_id',id).eq('is_active',true).order('display_order');
+     if(r.error)throw r.error;
+     const questions=r.data||[];
+     if(!questions.length||questions.length>500||questions.length!==Number(q.data.question_count))throw Error('Test is not ready: verify its 1–500 questions and saved question count.');
+     if(!document.getElementById('examPage')||!document.getElementById('questionText')||!document.getElementById('options'))throw Error('The VK Exams CBT page is incomplete. Please restore the original examPage markup.');
+     window.vkIpCurrentTest=q.data;window.vkIpCurrentQuestions=questions;
+     vkIpCurrentTest=q.data;vkIpCurrentQuestions=questions;
+     vkIndependentTopicExamMode=true;vkIndependentTopicTestId=id;
+     currentFreeMockTestId=null;currentFreeMockNumber=null;currentAttemptId=null;
+     currentCourse='Endowment Topic Wise Test Series';currentQuestionIndex=0;
+     examQuestions=questions.map((x,i)=>({id:x.id,number:i+1,q:x.question_text,o:[x.option_a,x.option_b,x.option_c,x.option_d],marks:1,negative:0,correctOption:'',explanation:''}));
+     userAnswers=new Array(examQuestions.length).fill(null);
+     examReviewFlags=new Array(examQuestions.length).fill(false);
+     examBookmarkedQuestions=new Set();examPaletteHidden=false;examPaused=false;testSubmitted=false;
+     timeLeft=Math.max(1,Number(q.data.duration_minutes)||30)*60;
+     clearInterval(timerInterval);
+     const shell=document.querySelector('.exam-hall-shell');if(shell)shell.classList.add('paid-theme');
+     const title=document.getElementById('examTitle');if(title){title.textContent=q.data.name||'Endowment Topic Wise Test';title.dataset.fullTitle=title.textContent;}
+     const toggle=document.getElementById('paletteToggleText');if(toggle)toggle.textContent='Hide Palette';
+     const nav=document.getElementById('examQuestionNavigator');if(nav)nav.classList.remove('hidden');
+     const body=document.querySelector('.exam-hall-body');if(body)body.classList.remove('palette-hidden');
+     const submitButtons=document.querySelectorAll('.hall-submit,.navigator-submit');submitButtons.forEach(b=>{b.disabled=false;b.textContent=b.classList.contains('hall-submit')?'Submit':'Submit / Finish test';});
+     showPage('examPage');
+     renderQuestion();renderTimer();
+     history.replaceState({vkPage:'examPage',vkIndependentTopic:true,testId:id},'', '#examPage?topicTest='+encodeURIComponent(id));
+     timerInterval=window.setInterval(function(){if(timeLeft>0&&!examPaused){timeLeft--;renderTimer();}if(timeLeft<=0){clearInterval(timerInterval);submitExam(true);}},1000);
+   }catch(e){console.error('Could not start independent Topic Wise exam:',e);alert(e.message||String(e));}
+ };
 })();
 </script>
 
