@@ -1,4 +1,4 @@
-                  <!DOCTYPE html>
+                 <!DOCTYPE html>
 <html lang="en">
 <head>
 
@@ -9395,7 +9395,7 @@ document.addEventListener('change',e=>{if(e.target&&e.target.id==='vkCatIconFile
 document.addEventListener('change',e=>{if(e.target&&e.target.id==='vkHomeCardImage'){const f=e.target.files&&e.target.files[0],p=document.getElementById('vkHomeCardImagePreview');if(!f){p.hidden=true;return}if(!['image/png','image/jpeg','image/webp'].includes(f.type)||f.size>2*1024*1024){alert('Choose PNG/JPG/WEBP up to 2 MB.');e.target.value='';p.hidden=true;return}p.src=URL.createObjectURL(f);p.hidden=false}});
 
 
-const VK_ADMIN_ALLOWED_COURSES = ["APPSC","Endowment Officer","High Court","Police","DSC","Banks","Endowment Topic Wise Test Series"];// Seventh homepage category; keep this label identical to courses.name.
+const VK_ADMIN_ALLOWED_COURSES = ["APPSC","Endowment Officer","High Court"]; // Only the three approved exam courses.
 window.VK_ADMIN_ALLOWED_COURSES = VK_ADMIN_ALLOWED_COURSES;
 
 function vkAdminPaidSeriesOptions(courseName){
@@ -9406,10 +9406,6 @@ function vkAdminPaidSeriesOptions(courseName){
         "Endowment Officer": [
             {value:"Paper 1", label:"Paper 1"},
             {value:"Paper 2", label:"Paper 2"}
-        ],
-        "Endowment Topic Wise Test Series": [
-            {value:"Paper 1", label:"Paper-1 Topic Wise Tests"},
-            {value:"Paper 2", label:"Paper-2 Topic Wise Tests"}
         ],
         "High Court": [
             {value:"Paper 1", label:"High Court Exam"}
@@ -9431,7 +9427,7 @@ function vkAdminUpdatePaidSeriesControl(){
     // refreshes this control; without preservation it always jumps back to Paper 1.
     const previouslySelectedPaper=String(select.value || "").trim();
     wrap.style.display=document.getElementById("vkAdminTestType")?.value==="paid" && choices.length ? "block" : "none";
-    if(label) label.textContent=courseName==="High Court" ? "Exam" : courseName==="APPSC" ? "APPSC Test Type" : courseName==="Endowment Topic Wise Test Series" ? "Topic Wise Paper" : "Paid Paper";
+    if(label) label.textContent=courseName==="High Court" ? "Exam" : courseName==="APPSC" ? "APPSC Test Type" : courseName==="Endowment Officer" ? "Endowment Paper" : "Paid Paper";
     select.innerHTML=choices.map(item=>`<option value="${vkAdminEscape(item.value)}">${vkAdminEscape(item.label)}</option>`).join("");
     if(choices.some(item=>item.value===previouslySelectedPaper)) select.value=previouslySelectedPaper;
     if(hint){
@@ -9439,8 +9435,6 @@ function vkAdminUpdatePaidSeriesControl(){
           ? "APPSC paid tests are organized under Screening Test only."
           : courseName==="High Court"
           ? "High Court paid tests are organized under one High Court Exam series."
-          : courseName==="Endowment Topic Wise Test Series"
-          ? "Choose Paper-1 or Paper-2 Topic Wise Tests. Add the topic name and upload questions using the same Admin Mock Test Builder."
           : "Test number is assigned automatically within the selected paper.";
     }
 }
@@ -9481,15 +9475,12 @@ function vkAdminRefreshPaidQuestionHint(){
 }
 
 function vkAdminExpectedPaidQuestionCount(courseName){
-    // The Independent Endowment Topic Wise series allows variable test lengths.
-    if(String(courseName || "").trim() === "Endowment Topic Wise Test Series") return null;
     // AP High Court Junior Assistant Paid Tests use 80 questions.
     // APPSC and Endowment Officer Paid Tests continue to use 150.
     return String(courseName || "").trim() === "High Court" ? 80 : 150;
 }
 
 function vkAdminPaidQuestionRuleText(courseName){
-    if(String(courseName || "").trim() === "Endowment Topic Wise Test Series") return "Topic-wise tests may contain 1–1,000 questions. Every question must have a correct answer key.";
     const expected = vkAdminExpectedPaidQuestionCount(courseName);
     return `${courseName === "High Court" ? "High Court" : courseName || "Paid"} Paid Tests require exactly ${expected} questions.`;
 }
@@ -17716,6 +17707,105 @@ body:has(#examPage.active) > footer{
  window.vkIpOpenStudentPackage=async function(id){return window.vkIpOpenPackages();};
  const oldStart=window.vkIpStartTest;
  window.vkIpStartTest=async function(id){try{isAdmin=await checkAdmin();await refreshPurchase();if(!isAdmin&&!purchase){alert('Please buy the ₹29 package to unlock exam attempts.');return;}const q=await supabaseClient.from('vk_independent_tests').select('*').eq('id',id).single();if(q.error)throw q.error;const r=await supabaseClient.from('vk_independent_questions').select('id,question_text,option_a,option_b,option_c,option_d,display_order').eq('test_id',id).eq('is_active',true).order('display_order');if(r.error)throw r.error;if(!r.data?.length||r.data.length>1000||r.data.length!==Number(q.data.question_count))throw Error('Test is not ready: verify its 1–1,000 questions and question count.');window.vkIpCurrentTest=q.data;window.vkIpCurrentQuestions=r.data;vkIpCurrentTest=q.data;vkIpCurrentQuestions=r.data;showPage('vkIndependentExamPage');const host=document.getElementById('vkIpExamHost');host.innerHTML=`<h2>${esc(q.data.name)}</h2><p>${r.data.length} Questions · ${q.data.duration_minutes} Minutes</p><form id="vkIpExamForm">${r.data.map((x,i)=>`<div class="vk-ip-exam-q"><strong>Q${i+1}. ${esc(x.question_text)}</strong>${['A','B','C','D'].map(k=>`<label><input type="radio" name="q_${x.id}" value="${k}"> ${k}. ${esc(x['option_'+k.toLowerCase()])}</label>`).join('')}</div>`).join('')}<button type="button" class="vk-ip-buy" onclick="vkIpSubmitTest()">Submit Test</button></form>`;}catch(e){alert(e.message||String(e));}};
+})();
+</script>
+
+
+<!-- VK EXAMS: consolidated three-course layout and standard Endowment test management -->
+<style id="vk-final-three-course-layout">
+  /* Only the three approved exam cards may appear on Home. */
+  #vkHomepageExamCards .vk-exam-card[onclick*="openCourse('Police')"],
+  #vkHomepageExamCards .vk-exam-card[onclick*="openCourse('DSC')"],
+  #vkHomepageExamCards .vk-exam-card[onclick*="openCourse('Banks')"],
+  #vkHomepageExamCards .vk-exam-card[data-course="Police"],
+  #vkHomepageExamCards .vk-exam-card[data-course="DSC"],
+  #vkHomepageExamCards .vk-exam-card[data-course="Banks"],
+  #vkHomepageExamCards .vk-exam-card[onclick*="Endowment Topic Wise Test Series"],
+  #vkHomepageExamCards .vk-exam-card[data-course="Endowment Topic Wise Test Series"] {
+    display:none !important;
+  }
+  /* Hide the retired independent Topic Wise package controls/pages in Admin and student UI. */
+  #vkTopicTestPackageWrap,
+  #vkAdminPublishIndependentPackageBtn,
+  #vkIndependentPackageDetail,
+  #vkIndependentExamPage,
+  #vkTopicTestPackage,
+  #vkTopicTestPackageTopic {
+    display:none !important;
+  }
+  /* Keep the standard paid test cards compact and make their action part of the same card. */
+  #testList .test-item {
+    box-sizing:border-box;
+    width:100%;
+    min-height:58px;
+    padding:14px 16px;
+    border-radius:12px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    flex-wrap:wrap;
+    cursor:pointer;
+  }
+  #testList .test-item > span:first-child { flex:1 1 180px; }
+  #testList .test-item .locked-label,
+  #testList .test-item .unlocked-label { margin-left:auto; }
+  @media(max-width:650px) {
+    #testList .test-item { padding:12px; }
+  }
+</style>
+<script id="vk-final-three-course-controller">
+(function(){
+  "use strict";
+  const allowed = ["APPSC","Endowment Officer","High Court"];
+  function pruneHomeCards(){
+    const grid=document.getElementById("vkHomepageExamCards");
+    if(!grid) return;
+    grid.querySelectorAll(".vk-exam-card").forEach(card=>{
+      const raw=(card.getAttribute("onclick")||"")+" "+(card.getAttribute("data-course")||"")+" "+(card.innerText||"");
+      const keep=allowed.some(name=>raw.toLowerCase().includes(name.toLowerCase()));
+      const unwanted=/Police|\bDSC\b|\bBanks\b|Endowment Topic Wise Test Series/i.test(raw);
+      if(unwanted || !keep) card.remove();
+    });
+  }
+  function cleanAdminCourseOptions(){
+    const sel=document.getElementById("vkAdminCourse");
+    if(!sel) return;
+    Array.from(sel.options).forEach(o=>{
+      if(o.value && !allowed.includes(o.value)) o.remove();
+    });
+    const topicWrap=document.getElementById("vkAdminTopicWrap");
+    const topicHint=document.getElementById("vkAdminPaidTopicHint");
+    const topicPackage=document.getElementById("vkTopicTestPackageWrap");
+    const publishIndependent=document.getElementById("vkAdminPublishIndependentPackageBtn");
+    const isPaid=document.getElementById("vkAdminTestType")?.value==="paid";
+    const course=sel.value;
+    if(topicPackage) topicPackage.style.display="none";
+    if(publishIndependent) publishIndependent.style.display="none";
+    if(topicWrap && isPaid && course==="Endowment Officer") topicWrap.style.display="none";
+    if(topicHint) topicHint.style.display="none";
+  }
+  function hideLegacyIndependentEntryPoints(){
+    document.querySelectorAll('a,button,[onclick]').forEach(el=>{
+      const t=((el.innerText||"")+" "+(el.getAttribute("onclick")||"")).trim();
+      if(/Endowment Topic Wise Test Series|vkTopicOpenPackage|vkIpOpenPackages/.test(t)){
+        if(!el.closest("#vkAdminMockBuilder")) el.style.display="none";
+      }
+    });
+  }
+  function apply(){
+    pruneHomeCards();
+    cleanAdminCourseOptions();
+    hideLegacyIndependentEntryPoints();
+  }
+  apply();
+  document.addEventListener("DOMContentLoaded",apply);
+  document.addEventListener("change",e=>{
+    if(["vkAdminCourse","vkAdminTestType","vkAdminPaidMode"].includes(e.target?.id)) setTimeout(apply,0);
+  });
+  const observer=new MutationObserver(()=>apply());
+  observer.observe(document.documentElement,{childList:true,subtree:true});
+  setTimeout(()=>observer.disconnect(),15000);
 })();
 </script>
 
