@@ -17752,7 +17752,80 @@ body:has(#examPage.active) > footer{
  window.vkV26OpenPaper=renderTopics;window.vkV26BackToPapers=renderPaperChooser;
  window.vkTopicWiseBack=function(){if(chosenPaper){chosenPaper=null;renderPaperChooser();return;}if(typeof window.showHome==='function')window.showHome();else if(typeof window.showPage==='function')window.showPage('home');};
  window.vkTopicOpenPackage=async function(){return window.vkIpOpenPackages();};
- window.vkIpOpenPackages=async function(){try{if(!window.supabaseClient)throw Error('Supabase is not ready. Refresh and try again.');isAdmin=await checkAdmin();pkg=await getPackage();if(!pkg)throw Error('Topic-wise package is not published yet.');await refreshPurchase();const r=await supabaseClient.from('vk_independent_papers').select('*').eq('package_id',pkg.id).eq('is_active',true).order('display_order');if(r.error)throw r.error;papers=r.data||[];const tr=papers.length?await supabaseClient.from('vk_independent_topics').select('*').in('paper_id',papers.map(p=>p.id)).eq('is_active',true).order('display_order'):{data:[],error:null};if(tr.error)throw tr.error;topics=tr.data||[];if(papers.length<2){if(!isAdmin)throw Error('The Paper-1 and Paper-2 topic structure is being prepared. Please check again soon.');}if(typeof showPage==='function')showPage('vkIndependentPackageDetail');renderPaperChooser();return true;}catch(e){console.error(e);const host=document.getElementById('vkIpStudentDetail');if(host)host.innerHTML='<div class="vk-ip-error">'+esc(e.message||e)+'</div>';return false;}};
+ let vkV26OpenPromise = null;
+ let vkV26LoadedAt = 0;
+ window.vkIpOpenPackages=async function(){
+   if(vkV26OpenPromise) return vkV26OpenPromise;
+   if(!window.supabaseClient){
+     if(typeof showPage==='function')showPage('vkIndependentPackageDetail');
+     const pendingHost=document.getElementById('vkIpStudentDetail');
+     if(pendingHost)pendingHost.innerHTML='<div class="vk-v26-loading"><span class="vk-v26-spinner"></span><strong>Connecting to exam server…</strong><small>Please wait a moment.</small></div>';
+     return false;
+   }
+
+   // Open the destination immediately; never wait for database requests before navigation.
+   if(typeof showPage==='function')showPage('vkIndependentPackageDetail');
+   const host=document.getElementById('vkIpStudentDetail');
+   if(!host)return false;
+
+   // If the structure was loaded recently, reuse it and refresh only the purchase status.
+   const freshCache = pkg && papers.length >= 2 && (Date.now()-vkV26LoadedAt)<30000;
+   if(freshCache){
+     renderPaperChooser();
+     vkV26OpenPromise=(async function(){
+       try{await refreshPurchase();renderPaperChooser();return true;}
+       catch(e){console.warn('Purchase status refresh:',e);return true;}
+       finally{vkV26OpenPromise=null;}
+     })();
+     return vkV26OpenPromise;
+   }
+
+   host.innerHTML='<div class="vk-v26-loading"><span class="vk-v26-spinner"></span><strong>Opening Endowment Topic Wise Test Series…</strong><small>Preparing Paper-I and Paper-II. This usually takes a few seconds.</small><div class="vk-v26-loading-track"><i></i></div></div>';
+
+   vkV26OpenPromise=(async function(){
+     try{
+       // Independent requests run together instead of waiting one after another.
+       const first=await Promise.all([checkAdmin(),getPackage()]);
+       isAdmin=first[0];
+       pkg=first[1];
+       if(!pkg)throw Error('Topic-wise package is not published yet.');
+
+       // Purchase status and papers do not depend on each other.
+       const second=await Promise.all([
+         refreshPurchase(),
+         supabaseClient.from('vk_independent_papers')
+           .select('*').eq('package_id',pkg.id).eq('is_active',true)
+           .order('display_order')
+       ]);
+       if(second[1].error)throw second[1].error;
+       papers=second[1].data||[];
+
+       if(papers.length){
+         const topicResult=await supabaseClient.from('vk_independent_topics')
+           .select('*').in('paper_id',papers.map(p=>p.id))
+           .eq('is_active',true).order('display_order');
+         if(topicResult.error)throw topicResult.error;
+         topics=topicResult.data||[];
+       }else{
+         topics=[];
+       }
+
+       if(papers.length<2 && !isAdmin){
+         throw Error('The Paper-1 and Paper-2 topic structure is being prepared. Please check again soon.');
+       }
+       vkV26LoadedAt=Date.now();
+       renderPaperChooser();
+       return true;
+     }catch(e){
+       console.error('Topic Wise loading error:',e);
+       host.innerHTML='<div class="vk-ip-error"><strong>Unable to load Topic Wise Test Series.</strong><p>'+esc(e.message||e)+'</p><button type="button" onclick="window.vkIpOpenPackages()">Try Again</button></div>';
+       return false;
+     }finally{
+       vkV26OpenPromise=null;
+     }
+   })();
+   return vkV26OpenPromise;
+ };
  window.vkIpStudentLoad=window.vkIpOpenPackages;
  window.vkIpOpenStudentPackage=async function(id){return window.vkIpOpenPackages();};
  const oldStart=window.vkIpStartTest;
@@ -18206,6 +18279,19 @@ body:has(#examPage.active) > footer{
  #vkIndependentExamPage .vk-ip-question-footer{align-items:flex-start;flex-direction:column}
  #vkIndependentExamPage .vk-ip-palette{grid-template-columns:repeat(5,minmax(0,1fr))}
 }
+</style>
+
+
+<style id="vk-v26-fast-open-loading">
+#vkIndependentPackageDetail .vk-v26-loading{min-height:240px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:30px 18px;text-align:center;color:#1d3764;background:#f8fbff;border:1px solid #dce7f7;border-radius:16px}
+#vkIndependentPackageDetail .vk-v26-loading strong{font-size:16px}
+#vkIndependentPackageDetail .vk-v26-loading small{font-size:12px;color:#64748b}
+#vkIndependentPackageDetail .vk-v26-spinner{width:32px;height:32px;border:3px solid #dbeafe;border-top-color:#2457c5;border-radius:50%;animation:vkV26Spin .75s linear infinite}
+#vkIndependentPackageDetail .vk-v26-loading-track{width:min(260px,80%);height:5px;background:#e4edfc;border-radius:9px;overflow:hidden}
+#vkIndependentPackageDetail .vk-v26-loading-track i{display:block;width:38%;height:100%;background:#2457c5;border-radius:9px;animation:vkV26Load 1.25s ease-in-out infinite}
+#vkIndependentPackageDetail .vk-ip-error button{margin-top:12px;padding:9px 16px;background:#2457c5;color:#fff;border:0;border-radius:8px;font-weight:800;cursor:pointer}
+@keyframes vkV26Spin{to{transform:rotate(360deg)}}
+@keyframes vkV26Load{0%{transform:translateX(-110%)}100%{transform:translateX(300%)}}
 </style>
 
 </body>
