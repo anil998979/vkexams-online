@@ -16401,7 +16401,7 @@ async function vkIpStartTest(id) {
 
         const { data: questions, error: qe } = await supabaseClient
             .from('vk_independent_questions')
-            .select('id,question_text,option_a,option_b,option_c,option_d,display_order')
+            .select('id,question_text,option_a,option_b,option_c,option_d,explanation,display_order')
             .eq('test_id', id)
             .eq('is_active', true)
             .order('display_order');
@@ -16504,79 +16504,145 @@ async function vkIpStartTest(id) {
 }
 
 
+const VK_IP_LAST_RESULT_KEY = 'vkIpLastCbtResultV1';
+
+function vkIpRenderSavedResult(snapshot) {
+    if (!snapshot || !snapshot.result || !Array.isArray(snapshot.questions)) return false;
+    let resultPage = document.getElementById('vkIpCbtResultPage');
+    if (!resultPage) {
+        resultPage = document.createElement('section');
+        resultPage.id = 'vkIpCbtResultPage';
+        resultPage.className = 'page';
+        resultPage.style.cssText = 'min-height:60vh;padding:28px 16px 48px;background:#edf2f8;';
+        document.body.appendChild(resultPage);
+    }
+    const r = snapshot.result;
+    const questions = snapshot.questions;
+    const letterText = (letter, q) => {
+        const index = ['A','B','C','D'].indexOf(String(letter || '').toUpperCase());
+        return index >= 0 ? (q.options[index] || '') : '';
+    };
+    const solutionHtml = questions.map((q, i) => {
+        const selected = String(q.selectedOption || '').toUpperCase();
+        const correct = String(q.correctOption || '').toUpperCase();
+        const isCorrect = !!selected && selected === correct;
+        const hasKey = ['A','B','C','D'].includes(correct);
+        const status = !selected ? 'Not answered' : (hasKey ? (isCorrect ? 'Correct' : 'Incorrect') : 'Answer key unavailable');
+        const statusColor = !selected ? '#64748b' : (hasKey ? (isCorrect ? '#15803d' : '#b91c1c') : '#b45309');
+        const options = (q.options || []).map((option, oi) => {
+            const letter = ['A','B','C','D'][oi];
+            const chosen = selected === letter;
+            const answer = correct === letter;
+            const bg = answer ? '#dcfce7' : (chosen ? '#fee2e2' : '#f8fafc');
+            const border = answer ? '#16a34a' : (chosen ? '#dc2626' : '#e2e8f0');
+            return `<div style="padding:9px 11px;margin:6px 0;border:1px solid ${border};border-radius:9px;background:${bg};"><b>${letter}.</b> ${vkIpEsc(option)} ${answer ? '<strong style="color:#15803d">✓ Correct answer</strong>' : (chosen ? '<strong style="color:#b91c1c">Your answer</strong>' : '')}</div>`;
+        }).join('');
+        return `<article style="background:#fff;border:1px solid #dbe5f2;border-radius:13px;padding:16px;margin:12px 0;text-align:left;">
+            <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;"><strong>Question ${i+1}</strong><strong style="color:${statusColor}">${status}</strong></div>
+            <p style="font-weight:700;margin:12px 0;white-space:pre-wrap;">${vkIpEsc(q.question || '')}</p>
+            ${options}
+            <p style="margin:10px 0 0;color:#334155;"><b>Your answer:</b> ${selected ? selected + ' — ' + vkIpEsc(letterText(selected,q)) : 'Not answered'}</p>
+            <p style="margin:5px 0;color:#166534;"><b>Correct answer:</b> ${hasKey ? correct + ' — ' + vkIpEsc(letterText(correct,q)) : 'Could not retrieve answer key'}</p>
+            ${q.explanation ? `<div style="margin-top:10px;padding:11px;background:#eff6ff;border-left:4px solid #2563eb;border-radius:8px;"><b>Explanation / Solution:</b><div style="margin-top:4px;white-space:pre-wrap;">${vkIpEsc(q.explanation)}</div></div>` : ''}
+        </article>`;
+    }).join('');
+    const keysAvailable = questions.some(q => ['A','B','C','D'].includes(String(q.correctOption || '').toUpperCase()));
+    resultPage.innerHTML = `
+        <div style="max-width:900px;margin:12px auto;padding:26px;background:#fff;border:1px solid #dbe5f2;border-radius:18px;box-shadow:0 8px 25px rgba(0,0,0,.08);">
+            <div style="text-align:center;">
+                <h2 style="color:#174ea6;margin:0 0 6px;">Exam Submitted Successfully</h2>
+                <h3 style="margin:0 0 8px;">${vkIpEsc(snapshot.testName || 'Test')}</h3>
+                <h1 style="color:#16a34a;font-size:38px;margin:6px 0;">${Number(r.score || 0)} / ${Number(r.total_marks || 0)}</h1>
+                <p>Correct Answers: ${Number(r.correct_answers || 0)}</p>
+                <p>Wrong Answers: ${Number(r.wrong_answers || 0)}</p>
+                <p>Unanswered: ${Number(r.unanswered || 0)}</p>
+                <h3>Percentage: ${Number(r.percentage || 0)}%</h3>
+                <p style="color:#64748b;font-size:13px;">Result and solutions are saved on this device so this page can be refreshed.</p>
+                <button class="vk-ip-buy" type="button" onclick="showPage('vkIndependentPackageDetail')">Back to Tests</button>
+            </div>
+            <section style="margin-top:26px;border-top:1px solid #e2e8f0;padding-top:18px;">
+                <h2 style="color:#174ea6;margin:0 0 6px;">Solutions & Answer Review</h2>
+                <p style="color:#64748b;font-size:13px;margin:0 0 12px;">Green indicates the correct option; red indicates your incorrect selection.</p>
+                ${!keysAvailable ? '<div style="padding:12px;background:#fff7ed;border:1px solid #fed7aa;border-radius:9px;color:#9a3412;margin-bottom:12px;">The answer key could not be retrieved from the database after submission. Explanations available with the question are shown below. Please check the Supabase read permission for submitted-test answer keys.</div>' : ''}
+                ${solutionHtml || '<p>Question review is not available for this attempt.</p>'}
+            </section>
+        </div>`;
+    return true;
+}
+
+function vkIpRestoreResultAfterRefresh() {
+    if (!location.hash.replace(/^#/, '').startsWith('vkIpCbtResultPage')) return;
+    try {
+        const saved = JSON.parse(localStorage.getItem(VK_IP_LAST_RESULT_KEY) || 'null');
+        if (saved && vkIpRenderSavedResult(saved)) showPage('vkIpCbtResultPage', false);
+    } catch (e) {
+        console.warn('Could not restore independent CBT result:', e);
+    }
+}
+
 async function vkIpSubmitTest(autoSubmit = false) {
-
     if (window.vkIpSubmitting) return;
-
     if (!vkIpCurrentTest || !vkIpCurrentQuestions.length) return;
-
     window.vkIpSubmitting = true;
     clearInterval(timerInterval);
-
     try {
         const answers = {};
-
         vkIpCurrentQuestions.forEach((q, i) => {
             const selected = userAnswers[i];
-
-            answers[q.id] =
-                selected === null || selected === undefined
-                    ? null
-                    : ['A', 'B', 'C', 'D'][selected];
+            answers[q.id] = selected === null || selected === undefined ? null : ['A', 'B', 'C', 'D'][selected];
         });
-
-        const { data, error } = await supabaseClient.rpc(
-            'vk_independent_submit_attempt',
-            {
-                p_test_id: vkIpCurrentTest.id,
-                p_answers: answers
-            }
-        );
-
+        const { data, error } = await supabaseClient.rpc('vk_independent_submit_attempt', {
+            p_test_id: vkIpCurrentTest.id,
+            p_answers: answers
+        });
         if (error) throw error;
-
         const result = Array.isArray(data) ? data[0] : data;
 
-        // Show the result on its own page, not inside the CBT exam page.
-        // showPage() deactivates #examPage so no exam controls remain visible.
-        let resultPage = document.getElementById('vkIpCbtResultPage');
-        if (!resultPage) {
-            resultPage = document.createElement('section');
-            resultPage.id = 'vkIpCbtResultPage';
-            resultPage.className = 'page';
-            resultPage.style.cssText = 'min-height:60vh;padding:28px 16px 48px;background:#edf2f8;';
-            document.body.appendChild(resultPage);
+        // Fetch answer keys only after the server confirms the attempt was submitted.
+        let keyMap = new Map();
+        let keyLoadError = null;
+        try {
+            const ids = vkIpCurrentQuestions.map(q => q.id);
+            const keyResponse = await supabaseClient.from('vk_independent_question_keys')
+                .select('question_id,correct_option').in('question_id', ids);
+            if (keyResponse.error) throw keyResponse.error;
+            keyMap = new Map((keyResponse.data || []).map(k => [k.question_id, String(k.correct_option || '').toUpperCase()]));
+        } catch (keyError) {
+            keyLoadError = keyError;
+            console.warn('Submitted-test answer keys could not be loaded:', keyError);
         }
 
-        resultPage.innerHTML = `
-            <div id="vkIpCbtResult" style="
-                max-width:750px;
-                margin:12px auto;
-                padding:30px;
-                background:#fff;
-                border:1px solid #dbe5f2;
-                border-radius:18px;
-                text-align:center;
-                box-shadow:0 8px 25px rgba(0,0,0,.08);
-            ">
-                <h2 style="color:#174ea6">Exam Submitted Successfully</h2>
-                <h3>${vkIpEsc(vkIpCurrentTest.name)}</h3>
-                <h1 style="color:#16a34a;font-size:38px">
-                    ${Number(result.score)} / ${Number(result.total_marks)}
-                </h1>
-                <p>Correct Answers: ${result.correct_answers}</p>
-                <p>Wrong Answers: ${result.wrong_answers}</p>
-                <p>Unanswered: ${result.unanswered}</p>
-                <h3>Percentage: ${result.percentage}%</h3>
-                <button class="vk-ip-buy" type="button"
-                    onclick="showPage('vkIndependentPackageDetail')">
-                    Back to Tests
-                </button>
-            </div>
-        `;
-
+        const snapshot = {
+            version: 1,
+            testId: vkIpCurrentTest.id,
+            testName: vkIpCurrentTest.name || 'Test',
+            completedAt: new Date().toISOString(),
+            result: {
+                score: Number(result?.score || 0),
+                total_marks: Number(result?.total_marks || 0),
+                correct_answers: Number(result?.correct_answers || 0),
+                wrong_answers: Number(result?.wrong_answers || 0),
+                unanswered: Number(result?.unanswered || 0),
+                percentage: Number(result?.percentage || 0)
+            },
+            answerKeyError: keyLoadError ? String(keyLoadError.message || keyLoadError) : null,
+            questions: vkIpCurrentQuestions.map((q, i) => ({
+                id: q.id,
+                question: q.question_text || '',
+                options: [q.option_a, q.option_b, q.option_c, q.option_d],
+                selectedOption: answers[q.id] || '',
+                correctOption: keyMap.get(q.id) || '',
+                explanation: q.explanation || ''
+            }))
+        };
+        try {
+            localStorage.setItem(VK_IP_LAST_RESULT_KEY, JSON.stringify(snapshot));
+        } catch (storageError) {
+            console.warn('Could not save result locally:', storageError);
+            alert('Your result was submitted, but this browser could not save the review for refresh.');
+        }
+        vkIpRenderSavedResult(snapshot);
         showPage('vkIpCbtResultPage');
-
     } catch (e) {
         console.error('CBT Submit Error:', e);
         alert('Could not submit test: ' + e.message);
@@ -16584,6 +16650,12 @@ async function vkIpSubmitTest(autoSubmit = false) {
         window.vkIpSubmitting = false;
     }
 }
+
+// The result section is dynamically created, so restore it after the HTML parser
+// has loaded all scripts and the initial hash router has run.
+window.addEventListener('DOMContentLoaded', vkIpRestoreResultAfterRefresh);
+window.addEventListener('pageshow', vkIpRestoreResultAfterRefresh);
+
 
 
 </script>
