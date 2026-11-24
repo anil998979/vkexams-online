@@ -1,4 +1,4 @@
-                       <!DOCTYPE html>
+                      <!DOCTYPE html>
 <html lang="en">
 <head>
 
@@ -17926,7 +17926,47 @@ body:has(#examPage.active) > footer{
  window.vkIpStudentLoad=window.vkIpOpenPackages;
  window.vkIpOpenStudentPackage=async function(id){return window.vkIpOpenPackages();};
  const oldStart=window.vkIpStartTest;
- window.vkIpStartTest=async function(id){try{isAdmin=await checkAdmin();await refreshPurchase();if(!isAdmin&&!purchase){alert('Please buy the ₹29 package to unlock exam attempts.');return;}const q=await supabaseClient.from('vk_independent_tests').select('*').eq('id',id).eq('is_active',true).single();if(q.error)throw q.error;const r=await supabaseClient.from('vk_independent_questions').select('id,question_text,option_a,option_b,option_c,option_d,display_order').eq('test_id',id).eq('is_active',true).order('display_order');if(r.error)throw r.error;if(!r.data?.length||r.data.length>300||r.data.length!==Number(q.data.question_count))throw Error('Test is not ready: verify its 1–300 questions and question count.');window.vkIpCurrentTest=q.data;window.vkIpCurrentQuestions=r.data;vkIpCurrentTest=q.data;vkIpCurrentQuestions=r.data;showPage('vkIndependentExamPage');const host=document.getElementById('vkIpExamHost');host.innerHTML=`<h2>${esc(q.data.name)}</h2><p>${r.data.length} Questions · ${q.data.duration_minutes} Minutes</p><form id="vkIpExamForm">${r.data.map((x,i)=>`<div class="vk-ip-exam-q"><strong>Q${i+1}. ${esc(x.question_text)}</strong>${['A','B','C','D'].map(k=>`<label><input type="radio" name="q_${x.id}" value="${k}"> ${k}. ${esc(x['option_'+k.toLowerCase()])}</label>`).join('')}</div>`).join('')}<button type="button" class="vk-ip-buy" onclick="vkIpSubmitTest()">Submit Test</button></form>`;}catch(e){alert(e.message||String(e));}};
+
+// FIX: Create missing exam page container
+function vkEnsureExamPage(){
+    let page = document.getElementById('vkIndependentExamPage');
+
+    if(!page){
+        page = document.createElement('section');
+        page.id = 'vkIndependentExamPage';
+        page.className = 'page';
+
+        page.innerHTML = `
+          <div style="max-width:1000px;margin:24px auto;padding:24px;background:#fff;border:1px solid #dbe3f0;border-radius:16px;">
+            <div id="vkIpExamHost"></div>
+          </div>
+        `;
+
+        document.body.appendChild(page);
+    }
+
+    if(!document.getElementById('vkIpExamHost')){
+        page.innerHTML = `
+          <div style="max-width:1000px;margin:24px auto;padding:24px;background:#fff;border:1px solid #dbe3f0;border-radius:16px;">
+            <div id="vkIpExamHost"></div>
+          </div>
+        `;
+    }
+
+    return page;
+}
+
+ window.vkIpStartTest=async function(id){try{isAdmin=await checkAdmin();await refreshPurchase();if(!isAdmin&&!purchase){alert('Please buy the ₹29 package to unlock exam attempts.');return;}const q=await supabaseClient.from('vk_independent_tests').select('*').eq('id',id).eq('is_active',true).single();if(q.error)throw q.error;const r=await supabaseClient.from('vk_independent_questions').select('id,question_text,option_a,option_b,option_c,option_d,display_order').eq('test_id',id).eq('is_active',true).order('display_order');if(r.error)throw r.error;if(!r.data?.length||r.data.length>300||r.data.length!==Number(q.data.question_count))throw Error('Test is not ready: verify its 1–300 questions and question count.');window.vkIpCurrentTest=q.data;window.vkIpCurrentQuestions=r.data;vkIpCurrentTest=q.data;vkIpCurrentQuestions=r.data;vkEnsureExamPage();
+
+showPage('vkIndependentExamPage');
+
+const host = document.getElementById('vkIpExamHost');
+
+if(!host){
+    throw new Error('Exam screen could not be created.');
+}
+
+host.innerHTML==`<h2>${esc(q.data.name)}</h2><p>${r.data.length} Questions · ${q.data.duration_minutes} Minutes</p><form id="vkIpExamForm">${r.data.map((x,i)=>`<div class="vk-ip-exam-q"><strong>Q${i+1}. ${esc(x.question_text)}</strong>${['A','B','C','D'].map(k=>`<label><input type="radio" name="q_${x.id}" value="${k}"> ${k}. ${esc(x['option_'+k.toLowerCase()])}</label>`).join('')}</div>`).join('')}<button type="button" class="vk-ip-buy" onclick="vkIpSubmitTest()">Submit Test</button></form>`;}catch(e){alert(e.message||String(e));}};
 })();
 </script>
 
