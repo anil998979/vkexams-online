@@ -18013,6 +18013,158 @@ body:has(#examPage.active) > footer{
 }
 </style>
 
+
+
+<style id="vk-v26-test-card-readable-design">
+/* Visual-only readability improvement for Paper-I and Paper-II test cards.
+   Existing artwork, labels, layout, database calls and click actions are preserved. */
+#vkIndependentPackageDetail #vkV26TestCards .vk-v26-test-card{
+  position:relative!important;
+  isolation:isolate;
+  overflow:hidden!important;
+  min-height:132px!important;
+  padding:13px 15px!important;
+  border-radius:15px!important;
+  box-shadow:0 5px 15px rgba(15,35,75,.12)!important;
+  transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease!important;
+}
+#vkIndependentPackageDetail #vkV26TestCards .vk-v26-test-card::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:0;
+  pointer-events:none;
+  background:linear-gradient(90deg,rgba(255,255,255,.98) 0%,rgba(255,255,255,.94) 48%,rgba(255,255,255,.72) 76%,rgba(255,255,255,.20) 100%);
+}
+#vkIndependentPackageDetail #vkV26TestCards[data-paper="paper1"] .vk-v26-test-card{
+  border:1px solid #91c8ff!important;
+  background-color:#dceeff!important;
+}
+#vkIndependentPackageDetail #vkV26TestCards[data-paper="paper1"] .vk-v26-test-card::before{
+  background:linear-gradient(100deg,rgba(239,248,255,.99) 0%,rgba(229,243,255,.96) 52%,rgba(196,226,255,.66) 78%,rgba(80,158,235,.15) 100%);
+}
+#vkIndependentPackageDetail #vkV26TestCards[data-paper="paper2"] .vk-v26-test-card{
+  border:1px solid #f2c47f!important;
+  background-color:#fff0d5!important;
+}
+#vkIndependentPackageDetail #vkV26TestCards[data-paper="paper2"] .vk-v26-test-card::before{
+  background:linear-gradient(100deg,rgba(255,250,239,.99) 0%,rgba(255,244,222,.96) 52%,rgba(255,222,168,.68) 78%,rgba(222,126,45,.15) 100%);
+}
+#vkIndependentPackageDetail #vkV26TestCards .vk-v26-test-card:hover{
+  transform:translateY(-2px)!important;
+  box-shadow:0 10px 22px rgba(25,55,100,.17)!important;
+}
+#vkIndependentPackageDetail #vkV26TestCards .vk-v26-test-card > *{
+  position:relative;
+  z-index:1;
+}
+#vkIndependentPackageDetail #vkV26TestCards .vk-v26-topic-no{
+  flex:0 0 42px!important;
+  width:42px;
+  height:42px;
+  border:2px solid rgba(255,255,255,.95);
+  border-radius:13px!important;
+  background:linear-gradient(145deg,#0879d8,#2445b8)!important;
+  color:#fff!important;
+  font-size:15px!important;
+  font-weight:950!important;
+  box-shadow:0 4px 10px rgba(20,75,160,.20);
+}
+#vkIndependentPackageDetail #vkV26TestCards[data-paper="paper2"] .vk-v26-topic-no{
+  background:linear-gradient(145deg,#f59e0b,#c2410c)!important;
+  box-shadow:0 4px 10px rgba(180,83,9,.20);
+}
+#vkIndependentPackageDetail #vkV26TestCards .vk-v26-test-card-main strong{
+  display:inline-block!important;
+  max-width:100%;
+  padding:5px 9px!important;
+  border:1px solid rgba(255,255,255,.95);
+  border-left:4px solid #1675d1;
+  border-radius:8px;
+  background:rgba(255,255,255,.91)!important;
+  color:#102d55!important;
+  font-size:14px!important;
+  font-weight:900!important;
+  line-height:1.35!important;
+  text-shadow:none!important;
+  box-shadow:0 2px 6px rgba(15,40,80,.07);
+}
+#vkIndependentPackageDetail #vkV26TestCards[data-paper="paper2"] .vk-v26-test-card-main strong{
+  border-left-color:#d97706;
+  color:#71340f!important;
+}
+#vkIndependentPackageDetail #vkV26TestCards .vk-v26-test-card-main small{
+  display:table!important;
+  margin-top:6px!important;
+  padding:4px 8px!important;
+  border-radius:6px;
+  background:rgba(255,255,255,.88)!important;
+  color:#344b68!important;
+  font-size:11px!important;
+  font-weight:800!important;
+  text-shadow:none!important;
+}
+#vkIndependentPackageDetail #vkV26TestCards .vk-v26-access-state{
+  display:inline-flex!important;
+  align-items:center;
+  margin-top:7px!important;
+  padding:4px 10px!important;
+  border:1px solid rgba(255,255,255,.9);
+  border-radius:999px!important;
+  font-size:11px!important;
+  font-weight:900!important;
+  box-shadow:0 2px 5px rgba(15,23,42,.06);
+}
+#vkIndependentPackageDetail #vkV26TestCards .vk-v26-access-state.locked{
+  background:linear-gradient(90deg,#fff0e9,#ffe0d8)!important;
+  color:#a32618!important;
+}
+#vkIndependentPackageDetail #vkV26TestCards .vk-v26-access-state.available{
+  background:linear-gradient(90deg,#e5ffef,#c9f7dc)!important;
+  color:#12643a!important;
+}
+#vkIndependentPackageDetail #vkV26TestCards .vk-v26-test-action{
+  margin-top:8px!important;
+}
+#vkIndependentPackageDetail #vkV26TestCards .vk-v26-test-action button{
+  min-height:36px;
+  padding:8px 16px!important;
+  border:1px solid rgba(255,255,255,.75)!important;
+  border-radius:999px!important;
+  background:linear-gradient(100deg,#bd4b0b,#ed8a12)!important;
+  color:#fff!important;
+  font-size:12px!important;
+  font-weight:950!important;
+  letter-spacing:.1px;
+  text-shadow:0 1px 1px rgba(80,35,0,.2);
+  box-shadow:0 4px 10px rgba(180,83,9,.22)!important;
+  transition:transform .16s ease,box-shadow .16s ease!important;
+}
+#vkIndependentPackageDetail #vkV26TestCards .vk-v26-test-action button:hover{
+  transform:translateY(-1px);
+  box-shadow:0 7px 14px rgba(180,83,9,.28)!important;
+}
+#vkIndependentPackageDetail #vkV26TestCards .vk-v26-test-card.is-unlocked .vk-v26-test-action button{
+  background:linear-gradient(100deg,#1264c5,#3154d9)!important;
+  box-shadow:0 4px 10px rgba(37,99,235,.22)!important;
+}
+#vkIndependentPackageDetail #vkV26TestCards .vk-v26-lock{
+  padding:4px 6px;
+  border:1px solid rgba(255,255,255,.85);
+  border-radius:8px;
+  background:rgba(255,255,255,.82);
+  color:#b45309;
+  text-shadow:none!important;
+}
+@media(max-width:560px){
+  #vkIndependentPackageDetail #vkV26TestCards .vk-v26-test-card{min-height:125px!important;padding:10px!important;gap:8px!important}
+  #vkIndependentPackageDetail #vkV26TestCards .vk-v26-topic-no{flex-basis:36px!important;width:36px;height:36px;font-size:13px!important}
+  #vkIndependentPackageDetail #vkV26TestCards .vk-v26-test-card-main strong{font-size:12px!important;padding:4px 6px!important}
+  #vkIndependentPackageDetail #vkV26TestCards .vk-v26-test-card-main small{font-size:10px!important}
+  #vkIndependentPackageDetail #vkV26TestCards .vk-v26-test-action button{min-height:34px;padding:7px 12px!important;font-size:11px!important}
+}
+</style>
+
 </body>
 </html>
  
