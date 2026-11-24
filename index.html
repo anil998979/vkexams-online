@@ -1,4 +1,4 @@
-                      <!DOCTYPE html>
+                       <!DOCTYPE html>
 <html lang="en">
 <head>
 
@@ -10188,11 +10188,29 @@ async function vkAdminPublishIndependentTopicWiseTest(paperName,testName,duratio
     if(packageResult.error) throw packageResult.error;
     if(!packageResult.data) throw new Error("The Endowment Topic Wise package was not found. Please ensure its existing package record is active.");
     const packageId=packageResult.data.id;
-    const independentPaper=paperName==="Paper 1"?"Paper-I":"Paper-II";
-    const paperResult=await supabaseClient.from("vk_independent_papers").select("id")
-        .eq("package_id",packageId).eq("name",independentPaper).eq("is_active",true).maybeSingle();
+    // Normalize the Admin dropdown value and make sure its matching paper row exists.
+    // The student side expects canonical names Paper-I and Paper-II, while the Admin
+    // dropdown values are Paper 1 and Paper 2. Older records may also use either style.
+    const paperNumber = /\b2\b|ii/i.test(String(paperName||"")) ? 2 : 1;
+    const independentPaper = paperNumber===1 ? "Paper-I" : "Paper-II";
+    const paperRowsResult = await supabaseClient.from("vk_independent_papers")
+        .select("id,name,is_active,display_order").eq("package_id",packageId);
+    if(paperRowsResult.error) throw paperRowsResult.error;
+    const normalizePaperName = value => String(value||"").toLowerCase().replace(/[^a-z0-9]/g,"");
+    const acceptedPaperNames = paperNumber===1 ? ["paper1","paperi"] : ["paper2","paperii"];
+    const existingPaper = (paperRowsResult.data||[]).find(p=>acceptedPaperNames.includes(normalizePaperName(p.name)));
+    let paperResult;
+    if(existingPaper){
+        paperResult = await supabaseClient.from("vk_independent_papers")
+            .update({name:independentPaper,is_active:true,display_order:paperNumber})
+            .eq("id",existingPaper.id).select("id").single();
+    }else{
+        paperResult = await supabaseClient.from("vk_independent_papers")
+            .insert({package_id:packageId,name:independentPaper,display_order:paperNumber,is_active:true})
+            .select("id").single();
+    }
     if(paperResult.error) throw paperResult.error;
-    if(!paperResult.data) throw new Error(independentPaper+" is not configured in the existing Endowment package.");
+    if(!paperResult.data) throw new Error("Could not create or activate "+independentPaper+". Check Supabase permissions and try again.");
     // Compatibility bucket: the database still requires topic_id, but no Topic is shown or managed in the UI.
     const bucketName=independentPaper+" Tests";
     let bucket=await supabaseClient.from("vk_independent_topics").select("id,display_order")
@@ -17663,7 +17681,7 @@ document.addEventListener('DOMContentLoaded',()=>{
       const ur=await supabaseClient.auth.getUser();if(ur.error)throw ur.error;const user=ur.data?.user;
       activePurchase=null;
       if(user){const q=await supabaseClient.from('vk_independent_purchases').select('*').eq('package_id',id).eq('user_id',user.id).eq('payment_status','paid').gt('expires_at',new Date().toISOString()).order('expires_at',{ascending:false}).limit(1);if(q.error)throw q.error;activePurchase=q.data?.[0]||null;}
-      const pp=await supabaseClient.from('vk_independent_papers').select('*').eq('package_id',id).eq('is_active',true).order('display_order');if(pp.error)throw pp.error;activePapers=(pp.data||[]).filter(p=>/paper\s*[-–]?\s*[12]/i.test(p.name)).slice(0,2);
+      const pp=await supabaseClient.from('vk_independent_papers').select('*').eq('package_id',id).eq('is_active',true).order('display_order');if(pp.error)throw pp.error;activePapers=(pp.data||[]).filter(p=>{const n=String(p.name||'').toLowerCase().replace(/[^a-z0-9]/g,'');return ['paper1','paperi','paper2','paperii'].includes(n);}).sort((a,b)=>{const rank=p=>{const n=String(p.name||'').toLowerCase().replace(/[^a-z0-9]/g,'');return ['paper1','paperi'].includes(n)?1:2;};return rank(a)-rank(b);}).slice(0,2);
       if(activePapers.length!==2)throw new Error('Paper-1 and Paper-2 must both be created and published in Admin before students can buy this package.');
       const tt=await supabaseClient.from('vk_independent_topics').select('*').in('paper_id',activePapers.map(p=>p.id)).eq('is_active',true).order('display_order');if(tt.error)throw tt.error;activeTopics=tt.data||[];
       window.vkIpActivePackageId=id;window.vkIpActivePurchase=!!activePurchase;
