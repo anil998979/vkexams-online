@@ -16537,24 +16537,21 @@ async function vkIpSubmitTest(autoSubmit = false) {
 
         const result = Array.isArray(data) ? data[0] : data;
 
-        const shell = document.querySelector('#examPage .exam-hall-shell');
-
-        if (!shell) throw Error('Exam screen not found.');
-
-        shell.style.display = 'none';
-
-        let resultBox = document.getElementById('vkIpCbtResult');
-
-        if (!resultBox) {
-            resultBox = document.createElement('div');
-            resultBox.id = 'vkIpCbtResult';
-            document.getElementById('examPage').appendChild(resultBox);
+        // Show the result on its own page, not inside the CBT exam page.
+        // showPage() deactivates #examPage so no exam controls remain visible.
+        let resultPage = document.getElementById('vkIpCbtResultPage');
+        if (!resultPage) {
+            resultPage = document.createElement('section');
+            resultPage.id = 'vkIpCbtResultPage';
+            resultPage.className = 'page';
+            resultPage.style.cssText = 'min-height:60vh;padding:28px 16px 48px;background:#edf2f8;';
+            document.body.appendChild(resultPage);
         }
 
-        resultBox.innerHTML = `
-            <div style="
+        resultPage.innerHTML = `
+            <div id="vkIpCbtResult" style="
                 max-width:750px;
-                margin:40px auto;
+                margin:12px auto;
                 padding:30px;
                 background:#fff;
                 border:1px solid #dbe5f2;
@@ -16563,27 +16560,22 @@ async function vkIpSubmitTest(autoSubmit = false) {
                 box-shadow:0 8px 25px rgba(0,0,0,.08);
             ">
                 <h2 style="color:#174ea6">Exam Submitted Successfully</h2>
-
                 <h3>${vkIpEsc(vkIpCurrentTest.name)}</h3>
-
                 <h1 style="color:#16a34a;font-size:38px">
                     ${Number(result.score)} / ${Number(result.total_marks)}
                 </h1>
-
                 <p>Correct Answers: ${result.correct_answers}</p>
                 <p>Wrong Answers: ${result.wrong_answers}</p>
                 <p>Unanswered: ${result.unanswered}</p>
-
                 <h3>Percentage: ${result.percentage}%</h3>
-
-                <button class="vk-ip-buy"
+                <button class="vk-ip-buy" type="button"
                     onclick="showPage('vkIndependentPackageDetail')">
                     Back to Tests
                 </button>
             </div>
         `;
 
-        resultBox.style.display = 'block';
+        showPage('vkIpCbtResultPage');
 
     } catch (e) {
         console.error('CBT Submit Error:', e);
