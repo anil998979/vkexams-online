@@ -16369,8 +16369,437 @@ async function vkIpOpenTopic(id){
   host.innerHTML=`<h2>📝 Available Topic Tests</h2><div class="vk-ip-test-list">${(tests||[]).map((t,i)=>`<div class="vk-ip-test-student"><div><strong>${vkIpEsc(t.name)}</strong><small>${t.question_count||0} Questions · ${t.duration_minutes||'—'} Minutes</small></div><button class="vk-ip-test-start" onclick="vkIpStartTest('${t.id}')">Start Your Exam →</button></div>`).join('')||'<p class="vk-ip-empty">Tests for this topic are being prepared.</p>'}</div>`;
   host.scrollIntoView({behavior:'smooth',block:'start'});
 }
-async function vkIpStartTest(id){try{const {data:test,error}=await supabaseClient.from('vk_independent_tests').select('*').eq('id',id).eq('is_active',true).single();if(error)throw error;const {data:questions,error:qe}=await supabaseClient.from('vk_independent_questions').select('id,question_text,option_a,option_b,option_c,option_d,display_order').eq('test_id',id).eq('is_active',true).order('display_order');if(qe)throw qe;if(!questions?.length)throw Error('No questions uploaded for this test.');if(questions.length<1||questions.length>1000||questions.length!==Number(test.question_count))throw Error('This test is not ready. It must contain 1–1,000 questions and the saved question count must match.');vkIpCurrentTest=test;vkIpCurrentQuestions=questions;showPage('vkIndependentExamPage');const host=document.getElementById('vkIpExamHost');host.innerHTML=`<h2>${vkIpEsc(test.name)}</h2><p>${questions.length} Questions · ${test.duration_minutes} Minutes</p><form id="vkIpExamForm">${questions.map((q,i)=>`<div class="vk-ip-exam-q"><strong>Q${i+1}. ${vkIpEsc(q.question_text)}</strong>${['A','B','C','D'].map(k=>`<label><input type="radio" name="q_${q.id}" value="${k}"> ${k}. ${vkIpEsc(q['option_'+k.toLowerCase()])}</label>`).join('')}</div>`).join('')}<button type="button" class="vk-ip-buy" onclick="vkIpSubmitTest()">Submit Test</button></form>`;}catch(e){alert(e.message||e);}}
-async function vkIpSubmitTest(){try{const form=document.getElementById('vkIpExamForm');const answers={};vkIpCurrentQuestions.forEach(q=>{answers[q.id]=form.querySelector(`input[name="q_${q.id}"]:checked`)?.value||null;});const {data:result,error:saveError}=await supabaseClient.rpc('vk_independent_submit_attempt',{p_test_id:vkIpCurrentTest.id,p_answers:answers});if(saveError)throw saveError;document.getElementById('vkIpExamHost').innerHTML=`<div class="vk-ip-result"><h2>Test Submitted</h2><h3>Score: ${result.score} / ${result.total_marks}</h3><p>Correct: ${result.correct_answers} · Wrong: ${result.wrong_answers} · Unanswered: ${result.unanswered}</p><p>Percentage: ${result.percentage}%</p></div><button class="vk-ip-buy" onclick="vkIpBackToPackages()">Back to Packages</button>`;}catch(e){alert('Could not submit test: '+e.message);}}
+
+async function vkIpStartTest(id) {
+    try {
+        const { data: test, error } = await supabaseClient
+            .from('vk_independent_tests')
+            .select('*')
+            .eq('id', id)
+            .eq('is_active', true)
+            .single();
+
+        if (error) throw error;
+
+        const { data: questions, error: qe } = await supabaseClient
+            .from('vk_independent_questions')
+            .select('id,question_text,option_a,option_b,option_c,option_d,display_order')
+            .eq('test_id', id)
+            .eq('is_active', true)
+            .order('display_order');
+
+        if (qe) throw qe;
+
+        if (!questions?.length ||
+            questions.length !== Number(test.question_count)) {
+            throw Error('Test questions are not ready.');
+        }
+
+        vkIpCurrentTest = test;
+        vkIpCurrentQuestions = questions;
+
+        // Use the existing IBPS CBT exam screen
+        const shell = document.querySelector('#examPage .exam-hall-shell');
+
+        if (!shell) throw Error('Existing CBT exam screen not found.');
+
+        shell.style.display = '';
+
+        const oldResult = document.getElementById('vkIpCbtResult');
+        if (oldResult) oldResult.remove();
+
+        // Convert database questions to existing CBT format
+        examQuestions = questions.map(q => ({
+            id: q.id,
+            q: q.question_text,
+            o: [
+                q.option_a,
+                q.option_b,
+                q.option_c,
+                q.option_d
+            ],
+            marks: 1
+        }));
+
+        userAnswers = new Array(examQuestions.length).fill(null);
+        examReviewFlags = new Array(examQuestions.length).fill(false);
+        examBookmarkedQuestions = new Set();
+
+        currentQuestionIndex = 0;
+        examPaused = false;
+        examPaletteHidden = false;
+        examLanguage = 'te';
+
+        currentFreeMockTestId = null;
+
+        timeLeft = Math.max(
+            1,
+            Number(test.duration_minutes) || 25
+        ) * 60;
+
+        clearInterval(timerInterval);
+
+        const title = document.getElementById('examTitle');
+        if (title) {
+            title.textContent = test.name;
+            title.dataset.fullTitle = test.name;
+        }
+
+        const pauseButton = document.getElementById('pauseExamButton');
+        if (pauseButton) pauseButton.textContent = 'Ⅱ Pause';
+
+        const navigator = document.getElementById('examQuestionNavigator');
+        if (navigator) navigator.classList.remove('hidden');
+
+        const body = document.querySelector('.exam-hall-body');
+        if (body) body.classList.remove('palette-hidden');
+
+        // Connect CBT Submit buttons to paid-test submission
+        document.querySelectorAll(
+            '#examPage .hall-submit, #examPage .navigator-submit'
+        ).forEach(button => {
+            button.onclick = () => vkIpSubmitTest();
+        });
+
+        showPage('examPage');
+
+        renderQuestion();
+        renderTimer();
+
+        // Start exam timer
+        timerInterval = setInterval(() => {
+            if (!examPaused && timeLeft > 0) {
+                timeLeft--;
+                renderTimer();
+            }
+
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                vkIpSubmitTest(true);
+            }
+        }, 1000);
+
+    } catch (e) {
+        console.error('CBT Start Error:', e);
+        alert(e.message || String(e));
+    }
+}
+
+
+async function vkIpSubmitTest(autoSubmit = false) {
+
+    if (window.vkIpSubmitting) return;
+
+    if (!vkIpCurrentTest || !vkIpCurrentQuestions.length) return;
+
+    window.vkIpSubmitting = true;
+    clearInterval(timerInterval);
+
+    try {
+        const answers = {};
+
+        vkIpCurrentQuestions.forEach((q, i) => {
+            const selected = userAnswers[i];
+
+            answers[q.id] =
+                selected === null || selected === undefined
+                    ? null
+                    : ['A', 'B', 'C', 'D'][selected];
+        });
+
+        const { data, error } = await supabaseClient.rpc(
+            'vk_independent_submit_attempt',
+            {
+                p_test_id: vkIpCurrentTest.id,
+                p_answers: answers
+            }
+        );
+
+        if (error) throw error;
+
+        const result = Array.isArray(data) ? data[0] : data;
+
+        const shell = document.querySelector('#examPage .exam-hall-shell');
+
+        if (!shell) throw Error('Exam screen not found.');
+
+        shell.style.display = 'none';
+
+        let resultBox = document.getElementById('vkIpCbtResult');
+
+        if (!resultBox) {
+            resultBox = document.createElement('div');
+            resultBox.id = 'vkIpCbtResult';
+            document.getElementById('examPage').appendChild(resultBox);
+        }
+
+        resultBox.innerHTML = `
+            <div style="
+                max-width:750px;
+                margin:40px auto;
+                padding:30px;
+                background:#fff;
+                border:1px solid #dbe5f2;
+                border-radius:18px;
+                text-align:center;
+                box-shadow:0 8px 25px rgba(0,0,0,.08);
+            ">
+                <h2 style="color:#174ea6">Exam Submitted Successfully</h2>
+
+                <h3>${vkIpEsc(vkIpCurrentTest.name)}</h3>
+
+                <h1 style="color:#16a34a;font-size:38px">
+                    ${Number(result.score)} / ${Number(result.total_marks)}
+                </h1>
+
+                <p>Correct Answers: ${result.correct_answers}</p>
+                <p>Wrong Answers: ${result.wrong_answers}</p>
+                <p>Unanswered: ${result.unanswered}</p>
+
+                <h3>Percentage: ${result.percentage}%</h3>
+
+                <button class="vk-ip-buy"
+                    onclick="showPage('vkIndependentPackageDetail')">
+                    Back to Tests
+                </button>
+            </div>
+        `;
+
+        resultBox.style.display = 'block';
+
+    } catch (e) {
+        console.error('CBT Submit Error:', e);
+        alert('Could not submit test: ' + e.message);
+    } finally {
+        window.vkIpSubmitting = false;
+    }
+}
+
+let examPage = document.getElementById('vkIndependentExamPage');
+
+if (!examPage) {
+    examPage = document.createElement('section');
+    examPage.id = 'vkIndependentExamPage';
+    examPage.className = 'page';
+    examPage.innerHTML =
+        '<div class="container"><div id="vkIpExamHost"></div></div>';
+    document.body.appendChild(examPage);
+}
+
+let host = document.getElementById('vkIpExamHost');
+
+if (!host) {
+    host = document.createElement('div');
+    host.id = 'vkIpExamHost';
+    examPage.appendChild(host);
+}
+
+showPage('vkIndependentExamPage');`<h2>${vkIpEsc(test.name)}</h2><p>${questions.length} Questions · ${test.duration_minutes} Minutes</p><form id="vkIpExamForm">${questions.map((q,i)=>`<div class="vk-ip-exam-q"><strong>Q${i+1}. ${vkIpEsc(q.question_text)}</strong>${['A','B','C','D'].map(k=>`<label><input type="radio" name="q_${q.id}" value="${k}"> ${k}. ${vkIpEsc(q['option_'+k.toLowerCase()])}</label>`).join('')}</div>`).join('')}<button type="button" class="vk-ip-buy" onclick="vkIpSubmitTest()">Submit Test</button></form>`;}catch(e){alert(e.message||e);}}
+
+async function vkIpStartTest(id) {
+    try {
+        const { data: test, error } = await supabaseClient
+            .from('vk_independent_tests')
+            .select('*')
+            .eq('id', id)
+            .eq('is_active', true)
+            .single();
+
+        if (error) throw error;
+
+        const { data: questions, error: qe } = await supabaseClient
+            .from('vk_independent_questions')
+            .select('id,question_text,option_a,option_b,option_c,option_d,display_order')
+            .eq('test_id', id)
+            .eq('is_active', true)
+            .order('display_order');
+
+        if (qe) throw qe;
+
+        if (!questions?.length ||
+            questions.length !== Number(test.question_count)) {
+            throw Error('Test questions are not ready.');
+        }
+
+        vkIpCurrentTest = test;
+        vkIpCurrentQuestions = questions;
+
+        // Use the existing IBPS CBT exam screen
+        const shell = document.querySelector('#examPage .exam-hall-shell');
+
+        if (!shell) throw Error('Existing CBT exam screen not found.');
+
+        shell.style.display = '';
+
+        const oldResult = document.getElementById('vkIpCbtResult');
+        if (oldResult) oldResult.remove();
+
+        // Convert database questions to existing CBT format
+        examQuestions = questions.map(q => ({
+            id: q.id,
+            q: q.question_text,
+            o: [
+                q.option_a,
+                q.option_b,
+                q.option_c,
+                q.option_d
+            ],
+            marks: 1
+        }));
+
+        userAnswers = new Array(examQuestions.length).fill(null);
+        examReviewFlags = new Array(examQuestions.length).fill(false);
+        examBookmarkedQuestions = new Set();
+
+        currentQuestionIndex = 0;
+        examPaused = false;
+        examPaletteHidden = false;
+        examLanguage = 'te';
+
+        currentFreeMockTestId = null;
+
+        timeLeft = Math.max(
+            1,
+            Number(test.duration_minutes) || 25
+        ) * 60;
+
+        clearInterval(timerInterval);
+
+        const title = document.getElementById('examTitle');
+        if (title) {
+            title.textContent = test.name;
+            title.dataset.fullTitle = test.name;
+        }
+
+        const pauseButton = document.getElementById('pauseExamButton');
+        if (pauseButton) pauseButton.textContent = 'Ⅱ Pause';
+
+        const navigator = document.getElementById('examQuestionNavigator');
+        if (navigator) navigator.classList.remove('hidden');
+
+        const body = document.querySelector('.exam-hall-body');
+        if (body) body.classList.remove('palette-hidden');
+
+        // Connect CBT Submit buttons to paid-test submission
+        document.querySelectorAll(
+            '#examPage .hall-submit, #examPage .navigator-submit'
+        ).forEach(button => {
+            button.onclick = () => vkIpSubmitTest();
+        });
+
+        showPage('examPage');
+
+        renderQuestion();
+        renderTimer();
+
+        // Start exam timer
+        timerInterval = setInterval(() => {
+            if (!examPaused && timeLeft > 0) {
+                timeLeft--;
+                renderTimer();
+            }
+
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                vkIpSubmitTest(true);
+            }
+        }, 1000);
+
+    } catch (e) {
+        console.error('CBT Start Error:', e);
+        alert(e.message || String(e));
+    }
+}
+
+
+async function vkIpSubmitTest(autoSubmit = false) {
+
+    if (window.vkIpSubmitting) return;
+
+    if (!vkIpCurrentTest || !vkIpCurrentQuestions.length) return;
+
+    window.vkIpSubmitting = true;
+    clearInterval(timerInterval);
+
+    try {
+        const answers = {};
+
+        vkIpCurrentQuestions.forEach((q, i) => {
+            const selected = userAnswers[i];
+
+            answers[q.id] =
+                selected === null || selected === undefined
+                    ? null
+                    : ['A', 'B', 'C', 'D'][selected];
+        });
+
+        const { data, error } = await supabaseClient.rpc(
+            'vk_independent_submit_attempt',
+            {
+                p_test_id: vkIpCurrentTest.id,
+                p_answers: answers
+            }
+        );
+
+        if (error) throw error;
+
+        const result = Array.isArray(data) ? data[0] : data;
+
+        const shell = document.querySelector('#examPage .exam-hall-shell');
+
+        if (!shell) throw Error('Exam screen not found.');
+
+        shell.style.display = 'none';
+
+        let resultBox = document.getElementById('vkIpCbtResult');
+
+        if (!resultBox) {
+            resultBox = document.createElement('div');
+            resultBox.id = 'vkIpCbtResult';
+            document.getElementById('examPage').appendChild(resultBox);
+        }
+
+        resultBox.innerHTML = `
+            <div style="
+                max-width:750px;
+                margin:40px auto;
+                padding:30px;
+                background:#fff;
+                border:1px solid #dbe5f2;
+                border-radius:18px;
+                text-align:center;
+                box-shadow:0 8px 25px rgba(0,0,0,.08);
+            ">
+                <h2 style="color:#174ea6">Exam Submitted Successfully</h2>
+
+                <h3>${vkIpEsc(vkIpCurrentTest.name)}</h3>
+
+                <h1 style="color:#16a34a;font-size:38px">
+                    ${Number(result.score)} / ${Number(result.total_marks)}
+                </h1>
+
+                <p>Correct Answers: ${result.correct_answers}</p>
+                <p>Wrong Answers: ${result.wrong_answers}</p>
+                <p>Unanswered: ${result.unanswered}</p>
+
+                <h3>Percentage: ${result.percentage}%</h3>
+
+                <button class="vk-ip-buy"
+                    onclick="showPage('vkIndependentPackageDetail')">
+                    Back to Tests
+                </button>
+            </div>
+        `;
+
+        resultBox.style.display = 'block';
+
+    } catch (e) {
+        console.error('CBT Submit Error:', e);
+        alert('Could not submit test: ' + e.message);
+    } finally {
+        window.vkIpSubmitting = false;
+    }
+}
 
 
 
