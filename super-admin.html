@@ -609,7 +609,7 @@ function buildStudentPermissionsDetails(student){
 }
 function updateEmailPreferenceSummary(){
   const total=managedStudents.length;
-  // Preserve the existing app convention: only an explicit false is OFF.
+  // Individual preference is stored separately from the global sending pause.
   const on=managedStudents.filter(s=>s.notifications_enabled!==false).length;
   const off=total-on;
   const effective=globalEmailEnabled===true?on:globalEmailEnabled===false?0:'—';
@@ -618,7 +618,17 @@ function updateEmailPreferenceSummary(){
   if($('emailPrefOff'))$('emailPrefOff').textContent=String(off);
   if($('emailPrefEffective'))$('emailPrefEffective').textContent=String(effective);
   if($('emailPrefGlobalNote'))$('emailPrefGlobalNote').textContent=
-    globalEmailEnabled===null?'Global setting: not loaded':`Global setting: ${globalEmailEnabled?'ON':'OFF'}`;
+    globalEmailEnabled===null?'Global setting: not loaded':`Global setting: ${globalEmailEnabled?'ON':'OFF — ALL EMAIL PAUSED'}`;
+}
+
+function renderEmailAlertStatus(individualEnabled){
+  if(globalEmailEnabled===false){
+    return `<span class="badge-off" title="Individual preference: ${individualEnabled?'ON':'OFF'}. Global switch is OFF, so no student is currently send-eligible.">PAUSED</span><div class="small muted">Preference: ${individualEnabled?'ON':'OFF'}</div>`;
+  }
+  if(globalEmailEnabled===null){
+    return `<span class="status">CHECKING</span><div class="small muted">Preference: ${individualEnabled?'ON':'OFF'}</div>`;
+  }
+  return `<span class="${individualEnabled?'badge-active':'badge-off'}">${individualEnabled?'ON':'OFF'}</span>`;
 }
 
 function renderManagedStudents(){
@@ -641,7 +651,7 @@ function renderManagedStudents(){
         <button class="btn action-btn permission-toggle" id="student-permissions-btn-${esc(s.id)}" type="button" aria-expanded="false" onclick="toggleStudentPermissions('${esc(s.id)}')">View permissions</button>
         ${buildStudentPermissionsDetails(s)}
       </td>
-      <td data-col="alerts"><span class="${notify?'badge-active':'badge-off'}">${notify?'ON':'OFF'}</span></td>
+      <td data-col="alerts">${renderEmailAlertStatus(notify)}</td>
       <td data-col="registered" class="registered-cell">${date(s.created_at)}</td>
       <td data-col="alertsAction"><button class="btn action-btn" type="button" onclick="toggleStudentEmail('${esc(s.id)}',${!notify})">${notify?'Disable alerts':'Enable alerts'}</button></td>
       <td data-col="statusAction"><button class="btn action-btn" type="button" onclick="changeStudentStatus('${esc(s.id)}','${esc(s.email||'')}')">Suspend / Activate</button></td>
@@ -716,8 +726,8 @@ async function loadEmailSettings(){
   globalEmailEnabled=data?.global_email_enabled===true;
   $('globalEmailSelect').value=String(globalEmailEnabled);
   $('globalEmailState').innerHTML=globalEmailEnabled?'<span class="badge-active">GLOBAL EMAIL ON</span>':'<span class="badge-off">GLOBAL EMAIL OFF</span>';
-  $('globalEmailMsg').textContent='Current value read from vk_platform_settings. Global ON enables every student; Global OFF pauses notifications for everyone.';
-  updateEmailPreferenceSummary();
+  $('globalEmailMsg').textContent='Current value read from vk_platform_settings. Global OFF pauses sending for everyone without changing individual preferences. Global ON enables every student and resumes sending.';
+  renderManagedStudents();
 }
 
 async function fetchAllStudentNotificationTargets(){
@@ -755,7 +765,7 @@ async function saveGlobalEmail(){
       $('globalEmailState').innerHTML='<span class="badge-off">GLOBAL EMAIL OFF</span>';
       $('globalEmailSelect').value='false';
       $('globalEmailMsg').textContent='Email notifications are now paused for all students. Individual ON/OFF preferences have been preserved.';
-      updateEmailPreferenceSummary();
+      renderManagedStudents();
       await writeAdminAudit('global_email_setting_updated','vk_platform_settings',null,{global_email_enabled:false,individual_preferences_changed:false});
       return;
     }
