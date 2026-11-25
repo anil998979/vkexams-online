@@ -207,6 +207,7 @@ input:focus,select:focus,textarea:focus{outline:3px solid #dfe7ff;border-color:#
 <button onclick="showTab('studentManageTab',this);loadManagedStudents()">♙ Student Management</button>
 <button onclick="showTab('accessTab',this);loadManagedStudents()">⚿ Access Control</button>
 <button onclick="showTab('emailTab',this);loadEmailSettings()">✉ Email Management</button>
+<button onclick="showTab('visitorsTab',this);loadVisitorAnalytics()">◉ Visitor Analytics</button>
 <button onclick="showTab('studentsTab',this)">Students</button>
 <button onclick="showTab('purchasesTab',this)">Purchases</button>
 <button onclick="showTab('attemptsTab',this)">Test Attempts</button>
@@ -300,6 +301,33 @@ input:focus,select:focus,textarea:focus{outline:3px solid #dfe7ff;border-color:#
 </section>
 
 <section id="overview" class="panel section"><h2>Activity overview</h2><p class="muted small">Daily new students, test attempts and paid revenue for the selected period (daily series capped to recent 30 days).</p><div id="dailyChart" class="chart"></div><div class="tablewrap"><table id="dailyTable"><thead><tr><th>Date</th><th>New students</th><th>Attempts</th><th>Paid revenue</th></tr></thead><tbody></tbody></table></div></section>
+
+<section id="visitorsTab" class="panel section hidden">
+  <h2>Website Visitor Analytics</h2>
+  <p class="muted small">Visitor activity recorded after the tracking script and database setup are installed on the public VK Exams pages. Live visitors = activity in the last 5 minutes.</p>
+  <div class="toolbar">
+    <button class="btn primary" type="button" onclick="loadVisitorAnalytics()">Refresh visitors</button>
+    <span id="visitorUpdated" class="small muted"></span>
+  </div>
+  <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:12px 0">
+    <div class="panel" style="padding:14px;border-top:3px solid #4169e1"><div class="label">Unique Visitors</div><div class="metric" id="visitorUnique" style="font-size:25px">—</div><div class="small muted">Selected period</div></div>
+    <div class="panel" style="padding:14px;border-top:3px solid #0f9f91"><div class="label">Live Visitors</div><div class="metric" id="visitorLive" style="font-size:25px">—</div><div class="small muted">Last 5 minutes</div></div>
+    <div class="panel" style="padding:14px;border-top:3px solid #e99a25"><div class="label">Page Views</div><div class="metric" id="visitorViews" style="font-size:25px">—</div><div class="small muted">Selected period</div></div>
+    <div class="panel" style="padding:14px;border-top:3px solid #9a65d5"><div class="label">Top Page</div><div class="metric" id="visitorTopPage" style="font-size:16px;overflow-wrap:anywhere">—</div><div class="small muted" id="visitorTopPageViews"></div></div>
+  </div>
+  <div class="panel" style="margin:12px 0;background:#fbfcff">
+    <h3 style="margin-top:0">Traffic by hour (India time)</h3>
+    <div id="visitorHourlyChart" class="chart"></div>
+    <p class="small muted">Bars show page views by hour of day in Asia/Kolkata.</p>
+  </div>
+  <h3>Most visited pages</h3>
+  <div class="tablewrap"><table><thead><tr><th>Page</th><th>Page Views</th><th>Unique Visitors</th></tr></thead><tbody id="visitorPagesRows"><tr><td colspan="3">Open Visitor Analytics and refresh.</td></tr></tbody></table></div>
+  <h3 style="margin-top:20px">Recent visitor activity</h3>
+  <p class="small muted">No visitor names, email addresses, IP addresses or passwords are collected by this tracker. Visitor IDs are anonymous browser identifiers.</p>
+  <div class="tablewrap"><table><thead><tr><th>Date &amp; Time (IST)</th><th>Visitor</th><th>Page</th><th>Device</th><th>Browser</th><th>Referrer</th></tr></thead><tbody id="visitorRecentRows"><tr><td colspan="6">No visitor data loaded.</td></tr></tbody></table></div>
+  <p id="visitorMsg" class="small muted" aria-live="polite" style="margin-top:10px"></p>
+</section>
+
 <section id="studentsTab" class="panel section hidden"><h2>Recent students</h2><p class="muted small">Latest 100 Auth accounts. Passwords and OTPs are never displayed.</p><div class="tablewrap"><table><thead><tr><th>Name</th><th>Email</th><th>Registered</th><th>Last login</th></tr></thead><tbody id="studentRows"></tbody></table></div></section>
 <section id="purchasesTab" class="panel section hidden"><h2>Purchases</h2><div class="tablewrap"><table><thead><tr><th>Date</th><th>Student</th><th>Course</th><th>Package</th><th>Amount</th><th>Status</th></tr></thead><tbody id="purchaseRows"></tbody></table></div></section>
 <section id="attemptsTab" class="panel section hidden"><h2>Test attempts</h2><div class="tablewrap"><table><thead><tr><th>Completed</th><th>Student</th><th>Test</th><th>Type</th><th>Score</th><th>%</th></tr></thead><tbody id="attemptRows"></tbody></table></div></section>
@@ -833,6 +861,50 @@ async function loadAuditLogs(){
   if(error){$('auditMsg').textContent='Could not load audit logs: '+error.message;return}
   $('auditRows').innerHTML=(data||[]).map(x=>`<tr><td>${date(x.created_at)}</td><td>${esc(x.actor_email||'—')}</td><td>${esc(x.action)}</td><td>${esc(x.table_name||'—')}</td><td>${esc(x.record_id||'—')}</td><td title="${esc(JSON.stringify(x.details||{}))}">${esc(JSON.stringify(x.details||{}).slice(0,120))}</td></tr>`).join('')||'<tr><td colspan="6">No audit records found yet. New Super Admin actions will be recorded here.</td></tr>';
   $('auditMsg').textContent=`Showing ${(data||[]).length} recent record(s).`;
+}
+
+
+// Visitor Analytics: reads the aggregate JSON returned by the secured Supabase RPC.
+async function loadVisitorAnalytics(){
+  const msg=$('visitorMsg');
+  msg.textContent='Loading visitor analytics…';
+  ['visitorUnique','visitorLive','visitorViews','visitorTopPage'].forEach(id=>$(id).textContent='…');
+  try{
+    const [from,to]=range();
+    const {data,error}=await sb.rpc('vk_admin_visitor_analytics',{p_from:from,p_to:to});
+    if(error)throw error;
+    const d=data||{};
+    $('visitorUnique').textContent=Number(d.unique_visitors||0).toLocaleString('en-IN');
+    $('visitorLive').textContent=Number(d.live_visitors||0).toLocaleString('en-IN');
+    $('visitorViews').textContent=Number(d.page_views||0).toLocaleString('en-IN');
+    const pages=Array.isArray(d.top_pages)?d.top_pages:[];
+    $('visitorTopPage').textContent=pages.length?(pages[0].page_path||'/'):'—';
+    $('visitorTopPageViews').textContent=pages.length?Number(pages[0].page_views||0)+' views':'No page data';
+
+    const hours=Array.isArray(d.hourly)?d.hourly:[];
+    const max=Math.max(1,...hours.map(x=>Number(x.page_views||0)));
+    $('visitorHourlyChart').innerHTML=hours.map(x=>{
+      const h=String(x.hour??'').padStart(2,'0');
+      const count=Number(x.page_views||0);
+      return `<div class="bar" title="${h}:00 IST — ${count} page views" style="height:${Math.max(count?3:0,count/max*100)}%"><span>${h}</span></div>`;
+    }).join('')||'<span class="small muted">No traffic data for this period.</span>';
+
+    $('visitorPagesRows').innerHTML=pages.map(x=>`<tr><td>${esc(x.page_path||'/')}</td><td>${Number(x.page_views||0).toLocaleString('en-IN')}</td><td>${Number(x.unique_visitors||0).toLocaleString('en-IN')}</td></tr>`).join('')||'<tr><td colspan="3">No page views in this period.</td></tr>';
+
+    const recent=Array.isArray(d.recent_visitors)?d.recent_visitors:[];
+    $('visitorRecentRows').innerHTML=recent.map(x=>`<tr>
+      <td>${date(x.created_at)}</td><td>${esc(String(x.visitor_id||'').slice(0,8))}…</td>
+      <td>${esc(x.page_path||'/')}</td><td>${esc(x.device_type||'Unknown')}</td>
+      <td>${esc(x.browser||'Unknown')}</td><td>${esc(x.referrer||'Direct')}</td>
+    </tr>`).join('')||'<tr><td colspan="6">No visitor activity found for this period.</td></tr>';
+    $('visitorUpdated').textContent='Updated '+new Date().toLocaleString('en-IN',{timeZone:'Asia/Kolkata'});
+    msg.textContent='Showing visitor data for the selected report period. Live count is based on the last 5 minutes.';
+  }catch(e){
+    msg.textContent='Visitor analytics could not load: '+(e.message||String(e))+'. Run the supplied SQL in Supabase and install the tracker on the public website pages.';
+    $('visitorPagesRows').innerHTML='<tr><td colspan="3">Visitor analytics setup required.</td></tr>';
+    $('visitorRecentRows').innerHTML='<tr><td colspan="6">Visitor analytics setup required.</td></tr>';
+    $('visitorHourlyChart').innerHTML='';
+  }
 }
 
 
