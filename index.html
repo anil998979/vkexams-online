@@ -1862,6 +1862,22 @@ header{
 #resultPage .result-buttons .btn{min-height:46px;padding:12px 20px;border-radius:11px}
 #resultPage .vk-result-note{margin:16px 0 0;color:#94a3b8;font-size:11px}
 @media(max-width:760px){#resultPage .container{padding:18px 12px 32px}#resultPage .vk-result-header{padding:22px 18px}#resultPage .vk-result-header h1{font-size:22px}#resultPage .vk-result-content{padding:14px}#resultPage .vk-result-top-grid{grid-template-columns:1fr}#resultPage .vk-result-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}#resultPage .vk-result-insight-grid{grid-template-columns:1fr}#resultPage .vk-result-panel-heading{align-items:flex-start;flex-direction:column}#resultPage .result-buttons{display:grid;grid-template-columns:1fr}#resultPage .result-buttons .btn{width:100%}}
+#resultPage .vk-result-comparison-panel{margin-top:18px;padding:20px;background:#fff;border:1px solid #e5eaf2;border-radius:16px}
+#resultPage .vk-result-live-tag{padding:6px 10px;border-radius:999px;background:#eff6ff;color:#1d4ed8;font-size:10px;font-weight:900;letter-spacing:.06em}
+#resultPage .vk-result-comparison-loading,#resultPage .vk-result-empty{padding:18px;border-radius:12px;background:#f8fafc;color:#64748b;font-size:13px;line-height:1.6}
+#resultPage .vk-result-comparison-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px;margin:14px 0}
+#resultPage .vk-result-comparison-kpi{padding:14px;border:1px solid #e5eaf2;border-radius:12px;background:#fbfdff}
+#resultPage .vk-result-comparison-kpi strong{display:block;margin:6px 0;font-size:23px;color:#1d4ed8}
+#resultPage .vk-result-comparison-kpi span{font-size:11px;color:#64748b;font-weight:750}
+#resultPage .vk-result-chart-row{display:grid;grid-template-columns:minmax(95px,1fr) minmax(0,3fr) 48px;gap:9px;align-items:center;margin:11px 0}
+#resultPage .vk-result-chart-label{font-size:12px;color:#334155;font-weight:750;overflow-wrap:anywhere}
+#resultPage .vk-result-chart-track{height:12px;background:#edf2f7;border-radius:99px;overflow:hidden}
+#resultPage .vk-result-chart-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,#0d9488,#2563eb)}
+#resultPage .vk-result-chart-value{text-align:right;font-size:12px;font-weight:850;color:#172554}
+#resultPage .vk-result-comparison-subhead{margin:18px 0 9px;font-size:14px;font-weight:850;color:#172033}
+#resultPage .vk-result-peer-note{margin-top:10px;padding:12px;border-radius:11px;background:#f0fdf4;color:#166534;font-size:13px;line-height:1.6}
+@media(max-width:650px){#resultPage .vk-result-comparison-panel{padding:14px}#resultPage .vk-result-comparison-grid{grid-template-columns:1fr}#resultPage .vk-result-chart-row{grid-template-columns:82px minmax(0,1fr) 42px;gap:6px}}
+
 
 /* =====================================================
    RESULT
@@ -4170,6 +4186,15 @@ class="page">
         <div class="vk-result-insight"><b id="vkResultNegative">—</b><span>Marks Lost to Wrong Answers</span></div>
       </div>
     </section>
+    <section class="vk-result-comparison-panel" id="vkResultComparisonPanel">
+      <div class="vk-result-panel-heading">
+        <div><h2>📈 Topic-wise & Attempt Comparison</h2><p>మీ గత ప్రయత్నాలు, Endowment Topic Testsలో మీ పురోగతి</p></div>
+        <span class="vk-result-live-tag">YOUR PERFORMANCE</span>
+      </div>
+      <div id="vkResultComparisonContent">
+        <div class="vk-result-comparison-loading">మీ Performance వివరాలు సిద్ధం చేస్తున్నాం...</div>
+      </div>
+    </section>
     <div class="result-buttons" style="margin-top:22px">
       <button class="btn btn-blue" onclick="viewSolutions()">View Solutions</button>
       <button class="btn btn-primary" onclick="reattempt()">Reattempt</button>
@@ -5426,6 +5451,7 @@ let lastResult = null;
    let currentFreeMockTestId = null;
 let currentFreeMockNumber = null;
 let currentAttemptId = null;
+let currentResultTestId = null;
    let freeMockStarting = false;
    let testSubmitted = false;
 
@@ -7485,6 +7511,7 @@ async function startPaidTest(testNumber){
         /* =========================================
            START ATTEMPT
         ========================================= */
+        currentResultTestId = testData.id;
 
         const {
             data:attemptData,
@@ -14455,7 +14482,7 @@ function renderVkProfessionalResult(result){
   // Section bars are generated only from explicit section/subject/topic labels.
   const host=document.getElementById("vkResultSectionChart");
   const status=document.getElementById("vkResultSectionStatus");
-  if(!host) return;
+  if(!host){ loadVkResultComparison(result); return; }
   const questions=Array.isArray(result.questions)?result.questions:[];
   const answers=Array.isArray(result.answers)?result.answers:[];
   const groups=new Map();
@@ -14481,6 +14508,128 @@ function renderVkProfessionalResult(result){
     if(status) status.textContent="Not mapped";
     host.innerHTML='<div class="vk-result-empty">ఈ Test ప్రశ్నల డేటాలో Section / Subject / Topic పేర్లు లేవు. అందువల్ల ప్రస్తుతం నిజమైన Section-wise Bar Graph చూపించడం సాధ్యం కాదు. ప్రశ్నలకు Section Mapping జోడించిన తర్వాత ఈ గ్రాఫ్ ఆటోమేటిక్‌గా కనిపిస్తుంది. ఊహాజనిత విభాగాలు లేదా మార్కులు చూపించము.</div>';
   }
+  loadVkResultComparison(result);
+}
+
+/* =====================================================
+   ENDOWMENT TOPIC-WISE RESULT COMPARISON
+   Uses the signed-in student's real test_results history.
+   Peer comparison is shown only when the database returns
+   other students' real results for the same test.
+===================================================== */
+async function loadVkResultComparison(result){
+    const host=document.getElementById("vkResultComparisonContent");
+    if(!host) return;
+    const pct=Math.max(0,Math.min(100,Number(result?.percentage||0)));
+    const testId=currentResultTestId||currentFreeMockTestId||null;
+    const courseName=String(currentCourse||"").trim().toLowerCase();
+    if(!courseName.includes("endowment")){
+        host.innerHTML='<div class="vk-result-empty">ఈ Comparison Dashboard ప్రస్తుతం Endowment Officer Topic Wise Test Series కోసం రూపొందించబడింది.</div>';
+        return;
+    }
+    if(!supabaseClient){
+        host.innerHTML='<div class="vk-result-empty">Database connection అందుబాటులో లేదు. మీ నిజమైన గత పరీక్షల వివరాలు లోడ్ చేయలేకపోయాము.</div>';
+        return;
+    }
+    try{
+        const {data:sessionData}=await supabaseClient.auth.getSession();
+        const userId=sessionData?.session?.user?.id;
+        if(!userId){
+            host.innerHTML='<div class="vk-result-empty">మీ గత పరీక్షల పోలిక కోసం Student Login అవసరం.</div>';
+            return;
+        }
+
+        let historyRows=[];
+        const historyQuery=await supabaseClient
+            .from("test_results")
+            .select("attempt_id,test_id,score,total_marks,percentage,completed_at,tests(id,title,topic_name,topic_test_number,test_series(name,courses(name)))")
+            .eq("user_id",userId)
+            .order("completed_at",{ascending:true});
+        if(!historyQuery.error) historyRows=historyQuery.data||[];
+
+        // Keep only Endowment Officer tests. The current attempt is retained
+        // even if the history query has not become visible yet.
+        historyRows=historyRows.filter(row=>{
+            const course=String(row.tests?.test_series?.courses?.name||"").toLowerCase();
+            const series=String(row.tests?.test_series?.name||"").toLowerCase();
+            return course.includes("endowment")||series.includes("endowment")||String(row.test_id||"")===String(testId||"");
+        });
+        if(testId && !historyRows.some(row=>String(row.attempt_id||"")===String(currentAttemptId||"") && currentAttemptId)){
+            historyRows.push({
+                attempt_id:currentAttemptId,
+                test_id:testId,
+                score:Number(result?.score||0),
+                total_marks:Number(result?.total||0),
+                percentage:pct,
+                completed_at:new Date().toISOString(),
+                tests:{id:testId,title:result?.title||"Current Test",topic_name:"Current Test"}
+            });
+        }
+        historyRows.sort((a,b)=>new Date(a.completed_at||0)-new Date(b.completed_at||0));
+
+        const currentRows=historyRows.filter(row=>String(row.test_id||"")===String(testId||""));
+        const attempts=currentRows.length?currentRows:[{
+            score:Number(result?.score||0),total_marks:Number(result?.total||0),
+            percentage:pct,completed_at:new Date().toISOString(),tests:{title:result?.title||"Current Test"}
+        }];
+        const previous=attempts.length>1?attempts[attempts.length-2]:null;
+        const improvement=previous?Number(pct-Number(previous.percentage||0)):null;
+        const latestByTest=new Map();
+        historyRows.forEach(row=>{
+            if(!row.test_id)return;
+            const old=latestByTest.get(row.test_id);
+            if(!old||new Date(row.completed_at||0)>=new Date(old.completed_at||0))latestByTest.set(row.test_id,row);
+        });
+        const topicRows=Array.from(latestByTest.values()).slice(-12);
+        const chart=(label,value)=>`<div class="vk-result-chart-row"><span class="vk-result-chart-label">${escapeHtml(label)}</span><div class="vk-result-chart-track"><div class="vk-result-chart-fill" style="width:${Math.max(0,Math.min(100,Number(value||0)))}%"></div></div><strong class="vk-result-chart-value">${Number(value||0).toFixed(1)}%</strong></div>`;
+        let html=`<div class="vk-result-comparison-grid">
+          <div class="vk-result-comparison-kpi"><span>ప్రస్తుత స్కోర్</span><strong>${pct.toFixed(1)}%</strong><span>${Number(result?.score||0)} / ${Number(result?.total||0)} మార్కులు</span></div>
+          <div class="vk-result-comparison-kpi"><span>Attempt Improvement</span><strong style="color:${improvement===null?'#64748b':improvement>=0?'#15803d':'#dc2626'}">${improvement===null?'—':(improvement>=0?'+':'')+improvement.toFixed(1)+'%'}</strong><span>${previous?'మునుపటి Attemptతో పోల్చి':'ఇంకా Previous Attempt లేదు'}</span></div>
+          <div class="vk-result-comparison-kpi"><span>Endowment Tests</span><strong>${latestByTest.size}</strong><span>వేర్వేరు Testsలో ఫలితాలు</span></div>
+        </div>`;
+
+        if(attempts.length>1){
+            html+='<div class="vk-result-comparison-subhead">ఈ Testలో Attempt-wise Improvement</div>';
+            attempts.forEach((row,index)=>{html+=chart("Attempt "+(index+1),Number(row.percentage||0));});
+            if(improvement!==null) html+=`<div class="vk-result-peer-note">${improvement>0?'🎉 చాలా బాగుంది! గత Attemptతో పోలిస్తే '+improvement.toFixed(1)+' percentage points మెరుగుదల సాధించారు.':improvement<0?'గత Attemptతో పోలిస్తే '+Math.abs(improvement).toFixed(1)+' percentage points తగ్గింది. తదుపరి ప్రయత్నంలో మెరుగుపరచవచ్చు.':'మీ గత Attemptతో సమానమైన ఫలితం సాధించారు.'}</div>`;
+        }else{
+            html+='<div class="vk-result-empty">ఈ పరీక్షకు ఇది మీ మొదటి Attempt. రెండోసారి పరీక్ష రాసినప్పుడు Improvement Graph ఆటోమేటిక్‌గా కనిపిస్తుంది.</div>';
+        }
+
+        if(topicRows.length){
+            html+='<div class="vk-result-comparison-subhead">Endowment Topic-wise Test Performance</div>';
+            topicRows.forEach(row=>{
+                const label=row.tests?.topic_name||row.tests?.title||"Topic Test";
+                html+=chart(label,Number(row.percentage||0));
+            });
+        }else{
+            html+='<div class="vk-result-empty">ఇంకా ఇతర Endowment Topic Test ఫలితాలు లభించలేదు.</div>';
+        }
+
+        let peerMessage="ఇతర విద్యార్థుల ఫలితాల పోలిక ప్రస్తుతం అందుబాటులో లేదు. Database అనుమతులు మరియు నిజమైన peer results వచ్చినప్పుడు ఇక్కడ చూపిస్తాము.";
+        if(testId){
+            const peerQuery=await supabaseClient
+                .from("test_results")
+                .select("user_id,percentage")
+                .eq("test_id",testId)
+                .neq("user_id",userId);
+            if(!peerQuery.error && Array.isArray(peerQuery.data) && peerQuery.data.length){
+                const peerScores=peerQuery.data.map(x=>Number(x.percentage)).filter(x=>Number.isFinite(x));
+                if(peerScores.length){
+                    const rank=1+peerScores.filter(x=>x>pct).length;
+                    const cohort=peerScores.length+1;
+                    const percentile=Math.round((peerScores.filter(x=>x<=pct).length+1)/cohort*100);
+                    const avg=peerScores.reduce((a,b)=>a+b,0)/peerScores.length;
+                    peerMessage=`👥 ఈ పరీక్షలో పోల్చిన ${cohort} మంది విద్యార్థుల్లో మీ అంచనా స్థానం ${rank} / ${cohort}. మీ Percentile ${percentile}%. ఇతర విద్యార్థుల సగటు ${avg.toFixed(1)}%; మీ స్కోర్ ${pct.toFixed(1)}%.`;
+                }
+            }
+        }
+        html+=`<div class="vk-result-comparison-subhead">ఇతర విద్యార్థులతో పోలిక</div><div class="vk-result-peer-note" style="background:#eff6ff;color:#1e40af">${peerMessage}</div>`;
+        host.innerHTML=html;
+    }catch(error){
+        console.warn("VK result comparison could not be loaded:",error);
+        host.innerHTML='<div class="vk-result-empty">Comparison వివరాలు లోడ్ చేయలేకపోయాము. మీ Result మరియు Solutions యథావిధిగా అందుబాటులో ఉంటాయి.</div>';
+    }
 }
 
 /* =====================================================
@@ -14865,6 +15014,7 @@ function saveVkCompletedResult(){
         const snapshot = {
             kind: currentAttemptId ? "paid" : "free",
             attemptId: currentAttemptId || null,
+            testId: currentResultTestId || currentFreeMockTestId || null,
             course: currentCourse || "",
             paper: currentPaper || "",
             testNumber: Number(currentTestNumber || 0),
@@ -14928,6 +15078,7 @@ function restoreVkCompletedResult(){
         currentFreeMockNumber = Number(saved.freeMockNumber || 0);
         currentFreeMockTestId = saved.freeMockTestId || null;
         currentAttemptId = saved.attemptId || null;
+        currentResultTestId = saved.testId || saved.freeMockTestId || null;
         testSubmitted = true;
 
         lastResult = {
