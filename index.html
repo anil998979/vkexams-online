@@ -5792,19 +5792,23 @@ async function openFreeMocks(addHistory = true){
         }
     }
 
-    const fallbackCourses = [["Endowment Officer","🛕"],["APPSC","🏛️"],["Police","👮"],["DSC","🎓"],["Banks","🏦"]];
+    /* Free Mock Tests page: show only the three approved categories. */
+    const fallbackCourses = [["APPSC","🏛️"],["Endowment Officer","🛕"],["High Court","⚖️"]];
+    const allowedFreeMockCourses = new Set(["APPSC","Endowment Officer","High Court"]);
     let courses = fallbackCourses.slice();
     try {
         if (supabaseClient) {
             const {data,error} = await supabaseClient.from("courses").select("name,icon,is_active,display_order").eq("is_active",true).order("display_order",{ascending:true});
             if (!error && Array.isArray(data) && data.length) {
-                courses = data.map(c=>[c.name,c.icon || (c.name.includes("Endowment")?"🛕":({APPSC:"🏛️",Police:"👮",DSC:"🎓",Banks:"🏦"}[c.name]||"🏛️"))]);
-                fallbackCourses.forEach(required=>{
-                    if(!courses.some(existing=>String(existing[0]).trim().toLowerCase()===required[0].toLowerCase())) courses.push(required);
-                });
+                const filteredCourses = data
+                    .filter(c => allowedFreeMockCourses.has(String(c.name || "").trim()))
+                    .map(c => [String(c.name).trim(), c.icon || ({APPSC:"🏛️","Endowment Officer":"🛕","High Court":"⚖️"}[String(c.name).trim()])]);
+                courses = fallbackCourses.map(required =>
+                    filteredCourses.find(existing => existing[0] === required[0]) || required
+                );
             }
         }
-    } catch(e) { console.warn("Dynamic free mock categories unavailable; using fallback.",e); }
+    } catch(e) { console.warn("Dynamic free mock categories unavailable; using approved fallback.",e); }
 
     $("freeMocks").classList.remove("mock-list-mode");
     $("freeMockCourses").className = "choice-grid";
