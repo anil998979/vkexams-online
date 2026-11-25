@@ -220,11 +220,23 @@ input:focus,select:focus,textarea:focus{outline:3px solid #dfe7ff;border-color:#
 <section id="studentManageTab" class="panel section hidden">
   <h2>Student Management</h2>
   <p class="muted small">Manage student account status and notification preference. Passwords are never visible; use Supabase Auth recovery for password resets.</p>
+  <div class="grid" id="emailPreferenceSummary" style="grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px;margin:14px 0">
+    <div class="panel" style="padding:13px;border-top:3px solid #4169e1"><div class="label">Total Students</div><div class="metric" id="emailPrefTotal" style="font-size:23px">—</div></div>
+    <div class="panel" style="padding:13px;border-top:3px solid #0f9f91"><div class="label">Individual Email ON</div><div class="metric" id="emailPrefOn" style="font-size:23px">—</div></div>
+    <div class="panel" style="padding:13px;border-top:3px solid #e45b78"><div class="label">Individual Email OFF</div><div class="metric" id="emailPrefOff" style="font-size:23px">—</div></div>
+    <div class="panel" style="padding:13px;border-top:3px solid #9a65d5"><div class="label">Currently Send-Eligible</div><div class="metric" id="emailPrefEffective" style="font-size:23px">—</div><div class="small muted" id="emailPrefGlobalNote">Global setting: checking…</div></div>
+  </div>
   <div class="toolbar">
     <input id="studentSearch" type="search" placeholder="Search name, email or phone" style="min-width:240px;flex:1" oninput="renderManagedStudents()">
+    <select id="studentEmailFilter" aria-label="Filter students by email preference" onchange="renderManagedStudents()">
+      <option value="all">All email preferences</option>
+      <option value="on">Email ON only</option>
+      <option value="off">Email OFF only</option>
+    </select>
     <button class="btn" onclick="toggleColumnSettings()" aria-expanded="false" id="manageColumnsBtn">⚙ Manage Columns</button>
     <button class="btn" onclick="loadManagedStudents()">Refresh students</button>
   </div>
+  <p class="small muted" style="margin:0 0 12px">Individual Email ON/OFF is saved per student. The Global Email switch is a master override only: Global OFF blocks sending, but it does not rewrite individual preferences. Use the filter above to view only ON or OFF students.</p>
   <div id="columnSettings" class="column-settings hidden">
     <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
       <strong>Choose visible columns</strong>
@@ -482,6 +494,11 @@ async function loadManagedStudents(){
   const permissionMap=new Map((permData||[]).map(x=>[x.student_id,x]));
   managedStudents=(data||[]).filter(x=>(x.role||'').toLowerCase()==='student')
     .map(x=>({...x,permissions:permissionMap.get(x.id)||null}));
+  // Read the master switch here as well, so Student Management shows accurate
+  // send-eligible counts even if the Email Management tab has not been opened.
+  const {data:emailSetting,error:emailSettingError}=await sb.from('vk_platform_settings')
+    .select('global_email_enabled').eq('id',1).maybeSingle();
+  if(!emailSettingError)globalEmailEnabled=emailSetting?.global_email_enabled===true;
   renderManagedStudents();
   const select=$('accessStudent');
   if(select){
@@ -590,9 +607,29 @@ function buildStudentPermissionsDetails(student){
     <div><strong>Jobs:</strong> ${yesNo(p.allow_jobs)}</div>
   </div>`;
 }
+function updateEmailPreferenceSummary(){
+  const total=managedStudents.length;
+  // Preserve the existing app convention: only an explicit false is OFF.
+  const on=managedStudents.filter(s=>s.notifications_enabled!==false).length;
+  const off=total-on;
+  const effective=globalEmailEnabled===true?on:globalEmailEnabled===false?0:'—';
+  if($('emailPrefTotal'))$('emailPrefTotal').textContent=String(total);
+  if($('emailPrefOn'))$('emailPrefOn').textContent=String(on);
+  if($('emailPrefOff'))$('emailPrefOff').textContent=String(off);
+  if($('emailPrefEffective'))$('emailPrefEffective').textContent=String(effective);
+  if($('emailPrefGlobalNote'))$('emailPrefGlobalNote').textContent=
+    globalEmailEnabled===null?'Global setting: not loaded':`Global setting: ${globalEmailEnabled?'ON':'OFF'}`;
+}
+
 function renderManagedStudents(){
   const q=($('studentSearch')?.value||'').trim().toLowerCase();
-  const filtered=managedStudents.filter(s=>[s.full_name,s.email,s.phone].some(v=>String(v||'').toLowerCase().includes(q)));
+  const emailFilter=$('studentEmailFilter')?.value||'all';
+  const filtered=managedStudents.filter(s=>{
+    const matchesText=[s.full_name,s.email,s.phone].some(v=>String(v||'').toLowerCase().includes(q));
+    const notify=s.notifications_enabled!==false;
+    const matchesEmail=emailFilter==='all'||(emailFilter==='on'&&notify)||(emailFilter==='off'&&!notify);
+    return matchesText&&matchesEmail;
+  });
   $('managedStudentRows').innerHTML=filtered.map(s=>{
     const notify=s.notifications_enabled!==false;
     return `<tr>
@@ -611,6 +648,7 @@ function renderManagedStudents(){
     </tr>`;
   }).join('')||'<tr><td colspan="9">No matching students.</td></tr>';
   applyStudentColumnVisibility();
+  updateEmailPreferenceSummary();
 }
 
 async function writeAdminAudit(action,tableName,recordId,details){
@@ -678,7 +716,8 @@ async function loadEmailSettings(){
   globalEmailEnabled=data?.global_email_enabled===true;
   $('globalEmailSelect').value=String(globalEmailEnabled);
   $('globalEmailState').innerHTML=globalEmailEnabled?'<span class="badge-active">GLOBAL EMAIL ON</span>':'<span class="badge-off">GLOBAL EMAIL OFF</span>';
-  $('globalEmailMsg').textContent='Current value read from vk_platform_settings.';
+  $('globalEmailMsg').textContent='Current value read from vk_platform_settings. This master switch does not change individual student preferences.';
+  updateEmailPreferenceSummary();
 }
 
 async function saveGlobalEmail(){
@@ -688,7 +727,8 @@ async function saveGlobalEmail(){
   if(error){$('globalEmailMsg').textContent='Update failed: '+error.message;return}
   globalEmailEnabled=enabled;
   $('globalEmailState').innerHTML=enabled?'<span class="badge-active">GLOBAL EMAIL ON</span>':'<span class="badge-off">GLOBAL EMAIL OFF</span>';
-  $('globalEmailMsg').textContent='Global email setting updated.';
+  $('globalEmailMsg').textContent='Global email setting updated. Individual student ON/OFF preferences were not changed.';
+  updateEmailPreferenceSummary();
   await writeAdminAudit('global_email_setting_updated','vk_platform_settings',null,{global_email_enabled:enabled});
 }
 
