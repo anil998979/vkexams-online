@@ -236,7 +236,7 @@ input:focus,select:focus,textarea:focus{outline:3px solid #dfe7ff;border-color:#
     <button class="btn" onclick="toggleColumnSettings()" aria-expanded="false" id="manageColumnsBtn">⚙ Manage Columns</button>
     <button class="btn" onclick="loadManagedStudents()">Refresh students</button>
   </div>
-  <p class="small muted" style="margin:0 0 12px">Individual Email ON/OFF is saved per student. The Global Email switch is a master override only: Global OFF blocks sending, but it does not rewrite individual preferences. Use the filter above to view only ON or OFF students.</p>
+  <p class="small muted" style="margin:0 0 12px">Global OFF temporarily stops email for everyone. Global ON enables email for every student and turns every individual Email Alert preference ON. You can still switch individual students OFF afterward.</p>
   <div id="columnSettings" class="column-settings hidden">
     <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
       <strong>Choose visible columns</strong>
@@ -277,7 +277,7 @@ input:focus,select:focus,textarea:focus{outline:3px solid #dfe7ff;border-color:#
 
 <section id="emailTab" class="panel section hidden">
   <h2>Email Notification Management</h2>
-  <p class="muted small">Global email OFF overrides individual notification preferences. Existing test-publish queue and duplicate-prevention logic are not changed by this dashboard update.</p>
+  <p class="muted small">Global OFF pauses email notifications for all students. Global ON turns every student’s individual email preference ON and resumes notifications for everyone.</p>
   <div class="panel" style="background:#f8faff;margin:12px 0">
     <div class="label">GLOBAL EMAIL SWITCH</div>
     <div class="toolbar">
@@ -716,20 +716,103 @@ async function loadEmailSettings(){
   globalEmailEnabled=data?.global_email_enabled===true;
   $('globalEmailSelect').value=String(globalEmailEnabled);
   $('globalEmailState').innerHTML=globalEmailEnabled?'<span class="badge-active">GLOBAL EMAIL ON</span>':'<span class="badge-off">GLOBAL EMAIL OFF</span>';
-  $('globalEmailMsg').textContent='Current value read from vk_platform_settings. This master switch does not change individual student preferences.';
+  $('globalEmailMsg').textContent='Current value read from vk_platform_settings. Global ON enables every student; Global OFF pauses notifications for everyone.';
   updateEmailPreferenceSummary();
+}
+
+async function fetchAllStudentNotificationTargets(){
+  const targets=[];
+  const pageSize=1000;
+  for(let from=0;;from+=pageSize){
+    const {data,error}=await sb.from('profiles')
+      .select('id,email,role')
+      .order('id',{ascending:true})
+      .range(from,from+pageSize-1);
+    if(error)throw new Error('Could not load all student accounts: '+error.message);
+    const rows=data||[];
+    targets.push(...rows.filter(row=>(row.role||'').toLowerCase()==='student'));
+    if(rows.length<pageSize)break;
+  }
+  return targets;
 }
 
 async function saveGlobalEmail(){
   const enabled=$('globalEmailSelect').value==='true';
-  if(!confirm(`Set global email notifications to ${enabled?'ON':'OFF'}? Global OFF overrides student-level preferences.`))return;
-  const {error}=await sb.rpc('vk_set_global_email',{p_enabled:enabled});
-  if(error){$('globalEmailMsg').textContent='Update failed: '+error.message;return}
-  globalEmailEnabled=enabled;
-  $('globalEmailState').innerHTML=enabled?'<span class="badge-active">GLOBAL EMAIL ON</span>':'<span class="badge-off">GLOBAL EMAIL OFF</span>';
-  $('globalEmailMsg').textContent='Global email setting updated. Individual student ON/OFF preferences were not changed.';
-  updateEmailPreferenceSummary();
-  await writeAdminAudit('global_email_setting_updated','vk_platform_settings',null,{global_email_enabled:enabled});
+  if(!confirm(enabled
+    ? 'GLOBAL ON will turn Individual Email Alerts ON for EVERY student and restart email notifications. Continue?'
+    : 'GLOBAL OFF will immediately pause email notifications for ALL students. Individual preferences will be kept as they are. Continue?'))return;
+
+  const saveButton=document.querySelector('#emailTab button[onclick="saveGlobalEmail()"]');
+  if(saveButton){saveButton.disabled=true;saveButton.textContent=enabled?'Enabling all students…':'Pausing emails…';}
+  $('globalEmailMsg').textContent=enabled?'Preparing to enable email notifications for every student…':'Pausing email notifications for everyone…';
+
+  try{
+    if(!enabled){
+      // Turn off the master switch first so no queued sender can send while paused.
+      const {error}=await sb.rpc('vk_set_global_email',{p_enabled:false});
+      if(error)throw new Error('Could not pause global email: '+error.message);
+      globalEmailEnabled=false;
+      $('globalEmailState').innerHTML='<span class="badge-off">GLOBAL EMAIL OFF</span>';
+      $('globalEmailSelect').value='false';
+      $('globalEmailMsg').textContent='Email notifications are now paused for all students. Individual ON/OFF preferences have been preserved.';
+      updateEmailPreferenceSummary();
+      await writeAdminAudit('global_email_setting_updated','vk_platform_settings',null,{global_email_enabled:false,individual_preferences_changed:false});
+      return;
+    }
+
+    // Keep the master switch OFF while enabling every individual student.
+    // This prevents partially updated accounts from receiving notifications.
+    const {error:pauseError}=await sb.rpc('vk_set_global_email',{p_enabled:false});
+    if(pauseError)throw new Error('Could not safely pause email before enabling all students: '+pauseError.message);
+    globalEmailEnabled=false;
+    $('globalEmailState').innerHTML='<span class="badge-off">GLOBAL EMAIL OFF — UPDATING</span>';
+    updateEmailPreferenceSummary();
+
+    const targets=await fetchAllStudentNotificationTargets();
+    let updated=0;
+    const failures=[];
+    const batchSize=20;
+    for(let i=0;i<targets.length;i+=batchSize){
+      const batch=targets.slice(i,i+batchSize);
+      const results=await Promise.all(batch.map(async student=>{
+        const {error}=await sb.rpc('vk_set_student_email_notifications',{
+          p_student_id:student.id,p_enabled:true
+        });
+        return {student,error};
+      }));
+      for(const result of results){
+        if(result.error)failures.push({email:result.student.email||result.student.id,message:result.error.message});
+        else updated++;
+      }
+      $('globalEmailMsg').textContent=`Turning Individual Email ON: ${Math.min(i+batchSize,targets.length)} of ${targets.length} students processed…`;
+    }
+
+    if(failures.length){
+      await loadManagedStudents();
+      const sample=failures.slice(0,5).map(x=>x.email).join(', ');
+      $('globalEmailState').innerHTML='<span class="badge-off">GLOBAL EMAIL OFF — INCOMPLETE</span>';
+      $('globalEmailSelect').value='false';
+      $('globalEmailMsg').textContent=`Safety pause: Global Email remains OFF because ${failures.length} student preference(s) could not be updated. ${updated} students were enabled. Failed: ${sample}${failures.length>5?'…':''}. Fix the RPC/permissions and try Global ON again.`;
+      await writeAdminAudit('global_email_enable_incomplete','profiles',null,{updated,failed:failures.length,failed_emails:failures.map(x=>x.email)});
+      return;
+    }
+
+    // Only resume sending after every student's individual preference is ON.
+    const {error:enableError}=await sb.rpc('vk_set_global_email',{p_enabled:true});
+    if(enableError)throw new Error('All individual preferences are ON, but the global switch could not be enabled: '+enableError.message);
+    globalEmailEnabled=true;
+    $('globalEmailSelect').value='true';
+    $('globalEmailState').innerHTML='<span class="badge-active">GLOBAL EMAIL ON</span>';
+    await loadManagedStudents();
+    $('globalEmailMsg').textContent=`Success: Global Email is ON. Individual Email Alerts are ON for all ${targets.length} students.`;
+    await writeAdminAudit('global_email_setting_updated','vk_platform_settings',null,{global_email_enabled:true,all_individual_preferences_enabled:true,students_updated:updated});
+  }catch(error){
+    $('globalEmailMsg').textContent='Update failed: '+error.message+' Global email has been kept OFF wherever the safety pause succeeded.';
+    $('globalEmailSelect').value=String(globalEmailEnabled===true);
+    await loadManagedStudents();
+  }finally{
+    if(saveButton){saveButton.disabled=false;saveButton.textContent='Save global setting';}
+  }
 }
 
 async function loadAuditLogs(){
