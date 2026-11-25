@@ -18805,6 +18805,70 @@ window.vkIpStartTest = async function(id) {
   },100);
 })();
 </script>
+
+<!-- VK Exams anonymous visitor tracker: add this before </body> on EVERY public page.
+     Keep the Supabase URL and publishable/anon key identical to your existing site setup. -->
+<script>
+(() => {
+  const SUPABASE_URL = 'https://uhxudsqndyxekybwtzar.supabase.co';
+  const SUPABASE_ANON_KEY = 'sb_publishable_-jHl666r6HSArPvksYh2GQ_OHHaYNhF';
+
+  // Stable anonymous browser ID; a separate session ID is renewed per browser tab session.
+  const getId = (key) => {
+    let value = localStorage.getItem(key);
+    if (!value) {
+      value = (crypto.randomUUID ? crypto.randomUUID() : 'v-' + Date.now() + '-' + Math.random().toString(36).slice(2));
+      localStorage.setItem(key, value);
+    }
+    return value;
+  };
+  const getSessionId = () => {
+    let value = sessionStorage.getItem('vk_visit_session');
+    if (!value) {
+      value = (crypto.randomUUID ? crypto.randomUUID() : 's-' + Date.now() + '-' + Math.random().toString(36).slice(2));
+      sessionStorage.setItem('vk_visit_session', value);
+    }
+    return value;
+  };
+  const ua = navigator.userAgent || '';
+  const device = /tablet|ipad/i.test(ua) ? 'Tablet' : /mobile|android|iphone/i.test(ua) ? 'Mobile' : 'Desktop';
+  const browser = /Edg\//.test(ua) ? 'Edge' : /Firefox\//.test(ua) ? 'Firefox' :
+    /Chrome\//.test(ua) ? 'Chrome' : /Safari\//.test(ua) ? 'Safari' : 'Other';
+  const pagePath = location.pathname + location.search;
+  const payload = {
+    visitor_id: getId('vk_visitor_id'),
+    session_id: getSessionId(),
+    page_path: pagePath.slice(0, 500) || '/',
+    page_title: (document.title || '').slice(0, 300),
+    referrer: (document.referrer || '').slice(0, 1000) || null,
+    device_type: device,
+    browser: browser
+  };
+
+  // Record page views separately from heartbeats so page-view totals stay accurate.
+  const sendEvent = (eventType) => {
+    const eventPayload = { ...payload, event_type: eventType };
+    fetch(SUPABASE_URL + '/rest/v1/visitor_events', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_ANON_KEY,
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify(eventPayload),
+      keepalive: true
+    }).catch(() => {});
+  };
+
+  sendEvent('page_view');
+  // Heartbeats let the dashboard estimate currently active visitors without
+  // inflating page-view counts. A visitor is considered active for 5 minutes.
+  window.setInterval(() => sendEvent('heartbeat'), 60 * 1000);
+})();
+</script>
+
+
+
 </body>
 </html>
  
