@@ -18821,6 +18821,25 @@ window.vkIpStartTest = async function(id) {
 #vkAppscOverlay .va-muted{color:#64748b;font-size:13px}
 #vkAppscOverlay .va-status{padding:10px;border-radius:8px;background:#fff7ed;color:#9a3412;margin:10px 0;white-space:pre-wrap}
 @media(max-width:600px){#vkAppscOverlay .va-wrap{padding:10px}#vkAppscOverlay .va-head{padding:17px}}
+
+#vkAppscOverlay .va-hero{background:linear-gradient(115deg,#4e211d,#9b3f2e 55%,#d18a32);color:#fff;padding:25px 24px;border-radius:20px;margin:18px 0 22px;box-shadow:0 12px 28px #3b1d2425}
+#vkAppscOverlay .va-hero h1{font-size:clamp(24px,3vw,34px);font-weight:850;margin:10px 0}
+#vkAppscOverlay .va-hero p{margin:7px 0 12px}
+#vkAppscOverlay .va-price{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:13px}
+#vkAppscOverlay .va-choose-title{font-size:22px;margin:14px 0 0;color:#15243c}
+#vkAppscOverlay .va-choose-sub{margin:0 0 18px;color:#526176;font-size:14px}
+#vkAppscOverlay .va-paper-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin:18px 0 22px}
+#vkAppscOverlay .va-paper-card{min-height:220px;position:relative;overflow:hidden;text-align:left;border-radius:24px;padding:22px 24px!important;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;gap:12px;border:4px solid #e8f4ff!important;box-shadow:0 8px 18px #142c4b24!important;color:#fff!important}
+#vkAppscOverlay .va-paper-card.paper1{background:radial-gradient(circle at 80% 35%,#24c6e8 0,#0876c9 35%,#063d91 78%)!important}
+#vkAppscOverlay .va-paper-card.paper2{background:radial-gradient(circle at 80% 30%,#ffb34e 0,#a83227 43%,#5a171b 100%)!important;border-color:#f7dfc8!important}
+#vkAppscOverlay .va-paper-pill{background:#fff5d8;color:#163c76;border:2px solid #ffcf48;border-radius:14px;padding:8px 14px;font-size:18px;font-weight:850;box-shadow:0 3px 8px #1115}
+#vkAppscOverlay .va-paper-card.paper2 .va-paper-pill{color:#76241f}
+#vkAppscOverlay .va-paper-card strong{font-size:24px;line-height:1.15;max-width:75%;text-shadow:0 2px 4px #0005}
+#vkAppscOverlay .va-paper-card small{font-size:14px}
+#vkAppscOverlay .va-paper-card em{font-style:normal;background:#fff;color:#173b72;border-radius:24px;padding:9px 18px;font-weight:850;margin-top:auto}
+#vkAppscOverlay .va-paper-card.paper2 em{color:#76241f}
+#vkAppscOverlay .va-access-card{margin-top:20px}
+@media(max-width:650px){#vkAppscOverlay .va-paper-grid{grid-template-columns:1fr;gap:12px}#vkAppscOverlay .va-paper-card{min-height:175px}#vkAppscOverlay .va-hero{padding:19px}#vkAppscOverlay .va-price span{width:100%}}
 </style>
 <script id="vk-appsc-module-v1">
 (function(){
@@ -18851,8 +18870,12 @@ window.vkAppscClose=()=>{$('vkAppscOverlay')?.remove()};
 window.vkAppscOpen=async function(){mount();try{admin=await isAdmin();pkg=await loadPackage();if(!pkg&&admin)pkg=await ensurePackage();if(!pkg)throw Error('APPSC Test Series is not published yet.');await loadData();status('');renderHome()}catch(e){status(e.message||String(e))}};
 function renderHome(){
  const host=$('vaContent');if(!host)return;
- host.innerHTML=`<div class="va-card"><div class="va-row"><div><b>${esc(pkg.name)}</b><div class="va-muted">₹${Number(pkg.price||29)} · ${Number(pkg.duration_days||5)} days access</div></div>${admin?'<button onclick="vkAppscAdmin()">Admin Management</button>':''}</div>${admin?`<div class="va-muted">Admin preview · Package ${pkg.is_published?'Published':'Draft'}</div>`:''}${!admin&&!purchase?'<button onclick="vkAppscBuy()">Unlock APPSC · ₹'+Number(pkg.price||29)+'</button>':'<b style="color:#15803d">'+(purchase?'✓ Access active':'Admin access')+'</b>'}</div>
- <div class="va-grid">${papers.map(p=>`<button onclick="vkAppscPaper('${p.id}')">${esc(p.name)} →</button>`).join('')}</div><div id="vaSub"></div>`;
+ const ordered=[...papers].sort((a,b)=>/screen/i.test(a.name)?-1:/screen/i.test(b.name)?1:/mains/i.test(a.name)?1:/mains/i.test(b.name)?-1:0);
+ const labels=ordered.map((p,i)=>({p,label:/screen/i.test(p.name)?'Screening Test':/mains/i.test(p.name)?'Mains Test':(i===0?'Screening Test':'Mains Test'),sub:i===0?'General Studies':'Advanced & Descriptive Practice',cls:i===0?'paper1':'paper2',icon:i===0?'📘':'🏛️'}));
+ host.innerHTML=`<section class="va-hero"><small>📚 VK EXAMS · APPSC</small><h1>APPSC Topic Wise Test Series</h1><p>Choose Screening Test or Mains Test to view the available subjects and topic-wise tests.</p><div class="va-price"><strong>₹${Number(pkg.price||29)} · ${Number(pkg.duration_days||5)} Days Access</strong><span>${admin?'ADMIN PREVIEW · ALL TESTS ENABLED':purchase?'✓ PACKAGE UNLOCKED':'Purchase the plan to unlock the tests.'}</span></div></section>
+ <h2 class="va-choose-title">Choose Your Test</h2><p class="va-choose-sub">Open a section to view its subjects and tests.</p>
+ <div class="va-paper-grid">${labels.map(({p,label,sub,cls,icon})=>`<button class="va-paper-card ${cls}" onclick="vkAppscPaper('${p.id}')"><span class="va-paper-pill">${icon} ${esc(label)}</span><strong>${esc(sub)}</strong><small>Subject-wise · Topic-wise Tests</small><em>View Tests →</em></button>`).join('')}</div>
+ <div class="va-card va-access-card"><div class="va-row"><div><b>${esc(pkg.name)}</b><div class="va-muted">₹${Number(pkg.price||29)} · ${Number(pkg.duration_days||5)} days access</div></div>${admin?'<button onclick="vkAppscAdmin()">Admin Management</button>':''}</div>${admin?`<div class="va-muted">Admin preview · Package ${pkg.is_published?'Published':'Draft'}</div>`:''}${!admin&&!purchase?'<button onclick="vkAppscBuy()">Unlock APPSC · ₹'+Number(pkg.price||29)+'</button>':'<b style="color:#15803d">'+(purchase?'✓ Access active':'Admin access')+'</b>'}</div><div id="vaSub"></div>`;
 }
 window.vkAppscPaper=async id=>{selectedPaper=id;const p=papers.find(x=>x.id===id);const list=subjects.filter(x=>x.paper_id===id);$('vaSub').innerHTML=`<div class="va-card"><h2>${esc(p?.name||'Section')} · Subjects</h2>${list.map(x=>`<div class="va-row"><b>${esc(x.name)}</b><button onclick="vkAppscSubject('${x.id}')">Open</button></div>`).join('')||'<p>No subjects added yet.</p>'}<div id="vaTopics"></div></div>`};
 window.vkAppscSubject=async id=>{selectedSubject=id;const sub=subjects.find(x=>x.id===id);const map=await (await sb()).from('vk_appsc_topic_subject_map').select('topic_id').eq('subject_id',id);if(map.error){status(map.error.message);return}const ids=(map.data||[]).map(x=>x.topic_id);const list=topics.filter(t=>ids.includes(t.id));$('vaTopics').innerHTML=`<h3>${esc(sub?.name||'Subject')} · Topics</h3>${list.map(t=>`<div class="va-row"><b>${esc(t.name)}</b><button onclick="vkAppscTests('${t.id}')">View Tests</button></div>`).join('')||'<p>No topics available.</p>'}<div id="vaTests"></div>`};
