@@ -18915,6 +18915,42 @@ new MutationObserver(addHomeCard).observe(document.documentElement,{childList:tr
 })();
 </script>
 
+
+
+<style id="vk-appsc-endowment-matching-ui">
+#vkAppscOverlay{position:fixed;inset:54px 0 0;z-index:9998;overflow:auto;background:linear-gradient(135deg,#f7f8ff 0%,#fff8f2 100%);padding:32px 18px 60px;color:#14213d}
+#vkAppscOverlay .va-page{width:min(100%,1000px);margin:0 auto}
+#vkAppscOverlay .va-back{display:inline-flex;align-items:center;margin:0 0 16px;padding:10px 17px;border:1px solid #cbd5ff;border-radius:11px;background:#fff;color:#1746b5;font-weight:800;cursor:pointer;box-shadow:0 5px 14px #1d4ed80d}
+#vkAppscOverlay .va-status{margin:0 0 12px;color:#b42318;font-size:14px}
+#vkAppscOverlay .va-status:empty{display:none}
+#vkAppscOverlay .va-hero{padding:24px;border-radius:21px;color:#fff;background:linear-gradient(110deg,#54251f,#8b3d26 55%,#d58a38);box-shadow:0 14px 32px #54251f22;margin:8px 0 20px}
+#vkAppscOverlay .va-hero small{font-size:12px;letter-spacing:.3px}
+#vkAppscOverlay .va-hero h1{margin:9px 0;font-size:clamp(25px,4vw,34px);line-height:1.15;font-weight:950;color:#fff}
+#vkAppscOverlay .va-hero p{margin:7px 0 13px;color:#fff2e7;font-size:14px}
+#vkAppscOverlay .va-price{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:14px}
+#vkAppscOverlay .va-price strong{font-weight:900}
+#vkAppscOverlay .va-buy{margin-top:14px;padding:11px 19px;border:0;border-radius:999px;background:#fff1c8;color:#682c1c;font-weight:900;cursor:pointer}
+#vkAppscOverlay .va-choose-title{margin:18px 0 2px;font-size:21px;font-weight:900;color:#10213f}
+#vkAppscOverlay .va-choose-sub{margin:0;color:#475569;font-size:14px}
+#vkAppscOverlay .va-paper-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin:20px 0}
+#vkAppscOverlay .va-paper-card{position:relative;min-height:225px;overflow:hidden;border:2px solid #fff;border-radius:22px;padding:23px;text-align:left;color:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:12px;box-shadow:0 13px 28px #1e293b24;transition:transform .18s,box-shadow .18s}
+#vkAppscOverlay .va-paper-card:hover{transform:translateY(-3px);box-shadow:0 18px 34px #1e293b35}
+#vkAppscOverlay .va-paper-card.screen{background:radial-gradient(circle at 82% 45%,#41c8f5 0 10%,transparent 34%),linear-gradient(115deg,#063b8b,#087bd4 60%,#082d69)}
+#vkAppscOverlay .va-paper-card.mains{background:radial-gradient(circle at 83% 45%,#ffbd50 0 8%,transparent 34%),linear-gradient(115deg,#761d25,#b64428 58%,#e18b37)}
+#vkAppscOverlay .va-card-tag{padding:7px 13px;border-radius:30px;background:#fff;color:#173b73;font-weight:900;font-size:14px}
+#vkAppscOverlay .va-paper-card.mains .va-card-tag{color:#76252a}
+#vkAppscOverlay .va-paper-card strong{font-size:clamp(24px,3vw,31px);line-height:1.1;font-weight:950;text-shadow:0 2px 5px #0005}
+#vkAppscOverlay .va-card-sub{font-size:14px;font-weight:700;color:#fff}
+#vkAppscOverlay .va-card-action{display:inline-block;margin-top:2px;padding:9px 18px;border-radius:30px;background:#fff;color:#123c7a;font-weight:900}
+#vkAppscOverlay .va-paper-card.mains .va-card-action{color:#852d29}
+#vkAppscOverlay .va-admin-link{display:flex;align-items:center;gap:12px;margin:10px 0;color:#64748b;font-size:12px}
+#vkAppscOverlay .va-admin-link button{padding:10px 16px;border:0;border-radius:10px;background:#742923;color:white;font-weight:800;cursor:pointer}
+#vkAppscOverlay .va-card{margin:14px 0;padding:18px;border:1px solid #dbe3ef;border-radius:14px;background:#fff;box-shadow:0 8px 22px #1725540b}
+#vkAppscOverlay .va-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #e7edf5}
+#vkAppscOverlay .va-row button,#vkAppscOverlay .va-card button{cursor:pointer}
+@media(max-width:650px){#vkAppscOverlay{padding:20px 13px 40px}#vkAppscOverlay .va-paper-grid{grid-template-columns:1fr}#vkAppscOverlay .va-paper-card{min-height:190px}#vkAppscOverlay .va-hero{padding:20px}}
+</style>
+
 </body> on EVERY public page.
      Keep the Supabase URL and publishable/anon key identical to your existing site setup. -->
 <script>
@@ -19016,15 +19052,35 @@ async function loadData(){
 }
 function mount(){
  let old=$('vkAppscOverlay');if(old)old.remove();
- const el=document.createElement('div');el.id='vkAppscOverlay';el.innerHTML=`<div class="va-wrap"><div class="va-head"><div>VK EXAMS · APPSC</div><h1>APPSC Topic Wise Test Series</h1><p>Screening Test · Mains Test · Subject-wise and Topic-wise Practice</p><button class="secondary" onclick="vkAppscClose()">✕ Close</button></div><div id="vaStatus" class="va-status">Loading APPSC…</div><div id="vaContent"></div></div>`;document.body.appendChild(el);
+ const el=document.createElement('div');el.id='vkAppscOverlay';
+ el.innerHTML=`<div class="va-page"><button class="va-back" onclick="vkAppscClose()">← Back</button><div id="vaStatus" class="va-status">Loading APPSC…</div><div id="vaContent"></div></div>`;
+ document.body.appendChild(el);
 }
 function status(m){const n=$('vaStatus');if(n)n.textContent=m}
 window.vkAppscClose=()=>{$('vkAppscOverlay')?.remove()};
 window.vkAppscOpen=async function(){mount();try{admin=await isAdmin();pkg=await loadPackage();if(!pkg&&admin)pkg=await ensurePackage();if(!pkg)throw Error('APPSC Test Series is not published yet.');await loadData();status('');renderHome()}catch(e){status(e.message||String(e))}};
 function renderHome(){
  const host=$('vaContent');if(!host)return;
- host.innerHTML=`<div class="va-card"><div class="va-row"><div><b>${esc(pkg.name)}</b><div class="va-muted">₹${Number(pkg.price||29)} · ${Number(pkg.duration_days||5)} days access</div></div>${admin?'<button onclick="vkAppscAdmin()">Admin Management</button>':''}</div>${admin?`<div class="va-muted">Admin preview · Package ${pkg.is_published?'Published':'Draft'}</div>`:''}${!admin&&!purchase?'<button onclick="vkAppscBuy()">Unlock APPSC · ₹'+Number(pkg.price||29)+'</button>':'<b style="color:#15803d">'+(purchase?'✓ Access active':'Admin access')+'</b>'}</div>
- <div class="va-grid">${papers.map(p=>`<button onclick="vkAppscPaper('${p.id}')">${esc(p.name)} →</button>`).join('')}</div><div id="vaSub"></div>`;
+ const screen=papers.find(p=>/screen/i.test(p.name))||papers[0];
+ const mains=papers.find(p=>/mains/i.test(p.name))||papers.find(p=>p.id!==screen?.id);
+ const paperCard=(p,label,kind)=>p?`<button type="button" class="va-paper-card ${kind}" onclick="vkAppscPaper('${p.id}')">
+   <span class="va-card-tag">${kind==='screen'?'📘':'🏛️'} ${label}</span>
+   <strong>${label}</strong>
+   <span class="va-card-sub">${kind==='screen'?'General Studies · Objective Practice':'Advanced & Descriptive Practice'}</span>
+   <span class="va-card-action">View Tests →</span>
+ </button>`:'';
+ host.innerHTML=`<section class="va-hero">
+   <small>🔒 VK EXAMS · APPSC</small>
+   <h1>APPSC Topic Wise Test Series</h1>
+   <p>Choose Screening Test or Mains Test to view the available tests. Subjects and topics are displayed inside each section.</p>
+   <div class="va-price"><strong>₹${Number(pkg.price||29)} · ${Number(pkg.duration_days||5)} Days Access</strong>
+   <span>${admin?'ADMIN PREVIEW · ALL TESTS ENABLED':purchase?'✓ PACKAGE UNLOCKED':'Purchase the plan to unlock the tests.'}</span></div>
+   ${!admin&&!purchase?'<button class="va-buy" onclick="vkAppscBuy()">Buy Plan · ₹'+Number(pkg.price||29)+'</button>':''}
+ </section>
+ <h2 class="va-choose-title">Choose Your Test</h2><p class="va-choose-sub">Open a section to view its subjects and tests.</p>
+ <div class="va-paper-grid">${paperCard(screen,'Screening Test','screen')}${paperCard(mains,'Mains Test','mains')}</div>
+ ${admin?'<div class="va-admin-link"><button onclick="vkAppscAdmin()">Admin Management</button><span>Admin preview · Package '+(pkg.is_published?'Published':'Draft')+'</span></div>':''}
+ <div id="vaSub"></div>`;
 }
 window.vkAppscPaper=async id=>{selectedPaper=id;const p=papers.find(x=>x.id===id);const list=subjects.filter(x=>x.paper_id===id);$('vaSub').innerHTML=`<div class="va-card"><h2>${esc(p?.name||'Section')} · Subjects</h2>${list.map(x=>`<div class="va-row"><b>${esc(x.name)}</b><button onclick="vkAppscSubject('${x.id}')">Open</button></div>`).join('')||'<p>No subjects added yet.</p>'}<div id="vaTopics"></div></div>`};
 window.vkAppscSubject=async id=>{selectedSubject=id;const sub=subjects.find(x=>x.id===id);const map=await (await sb()).from('vk_appsc_topic_subject_map').select('topic_id').eq('subject_id',id);if(map.error){status(map.error.message);return}const ids=(map.data||[]).map(x=>x.topic_id);const list=topics.filter(t=>ids.includes(t.id));$('vaTopics').innerHTML=`<h3>${esc(sub?.name||'Subject')} · Topics</h3>${list.map(t=>`<div class="va-row"><b>${esc(t.name)}</b><button onclick="vkAppscTests('${t.id}')">View Tests</button></div>`).join('')||'<p>No topics available.</p>'}<div id="vaTests"></div>`};
@@ -19080,6 +19136,42 @@ new MutationObserver(addHomeCard).observe(document.documentElement,{childList:tr
 #home #vkHomepageExamCards button[data-vk-appsc-card="1"]:focus-visible{outline:3px solid #2563eb!important;outline-offset:4px!important}
 @media(max-width:560px){#home #vkHomepageExamCards button[data-vk-appsc-card="1"]{aspect-ratio:3/1!important}}
 </style>
+
+
+<style id="vk-appsc-endowment-matching-ui">
+#vkAppscOverlay{position:fixed;inset:54px 0 0;z-index:9998;overflow:auto;background:linear-gradient(135deg,#f7f8ff 0%,#fff8f2 100%);padding:32px 18px 60px;color:#14213d}
+#vkAppscOverlay .va-page{width:min(100%,1000px);margin:0 auto}
+#vkAppscOverlay .va-back{display:inline-flex;align-items:center;margin:0 0 16px;padding:10px 17px;border:1px solid #cbd5ff;border-radius:11px;background:#fff;color:#1746b5;font-weight:800;cursor:pointer;box-shadow:0 5px 14px #1d4ed80d}
+#vkAppscOverlay .va-status{margin:0 0 12px;color:#b42318;font-size:14px}
+#vkAppscOverlay .va-status:empty{display:none}
+#vkAppscOverlay .va-hero{padding:24px;border-radius:21px;color:#fff;background:linear-gradient(110deg,#54251f,#8b3d26 55%,#d58a38);box-shadow:0 14px 32px #54251f22;margin:8px 0 20px}
+#vkAppscOverlay .va-hero small{font-size:12px;letter-spacing:.3px}
+#vkAppscOverlay .va-hero h1{margin:9px 0;font-size:clamp(25px,4vw,34px);line-height:1.15;font-weight:950;color:#fff}
+#vkAppscOverlay .va-hero p{margin:7px 0 13px;color:#fff2e7;font-size:14px}
+#vkAppscOverlay .va-price{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:14px}
+#vkAppscOverlay .va-price strong{font-weight:900}
+#vkAppscOverlay .va-buy{margin-top:14px;padding:11px 19px;border:0;border-radius:999px;background:#fff1c8;color:#682c1c;font-weight:900;cursor:pointer}
+#vkAppscOverlay .va-choose-title{margin:18px 0 2px;font-size:21px;font-weight:900;color:#10213f}
+#vkAppscOverlay .va-choose-sub{margin:0;color:#475569;font-size:14px}
+#vkAppscOverlay .va-paper-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin:20px 0}
+#vkAppscOverlay .va-paper-card{position:relative;min-height:225px;overflow:hidden;border:2px solid #fff;border-radius:22px;padding:23px;text-align:left;color:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:12px;box-shadow:0 13px 28px #1e293b24;transition:transform .18s,box-shadow .18s}
+#vkAppscOverlay .va-paper-card:hover{transform:translateY(-3px);box-shadow:0 18px 34px #1e293b35}
+#vkAppscOverlay .va-paper-card.screen{background:radial-gradient(circle at 82% 45%,#41c8f5 0 10%,transparent 34%),linear-gradient(115deg,#063b8b,#087bd4 60%,#082d69)}
+#vkAppscOverlay .va-paper-card.mains{background:radial-gradient(circle at 83% 45%,#ffbd50 0 8%,transparent 34%),linear-gradient(115deg,#761d25,#b64428 58%,#e18b37)}
+#vkAppscOverlay .va-card-tag{padding:7px 13px;border-radius:30px;background:#fff;color:#173b73;font-weight:900;font-size:14px}
+#vkAppscOverlay .va-paper-card.mains .va-card-tag{color:#76252a}
+#vkAppscOverlay .va-paper-card strong{font-size:clamp(24px,3vw,31px);line-height:1.1;font-weight:950;text-shadow:0 2px 5px #0005}
+#vkAppscOverlay .va-card-sub{font-size:14px;font-weight:700;color:#fff}
+#vkAppscOverlay .va-card-action{display:inline-block;margin-top:2px;padding:9px 18px;border-radius:30px;background:#fff;color:#123c7a;font-weight:900}
+#vkAppscOverlay .va-paper-card.mains .va-card-action{color:#852d29}
+#vkAppscOverlay .va-admin-link{display:flex;align-items:center;gap:12px;margin:10px 0;color:#64748b;font-size:12px}
+#vkAppscOverlay .va-admin-link button{padding:10px 16px;border:0;border-radius:10px;background:#742923;color:white;font-weight:800;cursor:pointer}
+#vkAppscOverlay .va-card{margin:14px 0;padding:18px;border:1px solid #dbe3ef;border-radius:14px;background:#fff;box-shadow:0 8px 22px #1725540b}
+#vkAppscOverlay .va-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #e7edf5}
+#vkAppscOverlay .va-row button,#vkAppscOverlay .va-card button{cursor:pointer}
+@media(max-width:650px){#vkAppscOverlay{padding:20px 13px 40px}#vkAppscOverlay .va-paper-grid{grid-template-columns:1fr}#vkAppscOverlay .va-paper-card{min-height:190px}#vkAppscOverlay .va-hero{padding:20px}}
+</style>
+
 </body>
 </html>
  
