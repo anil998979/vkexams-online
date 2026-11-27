@@ -9511,13 +9511,17 @@ document.addEventListener('change',e=>{if(e.target&&e.target.id==='vkCatIconFile
 document.addEventListener('change',e=>{if(e.target&&e.target.id==='vkHomeCardImage'){const f=e.target.files&&e.target.files[0],p=document.getElementById('vkHomeCardImagePreview');if(!f){p.hidden=true;return}if(!['image/png','image/jpeg','image/webp'].includes(f.type)||f.size>2*1024*1024){alert('Choose PNG/JPG/WEBP up to 2 MB.');e.target.value='';p.hidden=true;return}p.src=URL.createObjectURL(f);p.hidden=false}});
 
 
-const VK_ADMIN_ALLOWED_COURSES = ["APPSC","Endowment Officer","High Court","Endowment Topic Wise Test Series"]; // Only the four approved exam categories.
+const VK_ADMIN_ALLOWED_COURSES = ["APPSC","APPSC Topic Wise Test Series","Endowment Officer","High Court","Endowment Topic Wise Test Series"]; // Approved exam categories plus APPSC topic-wise module.
 window.VK_ADMIN_ALLOWED_COURSES = VK_ADMIN_ALLOWED_COURSES;
 
 function vkAdminPaidSeriesOptions(courseName){
     const options = {
         "APPSC": [
             {value:"Paper 1", label:"Screening Test"}
+        ],
+        "APPSC Topic Wise Test Series": [
+            {value:"Screening Test", label:"Screening Test"},
+            {value:"Mains Test", label:"Mains Test"}
         ],
         "Endowment Officer": [
             {value:"Paper 1", label:"Paper 1"},
@@ -9547,11 +9551,13 @@ function vkAdminUpdatePaidSeriesControl(){
     // refreshes this control; without preservation it always jumps back to Paper 1.
     const previouslySelectedPaper=String(select.value || "").trim();
     wrap.style.display=document.getElementById("vkAdminTestType")?.value==="paid" && choices.length ? "block" : "none";
-    if(label) label.textContent=courseName==="High Court" ? "Exam" : courseName==="APPSC" ? "APPSC Test Type" : courseName==="Endowment Topic Wise Test Series" ? "Paid Paper" : "Paid Paper";
+    if(label) label.textContent=courseName==="High Court" ? "Exam" : courseName==="APPSC" ? "APPSC Test Type" : courseName==="APPSC Topic Wise Test Series" ? "APPSC Section" : "Paid Paper";
     select.innerHTML=choices.map(item=>`<option value="${vkAdminEscape(item.value)}">${vkAdminEscape(item.label)}</option>`).join("");
     if(choices.some(item=>item.value===previouslySelectedPaper)) select.value=previouslySelectedPaper;
     if(hint){
-        hint.textContent=courseName==="APPSC"
+        hint.textContent=courseName==="APPSC Topic Wise Test Series"
+          ? "Manage Screening Test and Mains Test under Subjects → Topics → Tests. Excel/CSV question upload is available in APPSC Admin Management."
+          : courseName==="APPSC"
           ? "APPSC paid tests are organized under Screening Test only."
           : courseName==="High Court"
           ? "High Court paid tests are organized under one High Court Exam series."
@@ -9571,6 +9577,7 @@ async function vkAdminLoadCourses(){
         const {data,error} = await supabaseClient.from("courses").select("name").in("name",VK_ADMIN_ALLOWED_COURSES).order("name",{ascending:true});
         if(error) throw error;
         const available = new Set((data || []).map(row=>row.name));
+        available.add("APPSC Topic Wise Test Series"); // Dedicated independent-package course; no legacy courses row required.
         const ordered = VK_ADMIN_ALLOWED_COURSES.filter(name=>available.has(name));
         select.innerHTML = '<option value="">Select course</option>' +
             ordered.map(name => `<option value="${vkAdminEscape(name)}">${vkAdminEscape(name)}</option>`).join("");
@@ -9630,6 +9637,10 @@ function vkAdminUpdateTopicNameVisibility(){
 }
 
 function vkAdminOnTestTypeChange(){
+    if(String(document.getElementById("vkAdminCourse")?.value||"").trim()==="APPSC Topic Wise Test Series"){
+        vkAdminOnCourseChanged();
+        return;
+    }
     const type=document.getElementById("vkAdminTestType")?.value || "free";
     const paid=type==="paid";
     const topicWrap=document.getElementById("vkAdminTopicWrap");
@@ -9850,6 +9861,16 @@ let vkAdminEditingPaidTestId = null;
 let vkAdminPaidTestsCache = [];
 
 async function vkAdminOnCourseChanged(){
+    if(String(document.getElementById("vkAdminCourse")?.value||"").trim()==="APPSC Topic Wise Test Series"){
+        try{
+            if(typeof window.vkAppscOpen!=="function" || typeof window.vkAppscAdmin!=="function")
+                throw new Error("APPSC Topic Wise Admin module is unavailable. Please refresh the page.");
+            await window.vkAppscOpen();
+            if(!document.getElementById("vkAppscOverlay")) throw new Error("APPSC Admin screen could not be opened.");
+            if(typeof window.vkAppscAdmin==="function") await window.vkAppscAdmin();
+        }catch(e){alert("APPSC Topic Wise Test Series: "+(e.message||e));}
+        return;
+    }
     vkAdminUpdatePaidSeriesControl();
     if(document.getElementById("vkAdminTestType")?.value==="paid"){
         await vkAdminLoadPaidSeriesAndTests();
