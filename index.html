@@ -9551,7 +9551,7 @@ function vkAdminUpdatePaidSeriesControl(){
     // refreshes this control; without preservation it always jumps back to Paper 1.
     const previouslySelectedPaper=String(select.value || "").trim();
     wrap.style.display=document.getElementById("vkAdminTestType")?.value==="paid" && choices.length ? "block" : "none";
-    if(label) label.textContent=courseName==="High Court" ? "Exam" : courseName==="APPSC" ? "APPSC Test Type" : courseName==="APPSC Topic Wise Test Series" ? "APPSC Section" : "Paid Paper";
+    if(label) label.textContent=courseName==="High Court" ? "Exam" : courseName==="APPSC" ? "APPSC Test Type" : courseName==="APPSC Topic Wise Test Series" ? "Paid Test Type" : "Paid Paper";
     select.innerHTML=choices.map(item=>`<option value="${vkAdminEscape(item.value)}">${vkAdminEscape(item.label)}</option>`).join("");
     if(choices.some(item=>item.value===previouslySelectedPaper)) select.value=previouslySelectedPaper;
     if(hint){
@@ -9562,7 +9562,7 @@ function vkAdminUpdatePaidSeriesControl(){
           : courseName==="High Court"
           ? "High Court paid tests are organized under one High Court Exam series."
           : courseName==="Endowment Topic Wise Test Series"
-          ? "Choose Paper 1 or Paper 2. Add a test name and upload up to 300 questions using the standard Paid Test Builder."
+          ? (courseName==="APPSC Topic Wise Test Series" ? "Choose Screening Test or Mains Test. Enter the topic as the Test Name and upload up to 300 questions using the standard Paid Test Builder." : "Choose Paper 1 or Paper 2. Add a test name and upload up to 300 questions using the standard Paid Test Builder.")
           : "Test number is assigned automatically within the selected paper.";
     }
 }
@@ -9605,7 +9605,7 @@ function vkAdminRefreshPaidQuestionHint(){
 
 function vkAdminExpectedPaidQuestionCount(courseName){
     // Endowment Topic Wise tests allow a variable length up to 300 questions.
-    if(String(courseName || "").trim() === "Endowment Topic Wise Test Series") return null;
+    if(["Endowment Topic Wise Test Series","APPSC Topic Wise Test Series"].includes(String(courseName || "").trim())) return null;
     // AP High Court Junior Assistant Paid Tests use 80 questions.
     // APPSC and Endowment Officer Paid Tests continue to use 150.
     return String(courseName || "").trim() === "High Court" ? 80 : 150;
@@ -9619,7 +9619,7 @@ function vkAdminPaidQuestionRuleText(courseName){
 
 function vkAdminIsEndowmentTopicWiseCourse(){
     const courseName = String(document.getElementById("vkAdminCourse")?.value || "").trim();
-    return courseName.toLowerCase() === "endowment topic wise test series";
+    return ["endowment topic wise test series","appsc topic wise test series"].includes(courseName.toLowerCase());
 }
 
 function vkAdminUpdateTopicNameVisibility(){
@@ -9637,10 +9637,6 @@ function vkAdminUpdateTopicNameVisibility(){
 }
 
 function vkAdminOnTestTypeChange(){
-    if(String(document.getElementById("vkAdminCourse")?.value||"").trim()==="APPSC Topic Wise Test Series"){
-        vkAdminOnCourseChanged();
-        return;
-    }
     const type=document.getElementById("vkAdminTestType")?.value || "free";
     const paid=type==="paid";
     const topicWrap=document.getElementById("vkAdminTopicWrap");
@@ -9861,16 +9857,6 @@ let vkAdminEditingPaidTestId = null;
 let vkAdminPaidTestsCache = [];
 
 async function vkAdminOnCourseChanged(){
-    if(String(document.getElementById("vkAdminCourse")?.value||"").trim()==="APPSC Topic Wise Test Series"){
-        try{
-            if(typeof window.vkAppscOpen!=="function" || typeof window.vkAppscAdmin!=="function")
-                throw new Error("APPSC Topic Wise Admin module is unavailable. Please refresh the page.");
-            await window.vkAppscOpen();
-            if(!document.getElementById("vkAppscOverlay")) throw new Error("APPSC Admin screen could not be opened.");
-            if(typeof window.vkAppscAdmin==="function") await window.vkAppscAdmin();
-        }catch(e){alert("APPSC Topic Wise Test Series: "+(e.message||e));}
-        return;
-    }
     vkAdminUpdatePaidSeriesControl();
     if(document.getElementById("vkAdminTestType")?.value==="paid"){
         await vkAdminLoadPaidSeriesAndTests();
@@ -9907,6 +9893,23 @@ async function vkAdminLoadPaidSeriesAndTests(){
     const paperName=document.getElementById("vkAdminPaper")?.value;
     const testSelect=document.getElementById("vkAdminExistingTest");
     if(!courseName||!paperName||!testSelect)return;
+    if(courseName === "APPSC Topic Wise Test Series"){
+        testSelect.innerHTML='<option value="">Loading APPSC tests...</option>';
+        try{
+            const pkg=await supabaseClient.from("vk_independent_packages").select("id").eq("package_code","APPSC").eq("is_archived",false).order("created_at",{ascending:false}).limit(1).maybeSingle();
+            if(pkg.error)throw pkg.error;if(!pkg.data)throw new Error("APPSC Topic Wise package was not found.");
+            const canonical=/mains/i.test(String(paperName))?"Mains Test":"Screening Test";
+            const paper=await supabaseClient.from("vk_independent_papers").select("id").eq("package_id",pkg.data.id).eq("name",canonical).eq("is_active",true).maybeSingle();
+            if(paper.error)throw paper.error;if(!paper.data)throw new Error(canonical+" section is not configured yet. Create a test first.");
+            const bucket=await supabaseClient.from("vk_independent_topics").select("id").eq("paper_id",paper.data.id).eq("name",canonical+" Tests").eq("is_active",true).maybeSingle();
+            if(bucket.error)throw bucket.error;let tests=[];
+            if(bucket.data){const q=await supabaseClient.from("vk_independent_tests").select("id,name,topic_id,question_count,duration_minutes,total_marks,negative_marks,is_active,created_at").eq("topic_id",bucket.data.id).order("created_at",{ascending:false});if(q.error)throw q.error;tests=q.data||[];}
+            vkAdminPaidTestsCache=tests.map(t=>({...t,title:t.name||"Untitled Test",is_free:false}));
+            testSelect.innerHTML='<option value="">Select an existing test</option>'+vkAdminPaidTestsCache.map(t=>`<option value="${t.id}">${vkAdminEscape(t.title)} · ${t.is_active?"Published":"Draft"}</option>`).join("");
+            if(!tests.length)testSelect.innerHTML='<option value="">No existing tests found for '+canonical+'</option>';
+        }catch(e){console.error("APPSC test list load failed",e);testSelect.innerHTML='<option value="">Unable to load APPSC tests</option>';vkAdminShowStatus(e.message||String(e),true);}
+        return;
+    }
     if(courseName === "Endowment Topic Wise Test Series"){
         testSelect.innerHTML='<option value="">Loading Endowment tests...</option>';
         try{
@@ -10173,25 +10176,42 @@ async function vkAdminPublishIndependentPackage(){
     finally{if(button){button.disabled=false;button.textContent="Publish Topic-wise Package";}}
 }
 
-async function vkAdminPublishIndependentTopicWiseTest(paperName,testName,duration,negativeMarks,questions){
+async function vkAdminPublishIndependentTopicWiseTest(paperName,testName,duration,negativeMarks,questions,courseName="Endowment Topic Wise Test Series"){
     if(!await refreshVkAdminAccess()) throw new Error("Admin permission is required to publish tests.");
-    if(!Array.isArray(questions)||questions.length<1||questions.length>300) throw new Error("Endowment Topic Wise tests must contain between 1 and 300 questions.");
+    if(!Array.isArray(questions)||questions.length<1||questions.length>300) throw new Error(courseName+" tests must contain between 1 and 300 questions.");
     const packageResult=await supabaseClient.from("vk_independent_packages")
         .select("id,name,package_code,is_archived")
-        .eq("package_code","ENDOWMENT").eq("is_archived",false).order("created_at",{ascending:false}).limit(1).maybeSingle();
+        .eq("package_code",courseName==="APPSC Topic Wise Test Series"?"APPSC":"ENDOWMENT").eq("is_archived",false).order("created_at",{ascending:false}).limit(1).maybeSingle();
     if(packageResult.error) throw packageResult.error;
-    if(!packageResult.data) throw new Error("The Endowment Topic Wise package was not found. Please ensure its existing package record is active.");
-    const packageId=packageResult.data.id;
+    let packageRow=packageResult.data;
+    if(!packageRow && courseName==="APPSC Topic Wise Test Series"){
+        const made=await supabaseClient.from("vk_independent_packages").insert({name:"APPSC Topic Wise Test Series",description:"Screening Test and Mains Test practice",price:29,duration_days:5,package_code:"APPSC",is_published:false,is_archived:false}).select("id,name,package_code,is_archived").single();
+        if(made.error)throw made.error;packageRow=made.data;
+    }
+    if(!packageRow) throw new Error("The "+courseName+" package was not found. Please ensure its package record is active.");
+    const packageId=packageRow.id;
     // Normalize the Admin dropdown value and make sure its matching paper row exists.
     // The student side expects canonical names Paper-I and Paper-II, while the Admin
     // dropdown values are Paper 1 and Paper 2. Older records may also use either style.
-    const paperNumber = /\b2\b|ii/i.test(String(paperName||"")) ? 2 : 1;
-    const independentPaper = paperNumber===1 ? "Paper-I" : "Paper-II";
-    const paperRowsResult = await supabaseClient.from("vk_independent_papers")
+    const paperText=String(paperName||"").toLowerCase();
+    const paperNumber = (/\b2\b|ii|mains/i.test(paperText)) ? 2 : 1;
+    const isAppsc=courseName==="APPSC Topic Wise Test Series";
+    const independentPaper = isAppsc ? (paperNumber===1?"Screening Test":"Mains Test") : (paperNumber===1 ? "Paper-I" : "Paper-II");
+    let paperRowsResult = await supabaseClient.from("vk_independent_papers")
         .select("id,name,is_active,display_order").eq("package_id",packageId);
     if(paperRowsResult.error) throw paperRowsResult.error;
+    if(isAppsc){
+        for(const [nm,ord] of [["Screening Test",1],["Mains Test",2]]){
+            const exists=(paperRowsResult.data||[]).some(p=>String(p.name).toLowerCase()===nm.toLowerCase());
+            if(!exists){const made=await supabaseClient.from("vk_independent_papers").insert({package_id:packageId,name:nm,display_order:ord,is_active:true});if(made.error)throw made.error;}
+        }
+        paperRowsResult=await supabaseClient.from("vk_independent_papers").select("id,name,is_active,display_order").eq("package_id",packageId);
+        if(paperRowsResult.error)throw paperRowsResult.error;
+    }
     const normalizePaperName = value => String(value||"").toLowerCase().replace(/[^a-z0-9]/g,"");
-    const acceptedPaperNames = paperNumber===1 ? ["paper1","paperi"] : ["paper2","paperii"];
+    const acceptedPaperNames = isAppsc
+        ? (paperNumber===1?["screeningtest"]:["mainstest"])
+        : (paperNumber===1 ? ["paper1","paperi"] : ["paper2","paperii"]);
     const existingPaper = (paperRowsResult.data||[]).find(p=>acceptedPaperNames.includes(normalizePaperName(p.name)));
     let paperResult;
     if(existingPaper){
@@ -10252,6 +10272,20 @@ async function vkAdminPublishIndependentTopicWiseTest(paperName,testName,duratio
         if(insertedQuestionIds.length){await supabaseClient.from("vk_independent_question_keys").delete().in("question_id",insertedQuestionIds);await supabaseClient.from("vk_independent_questions").delete().in("id",insertedQuestionIds);}
         await supabaseClient.from("vk_independent_tests").delete().eq("id",testId);throw err;
     }
+    if(isAppsc){
+        const allP=await supabaseClient.from("vk_independent_papers").select("id,name").eq("package_id",packageId).eq("is_active",true);
+        if(allP.error)throw allP.error;
+        let ready=true;
+        for(const nm of ["Screening Test","Mains Test"]){
+            const p=(allP.data||[]).find(x=>String(x.name).toLowerCase()===nm.toLowerCase());
+            if(!p){ready=false;break;}
+            const b=await supabaseClient.from("vk_independent_topics").select("id").eq("paper_id",p.id).eq("name",nm+" Tests").eq("is_active",true).maybeSingle();
+            if(b.error)throw b.error;if(!b.data){ready=false;break;}
+            const t=await supabaseClient.from("vk_independent_tests").select("id").eq("topic_id",b.data.id).eq("is_active",true).limit(1);
+            if(t.error)throw t.error;if(!t.data?.length){ready=false;break;}
+        }
+        if(ready){const pub=await supabaseClient.from("vk_independent_packages").update({is_published:true}).eq("id",packageId);if(pub.error)throw pub.error;}
+    }
     return {test_id:testId,title:cleanTestName,question_count:questions.length,topic_id:bucket.data.id,paper:independentPaper};
 }
 
@@ -10263,7 +10297,7 @@ async function vkAdminPublishTest(){
     }
     const testType = document.getElementById("vkAdminTestType")?.value || "free";
     const isPaid = testType === "paid";
-    const isIndependentTopicWise = isPaid && (document.getElementById("vkAdminCourse")?.value || "").trim() === "Endowment Topic Wise Test Series";
+    const isIndependentTopicWise = isPaid && vkAdminIsEndowmentTopicWiseCourse();
     const courseName = (document.getElementById("vkAdminCourse")?.value || "").trim();
     const topicNameInput = (document.getElementById("vkAdminTopic")?.value || "").trim();
     const topicName = isPaid ? topicNameInput : vkAdminNormalizeFreeTopicName(topicNameInput);
@@ -10279,7 +10313,7 @@ async function vkAdminPublishTest(){
     : "";
     const cards = Array.from(document.querySelectorAll("#vkAdminQuestions .vk-admin-question"));
 
-   const requiresIndependentTestName = isPaid && courseName.toLowerCase() === "endowment topic wise test series";
+   const requiresIndependentTestName = isPaid && vkAdminIsEndowmentTopicWiseCourse();
    if(!courseName || (!isPaid && freeMode!=="edit" && !topicName) || (requiresIndependentTestName && !topicName)){
     vkAdminShowStatus(requiresIndependentTestName ? "Select the course and enter the Test Name." : (isPaid?"Select a course.":"Select a course and enter a topic name."),true); return;
 }
@@ -10351,6 +10385,9 @@ if(!isPaid && freeMode === "edit" && !freeEditTopicName){
     vkAdminShowStatus("Publishing test and saving questions...",false);
     try{
         if(isIndependentTopicWise){
+            if(paidMode==="edit" && courseName==="APPSC Topic Wise Test Series"){
+                throw new Error("APPSC existing-test editing is not enabled yet. Choose Create New Paid Test; Endowment editing remains unchanged.");
+            }
             if(paidMode==="edit"){
                 const totalMarks=questions.reduce((sum,q)=>sum+Number(q.marks||1),0);
                 const updated=await supabaseClient.rpc("vk_admin_update_endowment_topic_test",{
@@ -10364,8 +10401,8 @@ if(!isPaid && freeMode === "edit" && !freeEditTopicName){
                 if(updated.error)throw updated.error;
                 vkAdminShowStatus(`Existing Endowment test updated successfully. ${questions.length} questions saved; the same Test ID is retained.`,false);
             }else{
-                const created=await vkAdminPublishIndependentTopicWiseTest(paperName,topicName,duration,negativeMarks,questions);
-                vkAdminShowStatus(`Published Endowment test: ${created.title}. ${created.paper}. Questions: ${created.question_count}.`,false);
+                const created=await vkAdminPublishIndependentTopicWiseTest(paperName,topicName,duration,negativeMarks,questions,courseName);
+                vkAdminShowStatus(`Published ${courseName} test: ${created.title}. ${created.paper}. Questions: ${created.question_count}.`,false);
             }
             const courseSelect=document.getElementById("vkAdminCourse");
             const publishedCourse=courseSelect?.value;
@@ -18911,22 +18948,33 @@ function renderHome(){
  host.innerHTML=`<section class="va-hero">
    <small>🔒 VK EXAMS · APPSC</small>
    <h1>APPSC Topic Wise Test Series</h1>
-   <p>Choose Screening Test or Mains Test to view the available tests. Subjects and topics are displayed inside each section.</p>
+   <p>Choose Screening Test or Mains Test to view the available tests.</p>
    <div class="va-price"><strong>₹${Number(pkg.price||29)} · ${Number(pkg.duration_days||5)} Days Access</strong>
    <span>${admin?'ADMIN PREVIEW · ALL TESTS ENABLED':purchase?'✓ PACKAGE UNLOCKED':pkg.is_published?'Purchase the plan to unlock the tests.':'Test series will open after admin publication.'}</span></div>
    ${!admin&&!purchase&&pkg.is_published?'<button class="va-buy" onclick="vkAppscBuy()">Buy Plan · ₹'+Number(pkg.price||29)+'</button>':''}
  </section>
- <h2 class="va-choose-title">Choose Your Test</h2><p class="va-choose-sub">Open a section to view its subjects and tests.</p>
+ <h2 class="va-choose-title">Choose Your Test</h2><p class="va-choose-sub">Open a section to view its tests.</p>
  <div class="va-paper-grid" style="display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin:20px 0;visibility:visible!important">
  ${paperCard(screen,'Screening Test','screen')}${paperCard(mains,'Mains Test','mains')}
  </div>
- ${admin?'<div class="va-admin-link"><button onclick="vkAppscAdmin()">Admin Management</button><span>Admin preview · Package '+(pkg.is_published?'Published':'Draft')+'</span></div>':''}
+ ${admin?'<div class="va-admin-link"><span>Admin preview · Package '+(pkg.is_published?'Published':'Draft')+'</span></div>':''}
  <div id="vaSub"></div>`;
 }
 window.vkAppscSectionPending=()=>status('This section will open after the APPSC package and its Screening / Mains data are published.');
-window.vkAppscPaper=async id=>{if(!pkg?.id||(!admin&&!pkg.is_published)){vkAppscSectionPending();return;}selectedPaper=id;const p=papers.find(x=>x.id===id);const list=subjects.filter(x=>x.paper_id===id);$('vaSub').innerHTML=`<div class="va-card"><h2>${esc(p?.name||'Section')} · Subjects</h2>${list.map(x=>`<div class="va-row"><b>${esc(x.name)}</b><button onclick="vkAppscSubject('${x.id}')">Open</button></div>`).join('')||'<p>No subjects added yet.</p>'}<div id="vaTopics"></div></div>`};
-window.vkAppscSubject=async id=>{selectedSubject=id;const sub=subjects.find(x=>x.id===id);const map=await (await sb()).from('vk_appsc_topic_subject_map').select('topic_id').eq('subject_id',id);if(map.error){status(map.error.message);return}const ids=(map.data||[]).map(x=>x.topic_id);const list=topics.filter(t=>ids.includes(t.id));$('vaTopics').innerHTML=`<h3>${esc(sub?.name||'Subject')} · Topics</h3>${list.map(t=>`<div class="va-row"><b>${esc(t.name)}</b><button onclick="vkAppscTests('${t.id}')">View Tests</button></div>`).join('')||'<p>No topics available.</p>'}<div id="vaTests"></div>`};
-window.vkAppscTests=async id=>{const s=await sb();$('vaTests').innerHTML='Loading tests…';const r=await s.from('vk_independent_tests').select('id,name,question_count,duration_minutes').eq('topic_id',id).eq('is_active',true).order('created_at');if(r.error){$('vaTests').textContent=r.error.message;return}const unlocked=admin||!!purchase;$('vaTests').innerHTML=(r.data||[]).map(t=>`<div class="va-row"><span><b>${esc(t.name)}</b><div class="va-muted">${t.question_count||0} Questions · ${t.duration_minutes||'—'} Minutes</div></span><button onclick="${unlocked?`vkIpStartTest('${t.id}')`:'vkAppscBuy()'}">${unlocked?'Start Exam':'Unlock · ₹'+Number(pkg.price||29)}</button></div>`).join('')||'No tests published yet.'};
+window.vkAppscPaper=async id=>{
+ if(!pkg?.id||(!admin&&!pkg.is_published)){vkAppscSectionPending();return;}
+ selectedPaper=id;const p=papers.find(x=>x.id===id);const host=$('vaSub');
+ if(!host)return;
+ host.innerHTML=`<div class="va-card"><h2>${esc(p?.name||'Section')} · Tests</h2><div id="vaTests">Loading tests…</div></div>`;
+ const s=await sb();
+ const bucketNames=[(p?.name||'')+' Tests',p?.name||''];
+ const bucket=(topics||[]).find(t=>t.paper_id===id&&bucketNames.includes(t.name));
+ if(!bucket){$('vaTests').textContent='No tests published yet.';return;}
+ const r=await s.from('vk_independent_tests').select('id,name,question_count,duration_minutes').eq('topic_id',bucket.id).eq('is_active',true).order('display_order');
+ if(r.error){$('vaTests').textContent=r.error.message;return;}
+ const unlocked=admin||!!purchase;
+ $('vaTests').innerHTML=(r.data||[]).map(t=>`<div class="va-row"><span><b>${esc(t.name)}</b><div class="va-muted">${t.question_count||0} Questions · ${t.duration_minutes||'—'} Minutes</div></span><button onclick="${unlocked?`vkIpStartTest('${t.id}')`:'vkAppscBuy()'}">${unlocked?'Start Exam':'Unlock · ₹'+Number(pkg.price||29)}</button></div>`).join('')||'No tests published yet.';
+};
 window.vkAppscBuy=async function(){
  try{if(!pkg?.id||!pkg.is_published)throw Error('APPSC Test Series is not published yet.');const s=await sb(),u=await s.auth.getUser();if(!u.data?.user){if(typeof openLogin==='function')openLogin();else status('Please login first.');return}if(!window.Razorpay)throw Error('Razorpay did not load. Refresh and try again.');
  status('Preparing secure payment…');const o=await s.functions.invoke('create-razorpay-order',{body:{package_id:pkg.id,product_type:'independent'}});if(o.error||!o.data?.success)throw Error(o.data?.error||o.error?.message||'Order creation failed.');
@@ -18946,7 +18994,9 @@ window.vkAppscAdmin=async function(){
 };
 function fillTestSelect(){const s=$('vaImportTest');if(!s)return;(async()=>{const ids=topics.map(t=>t.id);if(!ids.length)return;const r=await (await sb()).from('vk_independent_tests').select('id,name').in('topic_id',ids);if(!r.error)s.innerHTML='<option value="">Select test</option>'+(r.data||[]).map(t=>`<option value="${t.id}">${esc(t.name)}</option>`).join('')})()}
 window.vkAppscSavePackage=async()=>{try{const r=await (await sb()).from('vk_independent_packages').update({name:$('vaPkgName').value.trim(),price:Number($('vaPrice').value),duration_days:Number($('vaDays').value)}).eq('id',pkg.id);if(r.error)throw r.error;pkg.name=$('vaPkgName').value;pkg.price=Number($('vaPrice').value);pkg.duration_days=Number($('vaDays').value);status('Package saved.')}catch(e){status(e.message)}};
-window.vkAppscPublish=async()=>{try{const s=await sb(),next=!pkg.is_published;if(next&&(!papers.length||!subjects.length))throw Error('Add at least one section and one subject before publishing.');const r=await s.from('vk_independent_packages').update({is_published:next}).eq('id',pkg.id);if(r.error)throw r.error;pkg.is_published=next;status(next?'APPSC package published.':'APPSC package unpublished.');await loadData();renderHome()}catch(e){status(e.message)}};
+window.vkAppscPublish=async()=>{try{const s=await sb(),next=!pkg.is_published;if(next){
+ const required=['Screening Test','Mains Test'];for(let i=0;i<required.length;i++){const p=papers.find(x=>String(x.name).toLowerCase()===required[i].toLowerCase());if(!p)throw Error('Add both Screening Test and Mains Test sections before publishing.');const bucket=topics.find(t=>t.paper_id===p.id&&t.name===p.name+' Tests');if(!bucket)throw Error('Upload at least one test under '+p.name+'.');const ts=await s.from('vk_independent_tests').select('id,question_count').eq('topic_id',bucket.id).eq('is_active',true);if(ts.error)throw ts.error;if(!ts.data?.length)throw Error('Upload at least one active test under '+p.name+'.');const qs=await s.from('vk_independent_questions').select('id,test_id').in('test_id',ts.data.map(t=>t.id)).eq('is_active',true);if(qs.error)throw qs.error;const ks=await s.from('vk_independent_question_keys').select('question_id').in('question_id',qs.data.map(q=>q.id));if(ks.error)throw ks.error;const keyed=new Set((ks.data||[]).map(k=>k.question_id));for(const t of ts.data){const own=qs.data.filter(q=>q.test_id===t.id);if(own.length!==Number(t.question_count)||own.some(q=>!keyed.has(q.id)))throw Error('Check question count and answer keys for '+p.name+' tests.');}}
+ }const r=await s.from('vk_independent_packages').update({is_published:next}).eq('id',pkg.id);if(r.error)throw r.error;pkg.is_published=next;status(next?'APPSC package published.':'APPSC package unpublished.');await loadData();renderHome()}catch(e){status(e.message)}};
 window.vkAppscAddPaper=async()=>{try{const name=$('vaPaperName').value.trim();if(!name)throw Error('Enter section name.');const r=await (await sb()).from('vk_independent_papers').insert({package_id:pkg.id,name,display_order:papers.length+1,is_active:true}).select('*').single();if(r.error)throw r.error;papers.push(r.data);status('Section added.');vkAppscAdmin()}catch(e){status(e.message)}};
 window.vkAppscAddSubject=async()=>{try{const name=$('vaSubjectName').value.trim(),paper_id=$('vaAdminPaper').value;if(!name||!paper_id)throw Error('Select section and enter subject.');const r=await (await sb()).from('vk_appsc_subjects').insert({package_id:pkg.id,paper_id,name,display_order:subjects.filter(x=>x.paper_id===paper_id).length+1,is_active:true}).select('*').single();if(r.error)throw r.error;subjects.push(r.data);status('Subject added.');vkAppscAdmin()}catch(e){status(e.message)}};
 window.vkAppscAddTopic=async()=>{try{const subject_id=$('vaTopicSubject').value,name=$('vaTopicName').value.trim(),sub=subjects.find(x=>x.id===subject_id);if(!sub||!name)throw Error('Select subject and enter topic.');const s=await sb(),r=await s.from('vk_independent_topics').insert({paper_id:sub.paper_id,name,display_order:topics.filter(x=>x.paper_id===sub.paper_id).length+1,is_active:true}).select('*').single();if(r.error)throw r.error;const m=await s.from('vk_appsc_topic_subject_map').insert({topic_id:r.data.id,subject_id,package_id:pkg.id,paper_id:sub.paper_id});if(m.error){await s.from('vk_independent_topics').delete().eq('id',r.data.id);throw m.error}topics.push(r.data);status('Topic added and linked to subject.');vkAppscAdmin()}catch(e){status(e.message)}};
@@ -19154,16 +19204,16 @@ function renderHome(){
  host.innerHTML=`<section class="va-hero">
    <small>🔒 VK EXAMS · APPSC</small>
    <h1>APPSC Topic Wise Test Series</h1>
-   <p>Choose Screening Test or Mains Test to view the available tests. Subjects and topics are displayed inside each section.</p>
+   <p>Choose Screening Test or Mains Test to view the available tests.</p>
    <div class="va-price"><strong>₹${Number(pkg.price||29)} · ${Number(pkg.duration_days||5)} Days Access</strong>
    <span>${admin?'ADMIN PREVIEW · ALL TESTS ENABLED':purchase?'✓ PACKAGE UNLOCKED':pkg.is_published?'Purchase the plan to unlock the tests.':'Test series will open after admin publication.'}</span></div>
    ${!admin&&!purchase&&pkg.is_published?'<button class="va-buy" onclick="vkAppscBuy()">Buy Plan · ₹'+Number(pkg.price||29)+'</button>':''}
  </section>
- <h2 class="va-choose-title">Choose Your Test</h2><p class="va-choose-sub">Open a section to view its subjects and tests.</p>
+ <h2 class="va-choose-title">Choose Your Test</h2><p class="va-choose-sub">Open a section to view its tests.</p>
  <div class="va-paper-grid" style="display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin:20px 0;visibility:visible!important">
  ${paperCard(screen,'Screening Test','screen')}${paperCard(mains,'Mains Test','mains')}
  </div>
- ${admin?'<div class="va-admin-link"><button onclick="vkAppscAdmin()">Admin Management</button><span>Admin preview · Package '+(pkg.is_published?'Published':'Draft')+'</span></div>':''}
+ ${admin?'<div class="va-admin-link"><span>Admin preview · Package '+(pkg.is_published?'Published':'Draft')+'</span></div>':''}
  <div id="vaSub"></div>`;
 }
 window.vkAppscSectionPending=()=>status('This section will open after the APPSC package and its Screening / Mains data are published.');
@@ -19189,7 +19239,9 @@ window.vkAppscAdmin=async function(){
 };
 function fillTestSelect(){const s=$('vaImportTest');if(!s)return;(async()=>{const ids=topics.map(t=>t.id);if(!ids.length)return;const r=await (await sb()).from('vk_independent_tests').select('id,name').in('topic_id',ids);if(!r.error)s.innerHTML='<option value="">Select test</option>'+(r.data||[]).map(t=>`<option value="${t.id}">${esc(t.name)}</option>`).join('')})()}
 window.vkAppscSavePackage=async()=>{try{const r=await (await sb()).from('vk_independent_packages').update({name:$('vaPkgName').value.trim(),price:Number($('vaPrice').value),duration_days:Number($('vaDays').value)}).eq('id',pkg.id);if(r.error)throw r.error;pkg.name=$('vaPkgName').value;pkg.price=Number($('vaPrice').value);pkg.duration_days=Number($('vaDays').value);status('Package saved.')}catch(e){status(e.message)}};
-window.vkAppscPublish=async()=>{try{const s=await sb(),next=!pkg.is_published;if(next&&(!papers.length||!subjects.length))throw Error('Add at least one section and one subject before publishing.');const r=await s.from('vk_independent_packages').update({is_published:next}).eq('id',pkg.id);if(r.error)throw r.error;pkg.is_published=next;status(next?'APPSC package published.':'APPSC package unpublished.');await loadData();renderHome()}catch(e){status(e.message)}};
+window.vkAppscPublish=async()=>{try{const s=await sb(),next=!pkg.is_published;if(next){
+ const required=['Screening Test','Mains Test'];for(let i=0;i<required.length;i++){const p=papers.find(x=>String(x.name).toLowerCase()===required[i].toLowerCase());if(!p)throw Error('Add both Screening Test and Mains Test sections before publishing.');const bucket=topics.find(t=>t.paper_id===p.id&&t.name===p.name+' Tests');if(!bucket)throw Error('Upload at least one test under '+p.name+'.');const ts=await s.from('vk_independent_tests').select('id,question_count').eq('topic_id',bucket.id).eq('is_active',true);if(ts.error)throw ts.error;if(!ts.data?.length)throw Error('Upload at least one active test under '+p.name+'.');const qs=await s.from('vk_independent_questions').select('id,test_id').in('test_id',ts.data.map(t=>t.id)).eq('is_active',true);if(qs.error)throw qs.error;const ks=await s.from('vk_independent_question_keys').select('question_id').in('question_id',qs.data.map(q=>q.id));if(ks.error)throw ks.error;const keyed=new Set((ks.data||[]).map(k=>k.question_id));for(const t of ts.data){const own=qs.data.filter(q=>q.test_id===t.id);if(own.length!==Number(t.question_count)||own.some(q=>!keyed.has(q.id)))throw Error('Check question count and answer keys for '+p.name+' tests.');}}
+ }const r=await s.from('vk_independent_packages').update({is_published:next}).eq('id',pkg.id);if(r.error)throw r.error;pkg.is_published=next;status(next?'APPSC package published.':'APPSC package unpublished.');await loadData();renderHome()}catch(e){status(e.message)}};
 window.vkAppscAddPaper=async()=>{try{const name=$('vaPaperName').value.trim();if(!name)throw Error('Enter section name.');const r=await (await sb()).from('vk_independent_papers').insert({package_id:pkg.id,name,display_order:papers.length+1,is_active:true}).select('*').single();if(r.error)throw r.error;papers.push(r.data);status('Section added.');vkAppscAdmin()}catch(e){status(e.message)}};
 window.vkAppscAddSubject=async()=>{try{const name=$('vaSubjectName').value.trim(),paper_id=$('vaAdminPaper').value;if(!name||!paper_id)throw Error('Select section and enter subject.');const r=await (await sb()).from('vk_appsc_subjects').insert({package_id:pkg.id,paper_id,name,display_order:subjects.filter(x=>x.paper_id===paper_id).length+1,is_active:true}).select('*').single();if(r.error)throw r.error;subjects.push(r.data);status('Subject added.');vkAppscAdmin()}catch(e){status(e.message)}};
 window.vkAppscAddTopic=async()=>{try{const subject_id=$('vaTopicSubject').value,name=$('vaTopicName').value.trim(),sub=subjects.find(x=>x.id===subject_id);if(!sub||!name)throw Error('Select subject and enter topic.');const s=await sb(),r=await s.from('vk_independent_topics').insert({paper_id:sub.paper_id,name,display_order:topics.filter(x=>x.paper_id===sub.paper_id).length+1,is_active:true}).select('*').single();if(r.error)throw r.error;const m=await s.from('vk_appsc_topic_subject_map').insert({topic_id:r.data.id,subject_id,package_id:pkg.id,paper_id:sub.paper_id});if(m.error){await s.from('vk_independent_topics').delete().eq('id',r.data.id);throw m.error}topics.push(r.data);status('Topic added and linked to subject.');vkAppscAdmin()}catch(e){status(e.message)}};
