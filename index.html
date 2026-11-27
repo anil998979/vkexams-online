@@ -9049,14 +9049,25 @@ function vkAdminEscape(value){
 
 async function refreshVkAdminAccess(){
     const nav = document.getElementById("vkAdminNav");
+    // On the first click after login, Supabase may still be restoring its
+    // client/session. Wait briefly instead of failing and requiring a refresh.
+    for(let attempt=0; !supabaseClient && attempt<12; attempt++){
+        await new Promise(resolve=>setTimeout(resolve,250));
+    }
     if(!supabaseClient || !nav){
         vkAdminAuthorized = false;
         if(nav) nav.classList.remove("is-visible");
         return false;
     }
     try{
-        const {data:sessionData} = await supabaseClient.auth.getSession();
-        if(!sessionData?.session?.user || sessionData.session.user.is_anonymous){
+        let sessionResult = await supabaseClient.auth.getSession();
+        // Give auth state restoration one more chance on a cold page load.
+        for(let attempt=0; (!sessionResult?.data?.session?.user) && attempt<6; attempt++){
+            await new Promise(resolve=>setTimeout(resolve,250));
+            sessionResult = await supabaseClient.auth.getSession();
+        }
+        const sessionUser = sessionResult?.data?.session?.user;
+        if(!sessionUser || sessionUser.is_anonymous){
             vkAdminAuthorized = false;
             nav.classList.remove("is-visible");
             return false;
