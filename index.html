@@ -4361,7 +4361,10 @@ id="solutions">
     <div class="exam-header" style="margin-top:18px">
       <h1>Mock Test Builder</h1>
       <p>Manage Free Mock Tests and Paid Test Series from one dashboard. Bulk upload, validate and publish.</p>
-      <div class="vk-admin-actions"><button type="button" class="vk-admin-btn vk-admin-btn-secondary" onclick="openAdminStudyMaterials()">📚 Manage Study Materials</button></div>
+      <div class="vk-admin-actions">
+        <button type="button" class="vk-admin-btn vk-admin-btn-secondary" onclick="openAdminStudyMaterials()">📚 Manage Study Materials</button>
+        <button type="button" class="vk-admin-btn" id="vkOpenAppscTopicAdmin" style="background:linear-gradient(110deg,#742323,#c77a32);color:#fff" onclick="vkOpenAppscTopicAdmin()">🏛️ Manage APPSC Topic Wise Tests</button>
+      </div>
     </div>
 
     <!-- ADMIN-ONLY TOPIC WISE TESTS: uses shared tests/questions/attempts engine; no package/payment flow -->
@@ -18973,6 +18976,37 @@ new MutationObserver(addHomeCard).observe(document.documentElement,{childList:tr
 #vkAppscOverlay .va-row button,#vkAppscOverlay .va-card button{cursor:pointer}
 @media(max-width:650px){#vkAppscOverlay{padding:20px 13px 40px}#vkAppscOverlay .va-paper-grid{grid-template-columns:1fr}#vkAppscOverlay .va-paper-card{min-height:190px}#vkAppscOverlay .va-hero{padding:20px}}
 </style>
+
+
+<!-- VK APPSC Topic Wise Admin entry point: isolated bridge; Endowment code untouched -->
+<script id="vk-appsc-admin-builder-entry-v1">
+(function(){
+  'use strict';
+  window.vkOpenAppscTopicAdmin = async function(){
+    const btn=document.getElementById('vkOpenAppscTopicAdmin');
+    if(btn){btn.disabled=true;btn.textContent='Opening APPSC Admin…';}
+    try{
+      if(typeof window.vkAppscOpen!=='function' || typeof window.vkAppscAdmin!=='function'){
+        throw new Error('APPSC Topic Wise module did not load. Please refresh the page.');
+      }
+      await window.vkAppscOpen();
+      const overlay=document.getElementById('vkAppscOverlay');
+      if(!overlay) throw new Error('Could not open APPSC management screen.');
+      const status=document.getElementById('vaStatus');
+      if(status && /admin permission|not authorized|service is loading/i.test(status.textContent||'')){
+        throw new Error(status.textContent);
+      }
+      // The module verifies admin access before rendering this management panel.
+      window.vkAppscAdmin();
+      overlay.scrollTo({top:0,behavior:'smooth'});
+    }catch(e){
+      alert('APPSC Admin: '+(e.message||e));
+    }finally{
+      if(btn){btn.disabled=false;btn.textContent='🏛️ Manage APPSC Topic Wise Tests';}
+    }
+  };
+})();
+</script>
 
 </body> on EVERY public page.
      Keep the Supabase URL and publishable/anon key identical to your existing site setup. -->
