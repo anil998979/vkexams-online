@@ -18863,7 +18863,7 @@ async function loadData(){
 }
 function mount(){
  let old=$('vkAppscOverlay');if(old)old.remove();
- const el=document.createElement('div');el.id='vkAppscOverlay';el.innerHTML=`<div class="va-wrap"><div class="va-head"><div>VK EXAMS · APPSC</div><h1>APPSC Topic Wise Test Series</h1><p>Screening Test · Mains Test · Subject-wise and Topic-wise Practice</p><button class="secondary" onclick="vkAppscClose()">✕ Close</button></div><div id="vaStatus" class="va-status">Loading APPSC…</div><div id="vaContent"></div></div>`;document.body.appendChild(el);
+ const el=document.createElement('div');el.id='vkAppscOverlay';el.innerHTML=`<div class="va-wrap"><div id="vaStatus" class="va-status">Loading APPSC…</div><div id="vaContent"></div></div>`;document.body.appendChild(el);
 }
 function status(m){const n=$('vaStatus');if(n)n.textContent=m}
 window.vkAppscClose=()=>{$('vkAppscOverlay')?.remove()};
@@ -19075,7 +19075,7 @@ async function loadData(){
 }
 function mount(){
  let old=$('vkAppscOverlay');if(old)old.remove();
- const el=document.createElement('div');el.id='vkAppscOverlay';el.innerHTML=`<div class="va-wrap"><div class="va-head"><div>VK EXAMS · APPSC</div><h1>APPSC Topic Wise Test Series</h1><p>Screening Test · Mains Test · Subject-wise and Topic-wise Practice</p><button class="secondary" onclick="vkAppscClose()">✕ Close</button></div><div id="vaStatus" class="va-status">Loading APPSC…</div><div id="vaContent"></div></div>`;document.body.appendChild(el);
+ const el=document.createElement('div');el.id='vkAppscOverlay';el.innerHTML=`<div class="va-wrap"><div id="vaStatus" class="va-status">Loading APPSC…</div><div id="vaContent"></div></div>`;document.body.appendChild(el);
 }
 function status(m){const n=$('vaStatus');if(n)n.textContent=m}
 window.vkAppscClose=()=>{$('vkAppscOverlay')?.remove()};
