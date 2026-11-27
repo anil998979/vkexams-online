@@ -18878,11 +18878,11 @@ function renderHome(){
  const host=$('vaContent');if(!host)return;
  const screen=papers.find(p=>/screen/i.test(p.name))||papers[0]||null;
  const mains=papers.find(p=>/mains/i.test(p.name))||papers.find(p=>p.id!==screen?.id)||null;
- const paperCard=(p,label,kind)=>`<button type="button" class="va-paper-card ${kind}" ${p?`onclick="vkAppscPaper('${p.id}')"`:'onclick="vkAppscSectionPending()"'} aria-label="${label}">
-   <span class="va-card-tag">${kind==='screen'?'📘':'🏛️'} ${label}</span>
-   <strong>${label}</strong>
-   <span class="va-card-sub">${kind==='screen'?'General Studies · Objective Practice':'Advanced & Descriptive Practice'}</span>
-   <span class="va-card-action">${p?'View Tests →':'Coming Soon'}</span>
+ const paperCard=(p,label,kind)=>`<button type="button" class="va-paper-card ${kind==='screen'?'paper1':'paper2'}" style="display:flex!important;visibility:visible!important;opacity:1!important;min-height:225px;width:100%;box-sizing:border-box;position:relative;overflow:hidden;border:3px solid ${kind==='screen'?'#21bce8':'#f3c27b'};border-radius:22px;padding:24px;text-align:left;color:#fff;background:${kind==='screen'?'radial-gradient(circle at 82% 35%,#28c8e8 0,#0876c9 36%,#063d91 80%)':'radial-gradient(circle at 83% 35%,#ffbd50 0,#a83227 43%,#5a171b 100%)'};box-shadow:0 8px 18px #142c4b24;flex-direction:column;align-items:flex-start;justify-content:space-between;gap:12px;cursor:pointer" ${p?`onclick="vkAppscPaper('${p.id}')"`:'onclick="vkAppscSectionPending()"'} aria-label="${label}">
+   <span style="display:inline-block;background:#fff;color:${kind==='screen'?'#173b73':'#76252a'};border:2px solid #ffcf48;border-radius:14px;padding:8px 14px;font-size:18px;font-weight:900">${kind==='screen'?'📘':'🏛️'} ${label}</span>
+   <strong style="display:block;font-size:clamp(24px,3vw,31px);line-height:1.12;font-weight:950;color:#fff;text-shadow:0 2px 5px #0006">${kind==='screen'?'General Studies':'Advanced Studies & Mains Practice'}</strong>
+   <span style="display:block;color:#fff;font-size:14px;font-weight:700">${kind==='screen'?'Objective Practice · Topic-wise Tests':'Mains Practice · Subject-wise Tests'}</span>
+   <span style="display:inline-block;background:#fff;color:${kind==='screen'?'#173b73':'#76252a'};padding:9px 18px;border-radius:25px;font-weight:900">${p?'View Tests →':'Coming Soon'}</span>
  </button>`;
  host.innerHTML=`<section class="va-hero">
    <small>🔒 VK EXAMS · APPSC</small>
@@ -18893,7 +18893,9 @@ function renderHome(){
    ${!admin&&!purchase&&pkg.is_published?'<button class="va-buy" onclick="vkAppscBuy()">Buy Plan · ₹'+Number(pkg.price||29)+'</button>':''}
  </section>
  <h2 class="va-choose-title">Choose Your Test</h2><p class="va-choose-sub">Open a section to view its subjects and tests.</p>
- <div class="va-paper-grid">${paperCard(screen,'Screening Test','screen')}${paperCard(mains,'Mains Test','mains')}</div>
+ <div class="va-paper-grid" style="display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin:20px 0;visibility:visible!important">
+ ${paperCard(screen,'Screening Test','screen')}${paperCard(mains,'Mains Test','mains')}
+ </div>
  ${admin?'<div class="va-admin-link"><button onclick="vkAppscAdmin()">Admin Management</button><span>Admin preview · Package '+(pkg.is_published?'Published':'Draft')+'</span></div>':''}
  <div id="vaSub"></div>`;
 }
