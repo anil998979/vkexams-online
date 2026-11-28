@@ -3565,6 +3565,32 @@ body.dark-mode .vk-theme-toggle{background:#243247;color:#f8fafc;border-color:#4
   #vkIndependentPackageDetail .vk-v26-paper-card{width:100%!important}
 }
 </style>
+<style id="vk-appsc-topic-grid-final">
+
+/* APPSC topic cards - enforce image-led responsive grid in both Screening and Mains */
+.va-topic-page{width:100%;max-width:1180px;min-height:65vh;margin:0 auto;padding:10px 0 38px;box-sizing:border-box}
+.va-topic-page-top{display:flex;align-items:center;gap:14px;margin:8px 0 18px}
+.va-topic-section-label{display:inline-flex;align-items:center;padding:8px 13px;border-radius:999px;background:#eaf3ff;color:#164a91;font-size:12px;font-weight:900;letter-spacing:.04em}
+.va-topic-page-header{margin:0 0 22px;padding:25px 28px;border-radius:20px;background:linear-gradient(115deg,#123d75,#087d9d 58%,#20a6a1);color:#fff;box-shadow:0 12px 28px rgba(20,65,105,.18)}
+.va-topic-page-header h1{margin:0 0 8px;color:#fff;font-size:clamp(24px,3vw,34px);font-weight:950;line-height:1.15}
+.va-topic-page-header p{margin:0;color:#effaff;font-size:14px}
+.va-topic-grid{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:18px!important;width:100%!important;margin:0 0 28px!important;align-items:stretch!important}
+button.va-topic-card{position:relative!important;display:flex!important;flex-direction:column!important;align-items:stretch!important;justify-content:flex-start!important;width:100%!important;min-width:0!important;min-height:270px!important;margin:0!important;padding:0!important;overflow:hidden!important;border:1px solid #d9e5f1!important;border-radius:18px!important;background:#fff!important;color:#172b4d!important;text-align:left!important;white-space:normal!important;box-shadow:0 8px 22px rgba(27,55,90,.13)!important;cursor:pointer!important;transition:transform .2s ease,box-shadow .2s ease!important}
+button.va-topic-card:hover{transform:translateY(-5px)!important;box-shadow:0 16px 30px rgba(27,55,90,.2)!important}
+.va-topic-image{position:relative!important;display:flex!important;flex:0 0 155px!important;align-items:flex-end!important;justify-content:space-between!important;width:100%!important;height:155px!important;min-height:155px!important;box-sizing:border-box!important;padding:14px!important;background-size:cover!important;background-position:center!important;background-repeat:no-repeat!important;color:#fff!important}
+.va-topic-image i{font-size:32px!important;font-style:normal!important;line-height:1!important;filter:drop-shadow(0 2px 3px #0008)}
+.va-topic-image small{display:grid!important;place-items:center!important;width:31px!important;height:31px!important;border-radius:50%!important;background:#071a32d9!important;color:#fff!important;font-size:12px!important;font-weight:950!important}
+.va-topic-copy{display:flex!important;flex:1!important;flex-direction:column!important;align-items:flex-start!important;gap:7px!important;box-sizing:border-box!important;padding:14px 15px 15px!important;background:linear-gradient(180deg,#fff,#f7faff)!important}
+.va-topic-copy strong{display:block!important;min-height:40px!important;color:#172b4d!important;font-size:15px!important;line-height:1.3!important;font-weight:900!important}
+.va-topic-copy em{display:block!important;min-height:31px!important;color:#64748b!important;font-size:11px!important;line-height:1.45!important;font-style:normal!important}
+.va-topic-copy>b{display:flex!important;justify-content:space-between!important;align-items:center!important;width:100%!important;margin-top:auto!important;padding-top:7px!important;color:#1268bd!important;font-size:12px!important;font-weight:950!important}
+.va-topic-copy>b span{font-size:17px!important}
+.va-topic-tests{margin:12px 0 30px!important;padding:20px!important;border-radius:16px!important;background:#fff!important}
+@media(max-width:1000px){.va-topic-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}}
+@media(max-width:680px){.va-topic-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:12px!important}button.va-topic-card{min-height:235px!important}.va-topic-image{flex-basis:115px!important;height:115px!important;min-height:115px!important}.va-topic-copy{padding:10px!important}.va-topic-copy strong{font-size:13px!important;min-height:48px!important}.va-topic-copy em{font-size:10px!important;min-height:40px!important}.va-topic-page-header{padding:18px!important}}
+@media(max-width:370px){.va-topic-grid{grid-template-columns:1fr!important}}
+
+</style>
 </head>
 
 
