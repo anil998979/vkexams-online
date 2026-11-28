@@ -9997,20 +9997,80 @@ async function vkAdminLoadPaidSeriesAndTests(){
     const testSelect=document.getElementById("vkAdminExistingTest");
     if(!courseName||!paperName||!testSelect)return;
     if(courseName === "APPSC Topic Wise Test Series"){
-        testSelect.innerHTML='<option value="">Loading APPSC tests...</option>';
+        testSelect.innerHTML='<option value="">Loading APPSC topic-wise tests...</option>';
         try{
-            const pkg=await supabaseClient.from("vk_independent_packages").select("id").eq("package_code","APPSC").eq("is_archived",false).order("created_at",{ascending:false}).limit(1).maybeSingle();
-            if(pkg.error)throw pkg.error;if(!pkg.data)throw new Error("APPSC Topic Wise package was not found.");
+            const pkg=await supabaseClient.from("vk_independent_packages")
+                .select("id")
+                .eq("package_code","APPSC")
+                .eq("is_archived",false)
+                .order("created_at",{ascending:false})
+                .limit(1)
+                .maybeSingle();
+            if(pkg.error) throw pkg.error;
+            if(!pkg.data) throw new Error("APPSC Topic Wise package was not found.");
+
             const canonical=/mains/i.test(String(paperName))?"Mains Test":"Screening Test";
-            const paper=await supabaseClient.from("vk_independent_papers").select("id").eq("package_id",pkg.data.id).eq("name",canonical).eq("is_active",true).maybeSingle();
-            if(paper.error)throw paper.error;if(!paper.data)throw new Error(canonical+" section is not configured yet. Create a test first.");
-            const bucket=await supabaseClient.from("vk_independent_topics").select("id").eq("paper_id",paper.data.id).eq("name",canonical+" Tests").eq("is_active",true).maybeSingle();
-            if(bucket.error)throw bucket.error;let tests=[];
-            if(bucket.data){const q=await supabaseClient.from("vk_independent_tests").select("id,name,topic_id,question_count,duration_minutes,total_marks,negative_marks,is_active,created_at").eq("topic_id",bucket.data.id).order("created_at",{ascending:false});if(q.error)throw q.error;tests=q.data||[];}
-            vkAdminPaidTestsCache=tests.map(t=>({...t,title:t.name||"Untitled Test",is_free:false}));
-            testSelect.innerHTML='<option value="">Select an existing test</option>'+vkAdminPaidTestsCache.map(t=>`<option value="${t.id}">${vkAdminEscape(t.title)} · ${t.is_active?"Published":"Draft"}</option>`).join("");
-            if(!tests.length)testSelect.innerHTML='<option value="">No existing tests found for '+canonical+'</option>';
-        }catch(e){console.error("APPSC test list load failed",e);testSelect.innerHTML='<option value="">Unable to load APPSC tests</option>';vkAdminShowStatus(e.message||String(e),true);}
+            const paper=await supabaseClient.from("vk_independent_papers")
+                .select("id")
+                .eq("package_id",pkg.data.id)
+                .eq("name",canonical)
+                .eq("is_active",true)
+                .maybeSingle();
+            if(paper.error) throw paper.error;
+            if(!paper.data) throw new Error(canonical+" section is not configured yet.");
+
+            // Load every topic under the selected APPSC section, not only the
+            // old single bucket named "Screening Test Tests"/"Mains Test Tests".
+            const topicResult=await supabaseClient.from("vk_independent_topics")
+                .select("id,name")
+                .eq("paper_id",paper.data.id)
+                .eq("is_active",true)
+                .order("name",{ascending:true});
+            if(topicResult.error) throw topicResult.error;
+
+            const topicRows=topicResult.data||[];
+            const topicNameById=new Map(topicRows.map(topic=>[String(topic.id),String(topic.name||"")]));
+            const topicIds=topicRows.map(topic=>topic.id);
+            let tests=[];
+            if(topicIds.length){
+                const q=await supabaseClient.from("vk_independent_tests")
+                    .select("id,name,topic_id,question_count,duration_minutes,total_marks,negative_marks,is_active,created_at")
+                    .in("topic_id",topicIds)
+                    .order("created_at",{ascending:false});
+                if(q.error) throw q.error;
+                tests=q.data||[];
+            }
+
+            vkAdminPaidTestsCache=tests.map(t=>({
+                ...t,
+                topic_name:topicNameById.get(String(t.topic_id))||"APPSC Topic",
+                title:t.name||"Untitled Test",
+                is_free:false
+            }));
+
+            const testsByTopic=new Map();
+            vkAdminPaidTestsCache.forEach(test=>{
+                const key=String(test.topic_id);
+                if(!testsByTopic.has(key)) testsByTopic.set(key,[]);
+                testsByTopic.get(key).push(test);
+            });
+            const topicOptions=topicRows.map(topic=>{
+                const topicTests=testsByTopic.get(String(topic.id))||[];
+                const options=topicTests.length
+                    ? topicTests.map(test=>`<option value="${test.id}">${vkAdminEscape(test.title)} · ${test.is_active?"Published":"Draft"}</option>`).join("")
+                    : '<option value="" disabled>No tests uploaded yet</option>';
+                return `<optgroup label="${vkAdminEscape(topic.name||"Untitled Topic")}">${options}</optgroup>`;
+            }).join("");
+
+            testSelect.innerHTML='<option value="">Select a topic and existing test</option>'+topicOptions;
+            if(!topicRows.length){
+                testSelect.innerHTML='<option value="">No active topics found under '+vkAdminEscape(canonical)+'</option>';
+            }
+        }catch(e){
+            console.error("APPSC topic-wise test list load failed",e);
+            testSelect.innerHTML='<option value="">Unable to load APPSC topic-wise tests</option>';
+            vkAdminShowStatus(e.message||String(e),true);
+        }
         return;
     }
     if(courseName === "Endowment Topic Wise Test Series"){
