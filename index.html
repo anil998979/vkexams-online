@@ -3591,6 +3591,42 @@ button.va-topic-card:hover{transform:translateY(-5px)!important;box-shadow:0 16p
 @media(max-width:370px){.va-topic-grid{grid-template-columns:1fr!important}}
 
 </style>
+
+<style id="vk-appsc-force-visible-section-images">
+/* Final override: visible photographic backgrounds for Screening and Mains cards */
+#vkAppscOverlay .va-paper-card.paper1,
+#vkAppscOverlay .va-paper-card.screen{
+  background-image:
+    linear-gradient(110deg,rgba(7,42,105,.76),rgba(0,104,170,.55) 58%,rgba(0,164,190,.28)),
+    url("https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&w=1800&q=90") !important;
+  background-size:cover !important;
+  background-position:center 48% !important;
+  background-repeat:no-repeat !important;
+  background-color:#07549b !important;
+}
+#vkAppscOverlay .va-paper-card.paper2,
+#vkAppscOverlay .va-paper-card.mains{
+  background-image:
+    linear-gradient(110deg,rgba(92,27,26,.75),rgba(157,54,34,.54) 58%,rgba(211,119,39,.28)),
+    url("https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?auto=format&fit=crop&w=1800&q=90") !important;
+  background-size:cover !important;
+  background-position:center 48% !important;
+  background-repeat:no-repeat !important;
+  background-color:#87372c !important;
+}
+#vkAppscOverlay .va-paper-card:before,
+#vkAppscOverlay .va-paper-card:after{content:none!important;display:none!important}
+#vkAppscOverlay .va-paper-card{isolation:isolate!important;color:#fff!important}
+#vkAppscOverlay .va-paper-card strong,
+#vkAppscOverlay .va-paper-card small,
+#vkAppscOverlay .va-paper-card span,
+#vkAppscOverlay .va-paper-card .va-card-sub{color:#fff!important;text-shadow:0 2px 5px rgba(0,0,0,.5)!important}
+#vkAppscOverlay .va-paper-card .va-card-action,
+#vkAppscOverlay .va-paper-card em{background:#fff!important;color:#153d7b!important;text-shadow:none!important}
+#vkAppscOverlay .va-paper-card.paper2 .va-card-action,
+#vkAppscOverlay .va-paper-card.mains .va-card-action{color:#8b3024!important}
+</style>
+
 </head>
 
 
