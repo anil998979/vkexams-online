@@ -19304,12 +19304,43 @@ window.vkAppscTopicCard=(t,i)=>{
 };
 window.vkAppscSubject=async id=>{const sub=subjects.find(x=>x.id===id);status('Subjects are no longer required for APPSC topic cards. Select a topic card directly.');};
 window.vkAppscTests=async id=>{
- const t=topics.find(x=>x.id===id),host=$('vaTests');if(!host)return;host.innerHTML='<div class="va-card">Loading tests…</div>';
- const r=await (await sb()).from('vk_independent_tests').select('id,name,question_count,duration_minutes').eq('topic_id',id).eq('is_active',true).order('created_at');
- if(r.error){host.innerHTML=`<div class="va-empty">${esc(r.error.message)}</div>`;return;}
- const unlocked=admin||!!purchase;
- host.innerHTML=`<div class="va-card va-topic-tests"><div class="va-row"><div><small>SELECTED TOPIC</small><h3>${esc(t?.name||'Topic')} · Tests</h3></div><span class="va-test-count">${(r.data||[]).length} Tests</span></div>
- ${(r.data||[]).map(x=>`<div class="va-row"><span><b>${esc(x.name)}</b><div class="va-muted">${x.question_count||0} Questions · ${x.duration_minutes||'—'} Minutes</div></span><button onclick="${unlocked?`vkIpStartTest('${x.id}')`:'vkAppscBuy()'}">${unlocked?'Start Exam':'Unlock · ₹'+Number(pkg.price||29)}</button></div>`).join('')||'<p class="va-muted">No tests uploaded in this topic yet. Tests uploaded by the administrator will appear here.</p>'}</div>`;
+ const t=topics.find(x=>String(x.id)===String(id));
+ const host=$('vaContent');
+ if(!host)return;
+ const topicName=t?.name||'Selected Topic';
+ host.innerHTML=`<section class="va-topic-page">
+   <div class="va-topic-page-top">
+     <button class="va-back-btn" type="button" onclick="window.vkAppscPaper(selectedPaper)">← Back to Topics</button>
+     <span class="va-topic-section-label">${/mains/i.test((papers.find(p=>p.id===selectedPaper)||{}).name||'')?'🏛️ MAINS TEST':'📘 SCREENING TEST'}</span>
+   </div>
+   <header class="va-topic-page-header">
+     <h1>${esc(topicName)} · Tests</h1>
+     <p>Choose a test below to start your exam.</p>
+   </header>
+   <div id="vaTopicTestResults" class="va-card">Loading tests…</div>
+ </section>`;
+ window.scrollTo({top:0,behavior:'smooth'});
+ const resultHost=$('vaTopicTestResults');
+ try{
+   const r=await (await sb()).from('vk_independent_tests')
+     .select('id,name,question_count,duration_minutes')
+     .eq('topic_id',id)
+     .eq('is_active',true)
+     .order('created_at',{ascending:true});
+   if(r.error)throw r.error;
+   const rows=r.data||[];
+   const unlocked=admin||!!purchase;
+   resultHost.innerHTML=`<div class="va-row">
+      <div><small>SELECTED TOPIC</small><h3>${esc(topicName)} · Tests</h3></div>
+      <span class="va-test-count">${rows.length} Tests</span>
+    </div>
+    ${rows.map(x=>`<div class="va-row">
+      <span><b>${esc(x.name)}</b><div class="va-muted">${x.question_count||0} Questions · ${x.duration_minutes||'—'} Minutes</div></span>
+      <button type="button" onclick="${unlocked?`vkIpStartTest('${x.id}')`:'vkAppscBuy()'}">${unlocked?'Start Exam':'Unlock · ₹'+Number(pkg.price||29)}</button>
+    </div>`).join('')||'<p class="va-muted">No tests uploaded in this topic yet. Tests uploaded by the administrator will appear here.</p>'}`;
+ }catch(e){
+   resultHost.innerHTML=`<p class="va-empty">${esc(e.message||String(e))}</p>`;
+ }
 };
 window.vkAppscBuy=async function(){
  try{if(!pkg?.id||!pkg.is_published)throw Error('APPSC Test Series is not published yet.');const s=await sb(),u=await s.auth.getUser();if(!u.data?.user){if(typeof openLogin==='function')openLogin();else status('Please login first.');return}if(!window.Razorpay)throw Error('Razorpay did not load. Refresh and try again.');
