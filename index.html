@@ -5628,7 +5628,11 @@ function showPage(
     addHistory = true
 ){
 
-    document
+        // Close the APPSC full-screen overlay before navigating to another SPA page.
+    // Otherwise it remains fixed above the newly selected page until a browser refresh.
+    if (typeof window.vkAppscClose === 'function') window.vkAppscClose();
+
+document
         .querySelectorAll(".page")
         .forEach(
             p =>
