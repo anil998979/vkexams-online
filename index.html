@@ -3591,42 +3591,6 @@ button.va-topic-card:hover{transform:translateY(-5px)!important;box-shadow:0 16p
 @media(max-width:370px){.va-topic-grid{grid-template-columns:1fr!important}}
 
 </style>
-
-<style id="vk-appsc-force-visible-section-images">
-/* Final override: visible photographic backgrounds for Screening and Mains cards */
-#vkAppscOverlay .va-paper-card.paper1,
-#vkAppscOverlay .va-paper-card.screen{
-  background-image:
-    linear-gradient(110deg,rgba(7,42,105,.76),rgba(0,104,170,.55) 58%,rgba(0,164,190,.28)),
-    url("https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&w=1800&q=90") !important;
-  background-size:cover !important;
-  background-position:center 48% !important;
-  background-repeat:no-repeat !important;
-  background-color:#07549b !important;
-}
-#vkAppscOverlay .va-paper-card.paper2,
-#vkAppscOverlay .va-paper-card.mains{
-  background-image:
-    linear-gradient(110deg,rgba(92,27,26,.75),rgba(157,54,34,.54) 58%,rgba(211,119,39,.28)),
-    url("https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?auto=format&fit=crop&w=1800&q=90") !important;
-  background-size:cover !important;
-  background-position:center 48% !important;
-  background-repeat:no-repeat !important;
-  background-color:#87372c !important;
-}
-#vkAppscOverlay .va-paper-card:before,
-#vkAppscOverlay .va-paper-card:after{content:none!important;display:none!important}
-#vkAppscOverlay .va-paper-card{isolation:isolate!important;color:#fff!important}
-#vkAppscOverlay .va-paper-card strong,
-#vkAppscOverlay .va-paper-card small,
-#vkAppscOverlay .va-paper-card span,
-#vkAppscOverlay .va-paper-card .va-card-sub{color:#fff!important;text-shadow:0 2px 5px rgba(0,0,0,.5)!important}
-#vkAppscOverlay .va-paper-card .va-card-action,
-#vkAppscOverlay .va-paper-card em{background:#fff!important;color:#153d7b!important;text-shadow:none!important}
-#vkAppscOverlay .va-paper-card.paper2 .va-card-action,
-#vkAppscOverlay .va-paper-card.mains .va-card-action{color:#8b3024!important}
-</style>
-
 </head>
 
 
@@ -4591,7 +4555,7 @@ id="solutions">
         </div>
         <div class="vk-admin-field" id="vkAdminFreeModeWrap">
           <label for="vkAdminFreeMode">Free Test Action</label>
-          <select id="vkAdminFreeMode" onchange="vkAdminFreeModeChanged()">
+          <select id="vkAdminFreeMode" onchange="vkAdminHandleFreeModeChange()">
             <option value="create">Create New Free Test</option>
             <option value="edit">Edit Existing Free Test</option>
           </select>
@@ -5628,11 +5592,7 @@ function showPage(
     addHistory = true
 ){
 
-        // Close the APPSC full-screen overlay before navigating to another SPA page.
-    // Otherwise it remains fixed above the newly selected page until a browser refresh.
-    if (typeof window.vkAppscClose === 'function') window.vkAppscClose();
-
-document
+    document
         .querySelectorAll(".page")
         .forEach(
             p =>
@@ -9597,8 +9557,8 @@ function vkAdminPaidSeriesOptions(courseName){
             {value:"Paper 1", label:"Screening Test"}
         ],
         "APPSC Topic Wise Test Series": [
-            {value:"Screening Test", label:"Screening Test"},
-            {value:"Mains Test", label:"Mains Test"}
+            {value:"Screening Test", label:"General Studies"},
+            {value:"Mains Test", label:"Mains Practice"}
         ],
         "Endowment Officer": [
             {value:"Paper 1", label:"Paper 1"},
@@ -9628,7 +9588,7 @@ function vkAdminUpdatePaidSeriesControl(){
     // refreshes this control; without preservation it always jumps back to Paper 1.
     const previouslySelectedPaper=String(select.value || "").trim();
     wrap.style.display=document.getElementById("vkAdminTestType")?.value==="paid" && choices.length ? "block" : "none";
-    if(label) label.textContent=courseName==="High Court" ? "Exam" : courseName==="APPSC" ? "APPSC Test Type" : courseName==="APPSC Topic Wise Test Series" ? "Paid Test Type" : "Paid Paper";
+    if(label) label.textContent=courseName==="High Court" ? "Exam" : courseName==="APPSC" ? "APPSC Test Type" : courseName==="APPSC Topic Wise Test Series" ? "Choose Your Test" : "Paid Paper";
     select.innerHTML=choices.map(item=>`<option value="${vkAdminEscape(item.value)}">${vkAdminEscape(item.label)}</option>`).join("");
     if(choices.some(item=>item.value===previouslySelectedPaper)) select.value=previouslySelectedPaper;
     if(hint){
@@ -9747,6 +9707,7 @@ function vkAdminOnTestTypeChange(){
         if(existingWrap) existingWrap.style.display="none";
         vkAdminFreeModeChanged();
     }
+    vkAdminConfigureAppscTestBuilder();
 }
 
 
@@ -9933,7 +9894,71 @@ let vkAdminPaidSeriesId = null;
 let vkAdminEditingPaidTestId = null;
 let vkAdminPaidTestsCache = [];
 
+
+function vkAdminIsAppscTopicWiseCourse(){
+    return String(document.getElementById("vkAdminCourse")?.value || "").trim() === "APPSC Topic Wise Test Series";
+}
+
+function vkAdminConfigureAppscTestBuilder(){
+    const appsc = vkAdminIsAppscTopicWiseCourse();
+    const typeSelect = document.getElementById("vkAdminTestType");
+    const freeWrap = document.getElementById("vkAdminFreeModeWrap");
+    const paidWrap = document.getElementById("vkAdminPaidModeWrap");
+    const freeSelect = document.getElementById("vkAdminFreeMode");
+    const paidSelect = document.getElementById("vkAdminPaidMode");
+    if(!typeSelect || !freeSelect || !paidSelect) return;
+
+    if(!freeSelect.dataset.standardOptions){
+        freeSelect.dataset.standardOptions = freeSelect.innerHTML;
+    }
+
+    if(appsc){
+        // APPSC Topic Wise is a paid independent package. Keep the requested
+        // "Free Test Action" field label, but route its choices through paid APIs.
+        typeSelect.value = "paid";
+        typeSelect.disabled = true;
+        freeSelect.innerHTML =
+            '<option value="">Select</option>' +
+            '<option value="create">Create New Paid Test</option>' +
+            '<option value="edit">Edit Existing Paid Test</option>';
+        const alreadyConfigured = freeSelect.dataset.appscConfigured === "1";
+        const currentAction = alreadyConfigured && ["create","edit"].includes(freeSelect.value)
+            ? freeSelect.value : "";
+        freeSelect.value = currentAction;
+        paidSelect.value = currentAction;
+        freeSelect.dataset.appscConfigured = "1";
+        if(freeWrap) freeWrap.style.display = "block";
+        if(paidWrap) paidWrap.style.display = "none";
+        const freeLabel = freeWrap?.querySelector("label");
+        if(freeLabel) freeLabel.textContent = "Free Test Action";
+    }else{
+        typeSelect.disabled = false;
+        freeSelect.dataset.appscConfigured = "0";
+        freeSelect.innerHTML = freeSelect.dataset.standardOptions;
+        if(!["create","edit"].includes(freeSelect.value)) freeSelect.value = "create";
+        if(freeWrap) freeWrap.style.display = typeSelect.value === "paid" ? "none" : "block";
+        if(paidWrap) paidWrap.style.display = typeSelect.value === "paid" ? "block" : "none";
+        const freeLabel = freeWrap?.querySelector("label");
+        if(freeLabel) freeLabel.textContent = "Free Test Action";
+    }
+}
+
+function vkAdminHandleFreeModeChange(){
+    if(vkAdminIsAppscTopicWiseCourse()){
+        const action = document.getElementById("vkAdminFreeMode")?.value || "";
+        const paidAction = document.getElementById("vkAdminPaidMode");
+        if(paidAction) paidAction.value = action;
+        vkAdminPaidModeChanged();
+    }else{
+        vkAdminFreeModeChanged();
+    }
+}
+
 async function vkAdminOnCourseChanged(){
+    if(vkAdminIsAppscTopicWiseCourse()){
+        const typeSelect=document.getElementById("vkAdminTestType");
+        if(typeSelect) typeSelect.value="paid";
+    }
     vkAdminUpdatePaidSeriesControl();
     if(document.getElementById("vkAdminTestType")?.value==="paid"){
         await vkAdminLoadPaidSeriesAndTests();
@@ -9941,6 +9966,7 @@ async function vkAdminOnCourseChanged(){
         await vkAdminLoadFreeTests();
     }
     vkAdminUpdateTopicNameVisibility();
+    vkAdminConfigureAppscTestBuilder();
 }
 
 async function vkAdminPaidModeChanged(){
@@ -10383,6 +10409,9 @@ async function vkAdminPublishTest(){
     const negativeMarks = Number(document.getElementById("vkAdminNegative")?.value);
     const freeMode = document.getElementById("vkAdminFreeMode")?.value || "create";
     const paidMode = document.getElementById("vkAdminPaidMode")?.value || "create";
+    if(isPaid && courseName==="APPSC Topic Wise Test Series" && !["create","edit"].includes(document.getElementById("vkAdminFreeMode")?.value || "")){
+        vkAdminShowStatus("Please select Create New Paid Test or Edit Existing Paid Test.",true); return;
+    }
         const freeEditTopicName = !isPaid && freeMode === "edit"
     ? vkAdminNormalizeFreeTopicName(
         document.getElementById("vkAdminFreeRenameInput")?.value || ""
@@ -10462,9 +10491,6 @@ if(!isPaid && freeMode === "edit" && !freeEditTopicName){
     vkAdminShowStatus("Publishing test and saving questions...",false);
     try{
         if(isIndependentTopicWise){
-            if(paidMode==="edit" && courseName==="APPSC Topic Wise Test Series"){
-                throw new Error("APPSC existing-test editing is not enabled yet. Choose Create New Paid Test; Endowment editing remains unchanged.");
-            }
             if(paidMode==="edit"){
                 const totalMarks=questions.reduce((sum,q)=>sum+Number(q.marks||1),0);
                 const updated=await supabaseClient.rpc("vk_admin_update_endowment_topic_test",{
@@ -10476,7 +10502,7 @@ if(!isPaid && freeMode === "edit" && !freeEditTopicName){
                     p_questions:questions.map(q=>({question_text:q.question_text,option_a:q.option_a,option_b:q.option_b,option_c:q.option_c,option_d:q.option_d,correct_option:q.correct_option,explanation:q.explanation||""}))
                 });
                 if(updated.error)throw updated.error;
-                vkAdminShowStatus(`Existing Endowment test updated successfully. ${questions.length} questions saved; the same Test ID is retained.`,false);
+                vkAdminShowStatus(`Existing ${courseName} test updated successfully. ${questions.length} questions saved; the same Test ID is retained.`,false);
             }else{
                 const created=await vkAdminPublishIndependentTopicWiseTest(paperName,topicName,duration,negativeMarks,questions,courseName);
                 vkAdminShowStatus(`Published ${courseName} test: ${created.title}. ${created.paper}. Questions: ${created.question_count}.`,false);
@@ -19025,10 +19051,10 @@ window.vkIpStartTest = async function(id) {
 #vkAppscOverlay .va-paper-card:after{content:"";position:absolute;inset:0;z-index:-1}
 #vkAppscOverlay .va-paper-card:hover{transform:translateY(-5px)!important;box-shadow:0 20px 38px rgba(22,35,65,.25)!important}
 #vkAppscOverlay .va-paper-card:hover:before{transform:scale(1.06)}
-#vkAppscOverlay .va-paper-card.paper1:before{background-image:url('https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&w=1600&q=90')}
-#vkAppscOverlay .va-paper-card.paper1:after{background:linear-gradient(110deg,rgba(8,43,108,.82),rgba(0,115,180,.62) 58%,rgba(0,184,190,.35))}
-#vkAppscOverlay .va-paper-card.paper2:before{background-image:url('https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?auto=format&fit=crop&w=1600&q=90')}
-#vkAppscOverlay .va-paper-card.paper2:after{background:linear-gradient(110deg,rgba(100,30,20,.84),rgba(171,65,33,.64) 58%,rgba(224,133,38,.38))}
+#vkAppscOverlay .va-paper-card.paper1:before{background-image:url('https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=1200&q=85')}
+#vkAppscOverlay .va-paper-card.paper1:after{background:linear-gradient(110deg,rgba(8,43,108,.94),rgba(0,115,180,.77) 58%,rgba(0,184,190,.50))}
+#vkAppscOverlay .va-paper-card.paper2:before{background-image:url('https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=1200&q=85')}
+#vkAppscOverlay .va-paper-card.paper2:after{background:linear-gradient(110deg,rgba(100,30,20,.95),rgba(171,65,33,.80) 58%,rgba(224,133,38,.55))}
 #vkAppscOverlay .va-paper-pill{display:inline-flex!important;align-items:center!important;gap:8px!important;padding:9px 14px!important;border:1px solid rgba(255,255,255,.7)!important;border-radius:12px!important;background:rgba(255,255,255,.16)!important;color:#fff!important;font-size:14px!important;font-weight:900!important;backdrop-filter:blur(5px)}
 #vkAppscOverlay .va-paper-card>strong{display:block!important;max-width:560px!important;color:#fff!important;font-size:clamp(23px,2.2vw,32px)!important;line-height:1.16!important;font-weight:950!important;text-shadow:0 2px 5px rgba(0,0,0,.18)}
 #vkAppscOverlay .va-paper-card .va-card-sub{display:block!important;color:#fff!important;font-size:13px!important;font-weight:800!important;text-shadow:0 1px 4px #0006}
