@@ -18942,6 +18942,36 @@ window.vkIpStartTest = async function(id) {
 @media(max-width:370px){#vkAppscOverlay .va-topic-grid{grid-template-columns:1fr}}
 
 </style>
+<style id="vk-appsc-section-card-refresh">
+
+/* VK APPSC section cards: rich image backgrounds and clear CTA */
+#vkAppscOverlay .va-paper-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px;margin:20px 0 24px}
+#vkAppscOverlay .va-paper-card{
+ position:relative!important;isolation:isolate!important;display:flex!important;flex-direction:column!important;
+ align-items:flex-start!important;justify-content:flex-start!important;gap:13px!important;
+ min-height:245px!important;padding:25px 25px 22px!important;overflow:hidden!important;
+ border:2px solid rgba(255,255,255,.85)!important;border-radius:23px!important;
+ color:#fff!important;text-align:left!important;cursor:pointer!important;
+ box-shadow:0 14px 32px rgba(22,35,65,.18)!important;
+ transition:transform .2s ease,box-shadow .2s ease!important;
+}
+#vkAppscOverlay .va-paper-card:before{content:"";position:absolute;inset:0;z-index:-2;background-size:cover;background-position:center;transition:transform .35s ease}
+#vkAppscOverlay .va-paper-card:after{content:"";position:absolute;inset:0;z-index:-1}
+#vkAppscOverlay .va-paper-card:hover{transform:translateY(-5px)!important;box-shadow:0 20px 38px rgba(22,35,65,.25)!important}
+#vkAppscOverlay .va-paper-card:hover:before{transform:scale(1.06)}
+#vkAppscOverlay .va-paper-card.paper1:before{background-image:url('https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=1200&q=85')}
+#vkAppscOverlay .va-paper-card.paper1:after{background:linear-gradient(110deg,rgba(8,43,108,.94),rgba(0,115,180,.77) 58%,rgba(0,184,190,.50))}
+#vkAppscOverlay .va-paper-card.paper2:before{background-image:url('https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=1200&q=85')}
+#vkAppscOverlay .va-paper-card.paper2:after{background:linear-gradient(110deg,rgba(100,30,20,.95),rgba(171,65,33,.80) 58%,rgba(224,133,38,.55))}
+#vkAppscOverlay .va-paper-pill{display:inline-flex!important;align-items:center!important;gap:8px!important;padding:9px 14px!important;border:1px solid rgba(255,255,255,.7)!important;border-radius:12px!important;background:rgba(255,255,255,.16)!important;color:#fff!important;font-size:14px!important;font-weight:900!important;backdrop-filter:blur(5px)}
+#vkAppscOverlay .va-paper-card>strong{display:block!important;max-width:560px!important;color:#fff!important;font-size:clamp(23px,2.2vw,32px)!important;line-height:1.16!important;font-weight:950!important;text-shadow:0 2px 5px rgba(0,0,0,.18)}
+#vkAppscOverlay .va-paper-card .va-card-sub{display:block!important;color:#fff!important;font-size:13px!important;font-weight:800!important;text-shadow:0 1px 4px #0006}
+#vkAppscOverlay .va-paper-card .va-card-action{display:inline-flex!important;align-items:center!important;gap:12px!important;margin-top:auto!important;padding:11px 19px!important;border-radius:999px!important;background:#fff!important;color:#163e83!important;font-size:14px!important;font-weight:950!important;box-shadow:0 4px 12px #0002}
+#vkAppscOverlay .va-paper-card.paper2 .va-card-action{color:#8b3024!important}
+#vkAppscOverlay .va-paper-card:disabled{opacity:.6!important;cursor:not-allowed!important}
+@media(max-width:650px){#vkAppscOverlay .va-paper-grid{grid-template-columns:1fr;gap:14px}#vkAppscOverlay .va-paper-card{min-height:215px!important;padding:20px!important}}
+
+</style>
 <script id="vk-appsc-module-v1">
 (function(){
 'use strict';
@@ -18998,11 +19028,11 @@ function renderHome(){
  const host=$('vaContent');if(!host)return;
  const screen=papers.find(p=>/screen/i.test(p.name))||null;
  const mains=papers.find(p=>/mains/i.test(p.name))||null;
- const paperCard=(p,label,kind)=>`<button type="button" class="va-paper-card ${kind==='screen'?'paper1':'paper2'}" ${p?`onclick="vkAppscPaper('${p.id}')"`:'disabled'} aria-label="${label}">
+ const paperCard=(p,label,kind)=>`<button type="button" class="va-paper-card ${kind==='screen'?'paper1':'paper2'}" ${p?`onclick="window.vkAppscPaper('${p.id}')"`:'disabled'} aria-label="${label}">
   <span class="va-paper-pill">${kind==='screen'?'📘':'🏛️'} ${label}</span>
   <strong>${kind==='screen'?'General Studies':'Advanced Studies & Mains Practice'}</strong>
   <span class="va-card-sub">${kind==='screen'?'Objective Practice · Topic-wise Tests':'Mains Practice · Topic-wise Tests'}</span>
-  <span class="va-card-action">Explore 24 Topics →</span>
+  <span class="va-card-action">Click Here <span aria-hidden="true">→</span></span>
  </button>`;
  host.innerHTML=`<section class="va-hero"><small>🔒 VK EXAMS · APPSC</small><h1>APPSC Topic Wise Test Series</h1>
   <p>Choose Screening Test or Mains Test to explore all 24 topics.</p>
@@ -19017,8 +19047,10 @@ function renderHome(){
 }
 window.vkAppscPaper=async id=>{
  if(!pkg?.id||(!admin&&!pkg.is_published)){status('APPSC package is not published yet.');return;}
- selectedPaper=id;const p=papers.find(x=>x.id===id);const list=topics.filter(t=>t.paper_id===id).sort((a,b)=>(a.display_order||0)-(b.display_order||0));
- const host=$('vaSub');if(!host)return;
+ selectedPaper=id;const p=papers.find(x=>x.id===id);
+ if(!p){status('This section is not configured yet. Please reload the APPSC page after the database setup.');return;}
+ const list=topics.filter(t=>t.paper_id===id).sort((a,b)=>(a.display_order||0)-(b.display_order||0));
+ const host=document.getElementById('vaSub');if(!host){status('Topic section could not be opened. Please try again.');return;}
  host.innerHTML=`<div class="va-topic-heading"><button class="va-back-btn" onclick="vkAppscOpen()">← Back to Sections</button>
  <div><span>${/mains/i.test(p?.name||'')?'🏛️ MAINS TEST':'📘 SCREENING TEST'}</span><h2>${esc(p?.name||'APPSC')} · 24 Topics</h2><p>Select any topic to view tests uploaded under that category.</p></div></div>
  <div class="va-topic-grid">${list.map((t,i)=>vkAppscTopicCard(t,i)).join('')||'<div class="va-empty">Topics are not available. Open this page once as Admin to initialize all 24 categories.</div>'}</div><div id="vaTests"></div>`;
@@ -19279,11 +19311,11 @@ function renderHome(){
  const host=$('vaContent');if(!host)return;
  const screen=papers.find(p=>/screen/i.test(p.name))||null;
  const mains=papers.find(p=>/mains/i.test(p.name))||null;
- const paperCard=(p,label,kind)=>`<button type="button" class="va-paper-card ${kind==='screen'?'paper1':'paper2'}" ${p?`onclick="vkAppscPaper('${p.id}')"`:'disabled'} aria-label="${label}">
+ const paperCard=(p,label,kind)=>`<button type="button" class="va-paper-card ${kind==='screen'?'paper1':'paper2'}" ${p?`onclick="window.vkAppscPaper('${p.id}')"`:'disabled'} aria-label="${label}">
   <span class="va-paper-pill">${kind==='screen'?'📘':'🏛️'} ${label}</span>
   <strong>${kind==='screen'?'General Studies':'Advanced Studies & Mains Practice'}</strong>
   <span class="va-card-sub">${kind==='screen'?'Objective Practice · Topic-wise Tests':'Mains Practice · Topic-wise Tests'}</span>
-  <span class="va-card-action">Explore 24 Topics →</span>
+  <span class="va-card-action">Click Here <span aria-hidden="true">→</span></span>
  </button>`;
  host.innerHTML=`<section class="va-hero"><small>🔒 VK EXAMS · APPSC</small><h1>APPSC Topic Wise Test Series</h1>
   <p>Choose Screening Test or Mains Test to explore all 24 topics.</p>
@@ -19298,8 +19330,10 @@ function renderHome(){
 }
 window.vkAppscPaper=async id=>{
  if(!pkg?.id||(!admin&&!pkg.is_published)){status('APPSC package is not published yet.');return;}
- selectedPaper=id;const p=papers.find(x=>x.id===id);const list=topics.filter(t=>t.paper_id===id).sort((a,b)=>(a.display_order||0)-(b.display_order||0));
- const host=$('vaSub');if(!host)return;
+ selectedPaper=id;const p=papers.find(x=>x.id===id);
+ if(!p){status('This section is not configured yet. Please reload the APPSC page after the database setup.');return;}
+ const list=topics.filter(t=>t.paper_id===id).sort((a,b)=>(a.display_order||0)-(b.display_order||0));
+ const host=document.getElementById('vaSub');if(!host){status('Topic section could not be opened. Please try again.');return;}
  host.innerHTML=`<div class="va-topic-heading"><button class="va-back-btn" onclick="vkAppscOpen()">← Back to Sections</button>
  <div><span>${/mains/i.test(p?.name||'')?'🏛️ MAINS TEST':'📘 SCREENING TEST'}</span><h2>${esc(p?.name||'APPSC')} · 24 Topics</h2><p>Select any topic to view tests uploaded under that category.</p></div></div>
  <div class="va-topic-grid">${list.map((t,i)=>vkAppscTopicCard(t,i)).join('')||'<div class="va-empty">Topics are not available. Open this page once as Admin to initialize all 24 categories.</div>'}</div><div id="vaTests"></div>`;
