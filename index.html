@@ -19226,12 +19226,18 @@ window.vkAppscPaper=async id=>{
  if(!pkg?.id||(!admin&&!pkg.is_published)){status('APPSC package is not published yet.');return;}
  selectedPaper=id;const p=papers.find(x=>x.id===id);
  if(!p){status('This section is not configured yet. Please reload the APPSC page after the database setup.');return;}
- const list=topics.filter(t=>t.paper_id===id).sort((a,b)=>(a.display_order||0)-(b.display_order||0));
+ const allPaperTopics=topics.filter(t=>t.paper_id===id).sort((a,b)=>(a.display_order||0)-(b.display_order||0));
+ // Hide the 24 predefined syllabus topic cards from both APPSC sections.
+ // Do not delete/deactivate database rows: retain the separate legacy test
+ // bucket (for example "Screening Test Tests") so the uploaded Indian History
+ // test remains available to students.
+ const catalogNames=new Set(VK_APPSC_TOPIC_CATALOG.map(x=>String(x.name).trim().toLowerCase()));
+ const list=allPaperTopics.filter(t=>!catalogNames.has(String(t.name||'').trim().toLowerCase()));
  const host=document.getElementById('vaContent');if(!host){status('Topic page could not be opened. Please try again.');return;}
  host.innerHTML=`<section class="va-topic-page">
   <div class="va-topic-page-top"><button class="va-back-btn" onclick="window.vkAppscOpen()">← Back to Sections</button><span class="va-topic-section-label">${/mains/i.test(p.name)?'🏛️ MAINS TEST':'📘 SCREENING TEST'}</span></div>
-  <header class="va-topic-page-header"><h1>${esc(p.name)} · 24 Topics</h1><p>Choose a topic to view the tests uploaded in that category.</p></header>
-  <div class="va-topic-grid">${list.map((t,i)=>vkAppscTopicCard(t,i)).join('')||'<div class="va-empty">Topics are not available. Open this page once as Admin to initialize all 24 categories.</div>'}</div>
+  <header class="va-topic-page-header"><h1>${esc(p.name)} · Tests</h1><p>Choose the available test group to view uploaded tests.</p></header>
+  <div class="va-topic-grid">${list.map((t,i)=>vkAppscTopicCard(t,i)).join('')||'<div class="va-empty">No test groups are available yet.</div>'}</div>
   <div id="vaTests"></div>
  </section>`;
  window.scrollTo({top:0,behavior:'smooth'});
@@ -19513,12 +19519,17 @@ window.vkAppscPaper=async id=>{
  if(!pkg?.id||(!admin&&!pkg.is_published)){status('APPSC package is not published yet.');return;}
  selectedPaper=id;const p=papers.find(x=>x.id===id);
  if(!p){status('This section is not configured yet. Please reload the APPSC page after the database setup.');return;}
- const list=topics.filter(t=>t.paper_id===id).sort((a,b)=>(a.display_order||0)-(b.display_order||0));
+ const allPaperTopics=topics.filter(t=>t.paper_id===id).sort((a,b)=>(a.display_order||0)-(b.display_order||0));
+ // Hide the 24 predefined syllabus topic cards from both APPSC sections.
+ // Keep database records intact and retain the separate test bucket containing
+ // the already-uploaded Indian History test.
+ const catalogNames=new Set(VK_APPSC_TOPIC_CATALOG.map(x=>String(x.name).trim().toLowerCase()));
+ const list=allPaperTopics.filter(t=>!catalogNames.has(String(t.name||'').trim().toLowerCase()));
  const host=document.getElementById('vaContent');if(!host){status('Topic page could not be opened. Please try again.');return;}
  host.innerHTML=`<section class="va-topic-page">
   <div class="va-topic-page-top"><button class="va-back-btn" onclick="window.vkAppscOpen()">← Back to Sections</button><span class="va-topic-section-label">${/mains/i.test(p.name)?'🏛️ MAINS TEST':'📘 SCREENING TEST'}</span></div>
-  <header class="va-topic-page-header"><h1>${esc(p.name)} · 24 Topics</h1><p>Choose a topic to view the tests uploaded in that category.</p></header>
-  <div class="va-topic-grid">${list.map((t,i)=>vkAppscTopicCard(t,i)).join('')||'<div class="va-empty">Topics are not available. Open this page once as Admin to initialize all 24 categories.</div>'}</div>
+  <header class="va-topic-page-header"><h1>${esc(p.name)} · Tests</h1><p>Choose the available test group to view uploaded tests.</p></header>
+  <div class="va-topic-grid">${list.map((t,i)=>vkAppscTopicCard(t,i)).join('')||'<div class="va-empty">No test groups are available yet.</div>'}</div>
   <div id="vaTests"></div>
  </section>`;
  window.scrollTo({top:0,behavior:'smooth'});
